@@ -1,0 +1,9 @@
+#run script to export variables if you dont have this file, then create it and set
+#export postgres_user=value
+#export postgres_password=value
+#example for pjm dev database.
+#REMEMBER to add it to .gitignore !!
+. export_creds.sh
+
+#start app
+flask --app main.py run --host 0.0.0.0 --reload
