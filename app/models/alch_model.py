@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, Time
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
@@ -8,7 +9,7 @@ Base = declarative_base()
 class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id_user_actualizacion = Column(UUID(as_uuid=True))
     fecha_actualizacion = Column(DateTime(timezone=False))
     descripcion = Column(String)
@@ -16,11 +17,22 @@ class Grupo(Base):
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
     __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id_padre = Column(UUID(as_uuid=True))
     id_hijo = Column(UUID(as_uuid=True))
     id_usuario_actualizacion = Column(UUID(as_uuid=True))
     fecha_actualizacion = Column(DateTime(timezone=False))
+
+class TipoTarea(Base):
+    __tablename__ = 'tipo_tarea'
+    __table_args__ = {'schema': 'tareas'}
+    #id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    codigo_humano = Column(String)
+    descripcion = Column(String, nullable=False)
+    id_usuario_actualizacion = Column(UUID(as_uuid=True), nullable=False)
+    fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
+
 
 class Tarea(Base):
     __tablename__ = 'tarea'
@@ -52,7 +64,8 @@ class TareaXGrupo(Base):
 class Usuario(Base):
     __tablename__ = 'usuario'
     __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    #id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     fecha_actualizacion = Column(DateTime(timezone=False))
     id_user_actualizacion = Column(UUID(as_uuid=True))
     nombre = Column(String)
@@ -62,19 +75,11 @@ class Usuario(Base):
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
     __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id_grupo = Column(UUID(as_uuid=True), ForeignKey('tareas.grupo.id'))
     id_usuario = Column(UUID(as_uuid=True), ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime(timezone=False))
 
-class TipoTarea(Base):
-    __tablename__ = 'tipo_tarea'
-    __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID(as_uuid=True), primary_key=True)
-    codigo_humano = Column(String)
-    descripcion = Column(String, nullable=False)
-    id_usuario_actualizacion = Column(UUID(as_uuid=True), nullable=False)
-    fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
 
 class Label(Base):
     __tablename__ = 'label'

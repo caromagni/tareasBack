@@ -34,22 +34,29 @@ class SmartNested(Nested):
 
 ###############ApiFlask####################  
 ###############Grupos####################
+class HerarquiaGrupoGrupoOut(Schema):
+    id_padre = String()
+    id_hijo = String()
+ 
 class GrupoIn(Schema):
-    name = String(required=True, validate=Length(0, 10))
-    category = String(required=True, validate=OneOf(['dog', 'cat']))
-    test = String()
+    descripcion = String(required=True)
+    id_user_actualizacion = String(required=True)
+    id_padre = String()    
 
 class GrupoOut(Schema):
-    id = Integer()
-    name = String()
-    name3 = String()
-    category = String()
+    id = String()
+    descripcion = String()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
+    #id_padre = Nested(HerarquiaGrupoGrupoOut, only=("id_padre"))
+
 ###############Usuarios####################
 class UsuarioIn(Schema):
     nombre = String(required=True)
     apellido = String(required=True)
     id_user_actualizacion = String(required=True)
     id_persona_ext = String(required=True)
+    id_grupo = String()
 
 class UsuarioOut(Schema):
     id = String()
@@ -59,11 +66,14 @@ class UsuarioOut(Schema):
     apellido = String()
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    id_grupo = Nested(GrupoOut, only=("id", "descripcion")) 
+    
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
+    
 ################TipoTareas####################
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True)

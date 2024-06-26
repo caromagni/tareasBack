@@ -3,6 +3,7 @@ from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 #from flask_jwt_extended import JWTManager
+from app.common.error_handling import register_error_handlers
 from .blueprints.groups import groups_b
 from .blueprints.usuario import usuario_b
 from .blueprints.tarea import tarea_b
@@ -32,7 +33,9 @@ def create_app():
     app.register_blueprint(tarea_b)
 
     #jwt = JWTManager(app=app)
-
+    # Registra manejadores de errores personalizados
+    register_error_handlers(app)
+    
     with app.app_context():
        
         return app

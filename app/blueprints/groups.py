@@ -1,9 +1,12 @@
 from apiflask import Schema, abort, APIBlueprint
+from flask import request
 from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario
+from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo
+from ..common.error_handling import ValidationError
 from sqlalchemy.sql import text
 from typing import List
 from ..schemas.schemas import GrupoIn, GrupoOut
@@ -22,73 +25,93 @@ from ..schemas.schemas import GrupoIn, GrupoOut
 
 groups_b = APIBlueprint('groups_b', __name__)
 
-@groups_b.patch('/grupos/<int:grupo_id>')
+@groups_b.patch('/grupos/<string:grupo_id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
 @groups_b.output(GrupoOut)
-def update_grupo(grupo_id, json_data):
-    print("grupo_id: ", grupo_id)
-    print("get all grupos")
+def update_gr(grupo_id: str, json_data: dict):
+    try:
+        session: scoped_session = current_app.session
+        print("Json data:",json_data)
+        res = update_grupo(grupo_id, **json_data)
+        if res is None:
+            print("No hay datos que modificar")  
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontró el grupo a modificar"
+                } 
+            return result
+
+        return res
     
-    # Get the session from the current app context
-    session: scoped_session = current_app.session
+    except Exception as err:
+        raise ValidationError(err)
     
-    # Query all groups from the Grupo table
-    grupos = session.query(Grupo).all()
-    print("grupos: ", grupos)
-    
-    if grupo_id > len(grupos) - 1:
-        abort(404)
-    
-    for attr, value in json_data.items():
-        grupos[grupo_id][attr] = value
-    
-    return grupos[grupo_id]
 
 @groups_b.get('/grupos')
+@groups_b.output(GrupoOut(many=True))
 def get_grupos():
-    session: scoped_session = current_app.session
-    grupos = session.query(Grupo).all()
-    # result_raw = session.execute(text("SELECT * FROM tareas.grupo WHERE descripcion = :val"), {'val': 'auxiliares'}) #example of raw query, reusing session pool from sqlalchemy
-    # for item_raw in result_raw:
-    #     print("RAW")
-    #     print(item_raw)
-   
-    return jsonify([{
-        'id': str(grupo.id),
-        'id_user_actualizacion': str(grupo.id_user_actualizacion),
-        'fecha_actualizacion': grupo.fecha_actualizacion,
-        'descripcion': grupo.descripcion
-    } for grupo in grupos])
+    try:
+        
+        res=get_all_grupos()
 
-@groups_b.get('/tareas')
-def get_tareas():
-    session: scoped_session = current_app.session
-    tareas = session.query(Tarea).all()
-    return jsonify([{
-        'id': str(tarea.id),
-        'id_grupo': str(tarea.id_grupo),
-        'prioridad': tarea.prioridad,
-        'titulo': tarea.titulo,
-        'cuerpo': tarea.cuerpo,
-        'id_tipo_tarea': str(tarea.id_tipo_tarea),
-        'eliminable': tarea.eliminable,
-        'fecha_eliminacion': tarea.fecha_eliminacion
-    } for tarea in tareas])
+        if res is None or len(res) == 0:
+            
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontraron datos de grupos"
+                } 
+            return result
 
-@groups_b.get('/tareas/{tarea_id}/usuarios-asignados')
-def get_usuarios_asignados(tarea_id: str):
-    session: scoped_session = current_app.session
+        return res 
     
-    usuarios = session.query(Usuario)\
-                     .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
-                     .filter(TareaAsignadaUsuario.id_tarea == tarea_id)\
-                     .all()
+    except Exception as err:
+        raise ValidationError(err)                                           
+
+
+@groups_b.get('/tareas/<string:tarea_id>/usuarios_asignados')
+def get_usuarios_asignados(tarea_id:str):
+    try:    
+        session: scoped_session = current_app.session
+        
+        usuarios = session.query(Usuario)\
+                        .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
+                        .filter(TareaAsignadaUsuario.id_tarea == tarea_id)\
+                        .all()
+        
+        return jsonify([{
+            'id': str(usuario.id),
+            'fecha_actualizacion': usuario.fecha_actualizacion,
+            'id_user_actualizacion': str(usuario.id_user_actualizacion),
+            'nombre': usuario.nombre,
+            'apellido': usuario.apellido,
+            'id_persona_ext': str(usuario.id_persona_ext)
+        } for usuario in usuarios])
     
-    return jsonify([{
-        'id': str(usuario.id),
-        'fecha_actualizacion': usuario.fecha_actualizacion,
-        'id_user_actualizacion': str(usuario.id_user_actualizacion),
-        'nombre': usuario.nombre,
-        'apellido': usuario.apellido,
-        'id_persona_ext': str(usuario.id_persona_ext)
-    } for usuario in usuarios])
+    except Exception as err:
+        raise ValidationError(err)
+    
+#################POST####################
+@groups_b.post('/grupo')
+@groups_b.input(GrupoIn)
+@groups_b.output(GrupoOut)
+def post_grupo(json_data: dict):
+    try:
+        
+        res = insert_grupo(**json_data)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Error en insert grupo",
+                    "ErrorMsg":"No se pudo insertar el grupo"
+                } 
+            return result
+            
+        return res
+    
+    except Exception as err:
+        raise ValidationError(err)    

@@ -8,7 +8,8 @@ from flask import current_app
 from .alch_model import Tarea, TipoTarea
 
 
-def get_tipo_tareas():
+def get_all_tipo_tareas():
+    print("get_tipo_tareas")
     session: scoped_session = current_app.session
     return session.query(TipoTarea).all()
 
@@ -29,11 +30,11 @@ def insert_tipo_tarea(id='', codigo_humano='', descripcion='', id_usuario_actual
     return nuevo_tipo_tarea
 
 
-
-
-def get_tareas():
+def get_all_tareas():
     session: scoped_session = current_app.session
-    return session.query(Tarea).all()
+    tareas = session.query(Tarea).all()
+    print("Tareas:", tareas)
+    return tareas
 
 
 
