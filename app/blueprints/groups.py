@@ -6,7 +6,7 @@ from sqlalchemy.orm import scoped_session
 from ..alch_model import Grupo,Tarea,Usuario
 from sqlalchemy.sql import text
 from typing import List
-
+from flask_cors import cross_origin
 
 
 # from apiflask import Schema, abort, APIBlueprint, input, output
@@ -32,7 +32,7 @@ class GrupoOut(Schema):
     name3 = String()
     category = String()
 
-@groups_b.patch('/grupos/<int:grupo_id>')
+@groups_b.patch('/grupo/<int:grupo_id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
 @groups_b.output(GrupoOut)
 def update_grupo(grupo_id, json_data):
@@ -54,7 +54,8 @@ def update_grupo(grupo_id, json_data):
     
     return grupos[grupo_id]
 
-@groups_b.get('/grupos')
+@groups_b.get('/grupo')
+@cross_origin(origin='http://shouldnotpass.com', supports_credentials=True)
 def get_grupos():
     session: scoped_session = current_app.session
     grupos = session.query(Grupo).all()
