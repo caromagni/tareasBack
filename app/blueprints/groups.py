@@ -1,26 +1,10 @@
-from apiflask import Schema, abort, APIBlueprint
-from flask import request
-from apiflask.fields import Integer, String
-from apiflask.validators import Length, OneOf
+from apiflask import APIBlueprint
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
-from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario
+from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario, HerarquiaGrupoGrupo
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo
 from ..common.error_handling import ValidationError
-from sqlalchemy.sql import text
-from typing import List
 from ..schemas.schemas import GrupoIn, GrupoOut
-
-
-
-# from apiflask import Schema, abort, APIBlueprint, input, output
-# from apiflask.fields import Integer, String
-# from apiflask.validators import Length, OneOf
-# from flask import current_app, jsonify
-# from sqlalchemy.orm import scoped_session, Session
-# from ..alch_model import Grupo, Tarea, Usuario, TareaAsignadaUsuario
-# from sqlalchemy.sql import text
-# from typing import List
 
 
 groups_b = APIBlueprint('groups_b', __name__)
@@ -69,8 +53,9 @@ def get_grupos():
         return res 
     
     except Exception as err:
-        raise ValidationError(err)                                           
-
+        raise ValidationError(err)    
+                                           
+   
 
 @groups_b.get('/tareas/<string:tarea_id>/usuarios_asignados')
 def get_usuarios_asignados(tarea_id:str):

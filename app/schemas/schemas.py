@@ -1,15 +1,15 @@
 from os import link
 from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
-from marshmallow_sqlalchemy.fields import Nested
+#from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
-from apiflask.fields import Integer, String, DateTime, Boolean
+from apiflask.fields import Integer, String, DateTime, Boolean, Nested
 from apiflask.validators import Length, OneOf
-from flask_marshmallow import Marshmallow
+#from flask_marshmallow import Marshmallow
 
 from ..models.alch_model import TipoTarea, Tarea
 
-ma = Marshmallow()
+#ma = Marshmallow()
 
 ##########Funciones de validación ##############################    
 
@@ -48,7 +48,14 @@ class GrupoOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
-    #id_padre = Nested(HerarquiaGrupoGrupoOut, only=("id_padre"))
+
+
+class GrupoHOut(Schema):
+    id_padre = String()
+    padre_descripcion = String()
+    id_hijo = String()
+    hijo_descripcion = String()
+
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
@@ -105,7 +112,7 @@ class TareaOut(Schema):
 
 
 ###############Marshmallow####################
-class TipoTareaSchema(ma.Schema):
+class TipoTareaSchema(Schema):
     class Meta:
         model = TipoTarea
         include_relationships = True
@@ -121,7 +128,7 @@ class TipoTareaSchema(ma.Schema):
 
                                           
 
-class TareaSchema(ma.Schema):
+class TareaSchema(Schema):
     class Meta:
         model = Tarea
         include_relationships = True
@@ -144,7 +151,7 @@ class TareaSchema(ma.Schema):
 
 ############## Schemas de Entrada de Datos ##############################
     
-class LoadFechaSchema(ma.Schema):
+class LoadFechaSchema(Schema):
     class Meta:
         ordered = True
 
@@ -156,7 +163,7 @@ class LoadFechaSchema(ma.Schema):
 
 
 
-class LoadExpedienteSchema(ma.Schema):
+class LoadExpedienteSchema(Schema):
     class Meta:
         ordered = True
 
