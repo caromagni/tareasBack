@@ -14,7 +14,7 @@ def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    CORS(app, expose_headers=["x-suggested-filename"])
+    
     app.config['DEBUG'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://"+Config.POSGRESS_USER+":"+Config.POSGRESS_PASSWORD+"@psql.beta.hwc.pjm.gob.ar:5432/tareas"
     app.config['SERVERS'] = Config.SERVERS
@@ -26,6 +26,13 @@ def create_app():
     Session = scoped_session(sessionmaker(bind=engine))
     
     # Attach the session to the app instance
+
+    @app.route("/")
+    def base_url():
+        return "<p>Hello, World!</p>"
+
+
+
     app.session = Session
     
     app.register_blueprint(groups_b)
@@ -42,4 +49,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    CORS(app, expose_headers=["x-suggested-filename"],resources={r"/*": {"origins":"http://doesnotwork.com","methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],"allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"]}})
+        
     app.run()
