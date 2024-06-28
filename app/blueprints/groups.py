@@ -46,19 +46,16 @@ def update_gr(grupo_id: str, json_data: dict):
     
     except Exception as err:
         raise ValidationError(err)
-    
 
 @groups_b.get('/grupos')
-@groups_b.output({'data':GrupoOut, 'total_count': Integer()})
+#@groups_b.output(GroupCountOut(many=True))
 def get_grupos():
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('page_size', default=10, type=int)
-        
     try:
-        logging.info("Fetching grupos...")
-        res,total_count=get_all_grupos(page,page_size)
-        print("does this have something?")
-        print(len(res))
+        
+        res, cant=get_all_grupos(page,page_size)
+       
         if res is None or len(res) == 0:
             
             result={
@@ -68,12 +65,47 @@ def get_grupos():
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             return result
-
-        return {"data": res, "total_count": total_count} 
+       
+        data = {
+                "count": cant,
+                "data": GrupoOut().dump(res, many=True)
+            }
+        
+        return data
     
     except Exception as err:
-        logging.error(f"Error fetching grupos: {err}")
-        raise ValidationError(err)                                           
+        raise ValidationError(err)    
+
+# @groups_b.get('/grupos')
+# #@groups_b.output()
+# def get_grupos():
+#     page = request.args.get('page', default=1, type=int)
+#     page_size = request.args.get('page_size', default=10, type=int)
+        
+#     try:
+#         logging.info("Fetching grupos...")
+#         res,total_count=get_all_grupos(page,page_size)
+#         print("does this have something?")
+#         print(len(res))
+#         data = {
+#                 "count": total_count,
+#                 "data": GrupoOut().dump(res, many=True)
+#             }
+#         if res is None or len(res) == 0:
+            
+#             result={
+#                     "valido":"fail",
+#                     "ErrorCode": 800,
+#                     "ErrorDesc":"Grupo no encontrado",
+#                     "ErrorMsg":"No se encontraron datos de grupos"
+#                 } 
+#             return result
+
+#         return {"data": res, "total_count": total_count} 
+    
+#     except Exception as err:
+#         logging.error(f"Error fetching grupos: {err}")
+#         raise ValidationError(err)                                           
 
 
 @groups_b.get('/tareas/<string:tarea_id>/usuarios_asignados')
