@@ -1,9 +1,9 @@
-from apiflask import APIBlueprint
+from apiflask import APIBlueprint 
 from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario, HerarquiaGrupoGrupo
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo
 from ..common.error_handling import ValidationError
 from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn
-
+from flask import request
 
 groups_b = APIBlueprint('groups_blueprint', __name__)
 
@@ -30,14 +30,17 @@ def update_gr(grupo_id: str, json_data: dict):
         raise ValidationError(err)
     
 @groups_b.doc(description='Listado de Grupos existentes', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/grupos/<int:page>/<int:page_size>')
 @groups_b.get('/grupos')
 @groups_b.output(GroupCountOut)
-def get_grupos(page=1, page_size=10):
+def get_grupos():
     try:
-        
+        page=int(request.args.get('page'))
+        page_size=int(request.args.get('page_size'))
+        print("page_size:",page_size)
+        print("page:",page)
         res, cant=get_all_grupos(page,page_size)
-       
+        
+        
         if res is None or len(res) == 0:
             
             result={
