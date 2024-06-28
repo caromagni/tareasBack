@@ -8,8 +8,9 @@ from ..models.usuario_model import get_all_usuarios, get_usuario_by_id, insert_u
 from ..schemas.schemas import  UsuarioIn, UsuarioOut
 from ..common.error_handling import ValidationError
 
-usuario_b = APIBlueprint('usuario_b', __name__)
+usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
+@usuario_b.doc(description='Listado de Usuarios', summary='Usuarios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario')
 @usuario_b.output(UsuarioOut(many=True))
 def get_usuarios():
@@ -31,6 +32,7 @@ def get_usuarios():
     
 
 #################POST####################
+@usuario_b.doc(description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(UsuarioIn)
 @usuario_b.output(UsuarioOut)

@@ -5,8 +5,9 @@ from typing import List
 from ..schemas.schemas import GrupoHOut, HerarquiaGrupoGrupoOut
 
 
-herarquia_b = APIBlueprint('herarquia_b', __name__)
+herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
+@herarquia_b.doc(description='Listado de Grupos padres - hijos', summary='Jerarquía de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @herarquia_b.get('/herarquias')
 @herarquia_b.output(HerarquiaGrupoGrupoOut(many=True))
 def get_herarquias():

@@ -49,7 +49,7 @@ class Tarea(Base):
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime(timezone=False))
 
-    grupo = relationship('Grupo', backref='tareas')
+    grupo = relationship('Grupo')
     tipo_tarea = relationship('TipoTarea')
 
 class TareaXGrupo(Base):

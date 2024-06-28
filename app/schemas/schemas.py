@@ -33,6 +33,10 @@ class SmartNested(Nested):
         return super(SmartNested, self).serialize(attr, obj, accessor)
 
 ###############ApiFlask####################  
+class PageIn(Schema):
+    page = Integer()
+    per_page = Integer()
+    
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
     id_padre = String()
@@ -42,10 +46,6 @@ class GrupoIn(Schema):
     descripcion = String(required=True)
     id_user_actualizacion = String(required=True)
     id_padre = String()    
-
-class PageIn(Schema):
-    page = Integer()
-    per_page = Integer()
 
 class GrupoOut(Schema):
     id = String()
@@ -114,9 +114,19 @@ class TareaOut(Schema):
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "descripcion")) 
+    grupo = Nested(GrupoOut, only=("id", "descripcion"))
     #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
 
-
+class TareaUsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    id_persona_ext = String()
+    nombre = String()
+    apellido = String()
+    id_grupo = String()
+    grupo = String()
+        
 
 ###############Marshmallow####################
 class TipoTareaSchema(Schema):
