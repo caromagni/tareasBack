@@ -6,6 +6,7 @@ from app.common.error_handling import register_error_handlers
 from .blueprints.groups import groups_b
 from .blueprints.usuario import usuario_b
 from .blueprints.tarea import tarea_b
+from .blueprints.herarquia import herarquia_b
 from .models.alch_model import Base
 from .config import Config
 
@@ -35,6 +36,7 @@ def create_app():
         return "<p>Hello, World!</p>"
     
     app.register_blueprint(groups_b)
+    app.register_blueprint(herarquia_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
 

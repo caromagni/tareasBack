@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo
 
 
 def get_all_tipo_tareas():
@@ -36,5 +36,23 @@ def get_all_tareas():
     print("Tareas:", tareas)
     return tareas
 
+def usuarios_tarea(tarea_id=""):
+    session: scoped_session = current_app.session
+    print("Usuarios por tarea:", tarea_id)    
+    usuarios = session.query(Usuario.nombre.label('nombre'),
+                        Usuario.apellido.label('apellido'),
+                        Usuario.id.label('id'),
+                        Usuario.id_persona_ext.label('id_persona_ext'),
+                        Usuario.id_user_actualizacion.label('id_user_actualizacion'),
+                        Usuario.fecha_actualizacion.label('fecha_actualizacion'),
+                        Tarea.id_grupo.label('id_grupo'),\
+                        Grupo.descripcion.label('grupo'))\
+                        .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
+                        .join(Tarea, TareaAsignadaUsuario.id_tarea == Tarea.id)\
+                        .join(Grupo, Tarea.id_grupo == Grupo.id)\
+                        .filter(TareaAsignadaUsuario.id_tarea == tarea_id)\
+                        .all()
+    
+    return usuarios
 
 

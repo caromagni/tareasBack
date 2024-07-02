@@ -2,9 +2,8 @@ from os import link
 from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
 #from marshmallow_sqlalchemy.fields import Nested
-from apiflask.fields import Integer, String, List, Nested
 from apiflask import Schema
-from apiflask.fields import Integer, String, DateTime, Boolean
+from apiflask.fields import Integer, String, DateTime, Boolean, Nested
 from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
@@ -34,6 +33,10 @@ class SmartNested(Nested):
         return super(SmartNested, self).serialize(attr, obj, accessor)
 
 ###############ApiFlask####################  
+class PageIn(Schema):
+    first = Integer(default=1)
+    rows = Integer(default=10)
+
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
     id_padre = String()
@@ -49,7 +52,17 @@ class GrupoOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
-    #id_padre = Nested(HerarquiaGrupoGrupoOut, only=("id_padre"))
+
+class GroupCountOut(Schema):
+    count = Integer()
+    data = Nested(GrupoOut, many=True)
+
+class GrupoHOut(Schema):
+    id_padre = String()
+    padre_descripcion = String()
+    id_hijo = String()
+    hijo_descripcion = String()
+
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
@@ -57,6 +70,13 @@ class UsuarioIn(Schema):
     apellido = String(required=True)
     id_user_actualizacion = String(required=True)
     id_persona_ext = String(required=True)
+    id_grupo = String()
+
+class UsuarioInPatch(Schema):
+    nombre = String()
+    apellido = String()
+    id_user_actualizacion = String()
+    id_persona_ext = String()
     id_grupo = String()
 
 class UsuarioOut(Schema):
@@ -101,9 +121,19 @@ class TareaOut(Schema):
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "descripcion")) 
+    grupo = Nested(GrupoOut, only=("id", "descripcion"))
     #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
 
-
+class TareaUsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    id_persona_ext = String()
+    nombre = String()
+    apellido = String()
+    id_grupo = String()
+    grupo = String()
+        
 
 ###############Marshmallow####################
 class TipoTareaSchema(Schema):
