@@ -2,7 +2,6 @@ from apiflask import APIFlask
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-#from flask_jwt_extended import JWTManager
 from app.common.error_handling import register_error_handlers
 from .blueprints.groups import groups_b
 from .blueprints.usuario import usuario_b
@@ -16,7 +15,7 @@ def create_app():
     app = APIFlask(__name__)
     
     app.config['DEBUG'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://"+Config.POSGRESS_USER+":"+Config.POSGRESS_PASSWORD+"@psql.beta.hwc.pjm.gob.ar:5432/tareas"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@psql.beta.hwc.pjm.gob.ar:5432/tareas"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
 
@@ -26,29 +25,24 @@ def create_app():
     Session = scoped_session(sessionmaker(bind=engine))
     
     # Attach the session to the app instance
+    app.session = Session
+
+    # Enable CORS
+    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
 
     @app.route("/")
     def base_url():
         return "<p>Hello, World!</p>"
-
-
-
-    app.session = Session
     
     app.register_blueprint(groups_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
 
-    #jwt = JWTManager(app=app)
-    # Registra manejadores de errores personalizados
+    # Register custom error handlers
     register_error_handlers(app)
     
-    with app.app_context():
-       
-        return app
+    return app
 
 if __name__ == '__main__':
     app = create_app()
-    CORS(app, expose_headers=["x-suggested-filename"],resources={r"/*": {"origins":"http://doesnotwork.com","methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],"allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"]}})
-        
     app.run()

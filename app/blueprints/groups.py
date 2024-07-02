@@ -47,7 +47,7 @@ def update_gr(grupo_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
 
-@groups_b.get('/grupos')
+@groups_b.get('/grupo')
 #@groups_b.output(GroupCountOut(many=True))
 def get_grupos():
     page = request.args.get('page', default=1, type=int)
