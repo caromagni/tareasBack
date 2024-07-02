@@ -13,10 +13,10 @@ from .alch_model import Grupo, HerarquiaGrupoGrupo
     cant=session.query(Grupo).count()
     return res, cant """
 
-def get_all_grupos(page=1, per_page=10): #if no arguments are passed, the default values are used
+def get_all_grupos(first=1, rows=10): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
-    result= session.query(Grupo).offset((page-1)*per_page).limit(per_page).all()
+    result= session.query(Grupo).offset((first-1)*rows).limit(rows).all()
     return result, total
 
 def get_all_herarquia():

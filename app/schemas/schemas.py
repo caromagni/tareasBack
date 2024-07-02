@@ -34,8 +34,8 @@ class SmartNested(Nested):
 
 ###############ApiFlask####################  
 class PageIn(Schema):
-    page = Integer(default=1)
-    page_size = Integer(default=10)
+    first = Integer(default=1)
+    rows = Integer(default=10)
 
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
@@ -70,6 +70,13 @@ class UsuarioIn(Schema):
     apellido = String(required=True)
     id_user_actualizacion = String(required=True)
     id_persona_ext = String(required=True)
+    id_grupo = String()
+
+class UsuarioInPatch(Schema):
+    nombre = String()
+    apellido = String()
+    id_user_actualizacion = String()
+    id_persona_ext = String()
     id_grupo = String()
 
 class UsuarioOut(Schema):

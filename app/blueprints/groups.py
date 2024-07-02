@@ -11,7 +11,7 @@ groups_b = APIBlueprint('groups_blueprint', __name__)
 @groups_b.patch('/grupos/<string:grupo_id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
 @groups_b.output(GrupoOut)
-def update_gr(grupo_id: str, json_data: dict):
+def patch_grupo(grupo_id: str, json_data: dict):
     try:
         res = update_grupo(grupo_id, **json_data)
         if res is None:
@@ -29,22 +29,24 @@ def update_gr(grupo_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
     
-@groups_b.doc(description='Listado de Grupos existentes', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupos?page=1&page_size=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos')
 @groups_b.input(PageIn, location='query')
 @groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
-        page=1
-        page_size=10
-        if(request.args.get('page_size') is not None):
-            page=int(request.args.get('page'))
-        if(request.args.get('page_size') is not None):
-            page_size=int(request.args.get('page_size'))
-            
-        print("page_size:",page_size)
-        print("page:",page)
-        res, cant=get_all_grupos(page,page_size)
+        #page=1
+        first=1
+        #page_size=10
+        rows=10
+        if(request.args.get('first') is not None):
+            first=int(request.args.get('first'))
+        if(request.args.get('rows') is not None):
+            rows=int(request.args.get('rows'))
+
+        print("page_size:",rows)
+        print("page:",first)
+        res, cant=get_all_grupos(first,rows)
         
         
         if res is None or len(res) == 0:
