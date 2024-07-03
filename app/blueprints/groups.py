@@ -39,7 +39,7 @@ def patch_grupo(grupo_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
     
-@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?page=1&page_size=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?first=1&rows=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo')
 @groups_b.input(PageIn, location='query')
 @groups_b.output(GroupCountOut)

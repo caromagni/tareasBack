@@ -31,9 +31,7 @@ def create_app():
     # Enable CORS
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
 
-    @app.route("/")
-    def base_url():
-        return "<p>Hello, World!</p>"
+
     
     app.register_blueprint(groups_b)
     app.register_blueprint(herarquia_b)

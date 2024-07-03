@@ -43,12 +43,14 @@ class HerarquiaGrupoGrupoOut(Schema):
     id_hijo = String()
  
 class GrupoIn(Schema):
-    descripcion = String(required=True)
+    nombre = String(required=True)
+    descripcion= String()
     id_user_actualizacion = String(required=True)
     id_padre = String()    
 
 class GrupoOut(Schema):
     id = String()
+    nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
@@ -59,17 +61,17 @@ class GroupCountOut(Schema):
 
 class GrupoHOut(Schema):
     id_padre = String()
-    padre_descripcion = String()
+    padre_nombre = String()
     id_hijo = String()
-    hijo_descripcion = String()
+    hijo_nombre = String()
 
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
     nombre = String(required=True)
     apellido = String(required=True)
-    id_user_actualizacion = String(required=True)
-    id_persona_ext = String(required=True)
+    id_user_actualizacion = String()
+    id_persona_ext = String()
     id_grupo = String()
 
 class UsuarioInPatch(Schema):
@@ -87,7 +89,7 @@ class UsuarioOut(Schema):
     apellido = String()
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
-    id_grupo = Nested(GrupoOut, only=("id", "descripcion")) 
+    id_grupo = Nested(GrupoOut, only=("id", "nombre")) 
     
 
     @post_dump
@@ -98,13 +100,13 @@ class UsuarioOut(Schema):
 ################TipoTareas####################
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True)
-    descripcion = String(required=True)
+    nombre = String(required=True)
     id_usuario_actualizacion = String(required=True)
 
 class TipoTareaOut(Schema):
     id = String()
     codigo_humano = String()
-    descripcion = String()
+    nombre = String()
     id_usuario_actualizacion = String()    
 
 ###############Tareas####################       
@@ -120,9 +122,9 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
-    tipo_tarea = Nested(TipoTareaOut, only=("id", "descripcion")) 
-    grupo = Nested(GrupoOut, only=("id", "descripcion"))
-    #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    grupo = Nested(GrupoOut, only=("id", "nombre"))
+    #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "nombre"))  
 
 class TareaUsuarioOut(Schema):
     id = String()
@@ -145,7 +147,7 @@ class TipoTareaSchema(Schema):
     
     id = fields.String()
     codigo_humano = fields.String()
-    descripcion =fields.String() 
+    nombre =fields.String() 
     id_usuario_actualizacion = fields.String() 
     fecha_actualizacion =fields.DateTime()
 
@@ -171,7 +173,7 @@ class TareaSchema(Schema):
     eliminable = fields.Boolean()
     fecha_eliminacion = fields.DateTime()
     #tipo_tarea = fields.String() 
-    tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
+    tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "nombre"))  
 
 ############## Schemas de Entrada de Datos ##############################
     

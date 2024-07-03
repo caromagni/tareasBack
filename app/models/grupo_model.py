@@ -26,7 +26,7 @@ def get_all_herarquia():
 
 def get_grupos_herarquia():
     session: scoped_session = current_app.session
-    res=session.query(Grupo.id, Grupo.descripcion, HerarquiaGrupoGrupo.id_hijo, HerarquiaGrupoGrupo.id_padre)\
+    res=session.query(Grupo.id, Grupo.nombre, HerarquiaGrupoGrupo.id_hijo, HerarquiaGrupoGrupo.id_padre)\
         .join(HerarquiaGrupoGrupo, Grupo.id == HerarquiaGrupoGrupo.id_padre)\
         .all()
     print(len(res))
@@ -42,12 +42,12 @@ def get_grupos_herarquia_labels():
             Grupo.id.label("id"),
             Grupo.id_user_actualizacion.label("user_actualizacion"),
             Grupo.fecha_actualizacion.label("fecha_actualizacion"),
-            Grupo.descripcion.label("descripcion"),
+            Grupo.nombre.label("nombre"),
             HerarquiaGrupoGrupo.id.label("herarquia_grupo_grupo_id"),
             HerarquiaGrupoGrupo.id_padre.label("id_padre"),
-            GrupoPadre.descripcion.label("padre_descripcion"),
+            GrupoPadre.nombre.label("padre_nombre"),
             HerarquiaGrupoGrupo.id_hijo.label("id_hijo"),
-            GrupoHijo.descripcion.label("hijo_descripcion"),
+            GrupoHijo.nombre.label("hijo_nombre"),
             HerarquiaGrupoGrupo.id_usuario_actualizacion.label("tareas_herarquia_grupo_grupo_id_usuario_actualizacion"),
             HerarquiaGrupoGrupo.fecha_actualizacion.label("tareas_herarquia_grupo_grupo_fecha_actualizacion")
         ).join(
@@ -60,28 +60,45 @@ def get_grupos_herarquia_labels():
     
     return res                                                                 
 
-def update_grupo(id='', descripcion='', id_user_actualizacion=''):
+def update_grupo(id='', nombre='', descripcion='', id_user_actualizacion=''):
     session: scoped_session = current_app.session
     grupos = session.query(Grupo).filter(Grupo.id == id).first()
    
     if grupos is None:
         return None
     
+    
+
+    if descripcion != '':
+        grupos.descripcion = descripcion    
+
+    update_data = {}
+    if nombre != '':
+        update_data[Grupo.nombre] = nombre
+    if descripcion != '':
+        update_data[Grupo.descripcion] = descripcion
+
+    update_data[Grupo.id_user_actualizacion] = id_user_actualizacion
+    update_data[Grupo.fecha_actualizacion] = datetime.now()          
+
     print("Grupo encontrado:",grupos)
-    session.query(Grupo).filter(Grupo.id == id).update({Grupo.descripcion: descripcion,
-        Grupo.id_user_actualizacion: id_user_actualizacion,
-        Grupo.fecha_actualizacion: datetime.now()})
+   # session.query(Grupo).filter(Grupo.id == id).update({Grupo.nombre: nombre,
+   #     Grupo.id_user_actualizacion: id_user_actualizacion,
+   #     Grupo.fecha_actualizacion: datetime.now()})
    
+    session.query(Grupo).filter(Grupo.id == id).update(update_data)
+
     session.commit()
     return grupos
 
-def insert_grupo(id='', descripcion='', id_user_actualizacion='', id_padre=''):
+def insert_grupo(id='', nombre='', descripcion='', id_user_actualizacion='', id_padre=''):
     session: scoped_session = current_app.session
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
     print(nuevoID)
     nuevo_grupo = Grupo(
         id=nuevoID_grupo,
+        nombre=nombre,
         descripcion=descripcion,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()

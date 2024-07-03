@@ -38,7 +38,8 @@ def get_usuarios():
 @usuario_b.output(UsuarioOut)
 def post_usuario(json_data: dict):
     try:
-        
+        print('inserta usuario')
+        res=""
         res = insert_usuario(**json_data)
         if res is None:
             result={
