@@ -19,7 +19,7 @@ def get_all_usuarios():
 def insert_usuario(id='', nombre='', apellido='', id_persona_ext='', id_user_actualizacion='', id_grupo=''):
     session: scoped_session = current_app.session
     nuevoID_usuario=uuid.uuid4()
-    print(nuevoID)
+    print("nuevo_usuario:",nuevoID_usuario)
     nuevo_usuario = Usuario(
         id=nuevoID_usuario,
         nombre=nombre,
@@ -28,6 +28,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext='', id_user_act
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
+    print("nuevo_usuario:",nuevo_usuario)
     session.add(nuevo_usuario)
     
     if id_grupo is not '':        

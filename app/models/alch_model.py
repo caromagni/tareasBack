@@ -12,6 +12,7 @@ class Grupo(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id_user_actualizacion = Column(UUID(as_uuid=True))
     fecha_actualizacion = Column(DateTime(timezone=False))
+    nombre = Column(String)
     descripcion = Column(String)
 
 class HerarquiaGrupoGrupo(Base):
@@ -29,7 +30,8 @@ class TipoTarea(Base):
     #id = Column(UUID(as_uuid=True), primary_key=True)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     codigo_humano = Column(String)
-    descripcion = Column(String, nullable=False)
+    nombre = Column(String, nullable=False)
+    descripcion = Column(String)
     id_usuario_actualizacion = Column(UUID(as_uuid=True), nullable=False)
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
 
@@ -68,7 +70,7 @@ class Usuario(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     fecha_actualizacion = Column(DateTime(timezone=False))
     id_user_actualizacion = Column(UUID(as_uuid=True))
-    nombre = Column(String)
+    nombre = Column(String, nullable=False)
     apellido = Column(String)
     id_persona_ext = Column(UUID(as_uuid=True))
 
@@ -86,6 +88,7 @@ class Label(Base):
     __table_args__ = {'schema': 'tareas'}
     id = Column(UUID(as_uuid=True), primary_key=True)
     codigo = Column(String, nullable=False)
+    nombre = Column(String, nullable=False)
     descripcion = Column(String)
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
     id_user_actualizacion = Column(UUID(as_uuid=True), nullable=False)
@@ -116,7 +119,7 @@ class TipoInhabilidad(Base):
     __table_args__ = {'schema': 'tareas'}
     id = Column(UUID(as_uuid=True), primary_key=True)
     tipo = Column(String, nullable=False)
-    descripcion = Column(String)
+    nombre = Column(String, nullable=False)
 
 class Agrupacion(Base):
     __tablename__ = 'agrupacion'

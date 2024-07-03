@@ -14,13 +14,13 @@ def get_all_tipo_tareas():
     return session.query(TipoTarea).all()
 
 
-def insert_tipo_tarea(id='', codigo_humano='', descripcion='', id_usuario_actualizacion=''):
+def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_usuario_actualizacion=''):
     session: scoped_session = current_app.session
     nuevoID=uuid.uuid4()
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
-        descripcion=descripcion,
+        nombre=nombre,
         id_usuario_actualizacion=id_usuario_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -46,7 +46,7 @@ def usuarios_tarea(tarea_id=""):
                         Usuario.id_user_actualizacion.label('id_user_actualizacion'),
                         Usuario.fecha_actualizacion.label('fecha_actualizacion'),
                         Tarea.id_grupo.label('id_grupo'),\
-                        Grupo.descripcion.label('grupo'))\
+                        Grupo.nombre.label('grupo'))\
                         .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
                         .join(Tarea, TareaAsignadaUsuario.id_tarea == Tarea.id)\
                         .join(Grupo, Tarea.id_grupo == Grupo.id)\
