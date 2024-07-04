@@ -12,7 +12,7 @@ from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn, Usuarios
 import logging
 
 
-groups_b = APIBlueprint('groups_b', __name__)
+groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 
 

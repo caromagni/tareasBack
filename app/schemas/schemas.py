@@ -47,7 +47,15 @@ class GrupoHOut(Schema):
     id_hijo = String()
     nombre_padre = String()
     nombre_hijo = String()
-    
+
+class HerarquiaOut(Schema):
+    id_padre = String()
+    id_hijo = String()
+    nombre_padre = String()
+    nombre_hijo = String()
+    path = String()
+    level = Integer()        
+
 class GrupoIn(Schema):
     nombre = String(required=True)
     descripcion= String()
