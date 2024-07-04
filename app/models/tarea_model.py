@@ -14,14 +14,15 @@ def get_all_tipo_tareas():
     return session.query(TipoTarea).all()
 
 
-def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_usuario_actualizacion=''):
+def insert_tipo_tarea(id='', codigo_humano='', nombre='',descripcion='', id_user_actualizacion=''):
     session: scoped_session = current_app.session
     nuevoID=uuid.uuid4()
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
-        id_usuario_actualizacion=id_usuario_actualizacion,
+        descripcion=descripcion,
+        id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
 

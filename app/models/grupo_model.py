@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Grupo, HerarquiaGrupoGrupo
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario
 
 
 """ def get_all_grupos():
@@ -45,10 +45,10 @@ def get_grupos_herarquia_labels():
             Grupo.nombre.label("nombre"),
             HerarquiaGrupoGrupo.id.label("herarquia_grupo_grupo_id"),
             HerarquiaGrupoGrupo.id_padre.label("id_padre"),
-            GrupoPadre.nombre.label("padre_nombre"),
+            GrupoPadre.nombre.label("nombre_padre"),
             HerarquiaGrupoGrupo.id_hijo.label("id_hijo"),
-            GrupoHijo.nombre.label("hijo_nombre"),
-            HerarquiaGrupoGrupo.id_usuario_actualizacion.label("tareas_herarquia_grupo_grupo_id_usuario_actualizacion"),
+            GrupoHijo.nombre.label("nombre_hijo"),
+            HerarquiaGrupoGrupo.id_user_actualizacion.label("tareas_herarquia_grupo_grupo_id_user_actualizacion"),
             HerarquiaGrupoGrupo.fecha_actualizacion.label("tareas_herarquia_grupo_grupo_fecha_actualizacion")
         ).join(
             HerarquiaGrupoGrupo, Grupo.id == HerarquiaGrupoGrupo.id_padre
@@ -66,8 +66,6 @@ def update_grupo(id='', nombre='', descripcion='', id_user_actualizacion=''):
    
     if grupos is None:
         return None
-    
-    
 
     if descripcion != '':
         grupos.descripcion = descripcion    
@@ -110,7 +108,7 @@ def insert_grupo(id='', nombre='', descripcion='', id_user_actualizacion='', id_
             id=nuevoID,
             id_padre=id_padre,
             id_hijo=nuevoID_grupo,
-            id_usuario_actualizacion=id_user_actualizacion,
+            id_user_actualizacion=id_user_actualizacion,
             fecha_actualizacion=datetime.now()
         )
         session.add(nueva_herarquia)
@@ -119,3 +117,17 @@ def insert_grupo(id='', nombre='', descripcion='', id_user_actualizacion='', id_
     
     return nuevo_grupo
 
+
+def get_usuarios_by_grupo(id):
+    session: scoped_session = current_app.session
+    res = session.query(Grupo.id.label("id_grupo"),
+                  Grupo.nombre.label("nombre_grupo"),
+                  Usuario.nombre.label("nombre"),
+                  Usuario.apellido.label("apellido"),
+                  Usuario.id.label("id_usuario")                  
+                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+                  ).filter(Grupo.id == id).all()                                    
+    print("Encontrados:",len(res))
+    return res
+    

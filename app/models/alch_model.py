@@ -21,7 +21,7 @@ class HerarquiaGrupoGrupo(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id_padre = Column(UUID(as_uuid=True))
     id_hijo = Column(UUID(as_uuid=True))
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
     fecha_actualizacion = Column(DateTime(timezone=False))
 
 class TipoTarea(Base):
@@ -32,7 +32,7 @@ class TipoTarea(Base):
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
     descripcion = Column(String)
-    id_usuario_actualizacion = Column(UUID(as_uuid=True), nullable=False)
+    id_user_actualizacion = Column(UUID(as_uuid=True), nullable=False)
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
 
 
@@ -99,7 +99,7 @@ class LabelXTarea(Base):
     label_id = Column(UUID(as_uuid=True), ForeignKey('tareas.label.id'), primary_key=True)
     tarea_id = Column(UUID(as_uuid=True), ForeignKey('tareas.tarea.id'), primary_key=True)
     fecha_actualizacion = Column(DateTime(timezone=False))
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
 
 class Inhabilidad(Base):
     __tablename__ = 'inhabilidad'
@@ -109,7 +109,7 @@ class Inhabilidad(Base):
     fecha_desde = Column(Time)
     fecha_hasta = Column(DateTime(timezone=False))
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
-    id_usuario_actualizacion = Column(UUID(as_uuid=True), nullable=False)
+    id_user_actualizacion = Column(UUID(as_uuid=True), nullable=False)
     id_grupo = Column(UUID(as_uuid=True), ForeignKey('tareas.grupo.id'))
 
     tipo_inhabilidad = relationship('TipoInhabilidad')
@@ -140,7 +140,7 @@ class TipoAgrupacion(Base):
     id = Column(UUID(as_uuid=True), primary_key=True)
     nombre = Column(String, nullable=False)
     fecha_actualizacion = Column(DateTime(timezone=False))
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
     habilitado = Column(Boolean, nullable=False)
 
 class Nota(Base):
@@ -150,7 +150,7 @@ class Nota(Base):
     id_tipo_nota = Column(UUID(as_uuid=True), ForeignKey('tareas.tipo_nota.id'), nullable=False)
     nota = Column(String)
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
     habilitado = Column(Boolean)
     id_tarea = Column(UUID(as_uuid=True), ForeignKey('tareas.tarea.id'), nullable=False)
 
@@ -162,7 +162,7 @@ class TipoNota(Base):
     id = Column(UUID(as_uuid=True), primary_key=True)
     nombre = Column(String, nullable=False)
     fecha_actualizacion = Column(DateTime(timezone=False))
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
     habilitado = Column(Boolean)
 
 class Multimedia(Base):
@@ -172,7 +172,7 @@ class Multimedia(Base):
     link = Column(String)
     id_tipo_link = Column(UUID(as_uuid=True))
     fecha_actualizacion = Column(DateTime(timezone=False))
-    id_usuario_actualizacion = Column(UUID(as_uuid=True))
+    id_user_actualizacion = Column(UUID(as_uuid=True))
     id_entidad = Column(UUID(as_uuid=True), nullable=False)
     nombre_entidad = Column(String, nullable=False)
 
@@ -192,11 +192,11 @@ class FechaIntermedia(Base):
     mensaje = Column(String)
     apagada = Column(Boolean)
     habilitado = Column(Boolean)
-    id_usuario_actualizacion = Column(UUID(as_uuid=True), ForeignKey('tareas.usuario.id'))
+    id_user_actualizacion = Column(UUID(as_uuid=True), ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime(timezone=False))
     id_tarea = Column(UUID(as_uuid=True), ForeignKey('tareas.tarea.id'), nullable=False)
     
-    usuario = relationship('Usuario', foreign_keys=[id_usuario_actualizacion])
+    usuario = relationship('Usuario', foreign_keys=[id_user_actualizacion])
 
 class AutoReglaAsignacion(Base):
     __tablename__ = 'auto_regla_asignacion'

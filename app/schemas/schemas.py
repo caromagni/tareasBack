@@ -41,7 +41,13 @@ class PageIn(Schema):
 class HerarquiaGrupoGrupoOut(Schema):
     id_padre = String()
     id_hijo = String()
- 
+
+class GrupoHOut(Schema):
+    id_padre = String()
+    id_hijo = String()
+    nombre_padre = String()
+    nombre_hijo = String()
+    
 class GrupoIn(Schema):
     nombre = String(required=True)
     descripcion= String()
@@ -59,12 +65,21 @@ class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GrupoOut, many=True)
 
-class GrupoHOut(Schema):
-    id_padre = String()
-    padre_nombre = String()
-    id_hijo = String()
-    hijo_nombre = String()
 
+class GruposUsuarioOut(Schema):
+    id_usuario = String()
+    nombre = String()
+    apellido = String()
+    id_grupo = String()
+    nombre_grupo = String()
+
+class UsuariosGrupoOut(Schema):
+    nombre_grupo = String()
+    id_usuario = String()
+    nombre = String()
+    apellido = String()
+    
+  
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
@@ -101,13 +116,14 @@ class UsuarioOut(Schema):
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True)
     nombre = String(required=True)
-    id_usuario_actualizacion = String(required=True)
+    descripcion = String()
+    id_user_actualizacion = String(required=True)
 
 class TipoTareaOut(Schema):
     id = String()
     codigo_humano = String()
     nombre = String()
-    id_usuario_actualizacion = String()    
+    id_user_actualizacion = String()    
 
 ###############Tareas####################       
 class TareaOut(Schema):
@@ -148,7 +164,7 @@ class TipoTareaSchema(Schema):
     id = fields.String()
     codigo_humano = fields.String()
     nombre =fields.String() 
-    id_usuario_actualizacion = fields.String() 
+    id_user_actualizacion = fields.String() 
     fecha_actualizacion =fields.DateTime()
 
 

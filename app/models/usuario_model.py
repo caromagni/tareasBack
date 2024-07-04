@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Usuario, UsuarioGrupo
+from .alch_model import Usuario, UsuarioGrupo, Grupo
 
 
 def get_usuario_by_id(id):
@@ -15,6 +15,21 @@ def get_usuario_by_id(id):
 def get_all_usuarios():
     session: scoped_session = current_app.session
     return session.query(Usuario).all()
+
+def get_grupos_by_usuario(id):
+    session: scoped_session = current_app.session
+    res = session.query(Usuario.id.label("id_usuario"),
+                  Usuario.nombre.label("nombre"),
+                  Usuario.apellido.label("apellido"),
+                  Grupo.id.label("id_grupo"),
+                  Grupo.nombre.label("nombre_grupo")
+                  ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
+                  ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id).filter(Usuario.id == id).all()                                    
+    
+    return res
+
+
+
 
 def insert_usuario(id='', nombre='', apellido='', id_persona_ext='', id_user_actualizacion='', id_grupo=''):
     session: scoped_session = current_app.session
@@ -73,33 +88,9 @@ def update_usuario(id='', **kwargs):
 
     # Siempre actualizar la fecha de actualización
     update_data[Usuario.fecha_actualizacion] = datetime.now()
-    print("update_data:",update_data)
     
-    """ if update_data:
-        session.query(Usuario).filter(Usuario.id == id).update(update_data)
-    if nombre != '':
-        usuario.nombre = nombre
-    if apellido != '':
-        usuario.apellido = apellido
-    if id_persona_ext != '':
-        usuario.id_persona_ext = id_persona_ext
-    else:
-        usuario.id_persona_ext = None
-
-    if id_user_actualizacion != '':
-        usuario.id_user_actualizacion = id_user_actualizacion        
-        print("nombre:",nombre)
-    usuario.fecha_actualizacion = datetime.now() """
-
     session.query(Usuario).filter(Usuario.id == id).update(update_data)
-    
-
-    """ session.query(Usuario).filter(Usuario.id == id).update({Usuario.nombre: nombre,
-        Usuario.apellido: apellido,
-        Usuario.id_persona_ext: id_persona_ext,
-        Usuario.id_user_actualizacion: id_user_actualizacion,
-        Usuario.fecha_actualizacion: datetime.now()}) """
-    
+        
 
     #if id_grupo is not '': 
     print("##############################################")
