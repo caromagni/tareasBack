@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint
-from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo
+from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo,get_grupos_all
 from typing import List
-from ..schemas.schemas import GrupoHOut, HerarquiaGrupoGrupoOut, HerarquiaOut
+from ..schemas.schemas import GrupoHOut, HerarquiaGrupoGrupoOut, HerarquiaOut,HerarquiaAllOut
 from ..common.error_handling import ValidationError
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
@@ -58,6 +58,7 @@ def get_niveles():
     try:
         #res=get_grupos_herarquia()
         res=get_grupos_recursivo()
+        print(res)
         if res is None:
             
             result={
@@ -72,3 +73,32 @@ def get_niveles():
     
     except Exception as err:
         raise ValidationError(err)       
+
+
+@herarquia_b.get('/herarquias_all')
+@herarquia_b.output(HerarquiaAllOut(many=True))
+def herarquias_all_():
+    try:
+        #res=get_grupos_herarquia()
+        res=get_grupos_all()
+        if res is None:
+            
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"No existen jerarquías de grupos",
+                } 
+            return result
+
+        return res 
+ 
+    
+    except Exception as err:
+        raise ValidationError(err)       
+
+
+
+
+
+
+

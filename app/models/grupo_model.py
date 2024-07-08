@@ -152,4 +152,23 @@ def get_grupos_recursivo():
     
     res = session.execute(query).fetchall()
     return res
+
+
+
+def get_grupos_all():
+    session: scoped_session = current_app.session
+    query = text("""
+              SELECT parent.id AS parent_id, 
+                parent.descripcion AS parent_descripcion, 
+       child.id AS child_id, 
+       child.descripcion AS child_descripcion
+FROM tareas.grupo AS parent
+LEFT JOIN tareas.herarquia_grupo_grupo AS hierarchy ON parent.id = hierarchy.id_padre
+LEFT JOIN tareas.grupo AS child ON hierarchy.id_hijo = child.id;
+
+
+                """)
+    
+    res = session.execute(query).fetchall()
+    return res
     

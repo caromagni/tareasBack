@@ -56,6 +56,14 @@ class HerarquiaOut(Schema):
     path = String()
     level = Integer()        
 
+class HerarquiaAllOut(Schema):
+    parent_id = String()
+    parent_descripcion = String()
+    child_id = String()
+    child_description = String()
+        
+
+
 class GrupoIn(Schema):
     nombre = String(required=True)
     descripcion= String()
