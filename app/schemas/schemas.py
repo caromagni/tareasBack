@@ -36,6 +36,11 @@ class SmartNested(Nested):
 class PageIn(Schema):
     first = Integer(default=1)
     rows = Integer(default=10)
+###############Nomenclador####################
+class NomencladorOut(Schema):
+    nomenclador = String()
+    desclarga = String()
+    nroficin_corto = String()
 
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
@@ -63,13 +68,12 @@ class HerarquiaAllOut(Schema):
     child_name = String()
     path = String()
         
-
-
 class GrupoIn(Schema):
     nombre = String(required=True)
     descripcion= String()
     id_user_actualizacion = String(required=True)
-    id_padre = String()    
+    id_padre = String()  
+    nomenclador = String()  
 
 class GrupoOut(Schema):
     id = String()
@@ -77,6 +81,8 @@ class GrupoOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+
 
 class GroupCountOut(Schema):
     count = Integer()

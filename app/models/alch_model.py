@@ -7,6 +7,27 @@ import uuid
 Base = declarative_base()
 metadata = Base.metadata
 
+class Nomenclador(Base):
+    __tablename__ = 'nomenclador'
+    __table_args__ = {'schema': 'tareas'}
+
+    c_oficppal = Column(CHAR(1), nullable=False)
+    c_circun = Column(CHAR(1), nullable=False)
+    c_oficina = Column(CHAR(2), nullable=False)
+    c_nroficin = Column(CHAR(2), nullable=False)
+    nroficin = Column(String(100), nullable=False)
+    activo = Column(Boolean, nullable=False, server_default=text("true"))
+    nomenclador = Column(CHAR(6), primary_key=True)
+    desclarga = Column(String)
+    lista = Column(Boolean)
+    nroficin_corto = Column(String(20))
+    desccorta = Column(String(30))
+    codigo = Column(CHAR(6))
+    publica_penal = Column(Boolean)
+    tipo_oficina = Column(String(3))
+    turnos = Column(Boolean, server_default=text("false"))
+    turnos_pass = Column(String(100))
+    turnos_des = Column(String(25))
 
 class ActuacionExt(Base):
     __tablename__ = 'actuacion_ext'
@@ -46,11 +67,13 @@ class Grupo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String)
     descripcion = Column(String)
+    cod_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
 
+    nomenclador = relationship('Nomenclador')
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
@@ -86,29 +109,6 @@ t_multimedia = Table(
     Column('nombre_entidad', String, nullable=False),
     schema='tareas',
 )
-
-
-class NomenNroficin(Base):
-    __tablename__ = 'nomen_nroficin'
-    __table_args__ = {'schema': 'tareas'}
-
-    c_oficppal = Column(CHAR(1), primary_key=True, nullable=False)
-    c_circun = Column(CHAR(1), primary_key=True, nullable=False)
-    c_oficina = Column(CHAR(2), primary_key=True, nullable=False)
-    c_nroficin = Column(CHAR(2), primary_key=True, nullable=False)
-    nroficin = Column(String(100), nullable=False)
-    activo = Column(Boolean, nullable=False, server_default=text("true"))
-    nomenclador = Column(CHAR(6), nullable=False)
-    desclarga = Column(String)
-    lista = Column(Boolean)
-    nroficin_corto = Column(String(20))
-    desccorta = Column(String(30))
-    codigo = Column(CHAR(6))
-    publica_penal = Column(Boolean)
-    tipo_oficina = Column(String(3))
-    turnos = Column(Boolean, server_default=text("false"))
-    turnos_pass = Column(String(100))
-    turnos_des = Column(String(25))
 
 
 class TipoActuacionExt(Base):
