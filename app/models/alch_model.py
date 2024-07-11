@@ -1,11 +1,26 @@
 # coding: utf-8
 from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, ForeignKey, Integer, String, Table, Time, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 Base = declarative_base()
 metadata = Base.metadata
+
+class Auditoria(Base):
+    __tablename__ = 'auditoria'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    #datos_anteriores = Column(ARRAY(String()))
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(UUID, nullable=False)
+    ip_usuario = Column(String, nullable=False)
 
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'

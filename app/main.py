@@ -11,6 +11,7 @@ from .blueprints.actuacion import actuacion_b
 from .blueprints.expediente import expediente_b
 from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
+from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from .config import Config
 
 def create_app():
