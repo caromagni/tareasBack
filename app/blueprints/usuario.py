@@ -5,7 +5,7 @@ from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
 from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario
-from ..schemas.schemas import  UsuarioIn, UsuarioOut, UsuarioInPatch, GruposUsuarioOut
+from ..schemas.schemas import  UsuarioIn, UsuarioOut, GruposUsuarioOut
 from ..common.error_handling import ValidationError
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
@@ -77,7 +77,7 @@ def post_usuario(json_data: dict):
 #################UPDATE####################
 @usuario_b.doc(description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
-@usuario_b.input(UsuarioInPatch)
+@usuario_b.input(UsuarioIn)
 @usuario_b.output(UsuarioOut)
 def patch_usuario(usuario_id: str, json_data: dict):
     try:

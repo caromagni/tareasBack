@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TareaOut, TipoTareaOut, TareaUsuarioOut
-from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, insert_tipo_tarea, usuarios_tarea
+from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioOut
+from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, insert_tipo_tarea, usuarios_tarea, insert_tarea
 from app.common.error_handling import ObjectNotFound, InvalidPayload, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
@@ -93,4 +93,24 @@ def get_usuarios_asignados(tarea_id:str):
     
     except Exception as err:
         raise ValidationError(err)
-      
+    
+@tarea_b.doc(description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.post('/tarea')
+@tarea_b.input(TareaIn)
+@tarea_b.output(TareaOut)
+def post_tarea(json_data: dict):
+    try:
+    
+        res = insert_tarea(**json_data)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Error en insert tarea",
+                    "ErrorMsg":"No se pudo insertar la tarea"
+                } 
+            return result
+        return res
+    
+    except Exception as err:
+        raise ValidationError(err)        

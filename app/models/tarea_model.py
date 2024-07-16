@@ -8,6 +8,34 @@ from flask import current_app
 from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo
 
 
+def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None):
+
+    session: scoped_session = current_app.session
+    nuevoID=uuid.uuid4()
+    print("nuevoID:",nuevoID)
+    nueva_tarea = Tarea(
+        id=nuevoID,
+        id_grupo=id_grupo,
+        prioridad=prioridad,
+        id_actuacion=id_actuacion,
+        titulo=titulo,
+        cuerpo=cuerpo,
+        id_expediente=id_expediente,
+        caratula_expediente=caratula_expediente,
+        id_tipo_tarea=id_tipo_tarea,
+        eliminable=eliminable,
+        id_usuario_asignado=id_usuario_asignado,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_eliminacion=fecha_eliminacion,
+        fecha_actualizacion=datetime.now()
+    )
+
+    session.add(nueva_tarea)
+    session.commit()
+    print("Tarea ingresada:",nueva_tarea)
+    return nueva_tarea
+
+
 def get_all_tipo_tareas():
     print("get_tipo_tareas")
     session: scoped_session = current_app.session

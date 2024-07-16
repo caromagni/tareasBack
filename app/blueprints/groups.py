@@ -17,12 +17,12 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@groups_b.patch('/grupo/<string:grupo_id>')
+@groups_b.patch('/grupo/<string:id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
 @groups_b.output(GrupoOut)
-def patch_grupo(grupo_id: str, json_data: dict):
+def patch_grupo(id: str, json_data: dict):
     try:
-        res = update_grupo(grupo_id, **json_data)
+        res = update_grupo(id, **json_data)
         if res is None:
             print("No hay datos que modificar")  
             result={

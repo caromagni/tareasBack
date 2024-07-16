@@ -8,7 +8,7 @@ from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
 from ..models.alch_model import TipoTarea, Tarea
-
+import re
 #ma = Marshmallow()
 
 ##########Funciones de validación ##############################    
@@ -21,10 +21,23 @@ def validate_fecha(f):
 
 def validate_expte(n):
     nro_causa = n[0:1] + "-" + n[1:11].lstrip('0') + "/" + n[11:13]
-    #print(nro_causa)
     return nro_causa
 
+def validate_char(f):
+    cadena = f [:2]
+    #if not f.isalpha():
+    print("Validate char:",cadena)
+    if not re.match(r'^[a-zA-Z]+$', cadena):
+        raise ValidationError("El campo debe comenzar con letras")
 
+def validate_char_num(f):
+    if f.len() < 6 or f.len() > 250:
+            raise ValidationError("El campo debe ser mayor a 6 y menor a 250 caracteres")
+
+def validate_num(f):
+    if not f.isdigit():
+        raise ValidationError("El campo debe contener sólo números")
+    
 ##########Schemas para joins ###############################   
 class SmartNested(Nested):
     def serialize(self, attr, obj, accessor=None):
@@ -36,6 +49,11 @@ class SmartNested(Nested):
 class PageIn(Schema):
     first = Integer(default=1)
     rows = Integer(default=10)
+###############Nomenclador####################
+class NomencladorOut(Schema):
+    nomenclador = String()
+    desclarga = String()
+    nroficin_corto = String()
 
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
@@ -63,13 +81,22 @@ class HerarquiaAllOut(Schema):
     child_name = String()
     path = String()
         
-
-
 class GrupoIn(Schema):
-    nombre = String(required=True)
-    descripcion= String()
+    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
+    nombre= String(required=True, validate=[
+        validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    descripcion= String(required=True, validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ])
     id_user_actualizacion = String(required=True)
-    id_padre = String()    
+    id_padre = String()  
+    codigo_nomenclador = String(validate=[
+        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
+        validate_num  
+    ])
 
 class GrupoOut(Schema):
     id = String()
@@ -77,6 +104,8 @@ class GrupoOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+
 
 class GroupCountOut(Schema):
     count = Integer()
@@ -100,18 +129,16 @@ class UsuariosGrupoOut(Schema):
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
-    nombre = String(required=True)
-    apellido = String(required=True)
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+    ])
+    apellido = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+    ])
     id_user_actualizacion = String()
     id_persona_ext = String()
     id_grupo = String()
 
-class UsuarioInPatch(Schema):
-    nombre = String()
-    apellido = String()
-    id_user_actualizacion = String()
-    id_persona_ext = String()
-    id_grupo = String()
 
 class UsuarioOut(Schema):
     id = String()
@@ -131,18 +158,61 @@ class UsuarioOut(Schema):
     
 ################TipoTareas####################
 class TipoTareaIn(Schema):
-    codigo_humano = String(required=True)
-    nombre = String(required=True)
-    descripcion = String()
+    codigo_humano = String(required=True, validate=[
+        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres")
+    ])
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
     id_user_actualizacion = String(required=True)
 
 class TipoTareaOut(Schema):
     id = String()
-    codigo_humano = String()
     nombre = String()
-    id_user_actualizacion = String()    
+    codigo_humano = String()
+    id_user_actualizacion = String() 
+      
+################Actuaciones####################
+class TipoActuacionOut(Schema):
+    id = String()
+    nombre = String()
 
-###############Tareas####################       
+class ActuacionOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    id_tipo_actuacion = String()
+    tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()  
+###############Expedientes####################
+class ExpedienteOut(Schema):    
+    id = String()
+    id_ext = String()
+    caratula = String()
+    estado = String()
+    
+
+###############Tareas####################  
+class TareaIn(Schema):
+    id_grupo = String(required=True)
+    prioridad = Integer(required=True, validate=[
+        validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
+    id_actuacion = String(required=True)
+    titulo = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    id_expediente = String()
+    caratula_expediente = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    id_tipo_tarea = String(required=True)
+    eliminable = Boolean()
+    fecha_eliminacion = DateTime()
+    id_usuario_asignado = String()   
+    id_user_actualizacion = String(required=True)
+
 class TareaOut(Schema):
     id = String()
     id_grupo = String()
@@ -157,7 +227,7 @@ class TareaOut(Schema):
     fecha_eliminacion = DateTime()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
-    #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "nombre"))  
+    
 
 class TareaUsuarioOut(Schema):
     id = String()

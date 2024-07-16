@@ -7,8 +7,11 @@ from .blueprints.groups import groups_b
 from .blueprints.usuario import usuario_b
 from .blueprints.tarea import tarea_b
 from .blueprints.herarquia import herarquia_b
+from .blueprints.actuacion import actuacion_b
+from .blueprints.expediente import expediente_b
 from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
+from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from .config import Config
 
 def create_app():
@@ -39,7 +42,8 @@ def create_app():
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
     app.register_blueprint(fix_b)
-
+    app.register_blueprint(actuacion_b)
+    app.register_blueprint(expediente_b)
     # Register custom error handlers
     register_error_handlers(app)
     

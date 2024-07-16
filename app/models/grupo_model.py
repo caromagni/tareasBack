@@ -61,36 +61,86 @@ def get_grupos_herarquia_labels():
     
     return res                                                                 
 
-def update_grupo(id='', nombre='', descripcion='', id_user_actualizacion=''):
+""" def update_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion='', id_padre=''):
     session: scoped_session = current_app.session
     grupos = session.query(Grupo).filter(Grupo.id == id).first()
    
     if grupos is None:
         return None
 
-    if descripcion != '':
-        grupos.descripcion = descripcion    
-
     update_data = {}
     if nombre != '':
         update_data[Grupo.nombre] = nombre
     if descripcion != '':
         update_data[Grupo.descripcion] = descripcion
+    if codigo_nomenclador != '':
+        update_data[Grupo.codigo_nomenclador] = codigo_nomenclador
+
 
     update_data[Grupo.id_user_actualizacion] = id_user_actualizacion
     update_data[Grupo.fecha_actualizacion] = datetime.now()          
 
-    print("Grupo encontrado:",grupos)
-   # session.query(Grupo).filter(Grupo.id == id).update({Grupo.nombre: nombre,
-   #     Grupo.id_user_actualizacion: id_user_actualizacion,
-   #     Grupo.fecha_actualizacion: datetime.now()})
-   
     session.query(Grupo).filter(Grupo.id == id).update(update_data)
+    
+    #Update de id_padre
+    if id_padre != '':   
+        herarquia = session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).first()      
+        if herarquia is not None:
+            update_data={}
+            update_data[HerarquiaGrupoGrupo.id_padre] = id_padre
+            update_data[HerarquiaGrupoGrupo.id_user_actualizacion] = id_user_actualizacion
+            update_data[HerarquiaGrupoGrupo.fecha_actualizacion] = datetime.now()
+            session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).update(update_data)
+            # session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).update(
+            #     id_padre=id_padre, 
+            #     id_user_actualizacion =id_user_actualizacion,
+            #     fecha_actualizacion=datetime.now())
+
 
     session.commit()
-    return grupos
+    return grupos """
 
-def insert_grupo(id='', nombre='', descripcion='', id_user_actualizacion='', id_padre=''):
+def update_grupo(id='', **kwargs):
+    session: scoped_session = current_app.session
+    grupo = session.query(Grupo).filter(Grupo.id == id).first()
+
+    if grupo is None:
+        return None
+
+    print("Grupo encontrado:", grupo)
+
+    if 'nombre' in kwargs:
+        grupo.nombre = kwargs['nombre']
+    if 'descripcion' in kwargs:
+        grupo.descripcion = kwargs['descripcion']
+    if 'codigo_nomenclador' in kwargs:
+        grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
+    if 'id_user_actualizacion' in kwargs:
+        grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+
+    # Siempre actualizar la fecha de actualización
+    grupo.fecha_actualizacion = datetime.now()
+    
+    if 'id_padre' in kwargs:
+        herarquia = session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).first()      
+        if herarquia is None:
+            nueva_herarquia = HerarquiaGrupoGrupo(
+                id=uuid.uuid4(),
+                id_padre=kwargs['id_padre'],
+                id_hijo=id,
+                id_user_actualizacion=kwargs['id_user_actualizacion'],
+                fecha_actualizacion=datetime.now()
+            )
+            session.add(nueva_herarquia)
+        else:
+            herarquia.id_padre = kwargs['id_padre']
+            herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
+            herarquia.fecha_actualizacion = datetime.now()
+
+    session.commit()
+    return grupo
+
+def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion='', id_padre=''):
     session: scoped_session = current_app.session
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -99,6 +149,7 @@ def insert_grupo(id='', nombre='', descripcion='', id_user_actualizacion='', id_
         id=nuevoID_grupo,
         nombre=nombre,
         descripcion=descripcion,
+        codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
