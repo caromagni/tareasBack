@@ -1,3 +1,19 @@
+from datetime import datetime
+
+from ..common.error_handling import ValidationError
+
+def controla_fecha(fecha_in=''):
+    if (fecha_in == ""):
+        return None    
+    else:
+        try:
+            fecha = datetime.strptime(fecha_in, '%d/%m/%Y').date()
+            
+            return fecha
+        except:
+            raise ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
+   
+
 def formato_expte(expte):
     l = len(expte)
     if(expte.rfind('-')<0):
