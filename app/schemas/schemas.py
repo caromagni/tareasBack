@@ -3,7 +3,7 @@ from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
 #from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
-from apiflask.fields import Integer, String, DateTime, Boolean, Nested
+from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested
 from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
@@ -16,7 +16,6 @@ import re
 def validate_fecha(f):
     #print("Mes:",int(f[3:5]))
     if int(f[3:5])>12:
-        #print("error en fechas")
         raise ValidationError("Campo fecha inválido - Ingrese dd/mm/aaaa")
 
 def validate_expte(n):
@@ -25,8 +24,6 @@ def validate_expte(n):
 
 def validate_char(f):
     cadena = f [:2]
-    #if not f.isalpha():
-    print("Validate char:",cadena)
     if not re.match(r'^[a-zA-Z]+$', cadena):
         raise ValidationError("El campo debe comenzar con letras")
 
@@ -130,15 +127,29 @@ class UsuariosGrupoOut(Schema):
 ###############Usuarios####################
 class UsuarioIn(Schema):
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
     ])
     apellido = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
     id_grupo = String()
 
+class UsuarioInPatch(Schema):
+    nombre = String(validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    apellido = String(validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String()
+    id_persona_ext = String()
+    id_grupo = String()
 
 class UsuarioOut(Schema):
     id = String()
@@ -159,7 +170,8 @@ class UsuarioOut(Schema):
 ################TipoTareas####################
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True, validate=[
-        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres")
+        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres"),
+        validate_char
     ])
     nombre = String(required=True, validate=[
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
@@ -206,12 +218,18 @@ class TareaIn(Schema):
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    caratula_expediente = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    caratula_expediente = String(validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ])
     id_tipo_tarea = String(required=True)
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
     id_usuario_asignado = String()   
     id_user_actualizacion = String(required=True)
+    #fecha_inicio = DateTime()
+    #fecha_fin = DateTime()
+    plazo = Integer(default=0)
 
 class TareaOut(Schema):
     id = String()

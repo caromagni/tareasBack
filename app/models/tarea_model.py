@@ -2,15 +2,20 @@
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime
+from ..common.functions import controla_fecha
 
 from flask import current_app
 
 from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo
 
 
-def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None):
+def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, plazo=0):
 
+    
     session: scoped_session = current_app.session
+    #fecha_inicio = controla_fecha(fecha_inicio)
+    #fecha_fin = controla_fecha(fecha_fin)   
+    #print("fecha_inicio:",fecha_inicio)
     nuevoID=uuid.uuid4()
     print("nuevoID:",nuevoID)
     nueva_tarea = Tarea(
@@ -27,7 +32,11 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
         id_usuario_asignado=id_usuario_asignado,
         id_user_actualizacion=id_user_actualizacion,
         fecha_eliminacion=fecha_eliminacion,
-        fecha_actualizacion=datetime.now()
+        fecha_actualizacion=datetime.now(),
+        #fecha_inicio=fecha_inicio,
+        #fecha_fin=fecha_fin,
+        fecha_creacion=datetime.now(),
+        plazo=plazo
     )
 
     session.add(nueva_tarea)
@@ -42,14 +51,13 @@ def get_all_tipo_tareas():
     return session.query(TipoTarea).all()
 
 
-def insert_tipo_tarea(id='', codigo_humano='', nombre='',descripcion='', id_user_actualizacion=''):
+def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=''):
     session: scoped_session = current_app.session
     nuevoID=uuid.uuid4()
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
-        descripcion=descripcion,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )

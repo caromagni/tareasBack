@@ -31,7 +31,6 @@ class TipoTarea(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
-    descripcion = Column(String)
     id_user_actualizacion = Column(UUID(as_uuid=True), nullable=False)
     fecha_actualizacion = Column(DateTime(timezone=False), nullable=False)
 

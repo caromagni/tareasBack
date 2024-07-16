@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, ForeignKey, Integer, String, Table, Time, text
+from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, Date, ForeignKey, Integer, String, Table, Time, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -232,12 +232,12 @@ class Inhabilidad(Base):
     tipo_inhabilidad = relationship('TipoInhabilidad')
 
 
+
 class Tarea(Base):
     __tablename__ = 'tarea'
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    #id_grupo = Column(UUID, nullable=False)
     id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
     prioridad = Column(Integer, nullable=False, server_default=text("0"))
     id_actuacion = Column(UUID)
@@ -251,10 +251,13 @@ class Tarea(Base):
     id_usuario_asignado = Column(UUID)
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
+    fecha_creacion = Column(DateTime)
+    fecha_inicio = Column(DateTime)
+    fecha_fin = Column(DateTime)
+    plazo = Column(Integer)
 
     tipo_tarea = relationship('TipoTarea')
     grupo = relationship('Grupo')
-
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
