@@ -301,8 +301,7 @@ def get_grupos_recursivo():
 def get_grupos_all():
     session: scoped_session = current_app.session
     query = text("""
-             
-WITH RECURSIVE GroupTree AS (
+  WITH RECURSIVE GroupTree AS (
     -- Anchor member: Start with all parentless nodes
     SELECT 
         g.id AS id_padre,
@@ -310,8 +309,9 @@ WITH RECURSIVE GroupTree AS (
         g.descripcion AS parent_name,
         g.descripcion AS child_name,
         g.id::text AS path,
-        1 AS level,
-        true AS is_parentless
+        0 AS level,  -- Set level to 0 for parentless groups
+        true AS is_parentless,
+        g.id AS group_id  -- Add the group ID column
     FROM 
         tareas.grupo g
     LEFT JOIN 
@@ -329,7 +329,8 @@ WITH RECURSIVE GroupTree AS (
         gp_hijo.descripcion AS child_name,
         gt.path || ' -> ' || hgg.id_hijo::text AS path,
         gt.level + 1 AS level,
-        false AS is_parentless
+        false AS is_parentless,
+        gp_hijo.id AS group_id  -- Add the group ID column for children
     FROM 
         tareas.herarquia_grupo_grupo hgg
     INNER JOIN 
@@ -348,11 +349,14 @@ SELECT
     gt.child_name,
     gt.path,
     gt.level,
-    gt.is_parentless
+    gt.is_parentless,
+    gt.group_id  -- Include the new group ID column in the final select
 FROM 
     GroupTree gt
 ORDER BY 
     gt.path;
+
+
 
 
 

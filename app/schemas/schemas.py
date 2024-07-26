@@ -79,6 +79,9 @@ class HerarquiaAllOut(Schema):
     id_hijo = String()
     child_name = String()
     path = String()
+    level = Integer()
+    is_parentless = Boolean()
+    group_id = String()
         
 class GrupoIn(Schema):
     #nombre = String(required=True, validate=validate.Length(min=6, max=30))
