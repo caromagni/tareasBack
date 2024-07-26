@@ -203,6 +203,18 @@ class UsuarioOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
     
+class TareaUsrOut(Schema):
+    id = String()
+    titulo = String()
+
+
+class UsuarioIdOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
+    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
+    
 ################TipoTareas####################
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True, validate=[

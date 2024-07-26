@@ -4,13 +4,61 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Usuario, UsuarioGrupo, Grupo
+from .alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
 
 
 def get_usuario_by_id(id):
     session: scoped_session = current_app.session
-    return session.query(Usuario).filter(Usuario.id == id).first()
-    #return Usuario.query.filter(Usuario.id == id).first()
+    
+    res = session.query(Usuario).filter(Usuario.id == id).first()
+    
+    results = []
+    tareas=[]
+    grupos=[]
+ 
+
+    if res is not None:
+        #Traigo los grupos del usuario
+        res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre
+                                  ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
+        
+        #Traigo los grupos hijos
+        res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo
+                                  ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
+        
+
+        if res_tareas is not None:
+            for row in res_tareas:
+                tarea = {
+                    "id": row.id,
+                    "titulo": row.titulo
+                }
+                tareas.append(tarea)
+
+        if res_grupos is not None:
+            for row in res_grupos:
+                grupo = {
+                    "id": row.id,
+                    "nombre": row.nombre
+                }
+                grupos.append(grupo)
+
+
+        ###################Formatear el resultado####################
+        result = {
+            "id": res.id,
+            "nombre": res.nombre,
+            "apellido": res.apellido,
+            "grupos": grupos,
+            "tareas": tareas
+        }
+
+        results.append(result)
+   
+    else:
+        return None
+    
+    return results 
 
 def get_all_usuarios():
     session: scoped_session = current_app.session

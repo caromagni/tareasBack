@@ -4,8 +4,8 @@ from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
-from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioOut, GruposUsuarioOut
+from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioOut, GruposUsuarioOut, UsuarioIdOut
 from ..common.error_handling import ValidationError
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
@@ -98,4 +98,21 @@ def patch_usuario(usuario_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
 
+###############GET BY ID####################
+@usuario_b.doc(description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.get('/usuario/<string:id>')
+@usuario_b.output(UsuarioIdOut(many=True))
+def get_usuario(id: str):
+        res = get_usuario_by_id(id)
+        if res is None:
+            print("Usuario no encontrado")  
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontró el grupo"
+                } 
+            return result
+
+        return res
 #################DELETE####################
