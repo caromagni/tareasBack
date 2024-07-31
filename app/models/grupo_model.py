@@ -364,4 +364,15 @@ ORDER BY
     
     res = session.execute(query).fetchall()
     return res
+
+def delete_grupo(id):
+    print("Borrando grupo con id:", id)
+    session: scoped_session = current_app.session
+    grupo = session.query(Grupo).filter(Grupo.id == id).first()
+    if grupo is None:
+        return None
+
+    grupo.eliminado = True
+    session.commit()
+    return grupo
     

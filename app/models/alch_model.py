@@ -86,7 +86,7 @@ class Grupo(Base):
     nombre = Column(String)
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
-
+    eliminado  = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
 
 class HerarquiaGrupoGrupo(Base):

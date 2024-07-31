@@ -4,7 +4,7 @@ from apiflask.fields import Integer, String, List, Nested
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
-from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id
+from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError
 from sqlalchemy.sql import text
 from typing import List
@@ -143,3 +143,30 @@ def post_grupo(json_data: dict):
     
     except Exception as err:
         raise ValidationError(err)    
+##############DELETE####################
+@groups_b.doc(description='Baja de un Grupo', summary='Baja de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.delete('/grupo/<string:id>')
+#@groups_b.output(GrupoOut)
+def del_grupo(id: str):
+    try:
+        print("id_grupo:",id)
+        res = delete_grupo(id)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontró el grupo a eliminar"
+                } 
+            return result
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id grupo": id,
+                    "grupo": res.nombre
+                } 
+        
+        return result
+    
+    except Exception as err:
+        raise ValidationError(err)

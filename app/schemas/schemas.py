@@ -107,6 +107,7 @@ class GrupoOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    eliminado = Boolean()
 
 class UsuarioGrupoIdOut(Schema):
     id = String()
