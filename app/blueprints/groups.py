@@ -41,7 +41,6 @@ def verify_token():
 @groups_b.patch('/grupo/<string:id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
 @groups_b.output(GrupoOut)
-#@groups_b.header('Authorization: Bearer', 'JWT TOKEN', required=True) 
 @auth.verify_token
 def patch_grupo(id: str, json_data: dict):
     try:
@@ -150,7 +149,7 @@ def get_grupos_fechas(query_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 
-@groups_b.doc(description='Consulta de grupos. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GrupoIdOut(many=True))
 def get_grupo(id: str):
