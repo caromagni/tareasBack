@@ -97,12 +97,18 @@ class HerarquiaAllOut(Schema):
     level = Integer()
     is_parentless = Boolean()
     group_id = String()
-        
+
+class GrupoIn1(Schema):
+    nombre = String(required=True, validate=validate.Length(min=6, max=30))
+    descripcion = String(required=True, validate=validate.Length(min=6, max=250))
+    id_user_actualizacion = String(required=True)
+    id_padre = String()  
+    codigo_nomenclador = String(validate=validate.Length(min=6, max=6))
+
 class GrupoIn(Schema):
     #nombre = String(required=True, validate=validate.Length(min=6, max=30))
-    
     nombre= String(required=True, validate=[
-        validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
     descripcion= String(required=True, validate=[
@@ -115,6 +121,24 @@ class GrupoIn(Schema):
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
     ])
+
+class GrupoPatchIn(Schema):
+    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
+    nombre= String(validate=[
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    descripcion= String(validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String(required=True)
+    id_padre = String()  
+    codigo_nomenclador = String(validate=[
+        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
+        validate_num  
+    ])
+    eliminado = Boolean()
 
 class GroupGetIn(Schema):
     first = Integer(default=1)
@@ -152,15 +176,17 @@ class HerarquiaGrupoOut(Schema):
     nombre_hijo = String()
     id_padre = String()
     nombre_padre = String()
+    eliminado = Boolean()
 
 
 class GrupoIdOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
+    eliminado = Boolean()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
-    hijos = List(Nested(HerarquiaGrupoOut, only=("id_hijo","nombre_hijo")))
-    padre = List(Nested(HerarquiaGrupoOut, only=("id_padre","nombre_padre")))
+    hijos = List(Nested(HerarquiaGrupoOut, only=("id_hijo","nombre_hijo", "eliminado")))
+    padre = List(Nested(HerarquiaGrupoOut, only=("id_padre","nombre_padre", "eliminado")))
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
   
 

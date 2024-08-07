@@ -1,9 +1,11 @@
 requests
-APIFlask==2.1.1
+Flask
+#Flask==3.0.3
+#APIFlask==2.1.1
+APIFlask
 apispec==6.6.1
 blinker==1.8.2
 click==8.1.7
-Flask==3.0.3
 Flask-Cors==4.0.1
 Flask-HTTPAuth==4.8.0
 flask-marshmallow==1.2.1
@@ -20,5 +22,7 @@ SQLAlchemy==2.0.30
 typing_extensions==4.12.1
 webargs==8.4.0
 Werkzeug==3.0.3
-#Flask-JWT-Extended==3.24.1
-#PyJWT==1.7.1
+
+Flask-JWT-Extended==3.24.1
+PyJWT==1.7.1
+

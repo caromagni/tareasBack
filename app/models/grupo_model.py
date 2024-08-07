@@ -20,11 +20,11 @@ def get_grupo_by_id(id):
 
     if res is not None:
         #Traigo el padre
-        res_padre = session.query(HerarquiaGrupoGrupo.id_padre, Grupo.nombre
+        res_padre = session.query(HerarquiaGrupoGrupo.id_padre, Grupo.nombre, Grupo.eliminado
                                   ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_padre).filter(HerarquiaGrupoGrupo.id_hijo == res.id).all()
         
         #Traigo los grupos hijos
-        res_hijos = session.query(HerarquiaGrupoGrupo.id_hijo, Grupo.nombre
+        res_hijos = session.query(HerarquiaGrupoGrupo.id_hijo, Grupo.nombre, Grupo.eliminado
                                   ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == res.id).all()
         
         res_usuario = session.query(UsuarioGrupo.id,
@@ -38,7 +38,8 @@ def get_grupo_by_id(id):
             for row in res_hijos:
                 hijo = {
                     "id_hijo": row.id_hijo,
-                    "nombre_hijo": row.nombre
+                    "nombre_hijo": row.nombre,
+                    "eliminado": row.eliminado
                 }
                 hijos.append(hijo)
 
@@ -46,7 +47,8 @@ def get_grupo_by_id(id):
             for row in res_padre:
                 padre = {
                     "id_padre": row.id_padre,
-                    "nombre_padre": row.nombre
+                    "nombre_padre": row.nombre,
+                    "eliminado": row.eliminado
                 }
                 padres.append(padre)
 
@@ -64,6 +66,7 @@ def get_grupo_by_id(id):
             "id": res.id,
             "nombre": res.nombre,
             "descripcion": res.descripcion,
+            "eliminado": res.eliminado,
             "padre": padres,
             "hijos": hijos,
             "usuarios": usuarios,
@@ -209,7 +212,7 @@ def get_grupos_herarquia_labels():
 
 def update_grupo(id='', **kwargs):
     session: scoped_session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id).first()
+    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado==False).first()
 
     if grupo is None:
         return None
@@ -380,14 +383,56 @@ ORDER BY
     res = session.execute(query).fetchall()
     return res
 
-def delete_grupo(id):
-    print("Borrando grupo con id:", id)
+
+def eliminar_grupo_recursivo(id):
+
     session: scoped_session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id).first()
-    if grupo is None:
+    hijos = session.query(Grupo.id,
+                  Grupo.eliminado,          
+                  HerarquiaGrupoGrupo.id_padre,
+                  HerarquiaGrupoGrupo.id_hijo
+                  ).join(HerarquiaGrupoGrupo, Grupo.id == HerarquiaGrupoGrupo.id_padre
+                  ).filter(Grupo.id == id, Grupo.eliminado==False).all() 
+    
+    if not hijos:
+        return
+    
+    for hijo in hijos:
+        if not hijo.eliminado:
+            eliminar_grupo_recursivo(hijo.id_hijo)
+            grupo = session.query(Grupo).filter(Grupo.id == hijo.id_hijo, Grupo.eliminado==False).first()
+            if grupo is not None:
+                grupo.eliminado = True
+                session.add(grupo)
+
+    
+
+def delete_grupo(id,todos=False):
+    print("Borrando grupo con id:", id)
+    session = current_app.session
+    try:
+        if todos:
+            # Eliminar todos los hijos
+            eliminar_grupo_recursivo(id)
+            grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+            if grupo:
+                grupo.eliminado = True
+                session.add(grupo)
+        else:    
+            # Eliminar solo el grupo
+            grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+            if grupo:
+                grupo.eliminado = True
+                session.add(grupo)
+            else:
+                print("No se encontró el grupo a eliminar")
+                return None
+
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        print(f'Error al eliminar el grupo: {e}')
         return None
 
-    grupo.eliminado = True
-    session.commit()
     return grupo
     
