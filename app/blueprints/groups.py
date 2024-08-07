@@ -3,7 +3,7 @@ from flask import request
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut
+from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut
 from datetime import datetime
 import jwt
 
@@ -38,24 +38,24 @@ def verify_token():
 
 
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@groups_b.patch('/grupo/<string:id>')
-@groups_b.input(GrupoIn(partial=True))  # -> json_data
+@groups_b.patch('/grupo/<string:id_grupo>')
+@groups_b.input(GrupoPatchIn) 
 @groups_b.output(GrupoOut)
-@auth.verify_token
-def patch_grupo(id: str, json_data: dict):
+def patch_grupo(id_grupo: str, json_data: dict):
     try:
         #token_payload = verify_token()
         #print("token_payload:",token_payload)
         #nombre_usuario=token_payload['preferred_username']
         #print("nombre_usuario:",nombre_usuario)
-        res = update_grupo(id, **json_data)
+        #print("json_data:",json_data)
+        res = update_grupo(id_grupo, **json_data)
+        print("res:",res)
         if res is None:
-            print("No hay datos que modificar")  
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
                     "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo a modificar"
+                    "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             return result
 
@@ -220,8 +220,9 @@ def post_grupo(json_data: dict):
 #@groups_b.output(GrupoOut)
 def del_grupo(id: str):
     try:
+        todos=True
         print("id_grupo:",id)
-        res = delete_grupo(id)
+        res = delete_grupo(id, todos)
         if res is None:
             result={
                     "valido":"fail",
