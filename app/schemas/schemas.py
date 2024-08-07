@@ -9,14 +9,29 @@ from apiflask.validators import Length, OneOf
 
 from ..models.alch_model import TipoTarea, Tarea
 import re
+from datetime import datetime
 #ma = Marshmallow()
 
 ##########Funciones de validación ##############################    
 
 def validate_fecha(f):
     #print("Mes:",int(f[3:5]))
-    if int(f[3:5])>12:
+    #print(int(f[0:4]))
+    patron = re.compile(r"^(0[1-9]|[12][0-9]|3[01])[-/](0[1-9]|1[0-2])[-/]\d{4}$")
+    
+    if not patron.match(f):
         raise ValidationError("Campo fecha inválido - Ingrese dd/mm/aaaa")
+
+    # Intentar convertir la fecha usando datetime.strptime con ambos formatos
+    try:
+        if '/' in f:
+            datetime.strptime(f, "%d/%m/%Y")
+        elif '-' in f:
+            datetime.strptime(f, "%d-%m-%Y")
+    except ValueError:
+        raise ValidationError("Campo fecha inválido - Ingrese dd/mm/aaaa")
+    
+    
 
 def validate_expte(n):
     nro_causa = n[0:1] + "-" + n[1:11].lstrip('0') + "/" + n[11:13]
@@ -85,6 +100,7 @@ class HerarquiaAllOut(Schema):
         
 class GrupoIn(Schema):
     #nombre = String(required=True, validate=validate.Length(min=6, max=30))
+    
     nombre= String(required=True, validate=[
         validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
         validate_char
@@ -100,6 +116,13 @@ class GrupoIn(Schema):
         validate_num  
     ])
 
+class GroupGetIn(Schema):
+    first = Integer(default=1)
+    rows = Integer(default=10)
+    nombre = String(default="")
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+
 class GrupoOut(Schema):
     id = String()
     nombre = String()
@@ -107,6 +130,7 @@ class GrupoOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    eliminado = Boolean()
 
 class UsuarioGrupoIdOut(Schema):
     id = String()

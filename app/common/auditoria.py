@@ -8,7 +8,6 @@ import json
 import uuid
 
 modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo}  # Asegúrate de agregar todos los modelos que te interesan
-print ("entra a Auditoría")
 
 
 def convert_to_serializable(value):
