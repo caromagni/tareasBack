@@ -11,7 +11,7 @@ from ..common.error_handling import ValidationError
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
 @usuario_b.doc(description='Listado de Usuarios', summary='Usuarios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.get('/usuario')
+@usuario_b.get('/usuarios')
 @usuario_b.output(UsuarioOut(many=True))
 def get_usuarios():
     try:

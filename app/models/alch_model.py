@@ -245,10 +245,10 @@ class Tarea(Base):
     id = Column(UUID, primary_key=True)
     id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
     prioridad = Column(Integer, nullable=False, server_default=text("0"))
-    id_actuacion = Column(UUID)
+    id_actuacion = Column(ForeignKey('tareas.actuacion_ext.id'))
     titulo = Column(String)
     cuerpo = Column(String)
-    id_expediente = Column(UUID)
+    id_expediente = Column(ForeignKey('tareas.expediente_ext.id'))
     caratula_expediente = Column(String)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
     eliminable = Column(Boolean)
@@ -260,9 +260,12 @@ class Tarea(Base):
     fecha_inicio = Column(DateTime)
     fecha_fin = Column(DateTime)
     plazo = Column(Integer)
+    eliminado = Column(Boolean, default=False)
 
     tipo_tarea = relationship('TipoTarea')
     grupo = relationship('Grupo')
+    expediente = relationship('ExpedienteExt')
+    actuacion = relationship('ActuacionExt')
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'

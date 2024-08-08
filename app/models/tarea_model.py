@@ -6,7 +6,7 @@ from ..common.functions import controla_fecha
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo
 
 
 def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0):
@@ -66,6 +66,75 @@ def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=
     session.commit()
     return nuevo_tipo_tarea
 
+def get_tarea_by_id(id):
+    session: scoped_session = current_app.session
+    
+    res = session.query(Tarea).filter(Tarea.id == id).first()
+    
+    results = []
+    usuarios=[]
+    grupos=[]
+ 
+
+    if res is not None:
+        #Consulto los usuarios asignados a la tarea
+        res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido
+                                  ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
+        
+        #Consulto los grupos asignados a la tarea
+        res_grupos = session.query(Grupo.id, Grupo.nombre
+                                  ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== res.id).all()
+
+        
+
+        if res_usuarios is not None:
+            for row in res_usuarios:
+                usuario = {
+                    "id": row.id,
+                    "nombre": row.nombre,
+                    "apellido": row.apellido
+                }
+                usuarios.append(usuario)
+
+        if res_grupos is not None:
+            for row in res_grupos:
+                grupo = {
+                    "id": row.id,
+                    "nombre": row.nombre
+                }
+                grupos.append(grupo)
+
+
+        ###################Formatear el resultado####################
+        result = {
+            "id": res.id,
+            "titulo": res.titulo,
+            "fecha_inicio": res.fecha_inicio,
+            "fecha_fin": res.fecha_fin,
+            "plazo": res.plazo,
+            "prioridad": res.prioridad,
+            "id_tipo_tarea": res.id_tipo_tarea,
+            "tipo_tarea": res.tipo_tarea,
+            "id_expediente": res.id_expediente,
+            "expediente": res.expediente,
+            "id_actuacion": res.id_actuacion,
+            "actuacion": res.actuacion,
+            "cuerpo": res.cuerpo,
+            "eliminable": res.eliminable,
+            "eliminado": res.eliminado,
+            "fecha_eliminacion": res.fecha_eliminacion,
+            "id_grupo": res.id_grupo,
+            "grupo": res.grupo,
+            "grupos": grupos,
+            "usuarios": usuarios
+        }
+
+        results.append(result)
+   
+    else:
+        return None
+    
+    return results 
 
 def get_all_tareas():
     session: scoped_session = current_app.session

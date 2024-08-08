@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioOut
-from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, insert_tipo_tarea, usuarios_tarea, insert_tarea
+from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioOut, TareaIdOut
+from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea
 from app.common.error_handling import ObjectNotFound, InvalidPayload, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
@@ -71,8 +71,28 @@ def get_tareas():
     except Exception as err:
         raise ValidationError(err) 
 
+@tarea_b.doc(description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.get('/tarea/<string:id_tarea>')
+@tarea_b.output(TareaIdOut(many=True))
+def get_tarea(id_tarea:str):
+    try:
+        res = get_tarea_by_id(id_tarea)    
+        if res is None or len(res) == 0:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Tarea no encontrada",
+                    "ErrorMsg":"No se encontraron datos de tareas"
+                } 
+            return result
+
+        return res
+    
+    except Exception as err:
+        raise ValidationError(err) 
+
 @tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tareas/<string:tarea_id>/usuarios_asignados')
+@tarea_b.get('/tarea_usr/<string:tarea_id>')
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    

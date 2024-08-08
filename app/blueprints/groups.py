@@ -3,7 +3,7 @@ from flask import request
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut
+from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, MsgErrorOut
 from datetime import datetime
 import jwt
 
@@ -40,7 +40,8 @@ def verify_token():
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GrupoPatchIn) 
-@groups_b.output(GrupoOut)
+#@groups_b.output(GrupoOut)
+
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
         #token_payload = verify_token()
@@ -57,9 +58,10 @@ def patch_grupo(id_grupo: str, json_data: dict):
                     "ErrorDesc":"Grupo no encontrado",
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
 
-        return res
+        return GrupoOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)
@@ -67,7 +69,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?first=1&rows=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos')
 @groups_b.input(PageIn, location='query')
-@groups_b.output(GroupCountOut)
+#@groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
         #page=1
@@ -81,7 +83,7 @@ def get_grupos(query_data: dict):
 
         res, cant=get_all_grupos(first,rows)
         
-        
+        print("res:",res)
         if res is None or len(res) == 0:
             
             result={
@@ -89,7 +91,8 @@ def get_grupos(query_data: dict):
                     "ErrorCode": 800,
                     "ErrorDesc":"Grupo no encontrado",
                     "ErrorMsg":"No se encontraron datos de grupos"
-                } 
+                }
+            res = MsgErrorOut().dump(result)
             return result
        
         data = {
@@ -106,7 +109,7 @@ def get_grupos(query_data: dict):
 @groups_b.doc(description='Consulta de grupos por fecha y descripción. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por fechas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo')
 @groups_b.input(GroupGetIn, location='query')
-@groups_b.output(GroupCountOut)
+#@groups_b.output(GroupCountOut)
 def get_grupos_fechas(query_data: dict):
     try:
         first=1
@@ -128,16 +131,18 @@ def get_grupos_fechas(query_data: dict):
 
         res, cant=get_all_grupos(first,rows, nombre, fecha_desde, fecha_hasta)
         
+        print("res:", res)
         
         if res is None or len(res) == 0:
             
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorDesc":"Grupos no encontrado",
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
        
         data = {
                 "count": cant,
@@ -151,26 +156,27 @@ def get_grupos_fechas(query_data: dict):
 
 @groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
-@groups_b.output(GrupoIdOut(many=True))
+#@groups_b.output(GrupoIdOut(many=True))
 def get_grupo(id: str):
         res = get_grupo_by_id(id)
         if res is None:
-            print("Grupo no encontrado")  
+            
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
                     "ErrorDesc":"Grupo no encontrado",
                     "ErrorMsg":"No se encontró el grupo"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
 
-        return res
+        return GrupoIdOut().dump(res)
 
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
-@groups_b.output(UsuariosGrupoOut(many=True))
+#@groups_b.output(UsuariosGrupoOut(many=True))
 def get_usrsbygrupo(id_grupo: str):
     try:
         print("id_grupo:",id_grupo)
@@ -185,9 +191,10 @@ def get_usrsbygrupo(id_grupo: str):
                     "ErrorDesc":"Grupo sin usuarios",
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
         
-        return res
+        return UsuariosGrupoOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)  
@@ -196,7 +203,7 @@ def get_usrsbygrupo(id_grupo: str):
 @groups_b.doc(description='Alta de un Grupo', summary='Alta de un nuevo Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(GrupoIn)
-@groups_b.output(GrupoOut)
+#@groups_b.output(GrupoOut)
 def post_grupo(json_data: dict):
     try:
         
@@ -208,20 +215,24 @@ def post_grupo(json_data: dict):
                     "ErrorDesc":"Error en insert grupo",
                     "ErrorMsg":"No se pudo insertar el grupo"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
             
-        return res
+        return GrupoOut().dump(res)
     
     except Exception as err:
-        raise ValidationError(err)    
+        raise ValidationError(err)  
+     
 ##############DELETE####################
 @groups_b.doc(description='Baja de un Grupo', summary='Baja de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 #@groups_b.output(GrupoOut)
 def del_grupo(id: str):
     try:
+        #eliminar tel grupo con sus hijos
         todos=True
-        print("id_grupo:",id)
+        #elimina solo el grupo
+        # todos=False
         res = delete_grupo(id, todos)
         if res is None:
             result={
@@ -230,7 +241,8 @@ def del_grupo(id: str):
                     "ErrorDesc":"Grupo no encontrado",
                     "ErrorMsg":"No se encontró el grupo a eliminar"
                 } 
-            return result
+            res = MsgErrorOut().dump(result)
+            return res
         else:
             result={
                     "Msg":"Registro eliminado",

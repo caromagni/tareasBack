@@ -98,15 +98,7 @@ class HerarquiaAllOut(Schema):
     is_parentless = Boolean()
     group_id = String()
 
-class GrupoIn1(Schema):
-    nombre = String(required=True, validate=validate.Length(min=6, max=30))
-    descripcion = String(required=True, validate=validate.Length(min=6, max=250))
-    id_user_actualizacion = String(required=True)
-    id_padre = String()  
-    codigo_nomenclador = String(validate=validate.Length(min=6, max=6))
-
 class GrupoIn(Schema):
-    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
     nombre= String(required=True, validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -123,7 +115,6 @@ class GrupoIn(Schema):
     ])
 
 class GrupoPatchIn(Schema):
-    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -194,6 +185,11 @@ class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GrupoOut, many=True)
 
+class MsgErrorOut(Schema):
+    valido = String()
+    ErrorCode = Integer()
+    ErrorDesc = String()
+    ErrorMsg = String()
 
 class GruposUsuarioOut(Schema):
     id_usuario = String()
@@ -355,6 +351,29 @@ class TareaUsuarioOut(Schema):
     id_grupo = String()
     grupo = String()
         
+class TareaIdOut(Schema):
+    id = String()
+    titulo = String()
+    cuerpo = String()
+    id_grupo = String()
+    grupo = Nested(GrupoOut, only=("id", "nombre"))
+    prioridad = Integer()
+    id_actuacion = String()
+    id_expediente = String()
+    #caratula_expediente = String()
+    id_tipo_tarea = String()
+    eliminable = Boolean()
+    eliminado = Boolean()
+    fecha_eliminacion = DateTime()
+    fecha_inicio = DateTime()
+    fecha_fin = DateTime()
+    plazo = Integer()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
+    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
+    usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))
+
 
 ###############Marshmallow####################
 class TipoTareaSchema(Schema):

@@ -1,7 +1,6 @@
 
 import os
-from app.common.kaycloak import get_public_key
-#add default string values if variable is not exported
+from app.common.keycloak import get_public_key
 
 os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')
