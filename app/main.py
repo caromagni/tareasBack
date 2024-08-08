@@ -59,7 +59,7 @@ def create_app():
     # Register custom error handlers
     register_error_handlers(app)
 
-    
+
 
     return app
 

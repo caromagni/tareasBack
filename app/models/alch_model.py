@@ -176,6 +176,8 @@ class TipoTarea(Base):
     id = Column(UUID, primary_key=True)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
+    # descripcion = Column(String, nullabe=False)
+    # habilitado = Column(Boolean)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
 

@@ -45,4 +45,4 @@
 . export_creds.sh
 
 #start app
-flask --app main.py run --host 0.0.0.0 --reload
+flask --app main.py run --host 0.0.0.0 --reload --port 80
