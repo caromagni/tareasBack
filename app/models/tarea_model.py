@@ -45,11 +45,13 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
     return nueva_tarea
 
 
-def get_all_tipo_tareas():
+def get_all_tipo_tareas(first=1, rows=10):
     print("get_tipo_tareas")
     session: scoped_session = current_app.session
-    return session.query(TipoTarea).all()
-
+    res = session.query(TipoTarea).offset((first-1)*rows).limit(rows).all()
+    todo = session.query(TipoTarea).all()
+    total= len(todo)
+    return res, total
 
 def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=''):
     session: scoped_session = current_app.session
@@ -78,6 +80,7 @@ def get_tarea_by_id(id):
 
     if res is not None:
         #Consulto los usuarios asignados a la tarea
+        print("Tarea encontrada:", res)
         res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
         
@@ -132,15 +135,17 @@ def get_tarea_by_id(id):
         results.append(result)
    
     else:
+        print("Tarea no encontrada")
         return None
     
     return results 
 
-def get_all_tareas():
+def get_all_tareas(first=1, rows=10):
     session: scoped_session = current_app.session
-    tareas = session.query(Tarea).all()
-    print("Tareas:", tareas)
-    return tareas
+    tareas = session.query(Tarea).offset((first-1)*rows).limit(rows).all()
+    todo = session.query(Tarea).all()
+    total= len(todo)
+    return tareas, total
 
 def usuarios_tarea(tarea_id=""):
     session: scoped_session = current_app.session
@@ -160,5 +165,23 @@ def usuarios_tarea(tarea_id=""):
                         .all()
     
     return usuarios
+
+def delete_tarea(id_tarea):
+    session: scoped_session = current_app.session
+    tarea = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
+    if tarea is not None:
+        if tarea.eliminable==False:
+              print("Tarea no eliminable")
+              return None
+        
+        tarea.eliminado=True
+        tarea.fecha_eliminacion=datetime.now()
+        tarea.fecha_actualizacion=datetime.now()
+        session.commit()
+        return tarea
+    
+    else:
+        print("Tarea no encontrada")
+        return None
 
 

@@ -120,12 +120,18 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
         ).offset((first-1)*rows).limit(rows).all()
-        total= len(result)
+        todo= session.query(Grupo).filter(
+            Grupo.nombre.ilike(f"%{nombre}%"),
+            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
+        ).all()
+        total= len(todo)
     else:
         result= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
         ).offset((first-1)*rows).limit(rows).all()
-        total= len(result)
+        todo= session.query(Grupo).filter(
+            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).all()
+        total= len(todo)
         
     #result= session.query(Grupo).offset((first-1)*rows).limit(rows).all()
     return result, total

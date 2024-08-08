@@ -336,6 +336,7 @@ class TareaOut(Schema):
     caratula_expediente = String()
     id_tipo_tarea = String()
     eliminable = Boolean()
+    eliminado = Boolean()
     fecha_eliminacion = DateTime()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
