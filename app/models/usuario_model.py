@@ -24,7 +24,7 @@ def get_usuario_by_id(id):
         
         #Traigo los grupos hijos
         res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo
-                                  ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
+                                  ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
         
 
         if res_tareas is not None:

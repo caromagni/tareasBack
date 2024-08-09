@@ -13,13 +13,38 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
 
     
     session: scoped_session = current_app.session
+
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
     print("fecha_inicio:",fecha_inicio)
-    nuevoID=uuid.uuid4()
-    print("nuevoID:",nuevoID)
+    tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
+    if tipo_tarea is None:
+       msg = "Tipo de tarea no encontrado"
+       return None, msg
+
+    nuevoID_tarea=uuid.uuid4()
+
+    if id_grupo is not None:
+        grupo = session.query(Grupo).filter(Grupo.id == id_grupo).first()
+        if grupo is None:
+            msg = "Grupo no encontrado"
+            id_grupo=None
+        else:    
+            nuevoID_tareaxgrupo=uuid.uuid4()
+            tareaxgrupo= TareaXGrupo(
+                id=nuevoID_tareaxgrupo,
+                id_grupo=id_grupo,
+                id_tarea=nuevoID_tarea,
+                id_user_actualizacion=id_user_actualizacion,
+                fecha_actualizacion=datetime.now()
+            )    
+
+
+
+    
+    print("nuevoID:",nuevoID_tarea)
     nueva_tarea = Tarea(
-        id=nuevoID,
+        id=nuevoID_tarea,
         id_grupo=id_grupo,
         prioridad=prioridad,
         id_actuacion=id_actuacion,
@@ -39,17 +64,23 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
         plazo=plazo
     )
 
+    
+    
+
+
     session.add(nueva_tarea)
     session.commit()
     print("Tarea ingresada:",nueva_tarea)
     return nueva_tarea
 
 
-def get_all_tipo_tareas():
+def get_all_tipo_tareas(first=1, rows=10):
     print("get_tipo_tareas")
     session: scoped_session = current_app.session
-    return session.query(TipoTarea).all()
-
+    res = session.query(TipoTarea).offset((first-1)*rows).limit(rows).all()
+    todo = session.query(TipoTarea).all()
+    total= len(todo)
+    return res, total
 
 def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=''):
     session: scoped_session = current_app.session
@@ -66,6 +97,50 @@ def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=
     session.commit()
     return nuevo_tipo_tarea
 
+def delete_tipo_tarea(id):
+    session: scoped_session = current_app.session
+    tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id, TipoTarea.eliminado==False).first()
+    if tipo_tarea is not None:
+        tipo_tarea.eliminado=True
+        tipo_tarea.fecha_actualizacion=datetime.now()
+        session.commit()
+        return tipo_tarea
+    else:
+        print("Tipo de tarea no encontrado")
+        return None
+    
+
+##########################TAREAS #############################################
+def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', notas=""):
+    msg=''
+    session: scoped_session = current_app.session
+    tareas = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
+    if tareas is None:
+        print("Tarea no encontrada")
+        msg = "Tarea no encontrada"
+        asigna_usuario= None
+        return asigna_usuario, msg
+    
+    tarea_asignada = session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea==id_tarea, TareaAsignadaUsuario.id_usuario==id_usuario).first()
+    
+    if tarea_asignada is not None:
+        print("Usuario ya asignado a la tarea")
+        msg = "Usuario ya asignado a la tarea"
+        asigna_usuario= None
+    
+    nuevoID=uuid.uuid4()
+    asigna_usuario = TareaAsignadaUsuario(
+        id=nuevoID,
+        id_tarea=id_tarea,
+        id_usuario=id_usuario,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_actualizacion=datetime.now()
+    )
+
+    session.add(asigna_usuario)
+    session.commit()
+    return asigna_usuario, msg
+
 def get_tarea_by_id(id):
     session: scoped_session = current_app.session
     
@@ -78,6 +153,7 @@ def get_tarea_by_id(id):
 
     if res is not None:
         #Consulto los usuarios asignados a la tarea
+        print("Tarea encontrada:", res)
         res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
         
@@ -132,15 +208,17 @@ def get_tarea_by_id(id):
         results.append(result)
    
     else:
+        print("Tarea no encontrada")
         return None
     
     return results 
 
-def get_all_tareas():
+def get_all_tareas(first=1, rows=10):
     session: scoped_session = current_app.session
-    tareas = session.query(Tarea).all()
-    print("Tareas:", tareas)
-    return tareas
+    tareas = session.query(Tarea).offset((first-1)*rows).limit(rows).all()
+    todo = session.query(Tarea).all()
+    total= len(todo)
+    return tareas, total
 
 def usuarios_tarea(tarea_id=""):
     session: scoped_session = current_app.session
@@ -160,5 +238,25 @@ def usuarios_tarea(tarea_id=""):
                         .all()
     
     return usuarios
+
+def delete_tarea(id_tarea):
+    session: scoped_session = current_app.session
+    tarea = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
+    if tarea is not None:
+        if tarea.eliminable==False:
+              print("Tarea no eliminable")
+              return None
+        
+        tarea.eliminado=True
+        tarea.fecha_eliminacion=datetime.now()
+        tarea.fecha_actualizacion=datetime.now()
+        session.commit()
+        return tarea
+    
+    else:
+        print("Tarea no encontrada")
+        return None
+    
+
 
 

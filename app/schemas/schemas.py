@@ -249,6 +249,15 @@ class UsuarioOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
     
+class TareaUsuarioIn(Schema):
+    id_tarea = String(required=True)
+    id_usuario = String(required=True)
+    id_usuario_actualizacion = String(required=True)
+    notas = String(validate=[
+        validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
+        validate_char
+    ])
+
 class TareaUsrOut(Schema):
     id = String()
     titulo = String()
@@ -277,7 +286,8 @@ class TipoTareaOut(Schema):
     id = String()
     nombre = String()
     codigo_humano = String()
-    id_user_actualizacion = String() 
+    id_user_actualizacion = String()
+    eliminado = Boolean()
       
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
@@ -302,10 +312,10 @@ class ExpedienteOut(Schema):
 
 ###############Tareas####################  
 class TareaIn(Schema):
-    id_grupo = String(required=True)
+    id_grupo = String()
     prioridad = Integer(required=True, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
-    id_actuacion = String(required=True)
+    id_actuacion = String()
     titulo = String(required=True, validate=[
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -336,6 +346,7 @@ class TareaOut(Schema):
     caratula_expediente = String()
     id_tipo_tarea = String()
     eliminable = Boolean()
+    eliminado = Boolean()
     fecha_eliminacion = DateTime()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
