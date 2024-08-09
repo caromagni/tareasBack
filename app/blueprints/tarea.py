@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn
-from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea
+from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn
+from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
 from app.common.error_handling import ObjectNotFound, InvalidPayload, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
@@ -8,7 +8,7 @@ from flask import request
 
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
-
+####################TIPO DE TAREA######################
 @tarea_b.doc(description='Listado de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tareas')
 #@tarea_b.output(TipoTareaOut(many=True))
@@ -43,6 +43,7 @@ def get_tipoTareas(query_data: dict):
     
     except Exception as err:
         raise ValidationError(err)    
+ 
 
 @tarea_b.doc(description='Alta de un nuevo Tipos de Tareas', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/tipo_tarea')
@@ -60,12 +61,41 @@ def post_tipo_tarea(json_data: dict):
                 } 
             res = MsgErrorOut().dump(result)
             return res
+        
+        
         return TipoTareaOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)  
 
 
+@tarea_b.doc(description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.delete('/tipo_tarea/<string:id>')
+def del_tipo_tarea(id: str):
+    try:
+        res = delete_tipo_tarea(id)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Tipo de tarea no encontrado",
+                    "ErrorMsg":"No se encontró el tipo de tarea"
+                } 
+            res = MsgErrorOut().dump(result)
+            return res
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id tipo de tarea": id,
+                    "Tipo de tarea": res.nombre
+                } 
+        
+        return result
+    
+    except Exception as err:
+        raise ValidationError(err)
+    
+################################TAREAS################################
 @tarea_b.doc(description='Listado de Tareas', summary='Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tareas')
 @tarea_b.input(PageIn, location='query')
@@ -141,7 +171,40 @@ def get_usuarios_asignados(tarea_id:str):
     
     except Exception as err:
         raise ValidationError(err)
+
+@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.post('/tarea_usr')
+@tarea_b.input(TareaUsuarioIn)
+#@tarea_b.output(TareaOut)
+def post_usuario_tarea(json_data: dict):
+    try:
     
+        res, msg = insert_usuario_tarea(**json_data)
+        if res is None:
+            print("Tarea ya asignada")
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Error en insert usuario_tarea",
+                    "ErrorMsg":msg
+                } 
+            res = MsgErrorOut().dump(result)
+            return res
+
+        result={
+                    "valido":"true",
+                    "id_usuario": res.id_usuario,
+                    "id_tarea": res.id_tarea,
+                    "Msg":"Tarea asignada"
+                } 
+        
+        return result
+    
+    except Exception as err:
+        raise ValidationError(err)    
+
+
+
 @tarea_b.doc(description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/tarea')
 @tarea_b.input(TareaIn)

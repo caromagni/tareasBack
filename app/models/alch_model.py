@@ -177,7 +177,7 @@ class TipoTarea(Base):
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
     # descripcion = Column(String, nullabe=False)
-    # habilitado = Column(Boolean)
+    eliminado = Column(Boolean, nullable=False, default=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
 
@@ -346,8 +346,8 @@ class TareaAsignadaUsuario(Base):
     id = Column(UUID, primary_key=True)
     id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-    fecha_asignacion = Column(DateTime, nullable=False)
-    id_usuario_asignador = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    id_user_actualizacion= Column(UUID, nullable=False)
     notas = Column(String)
 
     tarea = relationship('Tarea')
