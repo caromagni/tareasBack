@@ -8,6 +8,11 @@ from flask import request
 
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
+###############
+@tarea_b.before_request
+def before_request():
+    
+    print("Antes de la petición")
 ####################TIPO DE TAREA######################
 @tarea_b.doc(description='Listado de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tareas')
@@ -68,9 +73,9 @@ def post_tipo_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 
-
 @tarea_b.doc(description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/tipo_tarea/<string:id>')
+#@tarea_b.output(MsgErrorOut)
 def del_tipo_tarea(id: str):
     try:
         res = delete_tipo_tarea(id)
