@@ -3,12 +3,13 @@ from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
 from sqlalchemy.inspection import inspect
 from datetime import datetime
-from ..models.alch_model import Auditoria, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
+from ..models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
 import json
 import uuid
+from ..common.functions import get_user_ip
 
-modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo}  # Asegúrate de agregar todos los modelos que te interesan
-
+### modelos para los cuales se generará la auditoría ###
+modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo} 
 
 def convert_to_serializable(value):
     if isinstance(value, datetime):
@@ -29,16 +30,27 @@ def get_serializable_dict(instance):
 @event.listens_for(scoped_session, 'after_flush')
 def after_flush(session, flush_context):
     print("entra a after_flush")
+    ip = get_user_ip()
+    
+    def get_nombre_tabla(modelo):
+        match modelo:
+            case 'tarea':
+                return 'Auditoria_Tarea'
+            case 'grupo':
+                return 'Auditoria_Grupo'
+            case _:
+                return 'Auditoria'
     
     def get_user_actualizacion(instance):
         return str(instance.id_user_actualizacion) if hasattr(instance, 'id_user_actualizacion') else 'unknown'
     
-    for instance in session.new:
-        if isinstance(instance, tuple(modelos)):  # Reemplaza Tarea con el nombre de tu modelo
-            print("diccionario:",instance.__dict__)
-            nuevoID=uuid.uuid4()
 
-            auditoria = Auditoria(
+    for instance in session.new:
+        if isinstance(instance, tuple(modelos)):  
+            nuevoID=uuid.uuid4()
+            tabla = get_nombre_tabla(instance.__tablename__)
+            tabla_auditoria = globals().get(f'{tabla}')
+            auditoria = tabla_auditoria(
                 id = nuevoID,
                 nombre_tabla=instance.__tablename__,
                 id_registro=instance.id,
@@ -46,21 +58,23 @@ def after_flush(session, flush_context):
                 datos_nuevos=get_serializable_dict(instance),
                 fecha_actualizacion=datetime.now(),
                 usuario_actualizacion=get_user_actualizacion(instance),
-                ip_usuario='192.168.68.201'  # obtener la IP real del usuario
+                ip_usuario=ip
+               # ip_usuario='192.168.68.201'  # obtener la IP real del usuario
+                
             )
             session.add(auditoria)
             
     for instance in session.dirty: # Update
         if isinstance(instance, tuple(modelos)):  
+            print("Nombre de la tabla:", instance.__tablename__)
             state = inspect(instance)
             
             changes = {attr.key: (convert_to_serializable(attr.history.deleted[0]), convert_to_serializable(attr.history.added[0]))
                        for attr in state.attrs if attr.history.has_changes()}
             
-            print('changes:',changes)
-            
+            tabla_auditoria = globals().get(f'{get_nombre_tabla(instance.__tablename__)}')
             nuevoID=uuid.uuid4()
-            auditoria = Auditoria(
+            auditoria = tabla_auditoria(
                 id = nuevoID,
                 nombre_tabla=instance.__tablename__,
                 id_registro=instance.id,
@@ -69,14 +83,15 @@ def after_flush(session, flush_context):
                 datos_nuevos=get_serializable_dict(instance),
                 fecha_actualizacion=datetime.now(),
                 usuario_actualizacion=get_user_actualizacion(instance),
-                ip_usuario='192.168.68.201'  # obtener la IP real del usuario
+                ip_usuario=ip
             )
             session.add(auditoria)
 
     for instance in session.deleted:
         if isinstance(instance, tuple(modelos)):  
             nuevoID=uuid.uuid4()
-            auditoria = Auditoria(
+            tabla_auditoria = globals().get(f'{get_nombre_tabla(instance.__tablename__)}')
+            auditoria = tabla_auditoria(
                 id = nuevoID,
                 nombre_tabla=instance.__tablename__,
                 id_registro=instance.id,
@@ -84,6 +99,6 @@ def after_flush(session, flush_context):
                 datos_anteriores=get_serializable_dict(instance),
                 fecha_actualizacion=datetime.now(),
                 usuario_actualizacion=instance.id_user_actualizacion,
-                ip_usuario='192.168.68.201'  # Aquí debes obtener la IP real del usuario
+                ip_usuario=ip
             )
             session.add(auditoria)

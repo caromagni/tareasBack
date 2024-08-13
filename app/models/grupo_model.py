@@ -12,7 +12,8 @@ from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Nomen
 def get_grupo_by_id(id):
 
     session: scoped_session = current_app.session
-    res = session.query(Grupo).filter(Grupo.id == id).first()
+    res = session.query(Grupo).filter(Grupo.id == str(id)).first()
+    print("Grupo encontrado:", res.nombre)
     results=[]
     hijos=[]
     padres=[]
@@ -62,7 +63,7 @@ def get_grupo_by_id(id):
                 usuarios.append(usuario)
 
         ###################Formatear el resultado####################
-        result = {
+        results = {
             "id": res.id,
             "nombre": res.nombre,
             "descripcion": res.descripcion,
@@ -73,7 +74,7 @@ def get_grupo_by_id(id):
             "nomenclador": res.nomenclador
         }
 
-        results.append(result)
+        #results.append(result)
    
     
     return results    
@@ -267,7 +268,8 @@ def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_use
         descripcion=descripcion,
         codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
-        fecha_actualizacion=datetime.now()
+        fecha_actualizacion=datetime.now(),
+        fecha_creacion=datetime.now()
     )
     session.add(nuevo_grupo)
 

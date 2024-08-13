@@ -22,6 +22,15 @@ class GetTokenError(AppErrorBaseClass):
 class InvalidPayload(AppErrorBaseClass):
     pass
 
+class DataNotFound(AppErrorBaseClass):
+    pass
+
+class DataError(AppErrorBaseClass):
+    def __init__(self,code,desc):
+        self.code = code
+        self.desc = desc
+        
+
 def register_error_handlers(app):
     @app.errorhandler(Exception)
     def handle_exception_error(e):
@@ -53,7 +62,8 @@ def register_error_handlers(app):
 
     @app.errorhandler(ObjectNotFound)
     def handle_object_not_found_error(e):
-        print(e)
+        print("Error ObjectNotFound:", e)
+        #return jsonify(error='ObjectNotFound', code=e), 200
         return jsonify({'msg': str(e)}), 200
     
     @app.errorhandler(ValidationError)
@@ -73,3 +83,12 @@ def register_error_handlers(app):
         print(e)
         return jsonify(error='InvalidPayload',
                         error_description=str(e)), 400
+    
+    @app.errorhandler(DataError)
+    def handle_obs_error(e):
+        print("DataError")
+        return jsonify(error="DataError",error_description=e, code = e.code)
+    
+    @app.errorhandler(DataNotFound)
+    def handle_obs_error(e):
+        return jsonify(error="DataNotFound",error_description=str(e), code = 800), 200

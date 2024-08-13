@@ -144,6 +144,7 @@ class GrupoOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+    fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     eliminado = Boolean()
 
@@ -175,6 +176,7 @@ class GrupoIdOut(Schema):
     nombre = String()
     descripcion = String()
     eliminado = Boolean()
+    fecha_creacion = DateTime()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     hijos = List(Nested(HerarquiaGrupoOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGrupoOut, only=("id_padre","nombre_padre", "eliminado")))

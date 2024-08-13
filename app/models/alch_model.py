@@ -21,6 +21,35 @@ class Auditoria(Base):
     usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)
 
+class Auditoria_Grupo(Base):
+    __tablename__ = 'auditoria_grupo'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)
+
+class Auditoria_Tarea(Base):
+    __tablename__ = 'auditoria_tarea'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)
+
+
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'
     __table_args__ = {'schema': 'tareas'}
@@ -87,6 +116,8 @@ class Grupo(Base):
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)
+    fecha_creacion = Column(DateTime)
+    fecha_hasta = Column(DateTime)
     nomenclador = relationship('Nomenclador')
 
 class HerarquiaGrupoGrupo(Base):
