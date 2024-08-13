@@ -48,14 +48,12 @@ def verify_token():
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        print(id_grupo)
-        token_payload = verify_token()
+        #token_payload = verify_token()
         #print("token_payload:",token_payload)
-        nombre_usuario=token_payload['preferred_username']
-        print("nombre_usuario:",nombre_usuario)
+        #nombre_usuario=token_payload['preferred_username']
+        #print("nombre_usuario:",nombre_usuario)
         #print("json_data:",json_data)
         res = update_grupo(id_grupo, **json_data)
-        print("res:",res)
         if res is None:
             result={
                     "valido":"fail",
@@ -77,9 +75,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
-        #page=1
         first=1
-        #page_size=10
         rows=10
         if(request.args.get('first') is not None):
             first=int(request.args.get('first'))
@@ -137,7 +133,7 @@ def get_grupos_fechas(query_data: dict):
 
         res, cant=get_all_grupos(first,rows, nombre, fecha_desde, fecha_hasta)
         
-        print("res:", res)
+        #print("res:", res)
         
         if res is None or len(res) == 0:
             
