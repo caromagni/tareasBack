@@ -77,7 +77,7 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
 def get_all_tipo_tareas(first=1, rows=10):
     print("get_tipo_tareas")
     session: scoped_session = current_app.session
-    res = session.query(TipoTarea).offset((first-1)*rows).limit(rows).all()
+    res = session.query(TipoTarea).offset((first-1)).limit(rows).all()
     todo = session.query(TipoTarea).all()
     total= len(todo)
     return res, total
@@ -215,7 +215,7 @@ def get_tarea_by_id(id):
 
 def get_all_tareas(first=1, rows=10):
     session: scoped_session = current_app.session
-    tareas = session.query(Tarea).offset((first-1)*rows).limit(rows).all()
+    tareas = session.query(Tarea).offset((first-1)).limit(rows).all()
     todo = session.query(Tarea).all()
     total= len(todo)
     return tareas, total

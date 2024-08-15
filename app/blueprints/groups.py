@@ -1,35 +1,53 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
-from flask import request
+from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
 from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, MsgErrorOut
 from datetime import datetime
 import jwt
+from ..common.keycloak import get_public_key
+import os
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
+"""
+AUTH_URL=os.getenv('AUTH_URL')
+REALM=os.getenv('REALM')
 
-#@groups_b.before_request
-#def before_request():
+@groups_b.before_request
+def before_request():
+    get_public_key(AUTH_URL,REALM)
 #    print("Antes de la petición")
-
+"""
 #@jwt_required
+
+
+
 @auth.verify_token
 def verify_token():
     token_encabezado = request.headers.get('Authorization')
+    jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
+    jwt_alg=current_app.config['JWT_ALGORITHM']
+    jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
 
     if token_encabezado:
         try:
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
-            payload = jwt.decode(token, verify=False)
+          
+            payload = jwt.decode(jwt=token, key=jwt_pk, algorithms=jwt_alg, audience=jwt_aud)
+            
             return payload
             
         except jwt.ExpiredSignatureError:
             raise ValidationError( 'Token expirado. Inicie sesión nuevamente.')
-        except jwt.InvalidTokenError:
+        except jwt.InvalidTokenError as e:
+            print("Error:",e)
             raise ValidationError( 'Token inválido. Inicie sesión nuevamente.')
+        except Exception as e:
+            print("Error:",e)
+            raise ValidationError( 'Error al decodificar el token. Inicie sesión nuevamente.')
     else:
         raise ValidationError( 'No se encontró el token de autorización.' )
  
@@ -44,17 +62,17 @@ def verify_token():
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GrupoPatchIn) 
-#@groups_b.output(GrupoOut)
+@groups_b.output(GrupoOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        #token_payload = verify_token()
-        #print("token_payload:",token_payload)
-        #nombre_usuario=token_payload['preferred_username']
-        #print("nombre_usuario:",nombre_usuario)
+        token_payload = verify_token()
+        print("token_payload:",token_payload)
+        nombre_usuario=token_payload['preferred_username']
+        print("nombre_usuario:",nombre_usuario)
         #print("json_data:",json_data)
         res = update_grupo(id_grupo, **json_data)
-        if res is None:
+        """ if res is None:
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -62,9 +80,10 @@ def patch_grupo(id_grupo: str, json_data: dict):
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             res = MsgErrorOut().dump(result)
-            return res
+            return res """
 
-        return GrupoOut().dump(res)
+        #return GrupoOut().dump(res)
+        return res
     
     except Exception as err:
         raise ValidationError(err)
@@ -84,16 +103,7 @@ def get_grupos(query_data: dict):
 
         res, cant=get_all_grupos(first,rows)
         
-        if res is None or len(res) == 0:
-           
-            errorCode= 800
-            errorMessage= "Datos no encontrados"
-       
-            #res = MsgErrorOut().dump(result)
-            #return result
-            raise ValidationError("Datos no encontrados")
-            #raise DataError(errorCode,errorMessage)
-       
+        
         data = {
                 "count": cant,
                 "data": GrupoOut().dump(res, many=True)
@@ -102,9 +112,6 @@ def get_grupos(query_data: dict):
         return data
     
     except Exception as err:
-        print("code:",errorCode)
-        if errorCode == 800:
-            raise DataNotFound(err)
         raise ValidationError(err)  
     
 #############Consulta por varios campos################    
@@ -135,16 +142,16 @@ def get_grupos_fechas(query_data: dict):
         
         #print("res:", res)
         
-        if res is None or len(res) == 0:
+        # if res is None or len(res) == 0:
             
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupos no encontrado",
-                    "ErrorMsg":"No se encontraron datos de grupos"
-                } 
-            res = MsgErrorOut().dump(result)
-            return res
+        #     result={
+        #             "valido":"fail",
+        #             "ErrorCode": 800,
+        #             "ErrorDesc":"Grupos no encontrado",
+        #             "ErrorMsg":"No se encontraron datos de grupos"
+        #         } 
+        #     res = MsgErrorOut().dump(result)
+        #     return res
        
         data = {
                 "count": cant,
@@ -158,35 +165,36 @@ def get_grupos_fechas(query_data: dict):
 
 @groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
-#@groups_b.output(GrupoIdOut(many=True))
+@groups_b.output(GrupoIdOut())
 def get_grupo(id: str):
         print("id:",id)
         res = get_grupo_by_id(id)
-        if res is None:
+        # if res is None:
             
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo"
-                } 
-            res = MsgErrorOut().dump(result)
-            return res
-
-        return GrupoIdOut().dump(res)
+        #     result={
+        #             "valido":"fail",
+        #             "ErrorCode": 800,
+        #             "ErrorDesc":"Grupo no encontrado",
+        #             "ErrorMsg":"No se encontró el grupo"
+        #         } 
+        #     res = MsgErrorOut().dump(result)
+        #     return res
+        print("res:",res)
+        
+        return res
 
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
-#@groups_b.output(UsuariosGrupoOut(many=True))
+@groups_b.output(UsuariosGrupoOut(many=True))
 def get_usrsbygrupo(id_grupo: str):
     try:
         print("id_grupo:",id_grupo)
         res = get_usuarios_by_grupo(id_grupo)
         
         
-        if res is None == 0:
+        """ if res is None == 0:
             
             result={
                     "valido":"fail",
@@ -195,9 +203,10 @@ def get_usrsbygrupo(id_grupo: str):
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             res = MsgErrorOut().dump(result)
-            return res
+            return res """
         
-        return UsuariosGrupoOut().dump(res)
+        #return UsuariosGrupoOut().dump(res)
+        return res
     
     except Exception as err:
         raise ValidationError(err)  

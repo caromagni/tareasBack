@@ -36,6 +36,7 @@ def get_grupo_by_id(id):
                                     Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id).all()
         
         if res_hijos is not None:
+            print("tiene hijos")
             for row in res_hijos:
                 hijo = {
                     "id_hijo": row.id_hijo,
@@ -45,6 +46,7 @@ def get_grupo_by_id(id):
                 hijos.append(hijo)
 
         if res_padre is not None:
+            print("tiene padre")
             for row in res_padre:
                 padre = {
                     "id_padre": row.id_padre,
@@ -54,6 +56,7 @@ def get_grupo_by_id(id):
                 padres.append(padre)
 
         if res_usuario is not None:
+            print("tiene usuarios")
             for row in res_usuario:
                 usuario = {
                     "id": row.id,
@@ -73,40 +76,13 @@ def get_grupo_by_id(id):
             "usuarios": usuarios,
             "nomenclador": res.nomenclador
         }
-
+        print("Resultado:", results)
         #results.append(result)
    
     
     return results    
 
-    """ res = session.query(
-        Grupo.id.label("id"),
-        Grupo.nombre.label("nombre"),
-        Grupo.descripcion.label("descripcion"),
-        Grupo.nomenclador.label("nomenclador"),
-        Grupo.codigo_nomenclador.label("codigo_nomenclador"),
-        HP.id_hijo.label("id_hijo"),
-        HH.id_padre.label("id_padre"),
-        HH.id_hijo.label("hh_id_hijo"),
-        GrupoPadre.nombre.label("nombre_padre"),
-        GrupoHijo.nombre.label("nombre_hijo"),
-        Nomenclador.nomenclador.label("nomenclador"),
-        Nomenclador.desclarga.label("desclarga"),
-        UsuarioGrupo.id_usuario.label("id_usuario"),
-        Usuario.nombre.label("nombre_usuario"),
-        Usuario.apellido.label("apellido_usuario")
-    ).outerjoin(
-        HP, Grupo.id == HP.id_padre
-    ).outerjoin(
-        HH, Grupo.id == HH.id_hijo
-    ).outerjoin(
-        GrupoPadre, GrupoPadre.id == HH.id_padre
-    ).outerjoin(
-        GrupoHijo, GrupoHijo.id == HH.id_hijo
-    ).outerjoin(Nomenclador, Nomenclador.nomenclador == Grupo.codigo_nomenclador  
-    ).outerjoin(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-    ).outerjoin(Usuario, Usuario.id == UsuarioGrupo.id_usuario                        
-    ).filter(Grupo.id == id).all() """
+    
 
     
 
@@ -120,7 +96,7 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
         result = session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).offset((first-1)*rows).limit(rows).all()
+        ).offset(first-1).limit(rows).all()
         todo= session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
@@ -129,7 +105,7 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
     else:
         result= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).offset((first-1)*rows).limit(rows).all()
+        ).offset((first-1)).limit(rows).all()
         todo= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).all()
         total= len(todo)
