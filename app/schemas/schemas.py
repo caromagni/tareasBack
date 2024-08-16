@@ -59,8 +59,8 @@ class SmartNested(Nested):
 
 ###############ApiFlask####################  
 class PageIn(Schema):
-    first = Integer(default=1)
-    rows = Integer(default=10)
+    page = Integer(default=1)
+    per_page = Integer(default=10)
 ###############Nomenclador####################
 class NomencladorOut(Schema):
     nomenclador = String()
@@ -132,8 +132,8 @@ class GrupoPatchIn(Schema):
     eliminado = Boolean()
 
 class GroupGetIn(Schema):
-    first = Integer(default=1)
-    rows = Integer(default=10)
+    page = Integer(default=1)
+    per_page = Integer(default=10)
     nombre = String(default="")
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
@@ -186,6 +186,7 @@ class GrupoIdOut(Schema):
 class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GrupoOut, many=True)
+
 
 class MsgErrorOut(Schema):
     valido = String()
@@ -290,7 +291,11 @@ class TipoTareaOut(Schema):
     codigo_humano = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
-      
+
+class TipoTareaCountOut(Schema):
+    count = Integer()
+    data = Nested(TipoTareaOut, many=True)      
+
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
     id = String()

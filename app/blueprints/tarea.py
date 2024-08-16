@@ -1,7 +1,7 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn
+from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut
 from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
-from app.common.error_handling import ObjectNotFound, InvalidPayload, ValidationError
+from app.common.error_handling import DataError, DataNotFound, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request
@@ -13,31 +13,24 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 def before_request():
     
     print("Antes de la petición")
+    print(request.headers)
+
 ####################TIPO DE TAREA######################
 @tarea_b.doc(description='Listado de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tareas')
-#@tarea_b.output(TipoTareaOut(many=True))
+@tarea_b.output(TipoTareaCountOut)
 @tarea_b.input(PageIn, location='query')
 def get_tipoTareas(query_data: dict):
     try:
-        first=1
-        rows=10
-        if(request.args.get('first') is not None):
-            first=int(request.args.get('first'))
-        if(request.args.get('rows') is not None):
-            rows=int(request.args.get('rows'))
+        page=1
+        per_page=10
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
 
-        res, cant = get_all_tipo_tareas(first,rows)
+        res, cant = get_all_tipo_tareas(page,per_page)
     
-        if res is None or len(res) == 0:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Tarea no encontrada",
-                    "ErrorMsg":"No se encontraron datos de tareas"
-                } 
-            res = MsgErrorOut().dump(result, )
-            return res
         
         data = {
                 "count": cant,
@@ -46,6 +39,7 @@ def get_tipoTareas(query_data: dict):
         
         return data
     
+   
     except Exception as err:
         raise ValidationError(err)    
  
@@ -106,14 +100,14 @@ def del_tipo_tarea(id: str):
 @tarea_b.input(PageIn, location='query')
 def get_tareas(query_data: dict):
     try:
-        first=1
-        rows=10
-        if(request.args.get('first') is not None):
-            first=int(request.args.get('first'))
-        if(request.args.get('rows') is not None):
-            rows=int(request.args.get('rows'))
+        page=1
+        per_page=10
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
 
-        res,cant = get_all_tareas(first,rows)    
+        res,cant = get_all_tareas(page,per_page)    
         if res is None or len(res) == 0:
             result={
                     "valido":"fail",
