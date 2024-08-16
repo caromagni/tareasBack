@@ -68,20 +68,20 @@ def patch_grupo(id_grupo: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
     
-@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?first=1&rows=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?page=1&per_page=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @groups_b.get('/grupos')
 @groups_b.input(PageIn, location='query')
 @groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
-        first=1
-        rows=10
-        if(request.args.get('first') is not None):
-            first=int(request.args.get('first'))
-        if(request.args.get('rows') is not None):
-            rows=int(request.args.get('rows'))
+        page=1
+        per_page=10
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
 
-        res, cant=get_all_grupos(first,rows)
+        res, cant=get_all_grupos(page,per_page)
         
         
         data = {
@@ -101,17 +101,17 @@ def get_grupos(query_data: dict):
 #@groups_b.output(GroupCountOut)
 def get_grupos_fechas(query_data: dict):
     try:
-        first=1
-        rows=10
+        page=1
+        per_page=10
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         #fecha_hasta=datetime.now().strftime("%d/%m/%Y")
         fecha_hasta=datetime.now()
         print("query_data:",query_data)
-        if(request.args.get('first') is not None):
-            first=int(request.args.get('first'))
-        if(request.args.get('rows') is not None):
-            rows=int(request.args.get('rows'))
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
         if(request.args.get('nombre') is not None):
             nombre=request.args.get('nombre')
         if(request.args.get('fecha_desde') is not None):
@@ -119,7 +119,7 @@ def get_grupos_fechas(query_data: dict):
         if(request.args.get('fecha_hasta') is not None):
             fecha_hasta=request.args.get('fecha_hasta')  
 
-        res, cant=get_all_grupos(first,rows, nombre, fecha_desde, fecha_hasta)
+        res, cant=get_all_grupos(page,per_page, nombre, fecha_desde, fecha_hasta)
        
        
         data = {

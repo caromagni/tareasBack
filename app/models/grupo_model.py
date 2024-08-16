@@ -86,17 +86,17 @@ def get_grupo_by_id(id):
 
     
 
-def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): #if no arguments are passed, the default values are used
+def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
     print("fecha_desde:",fecha_desde)
     print("fecha_hasta:",fecha_hasta)
     if nombre != "":
-        #result= session.query(Grupo).filter(Grupo.nombre == nombre, Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).offset((first-1)*rows).limit(rows).all()
+        #result= session.query(Grupo).filter(Grupo.nombre == nombre, Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).offset((page-1)*per_page).limit(per_page).all()
         result = session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).order_by(Grupo.nombre).offset(first-1).limit(rows).all()
+        ).order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()
         todo= session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
@@ -105,12 +105,13 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
     else:
         result= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).order_by(Grupo.nombre).offset((first-1)).limit(rows).all()
+        ).order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()
         todo= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).all()
         total= len(todo)
         
-    #result= session.query(Grupo).offset((first-1)*rows).limit(rows).all()
+        
+    #result= session.query(Grupo).offset((page-1)*per_page).limit(per_page).all()
     return result, total
 
 def get_all_herarquia():

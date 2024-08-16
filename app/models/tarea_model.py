@@ -39,8 +39,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
                 fecha_actualizacion=datetime.now()
             )    
 
-
-
     
     print("nuevoID:",nuevoID_tarea)
     nueva_tarea = Tarea(
@@ -64,9 +62,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
         plazo=plazo
     )
 
-    
-    
-
 
     session.add(nueva_tarea)
     session.commit()
@@ -74,12 +69,12 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
     return nueva_tarea
 
 
-def get_all_tipo_tareas(first=1, rows=10):
-    print("get_tipo_tareas")
+def get_all_tipo_tareas(page=1, per_page=10):
+    print("get_tipo_tareas - ", page, "-", per_page)
     session: scoped_session = current_app.session
-    res = session.query(TipoTarea).offset((first-1)).limit(rows).all()
     todo = session.query(TipoTarea).all()
     total= len(todo)
+    res = session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total
 
 def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=''):
@@ -213,9 +208,9 @@ def get_tarea_by_id(id):
     
     return results 
 
-def get_all_tareas(first=1, rows=10):
+def get_all_tareas(page=1, per_page=10):
     session: scoped_session = current_app.session
-    tareas = session.query(Tarea).offset((first-1)).limit(rows).all()
+    tareas = session.query(Tarea).offset((page-1)*per_page).limit(per_page).all()
     todo = session.query(Tarea).all()
     total= len(todo)
     return tareas, total
