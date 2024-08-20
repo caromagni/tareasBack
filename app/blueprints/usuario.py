@@ -11,26 +11,7 @@ from datetime import datetime
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
-@usuario_b.doc(description='Listado de Usuarios', summary='Usuarios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.get('/usuarios_all')
-@usuario_b.output(UsuarioOut(many=True))
-def get_usuarios():
-    try:
-        res = get_all_usuarios()
-        if res is None:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Usuario no encontrado",
-                    "ErrorMsg":"No se encontraron datos de usuarios"
-                } 
-            return result
-            
-        return res
-    
-    except Exception as err:
-        raise ValidationError(err)  
-    
+#################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupos_usuario/<string:id_usuario>')
 @usuario_b.output(GruposUsuarioOut(many=True))
