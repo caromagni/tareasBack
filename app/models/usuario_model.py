@@ -60,7 +60,7 @@ def get_usuario_by_id(id):
     
     return results 
 
-def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
+def get_all_usuarios_ant(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
     session: scoped_session = current_app.session
     
     if id_grupo is not None:
@@ -130,6 +130,48 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
     total = len(todo)
     print("total:",total)
     return query, total
+
+
+def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
+    session: scoped_session = current_app.session
+
+    # Base de la consulta
+    query = session.query(
+        Usuario.id.label("id"),
+        Usuario.nombre.label("nombre"),
+        Usuario.apellido.label("apellido"),
+        Usuario.fecha_actualizacion.label("fecha_actualizacion"),
+        Usuario.id_persona_ext.label("id_persona_ext"),
+        Grupo.id.label("id_grupo"),
+        Grupo.nombre.label("nombre_grupo"),
+        Grupo.eliminado.label("grupo_eliminado")
+    ).outerjoin(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
+    ).outerjoin(Grupo, Grupo.id == UsuarioGrupo.id_grupo)
+
+    # Aplicar filtros dinámicamente
+    if id_grupo:
+        print("filtro por grupo:", id_grupo)
+        query = query.filter(Grupo.id == id_grupo)
+
+    if nombre:
+        print("filtro por nombre:", nombre)
+        query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
+
+    if apellido:
+        print("filtro por apellido:", apellido)
+        query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
+
+     # Calcular el total de resultados sin paginación
+    total= query.count()
+    # Ordenamiento y paginación
+    query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)
+
+    # Ejecutar la consulta paginada
+    paginated_results = query.all()
+
+
+    print("total:", total)
+    return paginated_results, total
 
 
 def get_grupos_by_usuario(id):
