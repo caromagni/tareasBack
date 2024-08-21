@@ -310,7 +310,7 @@ class UsuarioInPatch(Schema):
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
-    id_grupo = String()
+ 
 
 class UsuarioGetIn(Schema):
     page = Integer(default=1)
