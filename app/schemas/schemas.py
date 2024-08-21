@@ -87,7 +87,6 @@ class HerarquiaOut(Schema):
     level = Integer()        
 
 
-
 class HerarquiaAllOut(Schema):
     id_padre = String()
     parent_name = String()
@@ -151,12 +150,13 @@ class GrupoOut(Schema):
 
 class UsuarioGrupoIdOut(Schema):
     id = String()
-    fecha_actualizacion = DateTime()
+    fecha_actualizacion = String()
     id_user_actualizacion = String()
     nombre = String()
     apellido = String()
     id_persona_ext = String()
-    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    #nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+
 
 class UsuarioGOut(Schema):
     id = String()
@@ -184,9 +184,7 @@ class GrupoIdOut(Schema):
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
   
 
-class GroupCountOut(Schema):
-    count = Integer()
-    data = Nested(GrupoOut, many=True)
+
 
 
 class MsgErrorOut(Schema):
@@ -268,6 +266,25 @@ class TareaOut(Schema):
     grupo = Nested(GrupoOut, only=("id", "nombre"))
   
 
+####################Grupos - Tareas - Usuarios ####################
+class GrupoAllOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
+    fecha_creacion = String()
+    id_user_actualizacion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    codigo_nomenclador = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    usuarios = List(Nested(UsuarioGrupoIdOut))
+    tareas = List(Nested(TareaOut))
+
+class GroupCountOut(Schema):
+    count = Integer()
+    data = Nested(GrupoAllOut, many=True)
 ###############Usuario Base ####################
 class UsuarioIn(Schema):
     nombre = String(required=True, validate=[
@@ -280,7 +297,7 @@ class UsuarioIn(Schema):
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
-    id_grupo = String()
+    
 
 class UsuarioInPatch(Schema):
     nombre = String(validate=[

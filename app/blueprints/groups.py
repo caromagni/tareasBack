@@ -3,7 +3,7 @@ from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, MsgErrorOut
+from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, GrupoAllOut, MsgErrorOut
 from datetime import datetime
 import jwt
 from ..common.keycloak import get_public_key
@@ -94,9 +94,9 @@ def get_grupos(query_data: dict):
     except Exception as err:
         raise ValidationError(err)  
     
-#############Consulta por varios campos################    
-@groups_b.doc(description='Consulta de grupos por fecha y descripción. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por fechas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/grupo')
+#############Consulta de grupos por varios campos################    
+@groups_b.doc(description='Consulta de grupos por parámetros. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por fechas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.get('/grupos')
 @groups_b.input(GroupGetIn, location='query')
 @groups_b.output(GroupCountOut)
 def get_grupos_fechas(query_data: dict):
@@ -119,11 +119,12 @@ def get_grupos_fechas(query_data: dict):
             fecha_hasta=request.args.get('fecha_hasta')  
 
         res, cant=get_all_grupos(page,per_page, nombre, fecha_desde, fecha_hasta)
-       
+        
+        print("res:",res)
        
         data = {
                 "count": cant,
-                "data": GrupoOut().dump(res, many=True)
+                "data": GrupoAllOut().dump(res, many=True)
             }
         
         return data
