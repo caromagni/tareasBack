@@ -139,8 +139,8 @@ def get_usuarios_nombre(query_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 ######################DELETE######################
-@usuario_b.doc(description='Baja de un Grupo', summary='Baja de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.delete('/grupo/<string:id>')
+@usuario_b.doc(description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.delete('/usuario/<string:id>')
 #@groups_b.output(GrupoOut)
 def del_usuario(id: str):
     try:
@@ -151,8 +151,8 @@ def del_usuario(id: str):
         else:
             result={
                     "Msg":"Registro eliminado",
-                    "Id grupo": id,
-                    "grupo": res.nombre
+                    "Id usuario": id,
+                    "usuario": res.nombre
                 } 
         
         return result

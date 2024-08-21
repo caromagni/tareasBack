@@ -248,7 +248,7 @@ def update_usuario(id='', **kwargs):
 
 def delete_usuario(id):
     session: scoped_session = current_app.session
-    usuario = session.query(Usuario).filter(Usuario.id == id).first()
+    usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
     if usuario is None:
         return None
     
