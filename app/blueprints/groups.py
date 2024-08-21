@@ -68,10 +68,10 @@ def patch_grupo(id_grupo: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
     
-@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?page=1&per_page=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
-@groups_b.get('/grupos')
-@groups_b.input(PageIn, location='query')
-@groups_b.output(GroupCountOut)
+#@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?page=1&per_page=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+#@groups_b.get('/grupos')
+#@groups_b.input(PageIn, location='query')
+#@groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
         page=1

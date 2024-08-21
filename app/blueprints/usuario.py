@@ -100,7 +100,7 @@ def get_usuario(id: str):
 
 #############Consulta por varios campos################    
 @usuario_b.doc(description='Consulta de usuario con filtros', summary='Consulta de usuario por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@usuario_b.get('/usuarios')
+@usuario_b.get('/usuarios_detalle')
 @usuario_b.input(UsuarioGetIn, location='query')
 @usuario_b.output(UsuarioCountOut)
 def get_usuarios_nombre(query_data: dict):
