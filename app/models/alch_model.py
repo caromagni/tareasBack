@@ -116,6 +116,7 @@ class Grupo(Base):
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime)
     fecha_hasta = Column(DateTime)
     nomenclador = relationship('Nomenclador')
@@ -223,6 +224,8 @@ class Usuario(Base):
     nombre = Column(String)
     apellido = Column(String)
     id_persona_ext = Column(UUID)
+    eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
 
 
 class AutoAccionAsignacion(Base):
@@ -274,7 +277,7 @@ class Tarea(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'))
     prioridad = Column(Integer, nullable=False, server_default=text("0"))
     id_actuacion = Column(ForeignKey('tareas.actuacion_ext.id'))
     titulo = Column(String)
@@ -392,7 +395,7 @@ class TareaXGrupo(Base):
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'))
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
-    id_user = Column(UUID)
+    id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
 
     grupo = relationship('Grupo')

@@ -4,32 +4,14 @@ from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
-from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioOut, GruposUsuarioOut, UsuarioIdOut
-from ..common.error_handling import ValidationError
+from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut, UsuarioAllOut
+from ..common.error_handling import ValidationError, DataError, DataNotFound
+from datetime import datetime
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
-@usuario_b.doc(description='Listado de Usuarios', summary='Usuarios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.get('/usuarios')
-@usuario_b.output(UsuarioOut(many=True))
-def get_usuarios():
-    try:
-        res = get_all_usuarios()
-        if res is None:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Usuario no encontrado",
-                    "ErrorMsg":"No se encontraron datos de usuarios"
-                } 
-            return result
-            
-        return res
-    
-    except Exception as err:
-        raise ValidationError(err)  
-    
+#################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupos_usuario/<string:id_usuario>')
 @usuario_b.output(GruposUsuarioOut(many=True))
@@ -115,4 +97,66 @@ def get_usuario(id: str):
             return result
 
         return res
-#################DELETE####################
+
+#############Consulta por varios campos################    
+@usuario_b.doc(description='Consulta de usuario con filtros', summary='Consulta de usuario por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.get('/usuarios_detalle')
+@usuario_b.input(UsuarioGetIn, location='query')
+@usuario_b.output(UsuarioCountOut)
+def get_usuarios_nombre(query_data: dict):
+    try:
+        page=1
+        per_page=10
+        nombre=""
+        apellido=""
+        id_grupo=None
+        cant=0
+        
+        print("query_data:",query_data)
+        
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
+        if(request.args.get('id_grupo') is not None):
+            id_grupo=request.args.get('id_grupo')    
+        if(request.args.get('nombre') is not None):
+            nombre=request.args.get('nombre')
+        if(request.args.get('apellido') is not None):
+            apellido=request.args.get('apellido')    
+        
+
+        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo)
+
+        data = {
+                "count": cant,
+                "data": UsuarioAllOut().dump(res, many=True)
+            }
+        
+        
+        return data
+    
+    except Exception as err:
+        raise ValidationError(err)  
+######################DELETE######################
+@usuario_b.doc(description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.delete('/usuario/<string:id>')
+#@groups_b.output(GrupoOut)
+def del_usuario(id: str):
+    try:
+        res = delete_usuario(id)
+        if res is None:
+            raise DataNotFound("Usuario no encontrado")
+            
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id usuario": id,
+                    "usuario": res.nombre
+                } 
+        
+        return result
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err)

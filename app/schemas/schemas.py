@@ -59,8 +59,8 @@ class SmartNested(Nested):
 
 ###############ApiFlask####################  
 class PageIn(Schema):
-    first = Integer(default=1)
-    rows = Integer(default=10)
+    page = Integer(default=1)
+    per_page = Integer(default=10)
 ###############Nomenclador####################
 class NomencladorOut(Schema):
     nomenclador = String()
@@ -132,8 +132,8 @@ class GrupoPatchIn(Schema):
     eliminado = Boolean()
 
 class GroupGetIn(Schema):
-    first = Integer(default=1)
-    rows = Integer(default=10)
+    page = Integer(default=1)
+    per_page = Integer(default=10)
     nombre = String(default="")
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
@@ -147,6 +147,7 @@ class GrupoOut(Schema):
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     eliminado = Boolean()
+    suspendido = Boolean()
 
 class UsuarioGrupoIdOut(Schema):
     id = String()
@@ -187,6 +188,7 @@ class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GrupoOut, many=True)
 
+
 class MsgErrorOut(Schema):
     valido = String()
     ErrorCode = Integer()
@@ -206,73 +208,7 @@ class UsuariosGrupoOut(Schema):
     nombre = String()
     apellido = String()
     
-  
-
-###############Usuarios####################
-class UsuarioIn(Schema):
-    nombre = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
-        validate_char
-    ])
-    apellido = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
-        validate_char
-    ])
-    id_user_actualizacion = String()
-    id_persona_ext = String()
-    id_grupo = String()
-
-class UsuarioInPatch(Schema):
-    nombre = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
-        validate_char
-    ])
-    apellido = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
-        validate_char
-    ])
-    id_user_actualizacion = String()
-    id_persona_ext = String()
-    id_grupo = String()
-
-class UsuarioOut(Schema):
-    id = String()
-    fecha_actualizacion = DateTime()
-    id_user_actualizacion = String()
-    nombre = String()
-    apellido = String()
-    id_persona_ext = String()
-    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
-    id_grupo = Nested(GrupoOut, only=("id", "nombre")) 
-    
-
-    @post_dump
-    def add_nombre_completo(self, data, **kwargs):
-        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
-        return data
-    
-class TareaUsuarioIn(Schema):
-    id_tarea = String(required=True)
-    id_usuario = String(required=True)
-    id_usuario_actualizacion = String(required=True)
-    notas = String(validate=[
-        validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
-        validate_char
-    ])
-
-class TareaUsrOut(Schema):
-    id = String()
-    titulo = String()
-
-
-class UsuarioIdOut(Schema):
-    id = String()
-    nombre = String()
-    apellido = String()
-    tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
-    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
-    
-################TipoTareas####################
+###############Tareas y Tipo de Tareas Base####################  
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True, validate=[
         validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres"),
@@ -290,29 +226,6 @@ class TipoTareaOut(Schema):
     codigo_humano = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
-      
-################Actuaciones####################
-class TipoActuacionOut(Schema):
-    id = String()
-    nombre = String()
-
-class ActuacionOut(Schema):
-    id = String()
-    nombre = String()
-    descripcion = String()
-    id_tipo_actuacion = String()
-    tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
-    id_user_actualizacion = String()
-    fecha_actualizacion = String()  
-###############Expedientes####################
-class ExpedienteOut(Schema):    
-    id = String()
-    id_ext = String()
-    caratula = String()
-    estado = String()
-    
-
-###############Tareas####################  
 class TareaIn(Schema):
     id_grupo = String()
     prioridad = Integer(required=True, validate=[
@@ -349,10 +262,143 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
-    fecha_eliminacion = DateTime()
+    #fecha_eliminacion = DateTime()
+    fecha_eliminacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
+  
+
+###############Usuario Base ####################
+class UsuarioIn(Schema):
+    nombre = String(required=True, validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    apellido = String(required=True, validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String()
+    id_persona_ext = String()
+    id_grupo = String()
+
+class UsuarioInPatch(Schema):
+    nombre = String(validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    apellido = String(validate=[
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String()
+    id_persona_ext = String()
+    id_grupo = String()
+
+class UsuarioGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    nombre = String(default="")
+    apellido = String(default="")
+    id_grupo = String()
+   
+
+class UsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_persona_ext = String()
+    nombre_completo = String(dump_only=True)  
+    eliminado = Boolean()
+    suspendido = Boolean()
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
+
+class UsuarioAllOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)
+    id_persona_ext = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    grupos = List(Nested(GrupoOut))
+    tareas = List(Nested(TareaOut, only=("id", "titulo", "eliminado")))
+   
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
+class UsuarioCountOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioAllOut, many=True) 
+
+class TareaUsuarioIn(Schema):
+    id_tarea = String(required=True)
+    id_usuario = String(required=True)
+    id_user_actualizacion = String(required=True)
+    notas = String(validate=[
+        validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
+        validate_char
+    ])
+
+class TareaUsrOut(Schema):
+    id = String()
+    titulo = String()
+
+
+class UsuarioIdOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    id_persona_ext = String()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
+    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
     
+
+
+class TipoTareaCountOut(Schema):
+    count = Integer()
+    data = Nested(TipoTareaOut, many=True)      
+
+################Actuaciones####################
+class TipoActuacionOut(Schema):
+    id = String()
+    nombre = String()
+
+class ActuacionOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    id_tipo_actuacion = String()
+    tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()  
+###############Expedientes####################
+class ExpedienteOut(Schema):    
+    id = String()
+    id_ext = String()
+    caratula = String()
+    estado = String()
+    
+
+
+class TareaCountOut(Schema):
+    count = Integer()
+    data = Nested(TareaOut, many=True)      
 
 class TareaUsuarioOut(Schema):
     id = String()
@@ -373,7 +419,7 @@ class TareaIdOut(Schema):
     prioridad = Integer()
     id_actuacion = String()
     id_expediente = String()
-    #caratula_expediente = String()
+    caratula_expediente = String()
     id_tipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
