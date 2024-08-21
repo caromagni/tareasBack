@@ -6,7 +6,7 @@ from sqlalchemy.dialects import postgresql
 
 from flask import current_app
 
-from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Nomenclador
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 
 
 def get_grupo_by_id(id):
@@ -89,30 +89,81 @@ def get_grupo_by_id(id):
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
-    print("fecha_desde:",fecha_desde)
-    print("fecha_hasta:",fecha_hasta)
-    if nombre != "":
-        #result= session.query(Grupo).filter(Grupo.nombre == nombre, Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).offset((page-1)*per_page).limit(per_page).all()
-        result = session.query(Grupo).filter(
-            Grupo.nombre.ilike(f"%{nombre}%"),
-            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()
-        todo= session.query(Grupo).filter(
-            Grupo.nombre.ilike(f"%{nombre}%"),
-            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).all()
-        total= len(todo)
-    else:
-        result= session.query(Grupo).filter(
-            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()
-        todo= session.query(Grupo).filter(
-            Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).all()
-        total= len(todo)
-        
-        
-    #result= session.query(Grupo).offset((page-1)*per_page).limit(per_page).all()
-    return result, total
+
+    query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
+    
+    if nombre:
+        query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
+
+    total= query.count() 
+
+    result= query.order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()  
+
+    if result is not None:
+        results=[]
+        for res in result:
+            usuarios=[]
+            tareas=[]
+           
+            res_usuario = session.query(UsuarioGrupo.id_grupo,
+                                        Usuario.id, Usuario.nombre, 
+                                        Usuario.apellido, 
+                                        Usuario.eliminado, 
+                                        Usuario.suspendido, 
+                                        Usuario.fecha_actualizacion
+                        ).join(Usuario, Usuario.id==UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo==res.id).all()
+            
+            res_tareas = session.query(TareaXGrupo.id_grupo, 
+                                       Tarea.id, 
+                                       Tarea.titulo, 
+                                       Tarea.tipo_tarea,
+                                       Tarea.eliminado
+                                       ).join(Tarea, Tarea.id==TareaXGrupo.id_tarea
+                                                   ).filter(TareaXGrupo.id_grupo==res.id).all()
+            
+            if res_usuario is not None:
+                for row in res_usuario:
+                    usuario = {
+                        "apellido": row.apellido,
+                        "nombre": row.nombre,
+                        "id": row.id,
+                        "eliminado": row.eliminado,
+                        "suspendido": row.suspendido,
+                        "fecha_actualizacion": row.fecha_actualizacion
+                    }
+                    usuarios.append(usuario)
+            
+           
+            if res_tareas is not None:
+                print("tiene tareas:", len(res_tareas))
+                for row in res_tareas:
+                    tarea = {
+                        "id": row.id,
+                        "titulo": row.titulo,
+                        "tipo_tarea": row.tipo_tarea,
+                        "eliminado": row.eliminado,
+                        "fecha_actualizacion": row.fecha_actualizacion
+                    }
+                    tareas.append(tarea)
+
+            result = {
+                "id": res.id,
+                "nombre": res.nombre,
+                "descripcion": res.descripcion,
+                "nomenclador": res.nomenclador,
+                "fecha_creacion": res.fecha_creacion,
+                "fecha_actualizacion": res.fecha_actualizacion,
+                "id_user_actualizacion": res.id_user_actualizacion,
+                "eliminado": res.eliminado,
+                "suspendido": res.suspendido,
+                "usuarios": usuarios,
+                "tareas": tareas
+            } 
+                  
+            results.append(result)
+
+    return results, total
+
 
 def get_all_herarquia():
     session: scoped_session = current_app.session
