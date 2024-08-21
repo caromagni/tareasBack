@@ -10,7 +10,7 @@ from .alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tare
 def get_usuario_by_id(id):
     session: scoped_session = current_app.session
     
-    res = session.query(Usuario).filter(Usuario.id == id).first()
+    res = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False, Usuario.suspendido==False).first()
     
     results = []
     tareas=[]
@@ -49,6 +49,11 @@ def get_usuario_by_id(id):
             "id": res.id,
             "nombre": res.nombre,
             "apellido": res.apellido,
+            "id_persona_ext": res.id_persona_ext,
+            "id_user_actualizacion": res.id_user_actualizacion,
+            "fecha_actualizacion": res.fecha_actualizacion,
+            "eliminado": res.eliminado,
+            "suspendido": res.suspendido,
             "grupos": grupos,
             "tareas": tareas
         }
@@ -60,93 +65,12 @@ def get_usuario_by_id(id):
     
     return results 
 
-def get_all_usuarios_ant(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
-    session: scoped_session = current_app.session
-    
-    if id_grupo is not None:
-        print("filtro por grupo:", id_grupo)
-        todo = session.query(Usuario.id.label("id"),
-                    Usuario.nombre.label("nombre"),
-                    Usuario.apellido.label("apellido"),
-                    Usuario.fecha_actualizacion.label("fecha_actualizacion"),
-                    Usuario.id_persona_ext.label("id_persona_ext"),  
-                    Grupo.id.label("id_grupo"),
-                    Grupo.nombre.label("nombre_grupo"),
-                    Grupo.eliminado.label("grupo_eliminado")
-                    ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
-                    ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id       
-                    ).filter(UsuarioGrupo.id_grupo == id_grupo
-                    ).order_by(Usuario.apellido         
-                    ).all()
-        """ todo =  session.query(Grupo.id.label("id_grupo"),
-                  Grupo.nombre.label("nombre_grupo"),
-                  Grupo.eliminado.label("grupo_eliminado"),
-                  Usuario.nombre.label("nombre"),
-                  Usuario.apellido.label("apellido"),
-                  Usuario.id.label("id"),
-                  Usuario.fecha_actualizacion.label("fecha_actualizacion"),
-                  Usuario.id_persona_ext.label("id_persona_ext")                   
-                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                  ).filter(Grupo.id == id_grupo
-                  ).order_by(Usuario.apellido).all()  """
-        
-        query = session.query(Usuario.id.label("id"),
-                    Usuario.nombre.label("nombre"),
-                    Usuario.apellido.label("apellido"),
-                    Usuario.fecha_actualizacion.label("fecha_actualizacion"),
-                    Usuario.id_persona_ext.label("id_persona_ext"), 
-                    UsuarioGrupo.id_grupo.label("grupo"),
-                    Grupo.id.label("id_grupo"),
-                    Grupo.nombre.label("nombre_grupo"),
-                    Grupo.eliminado.label("grupo_eliminado")
-                    ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
-                    ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id       
-                    ).filter(UsuarioGrupo.id_grupo == id_grupo
-                    ).order_by(Usuario.apellido
-                    ).offset((page-1)*per_page).limit(per_page).all()  
-    
-    else:    
-        if nombre != "" and apellido != "":
-            print("filtro por nombre y apellido")
-            query = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%"), Usuario.apellido.ilike(f"%{apellido}%"))
-        else:
-            if nombre != "":
-                print("filtro por nombre")
-                todo = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%")).all()
-                query = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%")).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
-            else:
-                if apellido != "":
-                    print("filtro por apellido")
-                    todo = session.query(Usuario).filter(Usuario.apellido.ilike(f"%{apellido}%")).all()
-                    query = session.query(Usuario).filter(Usuario.apellido.ilike(f"%{apellido}%")).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
-                
-                else:
-                    print("sin filtro")
-                    todo = session.query(Usuario).all()
-                    query = session.query(Usuario).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
-                    #filter(Usuario.fecha_actualizacion.between(fecha_desde, fecha_hasta))    
-
-    total = len(todo)
-    print("total:",total)
-    return query, total
-
 
 def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
     session: scoped_session = current_app.session
 
     # Base de la consulta
-    query = session.query(
-        Usuario.id.label("id"),
-        Usuario.nombre.label("nombre"),
-        Usuario.apellido.label("apellido"),
-        Usuario.fecha_actualizacion.label("fecha_actualizacion"),
-        Usuario.id_persona_ext.label("id_persona_ext"),
-        Grupo.id.label("id_grupo"),
-        Grupo.nombre.label("nombre_grupo"),
-        Grupo.eliminado.label("grupo_eliminado")
-    ).outerjoin(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
-    ).outerjoin(Grupo, Grupo.id == UsuarioGrupo.id_grupo)
+    query = session.query(Usuario)
 
     # Aplicar filtros dinámicamente
     if id_grupo:
@@ -161,17 +85,81 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
         print("filtro por apellido:", apellido)
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
 
+
      # Calcular el total de resultados sin paginación
     total= query.count()
+
     # Ordenamiento y paginación
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)
+
 
     # Ejecutar la consulta paginada
     paginated_results = query.all()
 
+    if paginated_results is not None:
+        results = []
+        for res in paginated_results:
+            tareas=[]
+            grupos=[]
+            #Traigo los grupos del usuario
+            res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
+                                    ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
+            
+            #Traigo los grupos hijos
+            res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.eliminado
+                                    ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
+            
 
+            
+            if res_tareas is not None:
+                print("Tiene tareas-", len(res_tareas))
+                for row in res_tareas:
+                    tarea = {
+                        "id": row.id,
+                        "titulo": row.titulo,
+                        "eliminado": row.eliminado
+                    }
+                    tareas.append(tarea)
+
+            if res_grupos is not None:
+                print("Tiene grupos-", len(res_grupos))
+                for row in res_grupos:
+                    grupo = {
+                        "id": row.id,
+                        "nombre": row.nombre,
+                        "eliminado": row.eliminado,
+                        "suspendido": row.suspendido,
+                        "codigo_nomenclador": row.codigo_nomenclador
+
+                    }
+                    grupos.append(grupo)
+                print("grupos:", grupos)    
+
+
+            ###################Formatear el resultado####################
+            result = {
+                "id": res.id,
+                "nombre": res.nombre,
+                "apellido": res.apellido,
+                "id_persona_ext": res.id_persona_ext,
+                "id_user_actualizacion": res.id_user_actualizacion,
+                "fecha_actualizacion": res.fecha_actualizacion,
+                "eliminado": res.eliminado,
+                "suspendido": res.suspendido,
+                "grupos": grupos,
+                "tareas": tareas
+            }
+            print("result:", result)
+            results.append(result)
+
+   
+    else:
+        return None
+    
     print("total:", total)
-    return paginated_results, total
+    return results, total 
+        
+    
 
 
 def get_grupos_by_usuario(id):
@@ -223,7 +211,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
 
 def update_usuario(id='', **kwargs):
     session: scoped_session = current_app.session
-    usuario = session.query(Usuario).filter(Usuario.id == id).first()
+    usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False, Usuario.suspendido==False).first()
    
     if usuario is None:
         return None
@@ -255,6 +243,17 @@ def update_usuario(id='', **kwargs):
             )
             session.add(nuevo_usuario_grupo)
 
+    session.commit()
+    return usuario
+
+def delete_usuario(id):
+    session: scoped_session = current_app.session
+    usuario = session.query(Usuario).filter(Usuario.id == id).first()
+    if usuario is None:
+        return None
+    
+    usuario.eliminado = True
+    usuario.fecha_actualizacion = datetime.now()
     session.commit()
     return usuario
 

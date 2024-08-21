@@ -4,9 +4,9 @@ from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
-from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut
-from ..common.error_handling import ValidationError
+from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut, UsuarioAllOut
+from ..common.error_handling import ValidationError, DataError, DataNotFound
 from datetime import datetime
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
@@ -128,14 +128,35 @@ def get_usuarios_nombre(query_data: dict):
 
         res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo)
 
-        
         data = {
                 "count": cant,
-                "data": UsuarioOut().dump(res, many=True)
+                "data": UsuarioAllOut().dump(res, many=True)
             }
+        
         
         return data
     
     except Exception as err:
         raise ValidationError(err)  
-#################DELETE####################
+######################DELETE######################
+@usuario_b.doc(description='Baja de un Grupo', summary='Baja de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.delete('/grupo/<string:id>')
+#@groups_b.output(GrupoOut)
+def del_usuario(id: str):
+    try:
+        res = delete_usuario(id)
+        if res is None:
+            raise DataNotFound("Usuario no encontrado")
+            
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id grupo": id,
+                    "grupo": res.nombre
+                } 
+        
+        return result
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err)

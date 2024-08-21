@@ -116,6 +116,7 @@ class Grupo(Base):
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime)
     fecha_hasta = Column(DateTime)
     nomenclador = relationship('Nomenclador')
@@ -223,6 +224,8 @@ class Usuario(Base):
     nombre = Column(String)
     apellido = Column(String)
     id_persona_ext = Column(UUID)
+    eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
 
 
 class AutoAccionAsignacion(Base):
