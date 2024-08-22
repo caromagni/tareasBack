@@ -4,8 +4,8 @@ from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
-from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut, UsuarioAllOut
+from ..models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut, UsuarioAllOut
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from datetime import datetime
 
@@ -13,7 +13,7 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.get('/grupos_usuario/<string:id_usuario>')
+@usuario_b.get('/grupo_usuario/<string:id_usuario>')
 @usuario_b.output(GruposUsuarioOut(many=True))
 def get_grupos_by_usr(id_usuario: str):
     try:
@@ -32,7 +32,7 @@ def get_grupos_by_usr(id_usuario: str):
     except Exception as err:
         raise ValidationError(err) 
     
-#################POST####################
+#####################POST#########################
 @usuario_b.doc(description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(UsuarioIn)
@@ -84,7 +84,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
 @usuario_b.doc(description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario/<string:id>')
 @usuario_b.output(UsuarioIdOut(many=True))
-def get_usuario(id: str):
+def get_usuario_id(id: str):
         res = get_usuario_by_id(id)
         if res is None:
             print("Usuario no encontrado")  
@@ -98,15 +98,17 @@ def get_usuario(id: str):
 
         return res
 
-#############Consulta por varios campos################    
-@usuario_b.doc(description='Consulta de usuario con filtros', summary='Consulta de usuario por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@usuario_b.get('/usuarios_detalle')
+#############GET CON PARAMETROS######################## 
+# CONSULTA SIMPLE
+#######################################################
+@usuario_b.doc(description='Consulta de usuarios', summary='Consulta simple de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.get('/usuario')
 @usuario_b.input(UsuarioGetIn, location='query')
 @usuario_b.output(UsuarioCountOut)
-def get_usuarios_nombre(query_data: dict):
+def get_usuario(query_data: dict):
     try:
         page=1
-        per_page=10
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nombre=""
         apellido=""
         id_grupo=None
@@ -127,6 +129,47 @@ def get_usuarios_nombre(query_data: dict):
         
 
         res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo)
+
+        data = {
+                "count": cant,
+                "data": UsuarioOut().dump(res, many=True)
+            }
+        
+        
+        return data
+    
+    except Exception as err:
+        raise ValidationError(err) 
+    
+#####################DETALLE DE USUARIOS#######################   
+@usuario_b.doc(description='Consulta de usuarios con sus grupos y tareas', summary='Consulta detallada de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.get('/usuario_detalle')
+@usuario_b.input(UsuarioGetIn, location='query')
+@usuario_b.output(UsuarioCountAllOut)
+def get_usuarios_nombre(query_data: dict):
+    try:
+        page=1
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        nombre=""
+        apellido=""
+        id_grupo=None
+        cant=0
+        
+        print("query_data:",query_data)
+        
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
+        if(request.args.get('id_grupo') is not None):
+            id_grupo=request.args.get('id_grupo')    
+        if(request.args.get('nombre') is not None):
+            nombre=request.args.get('nombre')
+        if(request.args.get('apellido') is not None):
+            apellido=request.args.get('apellido')    
+        
+
+        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo)
 
         data = {
                 "count": cant,

@@ -4,7 +4,7 @@ from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
-from flask import request
+from flask import request, current_app
 
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
@@ -23,7 +23,7 @@ def before_request():
 def get_tipoTareas(query_data: dict):
     try:
         page=1
-        per_page=10
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -97,7 +97,7 @@ def del_tipo_tarea(id: str):
 def get_tareas(query_data: dict):
     try:
         page=1
-        per_page=10
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):

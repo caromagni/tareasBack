@@ -1,9 +1,9 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
-from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
+from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, PageIn, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, GrupoAllOut, MsgErrorOut
+from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, GrupoAllOut, MsgErrorOut
 from datetime import datetime
 import jwt
 from ..common.keycloak import get_public_key
@@ -11,6 +11,8 @@ import os
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
+
+
 
 @auth.verify_token
 def verify_token():
@@ -45,7 +47,7 @@ def verify_token():
 
 
 
-@groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GrupoPatchIn) 
 @groups_b.output(GrupoOut)
@@ -68,20 +70,33 @@ def patch_grupo(id_grupo: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
     
-#@groups_b.doc(description='Listado de Grupos existentes. Ejemplo de url: /grupo?page=1&per_page=2', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
-#@groups_b.get('/grupos')
-#@groups_b.input(PageIn, location='query')
-#@groups_b.output(GroupCountOut)
-def get_grupos(query_data: dict):
+ ###############CONSULTA SIMPLE DE GRUPOS###################   
+@groups_b.doc(description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+@groups_b.get('/grupo')
+@groups_b.input(GroupGetIn, location='query')
+@groups_b.output(GroupCountOut)
+def get_grupo(query_data: dict):
     try:
         page=1
-        per_page=10
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        print(type(per_page))
+        nombre=""
+        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_hasta=datetime.now()
+        print("query_data:",query_data)
+        print("per_page:",per_page)
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
+        if(request.args.get('nombre') is not None):
+            nombre=request.args.get('nombre')
+        if(request.args.get('fecha_desde') is not None):
+            fecha_desde=request.args.get('fecha_desde')
+        if(request.args.get('fecha_hasta') is not None):
+            fecha_hasta=request.args.get('fecha_hasta')  
 
-        res, cant=get_all_grupos(page,per_page)
+        res, cant=get_all_grupos(page,per_page, nombre, fecha_desde, fecha_hasta)
         
         
         data = {
@@ -94,15 +109,15 @@ def get_grupos(query_data: dict):
     except Exception as err:
         raise ValidationError(err)  
     
-#############Consulta de grupos por varios campos################    
-@groups_b.doc(description='Consulta de grupos por parámetros. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por fechas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/grupos')
+#############DETALLE DE GRUPOS###################    
+@groups_b.doc(description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.get('/grupo_detalle')
 @groups_b.input(GroupGetIn, location='query')
-@groups_b.output(GroupCountOut)
-def get_grupos_fechas(query_data: dict):
+@groups_b.output(GroupCountAllOut)
+def get_grupo_detalle(query_data: dict):
     try:
         page=1
-        per_page=10
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
@@ -118,7 +133,7 @@ def get_grupos_fechas(query_data: dict):
         if(request.args.get('fecha_hasta') is not None):
             fecha_hasta=request.args.get('fecha_hasta')  
 
-        res, cant=get_all_grupos(page,per_page, nombre, fecha_desde, fecha_hasta)
+        res, cant=get_all_grupos_detalle(page,per_page, nombre, fecha_desde, fecha_hasta)
         
         print("res:",res)
        
@@ -135,7 +150,7 @@ def get_grupos_fechas(query_data: dict):
 @groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GrupoIdOut())
-def get_grupo(id: str):
+def get_grupo_id(id: str):
     try:
         print("id:",id)
         res = get_grupo_by_id(id)
@@ -146,7 +161,7 @@ def get_grupo(id: str):
         
 
 
-@groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
 @groups_b.output(UsuariosGrupoOut(many=True))
@@ -160,7 +175,7 @@ def get_usrsbygrupo(id_grupo: str):
         raise ValidationError(err)  
     
 #################POST####################
-@groups_b.doc(description='Alta de un Grupo', summary='Alta de un nuevo Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(GrupoIn)
 #@groups_b.output(GrupoOut)
@@ -184,7 +199,7 @@ def post_grupo(json_data: dict):
         raise ValidationError(err)  
      
 ##############DELETE####################
-@groups_b.doc(description='Baja de un Grupo', summary='Baja de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 #@groups_b.output(GrupoOut)
 def del_grupo(id: str):

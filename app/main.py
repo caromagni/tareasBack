@@ -29,12 +29,14 @@ def create_app():
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
     app.config['JWT_IDENTITY_CLAIM'] = Config.JWT_IDENTITY_CLAIM
 
+
     #jwt = JWTManager(app=app)
 
     app.config['DEBUG'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@psql.beta.hwc.pjm.gob.ar:5432/tareas"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
+    app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
 
     # Initialize the SQLAlchemy engine and session
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
