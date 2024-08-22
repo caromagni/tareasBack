@@ -284,7 +284,12 @@ class GrupoAllOut(Schema):
 
 class GroupCountOut(Schema):
     count = Integer()
+    data = Nested(GrupoOut, many=True)
+
+class GroupCountAllOut(Schema):
+    count = Integer()
     data = Nested(GrupoAllOut, many=True)
+
 ###############Usuario Base ####################
 class UsuarioIn(Schema):
     nombre = String(required=True, validate=[
@@ -347,17 +352,21 @@ class UsuarioAllOut(Schema):
     id_persona_ext = String()
     eliminado = Boolean()
     suspendido = Boolean()
-    grupos = List(Nested(GrupoOut))
-    tareas = List(Nested(TareaOut, only=("id", "titulo", "eliminado")))
+    grupos = List(Nested(GrupoOut), only=("id", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
+    tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
    
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
 
-class UsuarioCountOut(Schema):
+class UsuarioCountAllOut(Schema):
     count = Integer()
     data = Nested(UsuarioAllOut, many=True) 
+
+class UsuarioCountOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioOut, many=True)     
 
 class TareaUsuarioIn(Schema):
     id_tarea = String(required=True)

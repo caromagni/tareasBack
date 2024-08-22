@@ -83,10 +83,24 @@ def get_grupo_by_id(id):
     return results    
 
     
+def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
+    session: scoped_session = current_app.session
+    total= session.query(Grupo).count()
 
+    query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
+    
+    if nombre:
+        query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
+
+    total= query.count() 
+
+    result= query.order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()  
+
+
+    return result, total
     
 
-def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): #if no arguments are passed, the default values are used
+def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 

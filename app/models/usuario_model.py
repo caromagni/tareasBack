@@ -19,27 +19,33 @@ def get_usuario_by_id(id):
 
     if res is not None:
         #Traigo los grupos del usuario
-        res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre
+        res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
                                   ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
         
         #Traigo los grupos hijos
-        res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo
+        res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
                                   ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
         
 
         if res_tareas is not None:
             for row in res_tareas:
                 tarea = {
-                    "id": row.id,
-                    "titulo": row.titulo
-                }
+                        "id": row.id,
+                        "titulo": row.titulo,
+                        "id_tipo_tarea": row.id_tipo_tarea,
+                        "eliminado": row.eliminado
+                    }
                 tareas.append(tarea)
 
         if res_grupos is not None:
             for row in res_grupos:
                 grupo = {
-                    "id": row.id,
-                    "nombre": row.nombre
+                        "id": row.id,
+                        "nombre": row.nombre,
+                        "eliminado": row.eliminado,
+                        "suspendido": row.suspendido,
+                        "codigo_nomenclador": row.codigo_nomenclador
+
                 }
                 grupos.append(grupo)
 
@@ -65,11 +71,30 @@ def get_usuario_by_id(id):
     
     return results 
 
-
 def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
     session: scoped_session = current_app.session
 
-    # Base de la consulta
+    query = session.query(Usuario)
+    if id_grupo:
+        print("filtro por grupo:", id_grupo)
+        query = query.filter(Grupo.id == id_grupo)
+
+    if nombre:
+        print("filtro por nombre:", nombre)
+        query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
+
+    if apellido:
+        print("filtro por apellido:", apellido)
+        query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
+
+    total= query.count()
+    query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page).all()
+    return query, total
+
+
+def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
+    session: scoped_session = current_app.session
+
     query = session.query(Usuario)
 
     # Aplicar filtros dinámicamente
@@ -86,12 +111,10 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
 
 
-     # Calcular el total de resultados sin paginación
     total= query.count()
 
     # Ordenamiento y paginación
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)
-
 
     # Ejecutar la consulta paginada
     paginated_results = query.all()
@@ -105,18 +128,18 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
             res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
                                     ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
             
-            #Traigo los grupos hijos
-            res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.eliminado
+            #Traigo las tareas asignadas al usuario
+            res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
                                     ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
             
 
-            
             if res_tareas is not None:
                 print("Tiene tareas-", len(res_tareas))
                 for row in res_tareas:
                     tarea = {
                         "id": row.id,
                         "titulo": row.titulo,
+                        "id_tipo_tarea": row.id_tipo_tarea,
                         "eliminado": row.eliminado
                     }
                     tareas.append(tarea)
