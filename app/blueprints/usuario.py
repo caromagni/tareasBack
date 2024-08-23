@@ -5,7 +5,7 @@ from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
 from ..models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut, UsuarioAllOut
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioAllOut
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from datetime import datetime
 
@@ -14,7 +14,7 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
-@usuario_b.output(GruposUsuarioOut(many=True))
+@usuario_b.output(GroupsUsuarioOut(many=True))
 def get_grupos_by_usr(id_usuario: str):
     try:
         res = get_grupos_by_usuario(id_usuario)
@@ -184,7 +184,7 @@ def get_usuarios_nombre(query_data: dict):
 ######################DELETE######################
 @usuario_b.doc(description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
-#@groups_b.output(GrupoOut)
+#@groups_b.output(GroupOut)
 def del_usuario(id: str):
     try:
         res = delete_usuario(id)
