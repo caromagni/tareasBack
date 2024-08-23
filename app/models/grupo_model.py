@@ -345,8 +345,9 @@ def get_usuarios_by_grupo(id):
 
 def get_grupos_recursivo():
     session: scoped_session = current_app.session
-    query = text("""
-                WITH RECURSIVE GroupTree AS ( SELECT  hgg1.id_padre, hgg1.id_hijo, 
+    query1 = text("""
+                WITH RECURSIVE GroupTree AS ( 
+                SELECT  hgg1.id_padre, hgg1.id_hijo, 
                 hgg1.id_hijo::text AS path, 1 AS level FROM tareas.herarquia_grupo_grupo hgg1
                 WHERE hgg1.id_padre IS NULL
                 OR NOT EXISTS ( SELECT 1 FROM tareas.herarquia_grupo_grupo hgg2
@@ -360,6 +361,44 @@ def get_grupos_recursivo():
                 gt.path, gt.level FROM GroupTree gt LEFT JOIN tareas.grupo gp_padre ON gt.id_padre = gp_padre.id
                 LEFT JOIN tareas.grupo gp_hijo ON gt.id_hijo = gp_hijo.id ORDER BY gt.path""")
     
+    query = text("""WITH RECURSIVE GroupTree AS (
+                SELECT  
+                    hgg1.id_padre, 
+                    hgg1.id_hijo, 
+                    hgg1.id_hijo::text AS path,
+                    COALESCE(gp_hijo.nombre, hgg1.id_hijo::text) AS path_name, 
+                    1 AS level 
+                FROM tareas.herarquia_grupo_grupo hgg1
+                LEFT JOIN tareas.grupo gp_hijo ON hgg1.id_hijo = gp_hijo.id
+                WHERE hgg1.id_padre IS NULL
+                    OR NOT EXISTS ( 
+                        SELECT 1 
+                        FROM tareas.herarquia_grupo_grupo hgg2
+                        WHERE hgg2.id_hijo = hgg1.id_padre
+                    )
+                UNION ALL
+                SELECT 
+                    hgg.id_padre, 
+                    hgg.id_hijo, 
+                    gt.path || ' -> ' || hgg.id_hijo::text AS path,
+                    gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
+                    gt.level + 1 AS level
+                FROM tareas.herarquia_grupo_grupo hgg
+                INNER JOIN GroupTree gt ON gt.id_hijo = hgg.id_padre
+                LEFT JOIN tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+            )
+            SELECT 
+                gt.id_padre, 
+                gp_padre.nombre AS nombre_padre, 
+                gt.id_hijo, 
+                gp_hijo.nombre AS nombre_hijo,
+                gt.path,
+                gt.path_name,  
+                gt.level 
+            FROM GroupTree gt 
+            LEFT JOIN tareas.grupo gp_padre ON gt.id_padre = gp_padre.id
+            LEFT JOIN tareas.grupo gp_hijo ON gt.id_hijo = gp_hijo.id 
+            ORDER BY gt.path""")
     res = session.execute(query).fetchall()
     return res
 

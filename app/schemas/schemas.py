@@ -84,6 +84,7 @@ class HerarquiaOut(Schema):
     nombre_padre = String()
     nombre_hijo = String()
     path = String()
+    path_name = String()
     level = Integer()        
 
 
