@@ -67,12 +67,12 @@ class NomencladorOut(Schema):
     desclarga = String()
     nroficin_corto = String()
 
-###############Grupos####################
-class HerarquiaGrupoGrupoOut(Schema):
+###############Groups####################
+class HerarquiaGroupGroupOut(Schema):
     id_padre = String()
     id_hijo = String()
 
-class GrupoHOut(Schema):
+class GroupHOut(Schema):
     id_padre = String()
     id_hijo = String()
     nombre_padre = String()
@@ -97,7 +97,7 @@ class HerarquiaAllOut(Schema):
     is_parentless = Boolean()
     group_id = String()
 
-class GrupoIn(Schema):
+class GroupIn(Schema):
     nombre= String(required=True, validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -113,7 +113,7 @@ class GrupoIn(Schema):
         validate_num  
     ])
 
-class GrupoPatchIn(Schema):
+class GroupPatchIn(Schema):
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -137,7 +137,7 @@ class GroupGetIn(Schema):
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
 
-class GrupoOut(Schema):
+class GroupOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
@@ -148,7 +148,7 @@ class GrupoOut(Schema):
     eliminado = Boolean()
     suspendido = Boolean()
 
-class UsuarioGrupoIdOut(Schema):
+class UsuarioGroupIdOut(Schema):
     id = String()
     fecha_actualizacion = String()
     id_user_actualizacion = String()
@@ -163,7 +163,7 @@ class UsuarioGOut(Schema):
     nombre = String()
     apellido = String()
 
-class HerarquiaGrupoOut(Schema):
+class HerarquiaGroupOut(Schema):
     id = String()
     id_hijo = String()
     nombre_hijo = String()
@@ -172,15 +172,15 @@ class HerarquiaGrupoOut(Schema):
     eliminado = Boolean()
 
 
-class GrupoIdOut(Schema):
+class GroupIdOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
     eliminado = Boolean()
     fecha_creacion = DateTime()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
-    hijos = List(Nested(HerarquiaGrupoOut, only=("id_hijo","nombre_hijo", "eliminado")))
-    padre = List(Nested(HerarquiaGrupoOut, only=("id_padre","nombre_padre", "eliminado")))
+    hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
+    padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
   
 
@@ -193,14 +193,14 @@ class MsgErrorOut(Schema):
     ErrorDesc = String()
     ErrorMsg = String()
 
-class GruposUsuarioOut(Schema):
+class GroupsUsuarioOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
     id_grupo = String()
     nombre_grupo = String()
 
-class UsuariosGrupoOut(Schema):
+class UsuariosGroupOut(Schema):
     nombre_grupo = String()
     id_usuario = String()
     nombre = String()
@@ -224,6 +224,7 @@ class TipoTareaOut(Schema):
     codigo_humano = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
+
 class TareaIn(Schema):
     id_grupo = String()
     prioridad = Integer(required=True, validate=[
@@ -260,14 +261,28 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
-    #fecha_eliminacion = DateTime()
     fecha_eliminacion = String()
+    fecha_inicio = String()
+    fecha_fin = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    plazo = Integer()
+    fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
-    grupo = Nested(GrupoOut, only=("id", "nombre"))
+    grupo = Nested(GroupOut, only=("id", "nombre"))
   
-
+class TareaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    titulo = String(default="")
+    id_tipo_tarea = String()
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+    id_usuario_asignado = String()
+    id_expediente = String()
+    
 ####################Grupos - Tareas - Usuarios ####################
-class GrupoAllOut(Schema):
+class GroupAllOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
@@ -279,16 +294,16 @@ class GrupoAllOut(Schema):
     suspendido = Boolean()
     codigo_nomenclador = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
-    usuarios = List(Nested(UsuarioGrupoIdOut))
+    usuarios = List(Nested(UsuarioGroupIdOut))
     tareas = List(Nested(TareaOut))
 
 class GroupCountOut(Schema):
     count = Integer()
-    data = Nested(GrupoOut, many=True)
+    data = Nested(GroupOut, many=True)
 
 class GroupCountAllOut(Schema):
     count = Integer()
-    data = Nested(GrupoAllOut, many=True)
+    data = Nested(GroupAllOut, many=True)
 
 ###############Usuario Base ####################
 class UsuarioIn(Schema):
@@ -352,7 +367,7 @@ class UsuarioAllOut(Schema):
     id_persona_ext = String()
     eliminado = Boolean()
     suspendido = Boolean()
-    grupos = List(Nested(GrupoOut), only=("id", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
+    grupos = List(Nested(GroupOut), only=("id", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
     tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
    
     @post_dump
@@ -392,7 +407,7 @@ class UsuarioIdOut(Schema):
     eliminado = Boolean()
     suspendido = Boolean()
     tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
-    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
+    grupos = List(Nested(GroupOut, only=("id", "nombre")))
     
 
 
@@ -441,7 +456,7 @@ class TareaIdOut(Schema):
     titulo = String()
     cuerpo = String()
     id_grupo = String()
-    grupo = Nested(GrupoOut, only=("id", "nombre"))
+    grupo = Nested(GroupOut, only=("id", "nombre"))
     prioridad = Integer()
     id_actuacion = String()
     id_expediente = String()
@@ -454,7 +469,7 @@ class TareaIdOut(Schema):
     fecha_fin = DateTime()
     plazo = Integer()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
-    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
+    grupos = List(Nested(GroupOut, only=("id", "nombre")))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
     usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))

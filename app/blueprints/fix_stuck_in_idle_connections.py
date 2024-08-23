@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint
 from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo
 from typing import List
-from ..schemas.schemas import GrupoHOut, HerarquiaGrupoGrupoOut, HerarquiaOut
+from ..schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaOut
 from ..common.error_handling import ValidationError
 from sqlalchemy.orm import scoped_session, aliased
 fix_b = APIBlueprint('fix_b', __name__)

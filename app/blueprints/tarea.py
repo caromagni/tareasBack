@@ -1,11 +1,11 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut
-from ..models.tarea_model import get_all_tareas, get_all_tipo_tareas, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
+from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut
+from ..models.tarea_model import get_all_tarea, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
-
+from datetime import datetime
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 ###############
@@ -16,20 +16,24 @@ def before_request():
     print(request.headers)
 
 ####################TIPO DE TAREA######################
-@tarea_b.doc(description='Listado de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tipo_tareas')
+@tarea_b.doc(description='Consulta de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.get('/tipo_tarea')
 @tarea_b.output(TipoTareaCountOut)
 @tarea_b.input(PageIn, location='query')
 def get_tipoTareas(query_data: dict):
     try:
+        cant=0
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+
+        print("query_data:",query_data)
+        
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
 
-        res, cant = get_all_tipo_tareas(page,per_page)
+        res, cant = get_all_tipo_tarea(page,per_page)
     
         
         data = {
@@ -90,20 +94,39 @@ def del_tipo_tarea(id: str):
         raise ValidationError(err)
     
 ################################TAREAS################################
-@tarea_b.doc(description='Listado de Tareas', summary='Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tareas')
-@tarea_b.input(PageIn, location='query')
+@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.get('/tarea')
+@tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountOut)
 def get_tareas(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant=0
+        titulo=""
+        id_expediente=None
+        id_tipo_tarea=None
+        id_usuario_asignado=None
+        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_hasta=datetime.now()
+
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
-
-        res,cant = get_all_tareas(page,per_page)    
+        if(request.args.get('id_usuario_asignado') is not None):
+            id_usuario_asignado=request.args.get('id_usuario_asignado')    
+        if(request.args.get('titulo') is not None):
+            titulo=request.args.get('titulo')
+        if(request.args.get('id_tipo_tarea') is not None):
+            id_tipo_tarea=request.args.get('id_tipo_tarea') 
+        if(request.args.get('id_expediente') is not None):
+            id_expediente=request.args.get('id_expediente')     
+        if(request.args.get('fecha_desde') is not None):
+            fecha_desde=request.args.get('fecha_desde')
+        if(request.args.get('fecha_hasta') is not None):
+            fecha_hasta=request.args.get('fecha_hasta') 
+        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_tipo_tarea, id_usuario_asignado, fecha_desde, fecha_hasta)    
 
         data = {
                 "count": cant,
