@@ -3,7 +3,7 @@ from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoPatchIn, GrupoOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGrupoOut, GrupoIdOut, GrupoAllOut, MsgErrorOut
+from ..schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
 from datetime import datetime
 import jwt
 from ..common.keycloak import get_public_key
@@ -49,8 +49,8 @@ def verify_token():
 
 @groups_b.doc(description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
-@groups_b.input(GrupoPatchIn) 
-@groups_b.output(GrupoOut)
+@groups_b.input(GroupPatchIn) 
+@groups_b.output(GroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
@@ -101,7 +101,7 @@ def get_grupo(query_data: dict):
         
         data = {
                 "count": cant,
-                "data": GrupoOut().dump(res, many=True)
+                "data": GroupOut().dump(res, many=True)
             }
         
         return data
@@ -139,7 +139,7 @@ def get_grupo_detalle(query_data: dict):
        
         data = {
                 "count": cant,
-                "data": GrupoAllOut().dump(res, many=True)
+                "data": GroupAllOut().dump(res, many=True)
             }
         
         return data
@@ -149,7 +149,7 @@ def get_grupo_detalle(query_data: dict):
 
 @groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
-@groups_b.output(GrupoIdOut())
+@groups_b.output(GroupIdOut())
 def get_grupo_id(id: str):
     try:
         print("id:",id)
@@ -164,7 +164,7 @@ def get_grupo_id(id: str):
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
-@groups_b.output(UsuariosGrupoOut(many=True))
+@groups_b.output(UsuariosGroupOut(many=True))
 def get_usrsbygrupo(id_grupo: str):
     try:
         res = get_usuarios_by_grupo(id_grupo)
@@ -177,8 +177,8 @@ def get_usrsbygrupo(id_grupo: str):
 #################POST####################
 @groups_b.doc(description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
-@groups_b.input(GrupoIn)
-#@groups_b.output(GrupoOut)
+@groups_b.input(GroupIn)
+#@groups_b.output(GroupOut)
 def post_grupo(json_data: dict):
     try:
         
@@ -193,7 +193,7 @@ def post_grupo(json_data: dict):
             res = MsgErrorOut().dump(result)
             return res
             
-        return GrupoOut().dump(res)
+        return GroupOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)  
@@ -201,7 +201,7 @@ def post_grupo(json_data: dict):
 ##############DELETE####################
 @groups_b.doc(description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
-#@groups_b.output(GrupoOut)
+#@groups_b.output(GroupOut)
 def del_grupo(id: str):
     try:
         #eliminar el grupo con sus hijos
