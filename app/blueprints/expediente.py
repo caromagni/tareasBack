@@ -10,7 +10,7 @@ from ..common.error_handling import ValidationError
 expediente_b = APIBlueprint('expediente_blueprint', __name__)
 
 @expediente_b.doc(description='Listado de Expedientes', summary='Listado de Expedientes del organismo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@expediente_b.get('/expedientes')
+@expediente_b.get('/expediente')
 @expediente_b.output(ExpedienteOut(many=True))
 def get_expedientes():
     try:

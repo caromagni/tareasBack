@@ -3,14 +3,14 @@ from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
-from ..models.actuacion_model import get_all_actuaciones, get_all_tactuaciones
+from ..models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
 from ..schemas.schemas import  ActuacionOut, TipoActuacionOut
 from ..common.error_handling import ValidationError
 
 actuacion_b = APIBlueprint('actuacion_blueprint', __name__)
 
 @actuacion_b.doc(description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@actuacion_b.get('/actuaciones')
+@actuacion_b.get('/actuacion')
 @actuacion_b.output(ActuacionOut(many=True))
 def get_actuaciones():
     try:
@@ -34,7 +34,7 @@ def get_actuaciones():
 @actuacion_b.output(TipoActuacionOut(many=True))
 def get_tactuaciones():
     try:
-        res = get_all_tactuaciones()
+        res = get_all_tipoactuaciones()
         if res is None:
             result={
                     "valido":"fail",
