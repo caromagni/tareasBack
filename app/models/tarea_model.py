@@ -40,7 +40,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
             )    
 
     
-    print("nuevoID:",nuevoID_tarea)
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         id_grupo=id_grupo,

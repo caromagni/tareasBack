@@ -1,6 +1,6 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
-from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo
+from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
 from ..schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
@@ -83,6 +83,7 @@ def get_grupo(query_data: dict):
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
+        path_name=False
         print("query_data:",query_data)
         print("per_page:",per_page)
         if(request.args.get('page') is not None):
@@ -95,10 +96,10 @@ def get_grupo(query_data: dict):
             fecha_desde=request.args.get('fecha_desde')
         if(request.args.get('fecha_hasta') is not None):
             fecha_hasta=request.args.get('fecha_hasta')  
-
-        res, cant=get_all_grupos(page,per_page, nombre, fecha_desde, fecha_hasta)
-        
-        
+        if(request.args.get('path_name') is not None):
+            path_name=request.args.get('path_name')
+            
+        res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name)
         data = {
                 "count": cant,
                 "data": GroupOut().dump(res, many=True)

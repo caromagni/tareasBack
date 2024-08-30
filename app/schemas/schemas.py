@@ -148,6 +148,8 @@ class GroupOut(Schema):
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     eliminado = Boolean()
     suspendido = Boolean()
+    path_name = String()
+    level = Integer()
 
 class UsuarioGroupIdOut(Schema):
     id = String()
@@ -243,11 +245,8 @@ class TareaIn(Schema):
     ])
     id_tipo_tarea = String(required=True)
     eliminable = Boolean()
-    fecha_eliminacion = DateTime()
     id_usuario_asignado = String()   
     id_user_actualizacion = String(required=True)
-    fecha_inicio = DateTime()
-    fecha_fin = DateTime()
     plazo = Integer(default=0)
 
 class TareaOut(Schema):

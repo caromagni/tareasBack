@@ -51,7 +51,7 @@ def get_gruposh():
     except Exception as err:
         raise ValidationError(err)   
     
-@herarquia_b.doc(description='Listado de Grupos padres - hijos con niveles', summary='Grupos Padres - Hijos con Niveles', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})    
+@herarquia_b.doc(description='Listado de Grupos padres e hijos con niveles', summary='Grupos Padres - Hijos con Niveles', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})    
 @herarquia_b.get('/niveles_grupos')
 @herarquia_b.output(HerarquiaOut(many=True))
 def get_niveles():
