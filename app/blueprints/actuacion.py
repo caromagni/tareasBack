@@ -1,8 +1,6 @@
-from apiflask import Schema, abort, APIBlueprint
-from apiflask.fields import Integer, String
-from apiflask.validators import Length, OneOf
+from apiflask import APIBlueprint
 from flask import current_app, jsonify, request
-from sqlalchemy.orm import scoped_session
+
 from ..models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
 from ..schemas.schemas import  ActuacionOut, TipoActuacionOut
 from ..common.error_handling import ValidationError

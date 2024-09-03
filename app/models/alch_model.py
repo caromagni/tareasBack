@@ -72,6 +72,16 @@ class Nomenclador(Base):
     turnos_pass = Column(String(100))
     turnos_des = Column(String(25))
 
+class TipoActuacionExt(Base):
+    __tablename__ = 'tipo_actuacion_ext'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tipo_actuacion_ext = Column(UUID, nullable=False)
+    nombre = Column(String, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+
+
 class ActuacionExt(Base):
     __tablename__ = 'actuacion_ext'
     __table_args__ = {'schema': 'tareas'}
@@ -80,9 +90,9 @@ class ActuacionExt(Base):
     nombre = Column(String)
     #id_tipo_actuacion = Column(UUID)
     id_tipo_actuacion = Column(ForeignKey('tareas.tipo_actuacion_ext.id'), nullable=False)
-    tipo_actuacion = relationship('TipoActuacionExt')
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    tipo_actuacion = relationship('TipoActuacionExt')
 
 
 class AutoReglaAsignacion(Base):
@@ -160,15 +170,6 @@ t_multimedia = Table(
     schema='tareas',
 )
 
-
-class TipoActuacionExt(Base):
-    __tablename__ = 'tipo_actuacion_ext'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True)
-    id_tipo_actuacion_ext = Column(UUID, nullable=False)
-    nombre = Column(String, nullable=False)
-    fecha_actualizacion = Column(DateTime, nullable=False)
 
 
 class TipoAgrupacion(Base):
@@ -311,6 +312,7 @@ class UsuarioGrupo(Base):
     id_usuario = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
+    eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')
     usuario = relationship('Usuario')
