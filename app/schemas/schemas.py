@@ -108,7 +108,8 @@ class GroupIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String(required=True)
-    id_padre = String()  
+    id_padre = String() 
+    base = Boolean(default=False)
     codigo_nomenclador = String(validate=[
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
@@ -150,6 +151,7 @@ class GroupOut(Schema):
     suspendido = Boolean()
     path_name = String()
     level = Integer()
+    base = Boolean()
 
 class UsuarioGroupIdOut(Schema):
     id = String()
@@ -188,8 +190,6 @@ class GroupIdOut(Schema):
   
 
 
-
-
 class MsgErrorOut(Schema):
     valido = String()
     ErrorCode = Integer()
@@ -197,11 +197,12 @@ class MsgErrorOut(Schema):
     ErrorMsg = String()
 
 class GroupsUsuarioOut(Schema):
-    id_usuario = String()
-    nombre = String()
-    apellido = String()
+    #id_usuario = String()
+    #nombre = String()
+    #apellido = String()
     id_grupo = String()
     nombre_grupo = String()
+    codigo_nomenclador = String()
 
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()
@@ -228,10 +229,10 @@ class TipoTareaOut(Schema):
     id_user_actualizacion = String()
     eliminado = Boolean()
 
-class UsuarioTarea(Schema):
+class ListUsuario(Schema):
     id_usuario = String()
 
-class UsuarioGrupo(Schema):
+class ListGrupo(Schema):
     id_grupo = String()    
     
 class TareaIn(Schema):
@@ -252,8 +253,8 @@ class TareaIn(Schema):
     eliminable = Boolean()
     id_user_actualizacion = String(required=True)
     plazo = Integer(default=0)
-    usuario = List(Nested(UsuarioTarea))
-    grupo = List(Nested(UsuarioGrupo))
+    usuario = List(Nested(ListUsuario))
+    grupo = List(Nested(ListGrupo))
     
 
 class TareaOut(Schema):
@@ -324,6 +325,7 @@ class UsuarioIn(Schema):
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
+    grupo = List(Nested(ListGrupo))
     
 
 class UsuarioInPatch(Schema):

@@ -24,7 +24,7 @@ def get_actuaciones():
                 } 
             return result
 
-        current_app.server.remove()    
+        current_app.session.remove()    
         return res
     
     except Exception as err:
@@ -45,7 +45,7 @@ def get_tipoactuaciones():
                 } 
             return result
         
-        current_app.server.remove()    
+        current_app.session.remove()    
         return res
     
     except Exception as err:

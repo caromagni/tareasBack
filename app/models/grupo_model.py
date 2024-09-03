@@ -370,7 +370,7 @@ def update_grupo(id='', **kwargs):
     session.commit()
     return grupo
 
-def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion='', id_padre=''):
+def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion='', id_padre='', base=False):
     session: scoped_session = current_app.session
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -378,6 +378,7 @@ def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_use
         id=nuevoID_grupo,
         nombre=nombre.upper(),
         descripcion=descripcion,
+        base=base,
         codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now(),

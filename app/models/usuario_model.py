@@ -191,7 +191,8 @@ def get_grupos_by_usuario(id):
                   Usuario.nombre.label("nombre"),
                   Usuario.apellido.label("apellido"),
                   Grupo.id.label("id_grupo"),
-                  Grupo.nombre.label("nombre_grupo")
+                  Grupo.nombre.label("nombre_grupo"),
+                  Grupo.codigo_nomenclador.label("codigo_nomenclador")
                   ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
                   ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id).filter(Usuario.id == id).all()                                    
     
@@ -200,7 +201,7 @@ def get_grupos_by_usuario(id):
 
 
 
-def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None):
+def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None):
     session: scoped_session = current_app.session
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)
@@ -213,9 +214,25 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
         fecha_actualizacion=datetime.now()
     )
     print("nuevo_usuario:",nuevo_usuario)
+    print("grupo:",grupo)
     session.add(nuevo_usuario)
-    
-    if id_grupo is not '':        
+    if grupo is not None:
+        for group in grupo:
+            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
+            if existe_grupo is None:
+                raise Exception("Error en el ingreso de grupos. Grupo no existente")
+            
+            nuevoID=uuid.uuid4()
+            nuevo_usuario_grupo = UsuarioGrupo(
+                id=nuevoID,
+                id_grupo=group['id_grupo'],
+                id_usuario=nuevoID_usuario,
+                id_user_actualizacion=id_user_actualizacion,
+                fecha_actualizacion=datetime.now()
+            )
+            session.add(nuevo_usuario_grupo)
+
+    """ if id_grupo is not '':        
         nuevoID=uuid.uuid4()
         nuevo_usuario_grupo = UsuarioGrupo(
             id=nuevoID,
@@ -225,7 +242,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
             fecha_actualizacion=datetime.now()
         )
 
-        session.add(nuevo_usuario_grupo)
+        session.add(nuevo_usuario_grupo) """
     
     session.commit()
 

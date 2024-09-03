@@ -26,7 +26,7 @@ def get_grupos_by_usr(id_usuario: str):
                     "ErrorMsg":"No se encontraron datos de usuarios"
                 } 
             return result
-        current_app.server.remove()    
+        current_app.session.remove()    
         return res
     
     except Exception as err:
@@ -95,7 +95,7 @@ def get_usuario_id(id: str):
                     "ErrorMsg":"No se encontró el grupo"
                 } 
             return result
-        current_app.server.remove()
+        current_app.session.remove()
         return res
 
 #############GET CON PARAMETROS######################## 
@@ -135,7 +135,7 @@ def get_usuario(query_data: dict):
                 "data": UsuarioOut().dump(res, many=True)
             }
         
-        current_app.server.remove()
+        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -176,7 +176,7 @@ def get_usuarios_nombre(query_data: dict):
                 "data": UsuarioAllOut().dump(res, many=True)
             }
         
-        current_app.server.remove()
+        current_app.session.remove()
         return data
     
     except Exception as err:

@@ -105,7 +105,7 @@ def get_grupo(query_data: dict):
                 "data": GroupOut().dump(res, many=True)
             }
         
-        current_app.server.remove()
+        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -144,7 +144,7 @@ def get_grupo_detalle(query_data: dict):
                 "data": GroupAllOut().dump(res, many=True)
             }
         
-        current_app.server.remove()
+        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -158,7 +158,7 @@ def get_grupo_id(id: str):
         print("id:",id)
         res = get_grupo_by_id(id)
         
-        current_app.server.remove()
+        current_app.session.remove()
         return res
     except Exception as err:
         raise ValidationError(err)
@@ -173,7 +173,7 @@ def get_usrsbygrupo(id_grupo: str):
     try:
         res = get_usuarios_by_grupo(id_grupo)
         
-        current_app.server.remove()
+        current_app.session.remove()
         return res
     
     except Exception as err:

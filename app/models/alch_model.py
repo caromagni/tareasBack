@@ -119,6 +119,7 @@ class Grupo(Base):
     suspendido = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime)
     fecha_hasta = Column(DateTime)
+    base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
 
 class HerarquiaGrupoGrupo(Base):

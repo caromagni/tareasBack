@@ -47,7 +47,7 @@ def get_gruposh():
                 } 
             return result
 
-        current_app.server.remove()
+        current_app.session.remove()
         return res 
     
     except Exception as err:
@@ -71,7 +71,7 @@ def get_niveles():
             
             return result
 
-        current_app.server.remove()
+        current_app.session.remove()
         return res 
  
     
@@ -94,7 +94,7 @@ def herarquias_all_():
                 } 
             return result
         
-        current_app.server.remove()
+        current_app.session.remove()
         return res 
  
     
