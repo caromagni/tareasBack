@@ -199,8 +199,6 @@ def get_grupos_by_usuario(id):
     return res
 
 
-
-
 def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None):
     session: scoped_session = current_app.session
     nuevoID_usuario=uuid.uuid4()
@@ -213,12 +211,10 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
-    print("nuevo_usuario:",nuevo_usuario)
-    print("grupo:",grupo)
     session.add(nuevo_usuario)
     if grupo is not None:
         for group in grupo:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
+            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo'], Grupo.eliminado==False).first()
             if existe_grupo is None:
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
@@ -269,6 +265,32 @@ def update_usuario(id='', **kwargs):
         usuario.id_user_actualizacion = kwargs['id_user_actualizacion']
 
     usuario.fecha_actualizacion = datetime.now()
+
+    if 'grupo' in kwargs:
+        #elimino los grupos existentes para ese usuario
+        grupos_usuarios=session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id)
+        for grupo in grupos_usuarios:
+            grupo.eliminado=True
+            grupo.fecha_actualizacion=datetime.now()
+
+        #controlo que el grupo exista y lo asocio al usuario
+        for group in kwargs['grupo']:
+            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo'], Grupo.eliminado==False).first()
+            if existe_grupo is None:
+                raise Exception("Error en el ingreso de grupos. Grupo no existente")
+            
+
+            nuevoID=uuid.uuid4()
+            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id, UsuarioGrupo.id_grupo==group['id_grupo'], UsuarioGrupo.eliminado==False).first()
+            if usuario_grupo is None:
+                nuevo_usuario_grupo = UsuarioGrupo(
+                    id=nuevoID,
+                    id_grupo=group['id_grupo'],
+                    id_usuario=id,
+                    id_user_actualizacion= kwargs['id_user_actualizacion'],
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(nuevo_usuario_grupo)
 
     if 'id_grupo' in kwargs:      
         nuevoID=uuid.uuid4()

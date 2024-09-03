@@ -339,6 +339,7 @@ class UsuarioInPatch(Schema):
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
+    grupo = List(Nested(ListGrupo))
  
 
 class UsuarioGetIn(Schema):
@@ -432,11 +433,12 @@ class TipoActuacionOut(Schema):
 class ActuacionOut(Schema):
     id = String()
     nombre = String()
-    descripcion = String()
     id_tipo_actuacion = String()
-    tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
     id_user_actualizacion = String()
     fecha_actualizacion = String()  
+    tipo_actuacion=String()
+    #tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
+
 ###############Expedientes####################
 class ExpedienteOut(Schema):    
     id = String()
