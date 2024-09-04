@@ -268,6 +268,7 @@ class Inhabilidad(Base):
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
+    descripcion = Column(String)
 
     grupo = relationship('Grupo')
     tipo_inhabilidad = relationship('TipoInhabilidad')

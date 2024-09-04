@@ -81,11 +81,14 @@ def get_grupo(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         print(type(per_page))
         nombre=""
+        eliminado=False
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
         path_name=False
         print("query_data:",query_data)
         print("per_page:",per_page)
+        if(request.args.get('eliminado') is not None):
+            eliminado=request.args.get('eliminado')
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -99,7 +102,7 @@ def get_grupo(query_data: dict):
         if(request.args.get('path_name') is not None):
             path_name=request.args.get('path_name')
 
-        res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name)
+        res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado)
         data = {
                 "count": cant,
                 "data": GroupOut().dump(res, many=True)

@@ -84,7 +84,7 @@ def get_grupo_by_id(id):
     return results    
 
 
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False):
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False):
     print("#"*50)
     print("get_all_grupos_nivel")
     print("#"*50)
@@ -152,31 +152,36 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     cursor=session.execute(subquery)
     query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
     
-    if nombre:
+    if nombre is not "":
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
 
-    total = query.count()
-    
+    if eliminado:
+        query = query.filter(Grupo.eliminado==eliminado)
 
+    total = query.count()
+    print("#"*50)
+    print("Total de registros:", total)
     for reg in cursor:
         print(reg.path_name)
         grupo=query.filter(Grupo.id==reg.id_hijo).first()
-        data = {
-            "id": reg.id_hijo,
-            "nombre": grupo.nombre,
-            "path_name": reg.path_name,
-            "fecha_actualizacion": grupo.fecha_actualizacion,
-            "level": reg.level,
-            "descripcion": grupo.descripcion,
-            "nomenclador": grupo.nomenclador,
-            "codigo_nomenclador": grupo.codigo_nomenclador,
-            "fecha_creacion": grupo.fecha_creacion,
-            "id_user_actualizacion": grupo.id_user_actualizacion,
-            "eliminado": grupo.eliminado,
-            "suspendido": grupo.suspendido
-        }
+        if grupo is not None:
+            #continue
+            data = {
+                "id": reg.id_hijo,
+                "nombre": grupo.nombre,
+                "path_name": reg.path_name,
+                "fecha_actualizacion": grupo.fecha_actualizacion,
+                "level": reg.level,
+                "descripcion": grupo.descripcion,
+                "nomenclador": grupo.nomenclador,
+                "codigo_nomenclador": grupo.codigo_nomenclador,
+                "fecha_creacion": grupo.fecha_creacion,
+                "id_user_actualizacion": grupo.id_user_actualizacion,
+                "eliminado": grupo.eliminado,
+                "suspendido": grupo.suspendido
+            }
 
-        result.append(data)
+            result.append(data)
 
     start = (page - 1) * per_page
     end = start + per_page

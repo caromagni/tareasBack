@@ -138,6 +138,7 @@ class GroupGetIn(Schema):
     nombre = String(default="")
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
+    eliminado = Boolean(default=False)
 
 class GroupOut(Schema):
     id = String()
