@@ -84,72 +84,77 @@ def get_grupo_by_id(id):
     return results    
 
 
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False):
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
     print("#"*50)
     print("get_all_grupos_nivel")
+    print("Path_name:", path_name)
     print("#"*50)
+    cursor=None
     session: scoped_session = current_app.session
     # Subconsulta recursiva
-    subquery= text("""WITH RECURSIVE GroupTree AS (
-            -- Anchor member: Start with all parentless nodes
+    if path_name=='true':
+        print("Con consulta recursiva")
+        subquery= text("""WITH RECURSIVE GroupTree AS (
+                -- Anchor member: Start with all parentless nodes
+                SELECT 
+                    g.id AS id_padre,
+                    g.id AS id_hijo,
+                    g.descripcion AS parent_name,
+                    g.descripcion AS child_name,
+                    g.id::text AS path,
+                    COALESCE(g.nombre, hgg1.id_hijo::text) AS path_name,
+                    0 AS level,  -- Set level to 0 for parentless groups
+                    true AS is_parentless,
+                    g.id AS group_id  -- Add the group ID column
+                FROM 
+                    tareas.grupo g
+                LEFT JOIN 
+                    tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
+                WHERE 
+                    hgg1.id_hijo IS NULL
+
+                UNION ALL
+
+                -- Recursive member: Join with the hierarchical table to find child groups
+                SELECT 
+                    hgg.id_padre,
+                    hgg.id_hijo,
+                    gp_padre.descripcion AS parent_name,
+                    gp_hijo.descripcion AS child_name,
+                    gt.path || ' -> ' || hgg.id_hijo::text AS path,
+                    gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
+                    gt.level + 1 AS level,
+                    false AS is_parentless,
+                    gp_hijo.id AS group_id  -- Add the group ID column for children
+                FROM 
+                    tareas.herarquia_grupo_grupo hgg
+                INNER JOIN 
+                    GroupTree gt ON gt.id_hijo = hgg.id_padre
+                INNER JOIN 
+                    tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
+                INNER JOIN 
+                    tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+            )
+
+            -- Select from the CTE to get the full hierarchy
             SELECT 
-                g.id AS id_padre,
-                g.id AS id_hijo,
-                g.descripcion AS parent_name,
-                g.descripcion AS child_name,
-                g.id::text AS path,
-                COALESCE(g.nombre, hgg1.id_hijo::text) AS path_name,
-                0 AS level,  -- Set level to 0 for parentless groups
-                true AS is_parentless,
-                g.id AS group_id  -- Add the group ID column
+                gt.id_padre,
+                gt.parent_name,
+                gt.id_hijo,
+                gt.child_name,
+                gt.path,
+                gt.path_name,
+                gt.level,
+                gt.is_parentless,
+                gt.group_id  -- Include the new group ID column in the final select
             FROM 
-                tareas.grupo g
-            LEFT JOIN 
-                tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
-            WHERE 
-                hgg1.id_hijo IS NULL
+                GroupTree gt
+            ORDER BY 
+                gt.path;""")
+        
+        result =[]
+        cursor=session.execute(subquery)
 
-            UNION ALL
-
-            -- Recursive member: Join with the hierarchical table to find child groups
-            SELECT 
-                hgg.id_padre,
-                hgg.id_hijo,
-                gp_padre.descripcion AS parent_name,
-                gp_hijo.descripcion AS child_name,
-                gt.path || ' -> ' || hgg.id_hijo::text AS path,
-                gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
-                gt.level + 1 AS level,
-                false AS is_parentless,
-                gp_hijo.id AS group_id  -- Add the group ID column for children
-            FROM 
-                tareas.herarquia_grupo_grupo hgg
-            INNER JOIN 
-                GroupTree gt ON gt.id_hijo = hgg.id_padre
-            INNER JOIN 
-                tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
-            INNER JOIN 
-                tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
-        )
-
-        -- Select from the CTE to get the full hierarchy
-        SELECT 
-            gt.id_padre,
-            gt.parent_name,
-            gt.id_hijo,
-            gt.child_name,
-            gt.path,
-            gt.path_name,
-            gt.level,
-            gt.is_parentless,
-            gt.group_id  -- Include the new group ID column in the final select
-        FROM 
-            GroupTree gt
-        ORDER BY 
-            gt.path;""")
-    
-    result =[]
-    cursor=session.execute(subquery)
     query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
     
     if nombre is not "":
@@ -158,37 +163,43 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     if eliminado:
         query = query.filter(Grupo.eliminado==eliminado)
 
+    if suspendido:
+        query = query.filter(Grupo.suspendido==suspendido)    
+
     total = query.count()
     print("#"*50)
     print("Total de registros:", total)
-    for reg in cursor:
-        print(reg.path_name)
-        grupo=query.filter(Grupo.id==reg.id_hijo).first()
-        if grupo is not None:
-            #continue
-            data = {
-                "id": reg.id_hijo,
-                "nombre": grupo.nombre,
-                "path_name": reg.path_name,
-                "fecha_actualizacion": grupo.fecha_actualizacion,
-                "level": reg.level,
-                "descripcion": grupo.descripcion,
-                "nomenclador": grupo.nomenclador,
-                "codigo_nomenclador": grupo.codigo_nomenclador,
-                "fecha_creacion": grupo.fecha_creacion,
-                "id_user_actualizacion": grupo.id_user_actualizacion,
-                "eliminado": grupo.eliminado,
-                "suspendido": grupo.suspendido
-            }
+    if cursor:
+        for reg in cursor:
+            print(reg.path_name)
+            grupo=query.filter(Grupo.id==reg.id_hijo).first()
+            if grupo is not None:
+                #continue
+                data = {
+                    "id": reg.id_hijo,
+                    "nombre": grupo.nombre,
+                    "path_name": reg.path_name,
+                    "fecha_actualizacion": grupo.fecha_actualizacion,
+                    "level": reg.level,
+                    "descripcion": grupo.descripcion,
+                    "nomenclador": grupo.nomenclador,
+                    "codigo_nomenclador": grupo.codigo_nomenclador,
+                    "fecha_creacion": grupo.fecha_creacion,
+                    "id_user_actualizacion": grupo.id_user_actualizacion,
+                    "eliminado": grupo.eliminado,
+                    "suspendido": grupo.suspendido
+                }
 
-            result.append(data)
+                result.append(data)
 
-    start = (page - 1) * per_page
-    end = start + per_page
+        start = (page - 1) * per_page
+        end = start + per_page
 
 
     # Extraer los registros de la página actual
-    result_paginated = result[start:end]
+        result_paginated = result[start:end]
+    else:
+        result_paginated= query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page)    
 
     #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
 
@@ -415,7 +426,8 @@ def get_usuarios_by_grupo(id):
                   Usuario.id.label("id_usuario")                  
                   ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
                   ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                  ).filter(Grupo.id == id).all()                                    
+                  ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all() 
+                                       
     print("Encontrados:",len(res))
     return res
 

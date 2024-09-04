@@ -1,16 +1,44 @@
 # coding: utf-8
 import uuid
 from sqlalchemy.orm import scoped_session
-from datetime import datetime
+from datetime import datetime, timedelta
 from ..common.functions import controla_fecha
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
+
+def es_habil(fecha):
+    if fecha.weekday() >= 5:
+        return True    
+    
+def calcular_fecha_vencimiento(fecha, plazo):
+    fecha_vencimiento = fecha
+    dias_agregados = 0
+    while dias_agregados < plazo:
+        fecha_vencimiento = fecha_vencimiento + timedelta(days=1)
+        if not es_habil(fecha_vencimiento):
+            dias_agregados = dias_agregados + 1
+
+    return fecha_vencimiento
 
 
 def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
+    ###########Calculo de plazo################
+    con_plazo=True
+    fecha_inicio = datetime.now()
 
+    if con_plazo:
+        plazo=10
+        query_inhabilidad = session.query(Inhabilidad).filter(Inhabilidad.fecha_inicio <= fecha_inicio, Inhabilidad.fecha_fin >= fecha_inicio).all()
+        if query_inhabilidad is not None:
+            for row in query_inhabilidad:
+                plazo=plazo+1
+
+        #fecha_fin = fecha_inicio + timedelta(days=plazo)
+        fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
+
+    ########################################################
     
     session: scoped_session = current_app.session
     print("Usuario:", usuario)

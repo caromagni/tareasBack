@@ -139,6 +139,8 @@ class GroupGetIn(Schema):
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
     eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
+    path_name = Boolean(default=False)
 
 class GroupOut(Schema):
     id = String()
