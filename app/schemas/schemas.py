@@ -328,11 +328,11 @@ class GroupCountAllOut(Schema):
 ###############Usuario Base ####################
 class UsuarioIn(Schema):
     nombre = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     apellido = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     id_user_actualizacion = String()
@@ -340,17 +340,17 @@ class UsuarioIn(Schema):
     grupo = List(Nested(ListGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    username = String(validate=[validate.Length(min=6, max=15, error="El campo debe ser mayor a 6 y menor a 15 caracteres")])
+    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
     
 
 class UsuarioInPatch(Schema):
     nombre = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     apellido = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     id_user_actualizacion = String()
@@ -358,7 +358,7 @@ class UsuarioInPatch(Schema):
     grupo = List(Nested(ListGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    username = String(validate=[validate.Length(min=6, max=15, error="El campo debe ser mayor a 6 y menor a 15 caracteres")])
+    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
 
 class UsuarioGetIn(Schema):

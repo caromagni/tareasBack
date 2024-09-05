@@ -39,7 +39,7 @@ def get_grupos_by_usr(id_usuario: str):
 @usuario_b.doc(description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(UsuarioIn)
-@usuario_b.output(UsuarioOut)
+#@usuario_b.output(UsuarioOut)
 def post_usuario(json_data: dict):
     try:
         print('inserta usuario')
@@ -54,7 +54,7 @@ def post_usuario(json_data: dict):
                 } 
             return result
             
-        return res
+        return UsuarioOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)
@@ -63,7 +63,7 @@ def post_usuario(json_data: dict):
 @usuario_b.doc(description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
 @usuario_b.input(UsuarioInPatch)
-@usuario_b.output(UsuarioOut)
+#@usuario_b.output(UsuarioOut)
 def patch_usuario(usuario_id: str, json_data: dict):
     try:
         
@@ -77,8 +77,8 @@ def patch_usuario(usuario_id: str, json_data: dict):
                     "ErrorMsg":"No se encontró el grupo a modificar"
                 } 
             return result
-            
-        return res
+        return UsuarioOut().dump(res)    
+        
     
     except Exception as err:
         raise ValidationError(err)
@@ -86,7 +86,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
 ###############GET BY ID####################
 @usuario_b.doc(description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario/<string:id>')
-@usuario_b.output(UsuarioIdOut(many=True))
+#@usuario_b.output(UsuarioIdOut(many=True))
 def get_usuario_id(id: str):
         res = get_usuario_by_id(id)
         if res is None or len(res)==0:
@@ -99,7 +99,8 @@ def get_usuario_id(id: str):
                 } 
             return result
         current_app.session.remove()
-        return res
+        return UsuarioIdOut().dump(res, many=True)
+        
 
 #############GET CON PARAMETROS######################## 
 # CONSULTA SIMPLE
@@ -213,6 +214,7 @@ def del_usuario(id: str):
                 } 
         
         return result
+    
     except DataNotFound as err:
         raise DataError(800, err)
     except Exception as err:
