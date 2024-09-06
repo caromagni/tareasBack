@@ -498,10 +498,10 @@ def get_grupos_recursivo():
 
 
 
-def get_grupos_all():
-    print("Esta consulta anda")
+def get_grupos_all(eliminado=None):
+    print("eliminado:", eliminado)
     session: scoped_session = current_app.session
-    query = text("""
+    query1 = text("""
   WITH RECURSIVE GroupTree AS (
     -- Anchor member: Start with all parentless nodes
     SELECT 
@@ -509,6 +509,7 @@ def get_grupos_all():
         g.id AS id_hijo,
         g.descripcion AS parent_name,
         g.descripcion AS child_name,
+        g.eliminado AS child_eliminado,         
         g.id::text AS path,
         0 AS level,  -- Set level to 0 for parentless groups
         true AS is_parentless,
@@ -528,6 +529,7 @@ def get_grupos_all():
         hgg.id_hijo,
         gp_padre.descripcion AS parent_name,
         gp_hijo.descripcion AS child_name,
+        gp_hijo.eliminado AS child_eliminado,         
         gt.path || ' -> ' || hgg.id_hijo::text AS path,
         gt.level + 1 AS level,
         false AS is_parentless,
@@ -548,17 +550,74 @@ SELECT
     gt.parent_name,
     gt.id_hijo,
     gt.child_name,
+    gt.child_eliminado,             
     gt.path,
     gt.level,
     gt.is_parentless,
     gt.group_id  -- Include the new group ID column in the final select
 FROM 
     GroupTree gt
-ORDER BY 
-    gt.path;
+WHERE 
+    gt.child_eliminado = :eliminado   
+ORDER BY gt.path;                                 
   """)
+    query_str = (
+        'WITH RECURSIVE GroupTree AS ('
+        'SELECT '
+        'g.id AS id_padre, '
+        'g.id AS id_hijo, '
+        'g.descripcion AS parent_name, '
+        'g.descripcion AS child_name, '
+        'g.eliminado AS child_eliminado, '
+        'g.id::text AS path, '
+        '0 AS level, '  # Nivel 0 para grupos sin padre
+        'true AS is_parentless, '
+        'g.id AS group_id '
+        'FROM tareas.grupo g '
+        'LEFT JOIN tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo '
+        'WHERE hgg1.id_hijo IS NULL '
+        'UNION ALL '
+        'SELECT '
+        'hgg.id_padre, '
+        'hgg.id_hijo, '
+        'gp_padre.descripcion AS parent_name, '
+        'gp_hijo.descripcion AS child_name, '
+        'gp_hijo.eliminado AS child_eliminado, '
+        'gt.path || \' -> \' || hgg.id_hijo::text AS path, '
+        'gt.level + 1 AS level, '
+        'false AS is_parentless, '
+        'gp_hijo.id AS group_id '
+        'FROM tareas.herarquia_grupo_grupo hgg '
+        'INNER JOIN GroupTree gt ON gt.id_hijo = hgg.id_padre '
+        'INNER JOIN tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id '
+        'INNER JOIN tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id '
+        ') '
+        'SELECT '
+        'gt.id_padre, '
+        'gt.parent_name, '
+        'gt.id_hijo, '
+        'gt.child_name, '
+        'gt.child_eliminado, '
+        'gt.path, '
+        'gt.level, '
+        'gt.is_parentless, '
+        'gt.group_id '
+        'FROM GroupTree gt '
+    )
+
+    if eliminado is not None:
+        query_str += ' WHERE gt.child_eliminado = :eliminado'
+
+    query_str += ' ORDER BY gt.path;'
+
+    query = text(query_str)
+
+    # Ejecutar la consulta con el parámetro `eliminado` si es necesario
+    if eliminado is not None:
+        res = session.execute(query, {"eliminado": eliminado}).fetchall()
+    else:
+        res = session.execute(query).fetchall()
     
-    res = session.execute(query).fetchall()
     return res
 
 

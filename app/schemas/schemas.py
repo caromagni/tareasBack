@@ -50,6 +50,11 @@ def validate_num(f):
     if not f.isdigit():
         raise ValidationError("El campo debe contener sólo números")
     
+def validate_email(f):
+    # Expresión regular para validar una dirección de correo electrónico
+    if not re.match(r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$', f):
+        raise ValidationError("El campo debe contener una dirección de email válida.")    
+    
 ##########Schemas para joins ###############################   
 class SmartNested(Nested):
     def serialize(self, attr, obj, accessor=None):
@@ -68,6 +73,9 @@ class NomencladorOut(Schema):
     nroficin_corto = String()
 
 ###############Groups####################
+class HerarquiaGroupGroupInput(Schema):
+    eliminado = Boolean()
+    
 class HerarquiaGroupGroupOut(Schema):
     id_padre = String()
     id_hijo = String()
@@ -93,6 +101,7 @@ class HerarquiaAllOut(Schema):
     parent_name = String()
     id_hijo = String()
     child_name = String()
+    child_eliminado = Boolean()
     path = String()
     level = Integer()
     is_parentless = Boolean()
@@ -200,7 +209,7 @@ class MsgErrorOut(Schema):
     ErrorMsg = String()
 
 class GroupsUsuarioOut(Schema):
-    #id_usuario = String()
+    id_usuario = String()
     #nombre = String()
     #apellido = String()
     id_grupo = String()
@@ -319,30 +328,37 @@ class GroupCountAllOut(Schema):
 ###############Usuario Base ####################
 class UsuarioIn(Schema):
     nombre = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     apellido = String(required=True, validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListGrupo))
+    dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
+    email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
+    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
+ 
     
 
 class UsuarioInPatch(Schema):
     nombre = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     apellido = String(validate=[
-        validate.Length(min=3, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListGrupo))
+    dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
+    email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
+    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
 
 class UsuarioGetIn(Schema):
@@ -350,8 +366,9 @@ class UsuarioGetIn(Schema):
     per_page = Integer(default=10)
     nombre = String(default="")
     apellido = String(default="")
-    id_grupo = String()
-   
+    #id_grupo = String()
+    dni = String()  
+    username = String()
 
 class UsuarioOut(Schema):
     id = String()
@@ -361,6 +378,9 @@ class UsuarioOut(Schema):
     apellido = String()
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  
+    username = String()
+    email = String()
+    dni = String()
     eliminado = Boolean()
     suspendido = Boolean()
 
@@ -382,7 +402,10 @@ class UsuarioAllOut(Schema):
     suspendido = Boolean()
     grupos = List(Nested(GroupOut), only=("id", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
     tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
-   
+    dni = String()
+    email = String()
+    username = String()
+
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
@@ -419,6 +442,9 @@ class UsuarioIdOut(Schema):
     fecha_actualizacion = String()
     eliminado = Boolean()
     suspendido = Boolean()
+    dni = String()
+    email = String()
+    username = String()
     tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
     grupos = List(Nested(GroupOut, only=("id", "nombre")))
     

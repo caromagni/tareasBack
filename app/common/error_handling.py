@@ -71,7 +71,7 @@ def register_error_handlers(app):
         print(e)
         #system_error = sys.exc_info()
         #return jsonify(e.with_traceback(system_error[2])), 403
-        return jsonify(error='ValidationError', error_description=str(e)), 403
+        return jsonify(error='ValidationError', error_description=str(e), code=800), 403
    
     @app.errorhandler(GetTokenError)
     def handle_object_not_found_error(e):

@@ -228,6 +228,9 @@ class Usuario(Base):
     id_persona_ext = Column(UUID)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
+    username = Column(String)
+    dni = Column(String)
+    email = Column(String)
 
 
 class AutoAccionAsignacion(Base):

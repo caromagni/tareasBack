@@ -1,9 +1,9 @@
 from apiflask import APIBlueprint
 from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo,get_grupos_all
 from typing import List
-from ..schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaOut,HerarquiaAllOut
+from ..schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
 from ..common.error_handling import ValidationError
-from flask import current_app
+from flask import current_app, request
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
@@ -80,11 +80,17 @@ def get_niveles():
 
 
 @herarquia_b.get('/herarquias_all')
+@herarquia_b.input(HerarquiaGroupGroupInput, location='query')
 @herarquia_b.output(HerarquiaAllOut(many=True))
-def herarquias_all_():
+def herarquias_all_(query_data: dict):
     try:
         #res=get_grupos_herarquia()
-        res=get_grupos_all()
+        eliminado=None
+        if(request.args.get('eliminado') is not None):
+            eliminado=request.args.get('eliminado')
+
+        res=get_grupos_all(eliminado)
+
         if res is None:
             
             result={

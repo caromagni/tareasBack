@@ -24,23 +24,28 @@ def calcular_fecha_vencimiento(fecha, plazo):
 
 
 def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
-    ###########Calculo de plazo################
+    session: scoped_session = current_app.session
+   ###########Calculo de plazo################
     con_plazo=True
-    fecha_inicio = datetime.now()
-
+    fecha_inicio = datetime.now().date()
+    print("fecha_inicio:",fecha_inicio)
     if con_plazo:
         plazo=10
-        query_inhabilidad = session.query(Inhabilidad).filter(Inhabilidad.fecha_inicio <= fecha_inicio, Inhabilidad.fecha_fin >= fecha_inicio).all()
-        if query_inhabilidad is not None:
-            for row in query_inhabilidad:
-                plazo=plazo+1
+        #Tarea.fecha_creacion.between(fecha_desde, fecha_hasta
+        #Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio  
+        query_inhabilidad = session.query(Inhabilidad).all()
+        if len(query_inhabilidad)>0:                                    
+            query_inhabilidad = session.query(Inhabilidad).filter(Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio).all()
+            if query_inhabilidad is not None:
+                for row in query_inhabilidad:
+                    plazo=plazo+1
 
         #fecha_fin = fecha_inicio + timedelta(days=plazo)
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
 
     ########################################################
     
-    session: scoped_session = current_app.session
+    
     print("Usuario:", usuario)
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   

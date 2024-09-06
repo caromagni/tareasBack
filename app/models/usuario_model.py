@@ -55,6 +55,9 @@ def get_usuario_by_id(id):
             "id": res.id,
             "nombre": res.nombre,
             "apellido": res.apellido,
+            "dni": res.dni,
+            "username": res.username,
+            "email": res.email,
             "id_persona_ext": res.id_persona_ext,
             "id_user_actualizacion": res.id_user_actualizacion,
             "fecha_actualizacion": res.fecha_actualizacion,
@@ -71,44 +74,51 @@ def get_usuario_by_id(id):
     
     return results 
 
-def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
+def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username=""):
     session: scoped_session = current_app.session
 
     query = session.query(Usuario)
     if id_grupo:
-        print("filtro por grupo:", id_grupo)
         query = query.filter(Grupo.id == id_grupo)
 
-    if nombre:
-        print("filtro por nombre:", nombre)
+    if nombre != "":
         query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
 
-    if apellido:
-        print("filtro por apellido:", apellido)
+    if apellido != "":
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
+
+    if dni != "":
+        query = query.filter(Usuario.dni.ilike(f"%{dni}%"))
+
+    if username != "":
+        query = query.filter(Usuario.username.ilike(f"%{username}%"))    
 
     total= query.count()
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page).all()
     return query, total
 
 
-def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
+def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username=""):
     session: scoped_session = current_app.session
 
     query = session.query(Usuario)
 
     # Aplicar filtros dinámicamente
     if id_grupo:
-        print("filtro por grupo:", id_grupo)
         query = query.filter(Grupo.id == id_grupo)
 
-    if nombre:
-        print("filtro por nombre:", nombre)
+    if len(nombre) > 0:
         query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
 
-    if apellido:
-        print("filtro por apellido:", apellido)
+    if len(apellido) > 0:
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
+
+    if len(dni) > 0:
+
+        query = query.filter(Usuario.dni.ilike(f"%{dni}%"))
+
+    if username != "":
+        query = query.filter(Usuario.username.ilike(f"%{username}%"))
 
 
     total= query.count()
@@ -169,6 +179,9 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "fecha_actualizacion": res.fecha_actualizacion,
                 "eliminado": res.eliminado,
                 "suspendido": res.suspendido,
+                "dni": res.dni,
+                "username": res.username,
+                "email": res.email,
                 "grupos": grupos,
                 "tareas": tareas
             }
@@ -179,13 +192,16 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     else:
         return None
     
-    print("total:", total)
     return results, total 
         
 
 
 def get_grupos_by_usuario(id):
     session: scoped_session = current_app.session
+    res = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
+    if res is None:
+        raise Exception("Usuario no encontrado")
+    
     res = session.query(Usuario.id.label("id_usuario"),
                   Usuario.nombre.label("nombre"),
                   Usuario.apellido.label("apellido"),
@@ -195,11 +211,11 @@ def get_grupos_by_usuario(id):
                   ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
                   ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
                   ).filter(Usuario.id == id, UsuarioGrupo.eliminado==False).all()                                    
-    
+
     return res
 
 
-def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None):
+def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
     session: scoped_session = current_app.session
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)
@@ -207,6 +223,9 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
         id=nuevoID_usuario,
         nombre=nombre,
         apellido=apellido,
+        dni = dni,
+        username = username.upper(),
+        email = email.lower(),
         id_persona_ext=id_persona_ext,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
@@ -214,10 +233,13 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
     session.add(nuevo_usuario)
     if grupo is not None:
         for group in grupo:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo'], Grupo.eliminado==False).first()
+            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
-            
+
+            if existe_grupo.eliminado==True:
+                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+
             nuevoID=uuid.uuid4()
             nuevo_usuario_grupo = UsuarioGrupo(
                 id=nuevoID,
@@ -228,18 +250,6 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
             )
             session.add(nuevo_usuario_grupo)
 
-    """ if id_grupo is not '':        
-        nuevoID=uuid.uuid4()
-        nuevo_usuario_grupo = UsuarioGrupo(
-            id=nuevoID,
-            id_grupo=id_grupo,
-            id_usuario=nuevoID_usuario,
-            #id_user_actualizacion=id_user_actualizacion,
-            fecha_actualizacion=datetime.now()
-        )
-
-        session.add(nuevo_usuario_grupo) """
-    
     session.commit()
 
     return nuevo_usuario
@@ -259,6 +269,12 @@ def update_usuario(id='', **kwargs):
         usuario.nombre = kwargs['nombre']
     if 'apellido' in kwargs:
         usuario.apellido = kwargs['apellido']
+    if 'username' in kwargs:
+        usuario.username = kwargs['username'].upper()
+    if 'dni' in kwargs:
+        usuario.dni = kwargs['dni']
+    if 'email' in kwargs:
+        usuario.email = kwargs['email'].lower()           
     if 'id_persona_ext' in kwargs:
         usuario.id_persona_ext = kwargs['id_persona_ext']
     if 'id_user_actualizacion' in kwargs:
@@ -275,10 +291,12 @@ def update_usuario(id='', **kwargs):
 
         #controlo que el grupo exista y lo asocio al usuario
         for group in kwargs['grupo']:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo'], Grupo.eliminado==False).first()
+            existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
+            if existe_grupo.eliminado==True:
+                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
             nuevoID=uuid.uuid4()
             usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id, UsuarioGrupo.id_grupo==group['id_grupo'], UsuarioGrupo.eliminado==False).first()
