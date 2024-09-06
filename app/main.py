@@ -1,4 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
+from flask import send_from_directory
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -50,6 +51,13 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
 
 
+    @app.route('/docs_sphinx/<path:filename>')
+    def serve_sphinx_docs(filename):
+        return send_from_directory('_build/html', filename)
+
+    @app.route('/docs_sphinx/')
+    def index():
+        return send_from_directory('_build/html', 'index.html')
     
     app.register_blueprint(groups_b)
     app.register_blueprint(herarquia_b)
