@@ -209,12 +209,13 @@ class MsgErrorOut(Schema):
     ErrorMsg = String()
 
 class GroupsUsuarioOut(Schema):
-    id_usuario = String()
+    #id_usuario = String()
     #nombre = String()
     #apellido = String()
     id_grupo = String()
     nombre_grupo = String()
     codigo_nomenclador = String()
+    
 
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()

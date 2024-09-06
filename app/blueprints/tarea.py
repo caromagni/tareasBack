@@ -233,7 +233,6 @@ def post_tarea(json_data: dict):
 @tarea_b.delete('/tarea/<string:id>')
 def del_tarea(id: str):
     try:
-       
         res = delete_tarea(id)
         print("res:",res)
         if res is None:

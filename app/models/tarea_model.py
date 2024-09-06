@@ -301,8 +301,8 @@ def delete_tarea(id_tarea):
     if tarea is not None:
         if tarea.eliminable==False:
               print("Tarea no eliminable")
-              return None
-        
+              raise Exception("Tarea no eliminable")
+              
         tarea.eliminado=True
         tarea.fecha_eliminacion=datetime.now()
         tarea.fecha_actualizacion=datetime.now()
