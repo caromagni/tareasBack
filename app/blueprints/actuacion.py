@@ -11,6 +11,17 @@ actuacion_b = APIBlueprint('actuacion_blueprint', __name__)
 @actuacion_b.get('/actuacion')
 @actuacion_b.output(ActuacionOut(many=True))
 def get_actuaciones():
+    """
+    Actuaciones.
+    ==============
+    
+    **List Actuaciones.**
+
+    :caption: This route returns a list of actuaciones.
+
+    :return: JSON object with actuaciones data or an error message.
+    :rtype: json
+    """
     try:
         res = get_all_actuaciones()
         if res is None:
