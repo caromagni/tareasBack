@@ -17,4 +17,7 @@ documentation for details.
    :recursive:
 
    app
+   .blueprints.actuacion
+   .blueprints.expediente
+
 
