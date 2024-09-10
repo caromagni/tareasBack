@@ -7,28 +7,6 @@ from flask import current_app, request
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
-""" @herarquia_b.doc(description='Listado de Grupos padres - hijos', summary='Jerarquía de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@herarquia_b.get('/herarquias')
-@herarquia_b.output(HerarquiaGroupGroupOut(many=True))
-def get_herarquias():
-    try:
-        
-        res=get_all_herarquia()
-        
-        if res is None or len(res) == 0:
-            
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontraron datos de grupos"
-                } 
-            return result
-
-        return res
-    
-    except Exception as err:
-        raise ValidationError(err)   """
 
 @herarquia_b.doc(description='Listado de Grupos padres - Hijos', summary='Grupos padres - hijos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @herarquia_b.get('/herarquias')
