@@ -26,6 +26,11 @@ def convert_to_serializable(value):
 
 def get_serializable_dict(instance):
     return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
+    try:
+        return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
+    except Exception as e:
+        return ""    
+    #return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
 
 @event.listens_for(scoped_session, 'after_flush')
 def after_flush(session, flush_context):
@@ -56,12 +61,14 @@ def after_flush(session, flush_context):
                 id_registro=instance.id,
                 operacion='INSERT',
                 datos_nuevos=get_serializable_dict(instance),
+                datos_nuevos="",
                 fecha_actualizacion=datetime.now(),
                 usuario_actualizacion=get_user_actualizacion(instance),
                 ip_usuario=ip
                # ip_usuario='192.168.68.201'  # obtener la IP real del usuario
                 
             )
+            print("auditoria:", auditoria)
             session.add(auditoria)
             
     for instance in session.dirty: # Update

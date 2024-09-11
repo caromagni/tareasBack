@@ -11,10 +11,16 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 ###############
 @tarea_b.before_request
 def before_request():
-    
     print("Antes de la petición")
     print(request.headers)
-
+######################Control de acceso######################
+def control_rol_usuario(token, nombre_usuario, url_api):
+    print("Control de acceso")
+    print("Token:",token)
+    print("Nombre usuario:",nombre_usuario)
+    print("URL:",url_api)
+    return True
+    
 ####################TIPO DE TAREA######################
 @tarea_b.doc(description='Consulta de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tarea')
@@ -101,6 +107,10 @@ def del_tipo_tarea(id: str):
 @tarea_b.output(TareaCountOut)
 def get_tareas(query_data: dict):
     try:
+        token=''
+        nombre_usuario='simperiale'
+        url_api='get/tarea'
+        #accede = control_rol_usuario(token, nombre_usuario, url_api)
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
@@ -108,6 +118,7 @@ def get_tareas(query_data: dict):
         id_expediente=None
         id_tipo_tarea=None
         id_usuario_asignado=None
+        id_grupo=None
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
 
@@ -116,7 +127,9 @@ def get_tareas(query_data: dict):
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
         if(request.args.get('id_usuario_asignado') is not None):
-            id_usuario_asignado=request.args.get('id_usuario_asignado')    
+            id_usuario_asignado=request.args.get('id_usuario_asignado')   
+        if(request.args.get('id_grupo') is not None):
+            id_usuario_asignado=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
@@ -127,7 +140,7 @@ def get_tareas(query_data: dict):
             fecha_desde=request.args.get('fecha_desde')
         if(request.args.get('fecha_hasta') is not None):
             fecha_hasta=request.args.get('fecha_hasta') 
-        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_tipo_tarea, id_usuario_asignado, fecha_desde, fecha_hasta)    
+        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_tipo_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta)    
 
         data = {
                 "count": cant,
@@ -222,7 +235,7 @@ def post_tarea(json_data: dict):
                     "error_description": "No se pudo insertar la tarea"
                 }
             res = MsgErrorOut().dump(result)
-
+        
         return TareaOut().dump(res)
     
     except Exception as err:

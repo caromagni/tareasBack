@@ -14,10 +14,10 @@ def get_actuaciones():
     """
     Actuaciones.
     ==============
-    
+
     **List Actuaciones.**
 
-    :caption: This route returns a list of actuaciones.
+    :caption: This route returns a list of *actuaciones*.
 
     :return: JSON object with actuaciones data or an error message.
     :rtype: json
