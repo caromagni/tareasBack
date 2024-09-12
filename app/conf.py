@@ -3,7 +3,7 @@ import sys
 
 # Agregar la carpeta de blueprints a sys.path
 sys.path.insert(0, os.path.abspath('..'))
-
+sys.path.insert(0, os.path.abspath('./../modulos'))
 # Archivo de configuración para el generador de documentación Sphinx
 
 project = 'tareas'
@@ -38,6 +38,19 @@ Documentación de Tareas
    introduccion
    arquitectura
    referencia_api
+   /modulos/alertas
+   /modulos/bandeja_principal
+   /modulos/calendario
+   /modulos/contenido_multimedia
+   /modulos/creacion_tarea
+   /modulos/grupos
+   /modulos/tareas_anidadas
+   /modulos/tareas_automaticas
+   /modulos/tareas_fechas_intermedias
+   /modulos/tareas_personales
+   /modulos/tareas_programadas
+   /modulos/tareas_recurrentes
+   /modulos/visibilidad_externa
 
 Índices y tablas
 ================

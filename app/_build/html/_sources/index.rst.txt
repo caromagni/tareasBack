@@ -8,8 +8,24 @@ Documentación de Tareas
    introduccion
    arquitectura
    referencia_api
+<<<<<<< HEAD
    tareas_api
    loindex
+=======
+   /modulos/alertas
+   /modulos/bandeja_principal
+   /modulos/calendario
+   /modulos/contenido_multimedia
+   /modulos/creacion_tarea
+   /modulos/grupos
+   /modulos/tareas_anidadas
+   /modulos/tareas_automaticas
+   /modulos/tareas_fechas_intermedias
+   /modulos/tareas_personales
+   /modulos/tareas_programadas
+   /modulos/tareas_recurrentes
+   /modulos/visibilidad_externa
+>>>>>>> main
 
 Índices y tablas
 ================
