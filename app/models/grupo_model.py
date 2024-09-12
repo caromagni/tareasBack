@@ -166,7 +166,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     if suspendido:
         query = query.filter(Grupo.suspendido==suspendido)    
 
-    total = query.count()
+    total = len(query.all())
     print("#"*50)
     print("Total de registros:", total)
     if cursor:
@@ -216,7 +216,7 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
 
-    total= query.count() 
+    total= len(query.all()) 
 
     result= query.order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()  
 
@@ -233,7 +233,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
 
-    total= query.count() 
+    total= len(query.all()) 
 
     result= query.order_by(Grupo.nombre).offset((page-1)*per_page).limit(per_page).all()  
 

@@ -93,7 +93,7 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None,
     if username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))    
 
-    total= query.count()
+    total= len(query.all())
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page).all()
     return query, total
 
@@ -121,7 +121,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
         query = query.filter(Usuario.username.ilike(f"%{username}%"))
 
 
-    total= query.count()
+    total= len(query.all())
 
     # Ordenamiento y paginación
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)

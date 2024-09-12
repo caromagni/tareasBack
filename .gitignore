@@ -83,7 +83,7 @@ docs/_build/man/
 docs/_build/epub/
 docs/_build/changelogs/
 docs/_build/javadocs/
-docs/_build/singlehtml/
+_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
