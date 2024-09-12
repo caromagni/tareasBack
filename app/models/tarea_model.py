@@ -1,4 +1,3 @@
-# coding: utf-8
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
@@ -26,10 +25,12 @@ def calcular_fecha_vencimiento(fecha, plazo):
 def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
    ###########Calculo de plazo################
-    con_plazo=True
+    print("###############Calculo de plazo################")
+    con_plazo=False
     fecha_inicio = datetime.now().date()
     print("fecha_inicio:",fecha_inicio)
     if con_plazo:
+        print("Calculo de plazo")
         plazo=10
         #Tarea.fecha_creacion.between(fecha_desde, fecha_hasta
         #Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio  
@@ -45,7 +46,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
 
     ########################################################
     
-    
     print("Usuario:", usuario)
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
@@ -57,12 +57,8 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
 
     nuevoID_tarea=uuid.uuid4()
 
-     
-
-    
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
-        id_grupo=id_grupo,
         prioridad=prioridad,
         id_actuacion=id_actuacion,
         titulo=titulo,
@@ -71,7 +67,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
         caratula_expediente=caratula_expediente,
         id_tipo_tarea=id_tipo_tarea,
         eliminable=eliminable,
-        id_usuario_asignado=id_usuario_asignado,
         id_user_actualizacion=id_user_actualizacion,
         fecha_eliminacion=fecha_eliminacion,
         fecha_actualizacion=datetime.now(),
@@ -113,7 +108,8 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
                     fecha_actualizacion=datetime.now()
                 )
                 session.add(asigna_usuario)
-        
+    
+       
     session.commit()
     return nueva_tarea
 
@@ -258,19 +254,27 @@ def get_tarea_by_id(id):
     
     return results 
 
-def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_tipo_tarea=None, id_usuario_asignado=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now()):
+def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now()):
     session: scoped_session = current_app.session
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     if titulo != '':
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
-    if id_usuario_asignado is not None:
-        query = query.filter(Tarea.id_usuario_asignado == id_usuario_asignado)
+    
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
 
-    total= query.count() 
+    if id_usuario_asignado is not None:
+        #query = query.filter(Tarea.id_usuario_asignado == id_usuario_asignado)
+        query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
+
+    if id_grupo is not None:
+        query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
+
+    
+
+    total= query.count()
 
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     

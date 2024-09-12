@@ -272,7 +272,7 @@ class TareaIn(Schema):
 
 class TareaOut(Schema):
     id = String()
-    id_grupo = String()
+    #id_grupo = String()
     prioridad = Integer()
     id_actuacion = String()
     titulo = String()
@@ -286,11 +286,11 @@ class TareaOut(Schema):
     fecha_inicio = String()
     fecha_fin = String()
     fecha_actualizacion = String()
-    id_user_actualizacion = String()
+    #id_user_actualizacion = String()
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
-    grupo = Nested(GroupOut, only=("id", "nombre"))
+    #grupo = Nested(GroupOut, only=("id", "nombre"))
   
 class TareaGetIn(Schema):
     page = Integer(default=1)
@@ -300,6 +300,7 @@ class TareaGetIn(Schema):
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
     id_usuario_asignado = String()
+    id_grupo = String()
     id_expediente = String()
     
 ####################Grupos - Tareas - Usuarios ####################
