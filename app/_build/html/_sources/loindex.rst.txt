@@ -1,3 +1,4 @@
+
 Documentación de Tareas
 =========================================
 
@@ -8,8 +9,6 @@ Documentación de Tareas
    introduccion
    arquitectura
    referencia_api
-   tareas_api
-   loindex
 
 Índices y tablas
 ================

@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>API de Tareas &#8212; documentación de tareas - </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/conestack.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+<link rel="stylesheet" type="text/css" src="_static/bootstrap.css" />
+<script src="_static/bootstrap.bundle.min.js"></script>
+<script src="_static/conestack.js"></script>
+
+  </head><body>
+
+  <noscript>
+    <style type="text/css">
+      #searchbox,
+      #searchdesc {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        #navbar-toggle {
+          display: none;
+        }
+        #cs-mobile-menu {
+          display: block;
+        }
+        #cs-layout {
+          margin-top: 12rem;
+        }
+        #cs-ext-links {
+          margin-right: 2rem!important;
+        }
+      }
+    </style>
+  </noscript>
+
+  
+  <header class="navbar navbar-expand-md" id="header">
+    <nav class="container-xxl flex-wrap flex-md-nowrap p-0" id="cs-nav">
+  <a id="logo" class="navbar-brand p-0 me-2" href="index.html">
+    <img src="_static/conestack.svg"
+         alt="Logo"
+         width="40px"
+         height="40px" />
+    <span>conestack</span>
+  </a>
+
+      
+  <div id="nav-search" class="ms-auto">
+    <div id="searchbox" class="nav-item me-3" role="search">
+      <form class="search input-group" action="search.html" method="get">
+        <input type="text" class="form-control" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button type="submit" 
+                class="bi bi-search input-group-text"
+                btn-title="Search documentation"></button>
+      </form>
+    </div>
+  </div>
+      
+
+      <button id="navbar-toggle" class="navbar-toggler p-0 me-4" type="button" data-bs-toggle="collapse" data-bs-target="#cs-mobile-menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="bi" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"></path></svg>
+      </button>
+
+      <div class="collapse container-fluid m-0 p-3" id="cs-mobile-menu"><nav class="cs-mobile-toc">
+  <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduccion.html">Introducción</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
+<li class="toctree-l1"><a class="reference internal" href="referencia_api.html">Referencia de la API</a></li>
+</ul>
+
+</nav>
+      </div>
+    </nav>
+  </header>
+  
+
+  <div class="container-xxl my-md-4" id="cs-layout">
+    
+  <aside id="cs-sidebar" class="ms-4 sphinxsidebar"><nav class="cs-nav-toc">
+  <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduccion.html">Introducción</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduccion.html#bienvenido-a-la-documentacion-del-back-end-de-tareas">Bienvenido a la Documentación del Back-end de Tareas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduccion.html#caracteristicas-principales">Características Principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduccion.html#primeros-pasos">Primeros Pasos</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arquitectura.html">Arquitectura</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arquitectura.html#vision-general-del-sistema">Visión General del Sistema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arquitectura.html#componentes-clave">Componentes Clave</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arquitectura.html#flujo-de-comunicacion">Flujo de Comunicación</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="referencia_api.html">Referencia de la API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="referencia_api.html#autenticacion">Autenticación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="referencia_api.html#endpoints">Endpoints</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+    
+  </aside>
+    
+
+    
+      <main class="document cs-main order-1" role="main">
+    
+      <div class="ps-lg-4 mt-3 cs-content">
+        
+  <section id="api-de-tareas">
+<h1>API de Tareas<a class="headerlink" href="#api-de-tareas" title="Permalink to this heading">#</a></h1>
+<p>Esta sección proporciona información detallada sobre los endpoints de API relacionados con tareas en el sistema back-end de Tareas.</p>
+<section id="autenticacion">
+<h2>Autenticación<a class="headerlink" href="#autenticacion" title="Permalink to this heading">#</a></h2>
+<p>Todas las solicitudes de API requieren autenticación usando JWT (JSON Web Tokens).</p>
+<p>URL Base: <code class="docutils literal notranslate"><span class="pre">https://api.tareas.com/v1</span></code></p>
+</section>
+<section id="endpoints">
+<h2>Endpoints<a class="headerlink" href="#endpoints" title="Permalink to this heading">#</a></h2>
+<section id="tipo-de-tarea">
+<h3>Tipo de Tarea<a class="headerlink" href="#tipo-de-tarea" title="Permalink to this heading">#</a></h3>
+<dl class="http get">
+<dt class="sig sig-object http" id="get--tipo_tarea">
+<span class="sig-name descname"><span class="pre">GET</span> </span><span class="sig-name descname"><span class="pre">/tipo_tarea</span></span><a class="headerlink" href="#get--tipo_tarea" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Recupera una lista de tipos de tareas.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/tipo_tarea</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Parámetros de consulta</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">page</span></code> (opcional): Número de página para la paginación.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">per_page</span></code> (opcional): Número de elementos por página.</p></li>
+</ul>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Desarrollo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tareas de desarrollo de software&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Diseño&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tareas de diseño gráfico&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http post">
+<dt class="sig sig-object http" id="post--tipo_tarea">
+<span class="sig-name descname"><span class="pre">POST</span> </span><span class="sig-name descname"><span class="pre">/tipo_tarea</span></span><a class="headerlink" href="#post--tipo_tarea" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Crea un nuevo tipo de tarea.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/tipo_tarea</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Testing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tareas de pruebas de software&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">201</span> <span class="ne">Created</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Testing&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tareas de pruebas de software&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http delete">
+<dt class="sig sig-object http" id="delete--tipo_tarea-(string-id)">
+<span class="sig-name descname"><span class="pre">DELETE</span> </span><span class="sig-name descname"><span class="pre">/tipo_tarea/</span></span><span class="sig-paren">(</span><em class="property"><span class="pre">string:</span> </em><em class="sig-param"><span class="pre">id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#delete--tipo_tarea-(string-id)" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Elimina un tipo de tarea existente.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">DELETE</span> <span class="nn">/tipo_tarea/3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Registro eliminado&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Id tipo de tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Tipo de tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Testing&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="tareas">
+<h3>Tareas<a class="headerlink" href="#tareas" title="Permalink to this heading">#</a></h3>
+<dl class="http get">
+<dt class="sig sig-object http" id="get--tarea">
+<span class="sig-name descname"><span class="pre">GET</span> </span><span class="sig-name descname"><span class="pre">/tarea</span></span><a class="headerlink" href="#get--tarea" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Recupera una lista de tareas.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/tarea</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Parámetros de consulta</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">page</span></code> (opcional): Número de página para la paginación.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">per_page</span></code> (opcional): Número de elementos por página.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">titulo</span></code> (opcional): Filtrar por título de tarea.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id_expediente</span></code> (opcional): Filtrar por ID de expediente.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id_tipo_tarea</span></code> (opcional): Filtrar por ID de tipo de tarea.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id_usuario_asignado</span></code> (opcional): Filtrar por ID de usuario asignado.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id_grupo</span></code> (opcional): Filtrar por ID de grupo.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fecha_desde</span></code> (opcional): Filtrar por fecha de inicio.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fecha_hasta</span></code> (opcional): Filtrar por fecha de fin.</p></li>
+</ul>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Implementar nueva funcionalidad&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Desarrollar la funcionalidad X para el módulo Y&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en_progreso&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fecha_creacion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-01T10:00:00&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-15T18:00:00&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id_tipo_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id_usuario_asignado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id_expediente&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exp456&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="c1">// ... más tareas ...</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http get">
+<dt class="sig sig-object http" id="get--tarea-(string-id_tarea)">
+<span class="sig-name descname"><span class="pre">GET</span> </span><span class="sig-name descname"><span class="pre">/tarea/</span></span><span class="sig-paren">(</span><em class="property"><span class="pre">string:</span> </em><em class="sig-param"><span class="pre">id_tarea</span></em><span class="sig-paren">)</span><a class="headerlink" href="#get--tarea-(string-id_tarea)" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Recupera los detalles de una tarea específica.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/tarea/1</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Implementar nueva funcionalidad&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Desarrollar la funcionalidad X para el módulo Y&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en_progreso&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fecha_creacion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-01T10:00:00&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-15T18:00:00&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id_tipo_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id_usuario_asignado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id_expediente&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exp456&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http post">
+<dt class="sig sig-object http" id="post--tarea">
+<span class="sig-name descname"><span class="pre">POST</span> </span><span class="sig-name descname"><span class="pre">/tarea</span></span><a class="headerlink" href="#post--tarea" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Crea una nueva tarea.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/tarea</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar pull request&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar y aprobar el PR #123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pendiente&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-20T18:00:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_tipo_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_usuario_asignado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user456&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_expediente&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exp789&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">201</span> <span class="ne">Created</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar pull request&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar y aprobar el PR #123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pendiente&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fecha_creacion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-10T09:00:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-20T18:00:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_tipo_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_usuario_asignado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user456&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_expediente&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exp789&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http delete">
+<dt class="sig sig-object http" id="delete--tarea-(string-id)">
+<span class="sig-name descname"><span class="pre">DELETE</span> </span><span class="sig-name descname"><span class="pre">/tarea/</span></span><span class="sig-paren">(</span><em class="property"><span class="pre">string:</span> </em><em class="sig-param"><span class="pre">id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#delete--tarea-(string-id)" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Elimina una tarea existente.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">DELETE</span> <span class="nn">/tarea/2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Registro eliminado&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Id tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="usuarios-asignados-a-tareas">
+<h3>Usuarios Asignados a Tareas<a class="headerlink" href="#usuarios-asignados-a-tareas" title="Permalink to this heading">#</a></h3>
+<dl class="http get">
+<dt class="sig sig-object http" id="get--tarea_usr-(string-tarea_id)">
+<span class="sig-name descname"><span class="pre">GET</span> </span><span class="sig-name descname"><span class="pre">/tarea_usr/</span></span><span class="sig-paren">(</span><em class="property"><span class="pre">string:</span> </em><em class="sig-param"><span class="pre">tarea_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#get--tarea_usr-(string-tarea_id)" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Recupera los usuarios asignados a una tarea específica.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/tarea_usr/1</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id_usuario&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Juan Pérez&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;juan@example.com&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id_usuario&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nombre&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;María García&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;maria@example.com&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="http post">
+<dt class="sig sig-object http" id="post--tarea_usr">
+<span class="sig-name descname"><span class="pre">POST</span> </span><span class="sig-name descname"><span class="pre">/tarea_usr</span></span><a class="headerlink" href="#post--tarea_usr" title="Enlazar permanentemente con esta definición">#</a></dt>
+<dd><p>Asigna un usuario a una tarea.</p>
+<p><strong>Ejemplo de solicitud</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/tarea_usr</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id_usuario&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user789&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Ejemplo de respuesta</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;valido&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_usuario&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user789&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id_tarea&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tarea asignada&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p>Para obtener información más detallada sobre otros endpoints y formatos de solicitud/respuesta, consulte la documentación completa de la API.</p>
+</section>
+</section>
+</section>
+
+
+      </div>
+
+    
+  <div class="cs-local-toc mx-4 mt-4 mb-5 my-md-0 ps-xl-3 mb-lg-5 text-muted">
+    <strong class="d-block h6 my-2 pb-2 border-bottom">On this page</strong>
+    <nav id="TableOfContents">
+      <ul>
+<li><a class="reference internal" href="#autenticacion">Autenticación</a></li>
+<li><a class="reference internal" href="#endpoints">Endpoints</a><ul>
+<li><a class="reference internal" href="#tipo-de-tarea">Tipo de Tarea</a></li>
+<li><a class="reference internal" href="#tareas">Tareas</a></li>
+<li><a class="reference internal" href="#usuarios-asignados-a-tareas">Usuarios Asignados a Tareas</a></li>
+</ul>
+</li>
+</ul>
+
+    </nav>
+  </div>
+    
+    </main>
+  </div><div class="container footer" role="contentinfo">
+  <footer class="d-flex flex-wrap justify-content-between align-items-center pt-2 my-4 border-top"><ul class="pb-2 mb-3 nav container border-bottom">
+  <li class="nav-item col-md-6 col">
+  </li>
+  <li class="nav-item col-md-6 col text-end">
+  </li>
+</ul>
+      <div class="container text-center text-muted pt-2 pb-2">
+          &#169; Derechos de autor 2024, Silvia Imperiale, Mauro Bonadeo, Carolina Magni, Martin Diaz.
+      </div>
+      <div class="container text-center text-muted pt-2 pb-2">
+        Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.0.
+      </div>
+  </footer>
+</div>
+
+  </body>
+</html>
