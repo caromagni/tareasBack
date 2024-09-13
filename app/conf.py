@@ -7,8 +7,8 @@ sys.path.insert(0, os.path.abspath('./../modulos'))
 # Archivo de configuración para el generador de documentación Sphinx
 
 project = 'tareas'
-copyright = '2024, Silvia Imperiale, Mauro Bonadeo, Carolina Magni, Martin Diaz'
-author = 'Silvia Imperiale, Mauro Bonadeo, Carolina Magni, Martin Diaz'
+copyright = '2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni'
+author = '2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni '
 
 extensions = [
     'sphinx.ext.autodoc',

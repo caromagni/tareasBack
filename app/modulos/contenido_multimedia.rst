@@ -1,5 +1,5 @@
 Contenido de Multimedia Tarea/Expediente
-======================================
+========================================
 
 El módulo de Contenido de Multimedia Tarea/Expediente es una funcionalidad avanzada del Sistema de Gestión de Tareas, diseñada para manejar y organizar eficientemente una amplia gama de contenidos multimedia asociados a tareas y expedientes en el ámbito judicial o administrativo. Este módulo permite una gestión integral de documentos, imágenes, audios, videos y otros tipos de archivos, facilitando el acceso, la organización y el uso de información multimedia crucial para los procesos judiciales.
 

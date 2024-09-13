@@ -1,5 +1,5 @@
 Visibilidad Externa Tarea
-========================
+==========================
 
 El módulo de Visibilidad Externa Tarea es una característica avanzada del Sistema de Gestión de Tareas, diseñada para permitir un acceso controlado y seguro a información específica de tareas para usuarios externos al sistema judicial o administrativo. Esta funcionalidad es crucial para mejorar la transparencia, facilitar la colaboración con partes externas y proporcionar actualizaciones de estado a interesados sin comprometer la seguridad o confidencialidad de la información sensible.
 
