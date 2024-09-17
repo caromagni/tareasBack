@@ -1,4 +1,3 @@
-
 Documentación de Tareas
 =========================================
 
@@ -22,6 +21,7 @@ Documentación de Tareas
    /modulos/tareas_programadas
    /modulos/tareas_recurrentes
    /modulos/visibilidad_externa
+   loindex
 
 Índices y tablas
 ================

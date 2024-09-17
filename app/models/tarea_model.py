@@ -274,7 +274,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_tipo_ta
 
     
 
-    total= query.count()
+    total= len(query.all())
 
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     

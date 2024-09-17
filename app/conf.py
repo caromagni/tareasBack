@@ -61,7 +61,7 @@ Documentación de Tareas
 '''
 
 # Escribir el archivo index.rst
-with open(os.path.join(os.path.dirname(__file__), 'index.rst'), 'w') as f:
+with open(os.path.join(os.path.dirname(__file__), 'loindex.rst'), 'w') as f:
     f.write(index_content)
 
 # Configurar el idioma a español

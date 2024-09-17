@@ -2,10 +2,15 @@ from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut
 from ..models.tarea_model import get_all_tarea, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
+from ..models.alch_model import Usuario, Rol, CasoUso
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
+from sqlalchemy.orm import scoped_session
+from ..common.usher import get_roles
+import uuid
+import json
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 ###############
@@ -13,13 +18,96 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 def before_request():
     print("Antes de la petición")
     print(request.headers)
+
 ######################Control de acceso######################
-def control_rol_usuario(token, nombre_usuario, url_api):
-    print("Control de acceso")
-    print("Token:",token)
-    print("Nombre usuario:",nombre_usuario)
-    print("URL:",url_api)
-    return True
+def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
+    session: scoped_session = current_app.session
+
+    tiempo_vencimiento = timedelta(minutes=30)
+    query_usr = session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
+    if query_usr is None:
+        print("Usuario no encontrado")
+        return False
+    else:
+        id_usuario = query_usr.id
+        query_rol = session.query(Rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now()).all()
+        total = len(query_rol)
+        if len(query_rol)==0:
+            #######Consultar Api Usher##########
+            roles = get_roles(token)
+            for r in roles['lista_roles_cus']:
+                nuevoIDRol=uuid.uuid4()
+                nuevo_rol = Rol(
+                    id=nuevoIDRol, 
+                    id_usuario=id_usuario, 
+                    vencimiento=datetime.now()+tiempo_vencimiento,
+                    rol=r['descripcion_rol'],
+                    id_rol_ext=r['id_usuario_sistema_rol']
+                )
+                session.add(nuevo_rol)
+                session.commit()
+                print("Nuevo Rol Guardado:",nuevo_rol.id)
+                for cu in r['casos_de_uso']:
+                    match cu['descripcion_corta_cu']:
+                        case 'crear-tarea':
+                            urlCU='post/tarea'
+                        case 'borrar-tarea':
+                            urlCU='delete/tarea'
+                        case 'consulta-tarea':
+                            urlCU='get/tarea'
+                        case 'asignar-tarea':
+                            urlCU='post/tarea'
+                        case 'crear-grupo':
+                            urlCU='post/grupo'
+                        case 'crear-usuario':
+                            urlCU='post/usuario'
+                        case 'modificar-usuario':
+                            urlCU='patch/usuario'
+                        case 'eliminar-tipo-tarea':
+                            urlCU='delete/tipo_tarea'
+                        case 'consulta_usuario_tarea':
+                            urlCU='get/tarea_usr'
+                        case 'alta_usuario_tarea':
+                            urlCU='post/tarea_usr'
+                        case 'consulta_usuarios_tarea':
+                            urlCU='get/tarea_usr'
+                        case 'consulta_tarea_id':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_usuario':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_grupo':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_expediente':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_tipo':
+                            urlCU='get/tipo_tarea'
+                        case 'eliminar-datos':
+                            urlCU='delete/tarea'
+                        case 'modificar-datos':
+                            urlCU='patch/tarea'        
+                        
+                    
+                    nuevoID_CU=uuid.uuid4()
+                    nuevoCU=CasoUso(
+                        id=nuevoID_CU,
+                        id_rol=nuevoIDRol,
+                        descripcion_ext=cu['descripcion_corta_cu'],
+                        url_api=urlCU
+                    )
+                    session.add(nuevoCU)
+                    print("Nuevo Caso de Uso Guardado:",nuevoCU.id_rol)
+                session.commit()
+            
+        query_permisos = session.query(Rol.id, CasoUso.id).join(CasoUso, Rol.id==CasoUso.id_rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now(), CasoUso.url_api.like(f"%{url_api}%")).all()
+        if len(query_permisos)==0:
+            print("No tiene permisos")
+            return False
+        else:
+            print("Roles de tareas:",query_rol)
+            return True
+            
+    
+
     
 ####################TIPO DE TAREA######################
 @tarea_b.doc(description='Consulta de Tipos de Tareas', summary='Tipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -32,8 +120,6 @@ def get_tipoTareas(query_data: dict):
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
 
-        print("query_data:",query_data)
-        
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -107,10 +193,15 @@ def del_tipo_tarea(id: str):
 @tarea_b.output(TareaCountOut)
 def get_tareas(query_data: dict):
     try:
-        token=''
-        nombre_usuario='simperiale'
+        ##########Variables de control de acceso####################
+        token='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJsTVhjMjlEdmFtdEZhZ2tiUWoxQ2Fib1pqSk9OY1lxTE5teE1CWERIZmx3In0.eyJleHAiOjE3MjcyNjMzOTEsImlhdCI6MTcyNTk2OTA1OCwiYXV0aF90aW1lIjoxNzI1OTY3MzkxLCJqdGkiOiJhZDU5MzlhNS03NjkwLTQwNmUtYmZiMi1hNWM1OTMzZTg1MzciLCJpc3MiOiJodHRwczovL2Rldi1hdXRoLnBqbS5nb2IuYXIvYXV0aC9yZWFsbXMvZGV2b3BzIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6Ijg5MWFiOTA5LTMzNzQtNDU2YS04Y2U5LTdiZDJkZjExOWQwYSIsInR5cCI6IkJlYXJlciIsImF6cCI6InVzaGVyIiwibm9uY2UiOiI2MGE5ZGRlZS01ZGY3LTQxNjYtYjk3Ny0zMTBhZDk1MWI3NmIiLCJzZXNzaW9uX3N0YXRlIjoiYTFiMDA2NWQtMzhiOC00YTFmLTk2YzAtMTg0NmU0MzliY2VjIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJ1c2hlciI6eyJyb2xlcyI6WyJhZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsInNpZCI6ImExYjAwNjVkLTM4YjgtNGExZi05NmMwLTE4NDZlNDM5YmNlYyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IlNpbHZpYSBTLiBJbXBlcmlhbGUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzaW1wZXJpYWxlIiwiZ2l2ZW5fbmFtZSI6IlNpbHZpYSBTLiIsImZhbWlseV9uYW1lIjoiSW1wZXJpYWxlIiwiZW1haWwiOiJzaW1wZXJpYWxlQG1haWwuanVzLm1lbmRvemEuZ292LmFyIn0.OnfYhSdrZfz7bL6r1sy3-6DCTeFH8G7VesMbGWh4XGCiFM2IuqpXldrjlhKWI8ahRTKAJEdvXlBn8ht5JtGY1y-ee8RbeVrxtmjmmBHJt-nejXNflhsoXcF_20r3rMyfvM210vtFaUy26YZi7ttIBS6mQaql4Y_DPgL_wAMVoa431ThaDw3Kijcl7nJQ40fBeti0YgiwS3KKvEamf8E-CbX1gCUNoZX_pyP4dWSh9kduNh_K0QU4uqyvVzwyt8_jikcPxWmHQ9SHh31M5_31b6uEgSXx7QqKECs-VzH4GnkdZB3TwRb7fnj0D4jSuSvuUp5Wk_lPcrdNMDX4RxA84w'
+        nombre_usuario='simperiale@mail.jus.mendoza.gov.ar'
         url_api='get/tarea'
-        #accede = control_rol_usuario(token, nombre_usuario, url_api)
+        rol='administrador'
+        accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
+        if accede is False:
+            raise DataError(800, "No tiene permisos para acceder a la API")
+        #############################################################
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
