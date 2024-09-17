@@ -414,19 +414,11 @@ class Rol(Base):
 
     id = Column(UUID, primary_key=True)
     id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    email = Column(String)
     rol = Column(String, nullable=False)
     id_rol_ext= Column(UUID)
     id_organismo = Column(UUID)
-    vencimiento = Column(DateTime)
-      
-class CasoUso(Base):
-    __tablename__ = 'caso_uso'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True)
-    #id_rol= Column(UUID)
-    id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
     url_api = Column(String, nullable=False)
     descripcion_ext = Column(String)
-    #id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
+    fecha_actualizacion = Column(DateTime)
     

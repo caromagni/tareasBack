@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Tareas Automáticas &#8212; documentación de tareas - </title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/conestack.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="next" title="Tareas con Fechas Intermedias y Distintas Alertas" href="tareas_fechas_intermedias.html" />
+    <link rel="prev" title="Tareas Anidadas" href="tareas_anidadas.html" />
+<link rel="stylesheet" type="text/css" src="../_static/bootstrap.css" />
+<script src="../_static/bootstrap.bundle.min.js"></script>
+<script src="../_static/conestack.js"></script>
+
+  </head><body>
+
+  <noscript>
+    <style type="text/css">
+      #searchbox,
+      #searchdesc {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        #navbar-toggle {
+          display: none;
+        }
+        #cs-mobile-menu {
+          display: block;
+        }
+        #cs-layout {
+          margin-top: 12rem;
+        }
+        #cs-ext-links {
+          margin-right: 2rem!important;
+        }
+      }
+    </style>
+  </noscript>
+
+  
+  <header class="navbar navbar-expand-md" id="header">
+    <nav class="container-xxl flex-wrap flex-md-nowrap p-0" id="cs-nav">
+  <a id="logo" class="navbar-brand p-0 me-2" href="../index.html">
+    <img src="_static/conestack.svg"
+         alt="Logo"
+         width="40px"
+         height="40px" />
+    <span>conestack</span>
+  </a>
+
+      
+  <div id="nav-search" class="ms-auto">
+    <div id="searchbox" class="nav-item me-3" role="search">
+      <form class="search input-group" action="../search.html" method="get">
+        <input type="text" class="form-control" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button type="submit" 
+                class="bi bi-search input-group-text"
+                btn-title="Search documentation"></button>
+      </form>
+    </div>
+  </div>
+      
+
+      <button id="navbar-toggle" class="navbar-toggler p-0 me-4" type="button" data-bs-toggle="collapse" data-bs-target="#cs-mobile-menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="bi" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"></path></svg>
+      </button>
+
+      <div class="collapse container-fluid m-0 p-3" id="cs-mobile-menu"><nav class="cs-mobile-toc">
+  <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduccion.html">Introducción</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../arquitectura.html">Arquitectura</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calendario.html">Calendario</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
+<li class="toctree-l1"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grupos.html">Grupos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_anidadas.html">Tareas Anidadas</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tareas Automáticas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_fechas_intermedias.html">Tareas con Fechas Intermedias y Distintas Alertas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_personales.html">Vista de Tareas Personales</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_programadas.html">Tareas Programadas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_recurrentes.html">Tareas Recurrentes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visibilidad_externa.html">Visibilidad Externa Tarea</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../loindex.html">Documentación de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../loindex.html#indices-y-tablas">Índices y tablas</a></li>
+</ul>
+
+</nav>
+      </div>
+    </nav>
+  </header>
+  
+
+  <div class="container-xxl my-md-4" id="cs-layout">
+    
+  <aside id="cs-sidebar" class="ms-4 sphinxsidebar"><nav class="cs-nav-toc">
+  <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduccion.html">Introducción</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduccion.html#modulos-principales">Módulos principales</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../arquitectura.html">Arquitectura</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../arquitectura.html#vision-general-del-sistema">Visión General del Sistema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arquitectura.html#componentes-clave">Componentes Clave</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arquitectura.html#flujo-de-comunicacion">Flujo de Comunicación</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../referencia_api.html#autenticacion">Autenticación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../referencia_api.html#endpoints">Endpoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="alertas.html#descripcion">Descripción:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bandeja_principal.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandeja_principal.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="calendario.html">Calendario</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="calendario.html#descripcion">Descripción:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contenido_multimedia.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contenido_multimedia.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="creacion_tarea.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creacion_tarea.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grupos.html">Grupos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grupos.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grupos.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_anidadas.html">Tareas Anidadas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tareas_anidadas.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_anidadas.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tareas Automáticas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_fechas_intermedias.html">Tareas con Fechas Intermedias y Distintas Alertas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tareas_fechas_intermedias.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_fechas_intermedias.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_personales.html">Vista de Tareas Personales</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tareas_personales.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_personales.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_programadas.html">Tareas Programadas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tareas_programadas.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_programadas.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_recurrentes.html">Tareas Recurrentes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tareas_recurrentes.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_recurrentes.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visibilidad_externa.html">Visibilidad Externa Tarea</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="visibilidad_externa.html#caracteristicas-principales">Características principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visibilidad_externa.html#funcionalidad">Funcionalidad</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../loindex.html">Documentación de Tareas</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../introduccion.html">Introducción</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arquitectura.html">Arquitectura</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="alertas.html">Alertas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calendario.html">Calendario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grupos.html">Grupos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_anidadas.html">Tareas Anidadas</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tareas Automáticas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_fechas_intermedias.html">Tareas con Fechas Intermedias y Distintas Alertas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_personales.html">Vista de Tareas Personales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_programadas.html">Tareas Programadas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tareas_recurrentes.html">Tareas Recurrentes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visibilidad_externa.html">Visibilidad Externa Tarea</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../loindex.html#indices-y-tablas">Índices y tablas</a></li>
+</ul>
+
+</nav>
+    
+  </aside>
+    
+
+    
+      <main class="document cs-main order-1" role="main">
+    
+      <div class="ps-lg-4 mt-3 cs-content">
+        
+  <section id="tareas-automaticas">
+<h1>Tareas Automáticas<a class="headerlink" href="#tareas-automaticas" title="Permalink to this heading">#</a></h1>
+<p>El módulo de Tareas Automáticas es una función avanzada del Sistema de Gestión de Tareas diseñada para automatizar procesos repetitivos y mejorar la eficiencia en el manejo de tareas rutinarias dentro del ámbito judicial o administrativo.</p>
+<section id="caracteristicas-principales">
+<h2>Características principales<a class="headerlink" href="#caracteristicas-principales" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Creación automática de tareas</strong>:
+- Generación de tareas basada en eventos predefinidos o condiciones específicas.
+- Integración con el Sistema de Expedientes para crear tareas a partir de presentaciones o movimientos.</p></li>
+<li><p><strong>Reglas personalizables</strong>:
+- Interfaz para definir reglas y condiciones que desencadenan la creación de tareas.
+- Capacidad para establecer criterios complejos basados en múltiples factores.</p></li>
+<li><p><strong>Asignación inteligente</strong>:
+- Distribución automática de tareas a usuarios o grupos basada en roles, carga de trabajo o especialización.
+- Algoritmos de balanceo de carga para optimizar la distribución del trabajo.</p></li>
+<li><p><strong>Actualización automática de estados</strong>:
+- Cambio automático del estado de las tareas basado en acciones del sistema o usuarios.
+- Capacidad para cerrar o reasignar tareas automáticamente bajo ciertas condiciones.</p></li>
+<li><p><strong>Notificaciones automáticas</strong>:
+- Generación de alertas y notificaciones vinculadas a la creación o actualización de tareas automáticas.
+- Integración con el módulo de Alertas para mantener informados a los usuarios relevantes.</p></li>
+<li><p><strong>Plantillas de tareas</strong>:
+- Creación y gestión de plantillas para tipos comunes de tareas automáticas.
+- Capacidad para personalizar campos y flujos de trabajo para diferentes tipos de tareas.</p></li>
+<li><p><strong>Seguimiento y auditoría</strong>:
+- Registro detallado de todas las tareas creadas y modificadas automáticamente.
+- Herramientas de análisis para evaluar la eficacia y eficiencia de las tareas automáticas.</p></li>
+<li><p><strong>Integración con calendario</strong>:
+- Sincronización automática con el Calendario de Días Inhábiles para ajustar fechas y plazos.
+- Programación de tareas considerando días hábiles y horarios laborales.</p></li>
+<li><p><strong>Escalabilidad y personalización</strong>:
+- Capacidad para adaptar y expandir las reglas de automatización según las necesidades cambiantes.
+- Opciones para que los administradores ajusten y refinen los procesos automáticos.</p></li>
+</ol>
+</section>
+<section id="funcionalidad">
+<h2>Funcionalidad<a class="headerlink" href="#funcionalidad" title="Permalink to this heading">#</a></h2>
+<p>El módulo de Tareas Automáticas actúa como un asistente virtual inteligente dentro del sistema, capaz de manejar una gran variedad de procesos sin intervención manual directa. Esta automatización no solo ahorra tiempo y reduce errores humanos, sino que también asegura la consistencia en el manejo de procedimientos estándar.</p>
+<p>Al automatizar tareas rutinarias, el personal puede enfocarse en actividades que requieren juicio humano y atención detallada. Esto lleva a una mayor productividad y a un uso más eficiente de los recursos humanos. Además, la capacidad de personalizar y ajustar las reglas de automatización permite que el sistema se adapte a las necesidades específicas y cambiantes de cada juzgado o departamento.</p>
+<p>Este módulo es especialmente valioso en entornos judiciales donde la precisión y el cumplimiento de plazos son críticos. Al asegurar que las tareas se creen, asignen y actualicen de manera oportuna y consistente, el módulo de Tareas Automáticas contribuye significativamente a la eficiencia y efectividad general del sistema de gestión de tareas.</p>
+</section>
+</section>
+
+
+      </div>
+
+    
+  <div class="cs-local-toc mx-4 mt-4 mb-5 my-md-0 ps-xl-3 mb-lg-5 text-muted">
+    <strong class="d-block h6 my-2 pb-2 border-bottom">On this page</strong>
+    <nav id="TableOfContents">
+      <ul>
+<li><a class="reference internal" href="#caracteristicas-principales">Características principales</a></li>
+<li><a class="reference internal" href="#funcionalidad">Funcionalidad</a></li>
+</ul>
+
+    </nav>
+  </div>
+    
+    </main>
+  </div><div class="container footer" role="contentinfo">
+  <footer class="d-flex flex-wrap justify-content-between align-items-center pt-2 my-4 border-top"><ul class="pb-2 mb-3 nav container border-bottom">
+  <li class="nav-item col-md-6 col">
+    <a href="tareas_anidadas.html"
+       title="capítulo anterior"
+       class="nav-link px-2 text-muted previous-chapter">Tareas Anidadas</a>
+  </li>
+  <li class="nav-item col-md-6 col text-end">
+    <a href="tareas_fechas_intermedias.html"
+       title="próximo capítulo"
+       class="nav-link px-2 text-muted next-chapter">Tareas con Fechas Intermedias y Distintas Alertas</a>
+  </li>
+</ul>
+      <div class="container text-center text-muted pt-2 pb-2">
+          &#169; Derechos de autor 2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
+      </div>
+      <div class="container text-center text-muted pt-2 pb-2">
+        Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.0.
+      </div>
+  </footer>
+</div>
+
+  </body>
+</html>

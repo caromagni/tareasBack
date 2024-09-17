@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut
 from ..models.tarea_model import get_all_tarea, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
-from ..models.alch_model import Usuario, Rol, CasoUso
+from ..models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
@@ -30,23 +30,12 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
         return False
     else:
         id_usuario = query_usr.id
-        query_rol = session.query(Rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now()).all()
-        total = len(query_rol)
+        email = query_usr.email
+        query_rol = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
         if len(query_rol)==0:
             #######Consultar Api Usher##########
             roles = get_roles(token)
             for r in roles['lista_roles_cus']:
-                nuevoIDRol=uuid.uuid4()
-                nuevo_rol = Rol(
-                    id=nuevoIDRol, 
-                    id_usuario=id_usuario, 
-                    vencimiento=datetime.now()+tiempo_vencimiento,
-                    rol=r['descripcion_rol'],
-                    id_rol_ext=r['id_usuario_sistema_rol']
-                )
-                session.add(nuevo_rol)
-                session.commit()
-                print("Nuevo Rol Guardado:",nuevo_rol.id)
                 for cu in r['casos_de_uso']:
                     match cu['descripcion_corta_cu']:
                         case 'crear-tarea':
@@ -84,21 +73,27 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
                         case 'eliminar-datos':
                             urlCU='delete/tarea'
                         case 'modificar-datos':
-                            urlCU='patch/tarea'        
-                        
-                    
-                    nuevoID_CU=uuid.uuid4()
-                    nuevoCU=CasoUso(
-                        id=nuevoID_CU,
-                        id_rol=nuevoIDRol,
+                            urlCU='patch/tarea'  
+
+                    nuevoIDRol=uuid.uuid4()
+                    nuevo_rol = Rol(
+                        id=nuevoIDRol, 
+                        email=email,
+                        id_usuario=id_usuario, 
+                        fecha_actualizacion=datetime.now(),
+                        rol=r['descripcion_rol'],
+                        id_rol_ext=r['id_usuario_sistema_rol'],
                         descripcion_ext=cu['descripcion_corta_cu'],
                         url_api=urlCU
                     )
-                    session.add(nuevoCU)
-                    print("Nuevo Caso de Uso Guardado:",nuevoCU.id_rol)
-                session.commit()
+                    session.add(nuevo_rol)
+                    session.commit()
+                    print("Nuevo Rol Guardado:",nuevo_rol.id)
+                
+            session.commit()
             
-        query_permisos = session.query(Rol.id, CasoUso.id).join(CasoUso, Rol.id==CasoUso.id_rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now(), CasoUso.url_api.like(f"%{url_api}%")).all()
+        query_permisos = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
+        
         if len(query_permisos)==0:
             print("No tiene permisos")
             return False
@@ -198,7 +193,8 @@ def get_tareas(query_data: dict):
         nombre_usuario='simperiale@mail.jus.mendoza.gov.ar'
         url_api='get/tarea'
         rol='administrador'
-        accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
+        #accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
+        accede = True
         if accede is False:
             raise DataError(800, "No tiene permisos para acceder a la API")
         #############################################################
