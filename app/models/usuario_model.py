@@ -256,7 +256,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
 
 def update_usuario(id='', **kwargs):
     session: scoped_session = current_app.session
-    usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False, Usuario.suspendido==False).first()
+    usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
    
     if usuario is None:
         return None
@@ -278,7 +278,8 @@ def update_usuario(id='', **kwargs):
         usuario.id_persona_ext = kwargs['id_persona_ext']
     if 'id_user_actualizacion' in kwargs:
         usuario.id_user_actualizacion = kwargs['id_user_actualizacion']
-
+    if 'suspendido' in kwargs:
+        usuario.suspendido = kwargs['suspendido']
     usuario.fecha_actualizacion = datetime.now()
 
     if 'grupo' in kwargs:

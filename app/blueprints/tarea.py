@@ -32,16 +32,11 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
         id_usuario = query_usr.id
         query_rol = session.query(Rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now()).all()
         total = len(query_rol)
-        print("Total roles:",total)
         if len(query_rol)==0:
             #######Consultar Api Usher##########
-            print("#"*50)
             roles = get_roles(token)
             for r in roles['lista_roles_cus']:
                 nuevoIDRol=uuid.uuid4()
-                descripcion_rol = r['descripcion_rol']
-                print(f"Rol: {descripcion_rol}-{nuevoIDRol}")
-                    
                 nuevo_rol = Rol(
                     id=nuevoIDRol, 
                     id_usuario=id_usuario, 
@@ -61,13 +56,13 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
                         case 'consulta-tarea':
                             urlCU='get/tarea'
                         case 'asignar-tarea':
-                            urlCU='get/tarea'
+                            urlCU='post/tarea'
                         case 'crear-grupo':
                             urlCU='post/grupo'
                         case 'crear-usuario':
                             urlCU='post/usuario'
                         case 'modificar-usuario':
-                            urlCU='patch/tipo_tarea'
+                            urlCU='patch/usuario'
                         case 'eliminar-tipo-tarea':
                             urlCU='delete/tipo_tarea'
                         case 'consulta_usuario_tarea':
@@ -101,15 +96,17 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
                     )
                     session.add(nuevoCU)
                     print("Nuevo Caso de Uso Guardado:",nuevoCU.id_rol)
-                    #print("Rol Guardado")
                 session.commit()
             
-            print("Commit")
-            print("#"*50)
-            return True
+        query_permisos = session.query(Rol.id, CasoUso.id).join(CasoUso, Rol.id==CasoUso.id_rol).filter(Rol.id_usuario == id_usuario, Rol.vencimiento>= datetime.now(), CasoUso.url_api.like(f"%{url_api}%")).all()
+        if len(query_permisos)==0:
+            print("No tiene permisos")
+            return False
         else:
             print("Roles de tareas:",query_rol)
             return True
+            
+    
 
     
 ####################TIPO DE TAREA######################
@@ -123,8 +120,6 @@ def get_tipoTareas(query_data: dict):
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
 
-        print("query_data:",query_data)
-        
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -206,7 +201,7 @@ def get_tareas(query_data: dict):
         accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
         if accede is False:
             raise DataError(800, "No tiene permisos para acceder a la API")
-        ############################################################
+        #############################################################
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0

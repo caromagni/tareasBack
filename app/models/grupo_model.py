@@ -7,6 +7,7 @@ from sqlalchemy.dialects import postgresql
 from apiflask.fields import Integer, String
 from flask import current_app
 
+
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 
 
@@ -86,15 +87,6 @@ def get_grupo_by_id(id):
 
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
     print("#"*50)
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
-    print("get_all_grupos_nivel")
     print("Path_name:", path_name)
     print("#"*50)
     cursor=None
@@ -655,29 +647,30 @@ def eliminar_grupo_recursivo(id):
 def delete_grupo(id,todos=False):
     print("Borrando grupo con id:", id)
     session = current_app.session
-    try:
-        if todos:
-            # Eliminar todos los hijos
-            eliminar_grupo_recursivo(id)
-            grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
-            if grupo:
-                grupo.eliminado = True
-                session.add(grupo)
-        else:    
-            # Eliminar solo el grupo
-            grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
-            if grupo:
-                grupo.eliminado = True
-                session.add(grupo)
-            else:
-                print("No se encontró el grupo a eliminar")
-                return None
+    if todos:
+        # Eliminar todos los hijos
+        print("Eliminar todos los hijos")
+        eliminar_grupo_recursivo(id)
+        grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+        if grupo:
+            grupo.eliminado = True
+    else:    
+        # Eliminar solo el grupo
+        print("Eliminar solo el grupo")
+        tiene_hijos = session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_padre == id).all()
+        if len(tiene_hijos)>0:
+            print("El grupo tiene hijos")
+            raise Exception("El grupo tiene hijos")
+                    
+        grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+        if grupo:
+            grupo.eliminado = True
+        else:
+            print("No se encontró el grupo a eliminar")
+            raise Exception("No se encontró el grupo a eliminar")
+            
 
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        print(f'Error al eliminar el grupo: {e}')
-        return None
+    session.commit()
 
     return grupo
     

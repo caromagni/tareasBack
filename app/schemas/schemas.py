@@ -139,7 +139,7 @@ class GroupPatchIn(Schema):
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
     ])
-    eliminado = Boolean()
+    suspendido = Boolean()
 
 class GroupGetIn(Schema):
     page = Integer(default=1)
@@ -355,6 +355,7 @@ class UsuarioInPatch(Schema):
         validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
+    suspendido = Boolean()
     id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListGrupo))
