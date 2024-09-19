@@ -33,7 +33,7 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
         email = query_usr.email
         query_rol = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
         if len(query_rol)==0:
-            #######Consultar Api Usher##########
+            #######Consultar CU Api Usher##########
             roles = get_roles(token)
             for r in roles['lista_roles_cus']:
                 for cu in r['casos_de_uso']:
