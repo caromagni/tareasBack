@@ -143,7 +143,8 @@ def update_tarea(id='', **kwargs):
         tarea.titulo = kwargs['titulo'].upper()  
         
     tarea.fecha_actualizacion = datetime.now()
-
+    usuarios=[]
+    grupos=[]
     if 'grupo' in kwargs:
         #elimino los grupos existentes para ese usuario
         grupos_usuarios=session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id)
@@ -174,6 +175,11 @@ def update_tarea(id='', **kwargs):
                     fecha_actualizacion=datetime.now()
                 )
                 session.add(nuevo_tarea_grupo)
+            grupo = {
+                "id": existe_grupo.id,
+                "nombre": existe_grupo.nombre
+            }
+            grupos.append(grupo)   
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
@@ -205,9 +211,40 @@ def update_tarea(id='', **kwargs):
                 )
                 session.add(nuevo_asigna_usuario)
 
+            usuario = {
+                "id": existe_usuario.id,
+                "nombre": existe_usuario.nombre,
+                "apellido": existe_usuario.apellido
+            }
+            usuarios.append(usuario)
+
+    ###################Formatear el resultado####################
+    result = {
+        "id": tarea.id,
+        "titulo": tarea.titulo,
+        "fecha_inicio": tarea.fecha_inicio,
+        "fecha_fin": tarea.fecha_fin,
+        "plazo": tarea.plazo,
+        "prioridad": tarea.prioridad,
+        "id_tipo_tarea": tarea.id_tipo_tarea,
+        "tipo_tarea": tarea.tipo_tarea,
+        "id_expediente": tarea.id_expediente,
+        "expediente": tarea.expediente,
+        "id_actuacion": tarea.id_actuacion,
+        "actuacion": tarea.actuacion,
+        "cuerpo": tarea.cuerpo,
+        "eliminable": tarea.eliminable,
+        "eliminado": tarea.eliminado,
+        "fecha_eliminacion": tarea.fecha_eliminacion,
+        "fecha_actualizacion": tarea.fecha_actualizacion,
+        "fecha_creacion": tarea.fecha_creacion,
+        "id_grupo": tarea.id_grupo,
+        "grupos": grupos,
+        "usuarios": usuarios
+    }
 
     session.commit()
-    return tarea
+    return result
 
 def get_all_tipo_tarea(page=1, per_page=10):
     print("get_tipo_tareas - ", page, "-", per_page)
@@ -335,6 +372,8 @@ def get_tarea_by_id(id):
             "eliminable": res.eliminable,
             "eliminado": res.eliminado,
             "fecha_eliminacion": res.fecha_eliminacion,
+            "fecha_actualizacion": res.fecha_actualizacion,
+            "fecha_creacion": res.fecha_creacion,
             "id_grupo": res.id_grupo,
             "grupo": res.grupo,
             "grupos": grupos,
@@ -435,6 +474,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
             "eliminable": res.eliminable,
             "eliminado": res.eliminado,
             "fecha_eliminacion": res.fecha_eliminacion,
+            "fecha_actualizacion": res.fecha_actualizacion,
+            "fecha_creacion": res.fecha_creacion,
             "grupos": grupos,
             "usuarios": usuarios
         }
