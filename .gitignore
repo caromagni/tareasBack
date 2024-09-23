@@ -138,9 +138,3 @@ dmypy.json
 .env.*
 export_creds.sh
 start.sh
-<<<<<<< HEAD
-=======
-
-# sphinx
-_build
->>>>>>> main
