@@ -662,9 +662,12 @@ def delete_grupo(id,todos=False):
     else:    
         # Eliminar solo el grupo
         print("Eliminar solo el grupo")
-        tiene_hijos = session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_padre == id).all()
+        tiene_hijos = session.query(HerarquiaGrupoGrupo).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == id, Grupo.eliminado==False).all()
+        print("Tiene hijos:", tiene_hijos)
         if len(tiene_hijos)>0:
-            print("El grupo tiene hijos")
+            for hijo in tiene_hijos:
+                 print("El grupo tiene hijos - id_padre:", hijo.id_padre, "-id_hijo:", hijo.id_hijo)
+
             raise Exception("El grupo tiene hijos")
                     
         grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
