@@ -34,7 +34,7 @@ def create_app():
     #jwt = JWTManager(app=app)
 
     app.config['DEBUG'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@psql.beta.hwc.pjm.gob.ar:5432/tareas"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE

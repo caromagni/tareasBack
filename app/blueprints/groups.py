@@ -217,7 +217,7 @@ def post_grupo(json_data: dict):
 def del_grupo(id: str):
     try:
         #eliminar el grupo con sus hijos
-        todos=True
+        todos=False
         #elimina solo el grupo
         # todos=False
         res = delete_grupo(id, todos)

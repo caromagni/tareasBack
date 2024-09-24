@@ -74,8 +74,8 @@ def patch_usuario(usuario_id: str, json_data: dict):
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo a modificar"
+                    "ErrorDesc":"Usuario no encontrado",
+                    "ErrorMsg":"No se encontró el usuario a modificar"
                 } 
             return result
         return UsuarioOut().dump(res)    
@@ -119,6 +119,8 @@ def get_usuario(query_data: dict):
         dni=""
         username=""
         id_grupo=None
+        eliminado= None
+        suspendido=None
         cant=0
         
         print("query_data:",query_data)
@@ -137,9 +139,12 @@ def get_usuario(query_data: dict):
             dni=request.args.get('dni') 
         if(request.args.get('username') is not None):
             username=request.args.get('username')           
-        
+        if(request.args.get('eliminado') is not None):
+            eliminado=request.args.get('eliminado')
+        if(request.args.get('suspendido') is not None):
+            suspendido=request.args.get('suspendido')    
 
-        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username)
+        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 
         data = {
                 "count": cant,
@@ -157,7 +162,7 @@ def get_usuario(query_data: dict):
 @usuario_b.get('/usuario_detalle')
 @usuario_b.input(UsuarioGetIn, location='query')
 @usuario_b.output(UsuarioCountAllOut)
-def get_usuarios_nombre(query_data: dict):
+def get_usuarios_detalle(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
@@ -167,6 +172,8 @@ def get_usuarios_nombre(query_data: dict):
         dni=""
         username=""
         cant=0
+        eliminado= None
+        suspendido=None
         
         print("query_data:",query_data)
         
@@ -183,9 +190,13 @@ def get_usuarios_nombre(query_data: dict):
         if(request.args.get('dni') is not None):
             dni=request.args.get('dni')
         if(request.args.get('username') is not None):
-            username=request.args.get('username')        
+            username=request.args.get('username')
+        if(request.args.get('eliminado') is not None):
+            eliminado=request.args.get('eliminado')
+        if(request.args.get('suspendido') is not None):
+            suspendido=request.args.get('suspendido')                
 
-        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username)
+        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 
         data = {
                 "count": cant,

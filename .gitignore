@@ -83,7 +83,7 @@ docs/_build/man/
 docs/_build/epub/
 docs/_build/changelogs/
 docs/_build/javadocs/
-docs/_build/singlehtml/
+_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -136,8 +136,5 @@ dmypy.json
 # dotenv
 .env
 .env.*
-export_creds.sh
+#export_creds.sh
 start.sh
-
-# sphinx
-_build

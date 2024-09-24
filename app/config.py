@@ -11,6 +11,7 @@ class Config:
     # Database configuration
     POSGRESS_USER = os.environ.get('postgres_user') 
     POSGRESS_PASSWORD = os.environ.get('postgres_password')
+    POSGRESS_BASE = os.environ.get('postgres_base')
 
     PROPAGATE_EXCEPTIONS = True
 
@@ -23,11 +24,11 @@ class Config:
     SERVERS = [
         {
             'name': 'localhost',
-            'url': 'http://localhost:3000'
+            'url': 'http://localhost:5005'
         },
         {
             'name': 'localhost',
-            'url': 'http://192.168.68.107:5005'
+            'url': 'http://192.168.70.27:5005'
         }
     ]
     DESCRIPTION='APIs Sistema de Tareas'
