@@ -214,7 +214,21 @@ class TipoTarea(Base):
     eliminado = Column(Boolean, nullable=False, default=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    base = Column(Boolean, default=False)
 
+class SubtipoTarea(Base):
+    __tablename__ = 'subtipo_tarea'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tipo = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    nombre = Column(String)
+    eliminado = Column(Boolean, default=False)
+    id_user_actualizacion = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    base = Column(Boolean, default=False)
+
+    tipo_tarea = relationship('TipoTarea')
 
 class Usuario(Base):
     __tablename__ = 'usuario'
@@ -291,6 +305,7 @@ class Tarea(Base):
     id_expediente = Column(ForeignKey('tareas.expediente_ext.id'))
     caratula_expediente = Column(String)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    id_subtipo_tarea = Column(ForeignKey('tareas.subtipo_tarea.id'))
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
@@ -301,8 +316,10 @@ class Tarea(Base):
     fecha_fin = Column(DateTime)
     plazo = Column(Integer)
     eliminado = Column(Boolean, default=False)
+    estado = Column(Integer)
 
     tipo_tarea = relationship('TipoTarea')
+    subtipo_tarea = relationship('SubtipoTarea')
     grupo = relationship('Grupo')
     expediente = relationship('ExpedienteExt')
     actuacion = relationship('ActuacionExt')

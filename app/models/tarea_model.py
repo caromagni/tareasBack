@@ -5,7 +5,7 @@ from ..common.functions import controla_fecha
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:
@@ -22,7 +22,7 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
+def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
    ###########Calculo de plazo################
     print("###############Calculo de plazo################")
@@ -62,12 +62,14 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         prioridad=prioridad,
+        estado=estado,
         id_actuacion=id_actuacion,
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
         caratula_expediente=caratula_expediente,
         id_tipo_tarea=id_tipo_tarea,
+        id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
         id_user_actualizacion=id_user_actualizacion,
         fecha_eliminacion=fecha_eliminacion,
@@ -135,10 +137,14 @@ def update_tarea(id='', **kwargs):
         tarea.id_expediente = kwargs['id_expediente']           
     if 'id_tipo_tarea' in kwargs:
         tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
+    if 'id_subtipo_tarea' in kwargs:
+        tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
     if 'plazo' in kwargs:
         tarea.plazo = kwargs['plazo']
     if 'prioridad' in kwargs:
         tarea.prioridad = kwargs['prioridad']
+    if 'estado' in kwargs:
+        tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper()  
         
@@ -280,8 +286,42 @@ def delete_tipo_tarea(id):
     else:
         print("Tipo de tarea no encontrado")
         return None
-    
+#########################SUBTIPO TAREA############################################
+def get_all_subtipo_tarea(page=1, per_page=10):
+    print("get_tipo_tareas - ", page, "-", per_page)
+    session: scoped_session = current_app.session
+    todo = session.query(SubtipoTarea).all()
+    total= len(todo)
+    res = session.query(SubtipoTarea).order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
+    return res, total    
 
+def insert_subtipo_tarea(id='', id_tipo='', nombre='', id_user_actualizacion=''):
+    session: scoped_session = current_app.session
+    nuevoID=uuid.uuid4()
+    nuevo_subtipo_tarea = SubtipoTarea(
+        id=nuevoID,
+        id_tipo=id_tipo,
+        nombre=nombre,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_actualizacion=datetime.now()
+    )
+
+    session.add(nuevo_subtipo_tarea)
+    session.commit()
+    return nuevo_subtipo_tarea
+
+def delete_subtipo_tarea(id):
+    session: scoped_session = current_app.session
+    subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id, SubtipoTarea.eliminado==False).first()
+    if subtipo_tarea is not None:
+        subtipo_tarea.eliminado=True
+        subtipo_tarea.fecha_actualizacion=datetime.now()
+        session.commit()
+        return subtipo_tarea
+    else:
+        print("Subtipo de tarea no encontrado")
+        return None
+    
 ##########################TAREAS #############################################
 def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', notas=""):
     msg=''
@@ -362,8 +402,11 @@ def get_tarea_by_id(id):
             "fecha_fin": res.fecha_fin,
             "plazo": res.plazo,
             "prioridad": res.prioridad,
+            "estado": res.estado,
             "id_tipo_tarea": res.id_tipo_tarea,
+            "id_subtipo_tarea": res.id_subtipo_tarea,
             "tipo_tarea": res.tipo_tarea,
+            "subtipo_tarea": res.subtipo_tarea,
             "id_expediente": res.id_expediente,
             "expediente": res.expediente,
             "id_actuacion": res.id_actuacion,
@@ -388,7 +431,7 @@ def get_tarea_by_id(id):
     
     return results 
 
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, eliminado=None):
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
     session: scoped_session = current_app.session
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     if titulo != '':
@@ -410,6 +453,9 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
 
     if prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
+
+    if estado > 0:
+        query = query.filter(Tarea.estado == estado)    
 
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
@@ -463,8 +509,11 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
             "fecha_fin": res.fecha_fin,
             "plazo": res.plazo,
             "prioridad": res.prioridad,
+            "estado": res.estado,
             "id_tipo_tarea": res.id_tipo_tarea,
             "tipo_tarea": res.tipo_tarea,
+            "id_subtipo_tarea": res.id_subtipo_tarea,
+            "subtipo_tarea": res.subtipo_tarea,
             "id_expediente": res.id_expediente,
             "expediente": res.expediente,
             "caratula_expediente": res.caratula_expediente,
