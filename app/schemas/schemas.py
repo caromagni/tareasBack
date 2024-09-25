@@ -1,6 +1,7 @@
 from os import link
 from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
+from enum import Enum
 #from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
 from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested, List
@@ -54,7 +55,14 @@ def validate_email(f):
     # Expresión regular para validar una dirección de correo electrónico
     if not re.match(r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$', f):
         raise ValidationError("El campo debe contener una dirección de email válida.")    
-    
+
+##########Clase enum para los estados de las tareas ###############################
+class EstadoEnum(Enum):
+    pendiente = 1
+    en_proceso = 2
+    realizada = 3
+    cancelada = 4
+
 ##########Schemas para joins ###############################   
 class SmartNested(Nested):
     def serialize(self, attr, obj, accessor=None):
@@ -234,6 +242,7 @@ class TipoTareaIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String(required=True)
+    base = Boolean(default=False)
 
 class TipoTareaOut(Schema):
     id = String()
@@ -241,6 +250,25 @@ class TipoTareaOut(Schema):
     codigo_humano = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
+    base = Boolean()
+
+class SubtipoTareaIn(Schema):
+    id_tipo = String(required=True)
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    base = Boolean(default=False)
+
+class SubtipoTareaOut(Schema):
+    id = String()
+    id_tipo = String()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre"))
+    nombre = String()
+    eliminado = Boolean()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
+    base = Boolean()
 
 class ListUsuario(Schema):
     id_usuario = String()
@@ -263,6 +291,7 @@ class TareaIn(Schema):
         validate_char
     ])
     id_tipo_tarea = String(required=True)
+    id_subtipo_tarea = String()
     eliminable = Boolean()
     id_user_actualizacion = String(required=True)
     fecha_inicio = String(validate=validate_fecha)
@@ -270,6 +299,10 @@ class TareaIn(Schema):
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
     grupo = List(Nested(ListGrupo))
+    estado = fields.Integer(validate=validate.OneOf(
+        [estado.value for estado in EstadoEnum], 
+        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
+    ))
 
 class TareaPatchIn(Schema):
     prioridad = Integer(validate=[
@@ -286,6 +319,7 @@ class TareaPatchIn(Schema):
         validate_char
     ])
     id_tipo_tarea = String()
+    id_subtipo_tarea = String()
     eliminable = Boolean()
     id_user_actualizacion = String(required=True)
     fecha_inicio = String(validate=validate_fecha)
@@ -293,17 +327,23 @@ class TareaPatchIn(Schema):
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
     grupo = List(Nested(ListGrupo))
+    estado = fields.Integer(validate=validate.OneOf(
+        [estado.value for estado in EstadoEnum], 
+        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
+    ))
 
 class TareaOut(Schema):
     id = String()
     #id_grupo = String()
     prioridad = Integer()
+    estado = Integer()
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
     id_expediente = String()
     caratula_expediente = String()
     id_tipo_tarea = String()
+    id_subtipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
     fecha_eliminacion = String()
@@ -311,10 +351,11 @@ class TareaOut(Schema):
     fecha_fin = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
-    #id_user_actualizacion = String()
+    id_user_actualizacion = String()
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
@@ -513,10 +554,13 @@ class UsuarioIdOut(Schema):
     grupos = List(Nested(GroupOut, only=("id", "nombre")))
     
 
-
 class TipoTareaCountOut(Schema):
     count = Integer()
-    data = Nested(TipoTareaOut, many=True)      
+    data = Nested(TipoTareaOut, many=True)   
+
+class SubtipoTareaCountOut(Schema):
+    count = Integer()
+    data = Nested(SubtipoTareaOut, many=True)       
 
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
@@ -562,10 +606,12 @@ class TareaIdOut(Schema):
     id_grupo = String()
     grupo = Nested(GroupOut, only=("id", "nombre"))
     prioridad = Integer()
+    estado = Integer()
     id_actuacion = String()
     id_expediente = String()
     caratula_expediente = String()
     id_tipo_tarea = String()
+    id_subtipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
     fecha_eliminacion = DateTime()
@@ -573,6 +619,7 @@ class TareaIdOut(Schema):
     fecha_fin = DateTime()
     plazo = Integer()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     grupos = List(Nested(GroupOut, only=("id", "nombre")))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
