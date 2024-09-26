@@ -244,6 +244,18 @@ class TipoTareaIn(Schema):
     id_user_actualizacion = String(required=True)
     base = Boolean(default=False)
 
+class TipoTareaPatchIn(Schema):
+    codigo_humano = String(validate=[
+        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres"),
+        validate_char
+    ])
+    nombre = String(validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String(required=True)
+    base = Boolean(default=False)
+
 class TipoTareaOut(Schema):
     id = String()
     nombre = String()
@@ -252,6 +264,7 @@ class TipoTareaOut(Schema):
     eliminado = Boolean()
     base = Boolean()
 
+
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
     nombre = String(required=True, validate=[
@@ -259,6 +272,16 @@ class SubtipoTareaIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
+    id_user_actualizacion = String(required=True)
+
+class SubtipoTareaPatchIn(Schema):
+    id_tipo = String()
+    nombre = String(validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    base = Boolean(default=False)
+    id_user_actualizacion = String(required=True)
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)

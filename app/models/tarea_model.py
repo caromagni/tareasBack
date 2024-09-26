@@ -260,13 +260,14 @@ def get_all_tipo_tarea(page=1, per_page=10):
     res = session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total
 
-def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=''):
+def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
     nuevoID=uuid.uuid4()
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
+        base=base,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -274,6 +275,32 @@ def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=
     session.add(nuevo_tipo_tarea)
     session.commit()
     return nuevo_tipo_tarea
+
+
+def update_tipo_tarea(tipo_tarea_id='', **kwargs):
+
+    session: scoped_session = current_app.session
+    tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id).first()
+    
+    if tipo_tarea is None:
+        raise Exception("Tipo de tarea no encontrado")
+    
+    if 'codigo_humano' in kwargs:
+        tipo_tarea.codigo_humano = kwargs['codigo_humano']
+    if 'nombre' in kwargs:
+        tipo_tarea.nombre = kwargs['nombre']
+    if 'base' in kwargs:
+        tipo_tarea.base = kwargs['base'] 
+    else:
+        tipo_tarea.base = False
+
+    if 'id_user_actualizacion' in kwargs:
+        tipo_tarea.id_user_actualizacion = kwargs['id_user_actualizacion']
+
+    tipo_tarea.fecha_actualizacion = datetime.now()
+    session.commit()
+    return tipo_tarea
+
 
 def delete_tipo_tarea(id):
     session: scoped_session = current_app.session
@@ -297,20 +324,19 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     if eliminado is not None:
         query = query.filter(SubtipoTarea.eliminado==eliminado)
 
-    
-
     total= len(query.all())
 
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(id='', id_tipo='', nombre='', id_user_actualizacion=''):
+def insert_subtipo_tarea(id_tipo='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
     nuevoID=uuid.uuid4()
     nuevo_subtipo_tarea = SubtipoTarea(
         id=nuevoID,
         id_tipo=id_tipo,
         nombre=nombre,
+        base=base,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -318,6 +344,27 @@ def insert_subtipo_tarea(id='', id_tipo='', nombre='', id_user_actualizacion='')
     session.add(nuevo_subtipo_tarea)
     session.commit()
     return nuevo_subtipo_tarea
+
+def update_subtipo_tarea(subtipo_id='', **kwargs):
+
+    session: scoped_session = current_app.session
+    subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == subtipo_id).first()
+    
+    if subtipo_tarea is None:
+        raise Exception("Subtipo de tarea no encontrado")
+    
+    if 'nombre' in kwargs:
+        subtipo_tarea.nombre = kwargs['nombre']
+    if 'id_user_actualizacion' in kwargs:
+        subtipo_tarea.id_user_actualizacion = kwargs['id_user_actualizacion']
+    if 'base' in kwargs:
+        subtipo_tarea.base = kwargs['base']
+    else:
+        subtipo_tarea.base = False    
+
+    subtipo_tarea.fecha_actualizacion = datetime.now()
+    session.commit()
+    return subtipo_tarea
 
 def delete_subtipo_tarea(id):
     session: scoped_session = current_app.session

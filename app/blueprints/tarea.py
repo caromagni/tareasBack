@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn
+from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn
 from ..models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
-from ..models.tarea_model import get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea
+from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
@@ -160,7 +160,31 @@ def post_tipo_tarea(json_data: dict):
     
     except Exception as err:
         raise ValidationError(err)  
+    
 
+@tarea_b.doc(description='Modificación de un Tipos de Tarea', summary='Modificación de un Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.patch('/tipo_tarea/<string:tipo_tarea_id>')
+@tarea_b.input(TipoTareaPatchIn)
+def update_tipotarea(tipo_tarea_id:str,json_data: dict):
+    try:
+    
+        res = update_tipo_tarea(tipo_tarea_id,**json_data)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "code": 800,
+                    "error":"Error en modificación de tipo de tarea",
+                    "error_description":"No se pudo modificar el tipo de tarea"
+                }
+            res = MsgErrorOut().dump(result)
+            return res
+        
+        
+        return TipoTareaOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err)  
+    
 @tarea_b.doc(description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/tipo_tarea/<string:id>')
 #@tarea_b.output(MsgErrorOut)
@@ -206,7 +230,7 @@ def get_subtipoTarea(query_data: dict):
             eliminado=request.args.get('eliminado')
 
         print("id_tipo_tarea:",id_tipo_tarea)
-        
+
         res, cant = get_all_subtipo_tarea(page,per_page,id_tipo_tarea, eliminado)
         
         data = {
@@ -244,6 +268,28 @@ def post_subtipo_tarea(json_data: dict):
     
     except Exception as err:
         raise ValidationError(err)  
+
+@tarea_b.doc(description='Modificación de un Subtipos de Tarea', summary='Modificación de un Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.patch('/subtipo_tarea/<string:subtipo_id>')
+@tarea_b.input(SubtipoTareaPatchIn)
+def update_subtipotarea(subtipo_id:str,json_data: dict):
+    try:
+    
+        res = update_subtipo_tarea(subtipo_id,**json_data)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "code": 800,
+                    "error":"Error en modificar subtipo de tarea",
+                    "error_description":"No se pudo modificar el subtipo de tarea"
+                }
+            res = MsgErrorOut().dump(result)
+            return res
+        
+        return SubtipoTareaOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err) 
 
 @tarea_b.doc(description='Baja de Subtipo de Tarea', summary='Baja de subtipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/subtipo_tarea/<string:id>')
