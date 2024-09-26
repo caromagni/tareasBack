@@ -402,6 +402,7 @@ class TareaGetIn(Schema):
     id_actuacion = String()
     prioridad = Integer()
     eliminado = Boolean()
+    estado = Integer()
     
 ####################Grupos - Tareas - Usuarios ####################
 class GroupAllOut(Schema):
@@ -529,6 +530,7 @@ class TareaAllOut(Schema):
     id = String()
     #id_grupo = String()
     prioridad = Integer()
+    estado = Integer()
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
