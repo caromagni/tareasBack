@@ -5,7 +5,7 @@ from ..common.functions import controla_fecha
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:
@@ -132,12 +132,22 @@ def update_tarea(id='', **kwargs):
     if 'eliminable' in kwargs:
         tarea.eliminable = kwargs['eliminable']
     if 'id_actuacion' in kwargs:
+        actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
+        if actuacion is None:
+            raise Exception("Actuacion no encontrada")
         tarea.id_actuacion = kwargs['id_actuacion']
     if 'id_expediente' in kwargs:
+        expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
+        if expediente is None:
+            raise Exception("Expediente no encontrado")
         tarea.id_expediente = kwargs['id_expediente']           
     if 'id_tipo_tarea' in kwargs:
+        tipo = session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
         tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
     if 'id_subtipo_tarea' in kwargs:
+        subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
+        if subtipo is None:
+            raise Exception("Subtipo de tarea no encontrado")
         tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
     if 'plazo' in kwargs:
         tarea.plazo = kwargs['plazo']
@@ -147,6 +157,11 @@ def update_tarea(id='', **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper()  
+    if 'id_user_actualizacion' in kwargs:
+        usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario de actualizacion no encontrado")
+        tarea.id_user_actualizacion = kwargs['id_user_actualizacion']  
         
     tarea.fecha_actualizacion = datetime.now()
     usuarios=[]
