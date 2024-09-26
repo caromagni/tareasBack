@@ -287,12 +287,21 @@ def delete_tipo_tarea(id):
         print("Tipo de tarea no encontrado")
         return None
 #########################SUBTIPO TAREA############################################
-def get_all_subtipo_tarea(page=1, per_page=10):
+def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None):
     print("get_tipo_tareas - ", page, "-", per_page)
     session: scoped_session = current_app.session
-    todo = session.query(SubtipoTarea).all()
-    total= len(todo)
-    res = session.query(SubtipoTarea).order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
+
+    query = session.query(SubtipoTarea)
+    if id_tipo_tarea is not None:
+        query = query.filter(SubtipoTarea.id_tipo==id_tipo_tarea)
+    if eliminado is not None:
+        query = query.filter(SubtipoTarea.eliminado==eliminado)
+
+    
+
+    total= len(query.all())
+
+    res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
 def insert_subtipo_tarea(id='', id_tipo='', nombre='', id_user_actualizacion=''):

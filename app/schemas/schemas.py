@@ -260,6 +260,12 @@ class SubtipoTareaIn(Schema):
     ])
     base = Boolean(default=False)
 
+class SubtipoTareaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    id_tipo_tarea = String()
+    eliminado = Boolean()
+
 class SubtipoTareaOut(Schema):
     id = String()
     id_tipo = String()
