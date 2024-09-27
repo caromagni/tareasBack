@@ -37,14 +37,15 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
         tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
             raise Exception("Tipo de tarea no encontrado")
-        
+        nombre_tipo=tipo_tarea.nombre
         if id_subtipo_tarea is not None:
             subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
                 raise Exception("Subtipo de tarea no encontrado")
+            nombre_subtipo = subtipo_tarea.nombre
             subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.id_tipo == id_tipo_tarea).first()
             if subtipo_tarea is None:
-                raise Exception("El tipo de tarea  y el subtipo de tarea no se corresponden")
+                raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
         
     if id_user_actualizacion is not None:
         qryusuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion).first()
@@ -187,13 +188,16 @@ def update_tarea(id='', **kwargs):
         if tipo is  None:
             raise Exception("Tipo de tarea no encontrado")
         
+        nombre_tipo=tipo.nombre
+
         if 'id_subtipo_tarea' in kwargs:
             subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
+            nombre_subtipo = subtipo.nombre
             subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea']).first()
             if subtipo is None:
-                raise Exception("El tipo de tarea y el subtipo de tarea no se corresponden")
+                raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
            
             tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
             tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
