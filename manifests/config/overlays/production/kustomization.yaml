@@ -1,0 +1,18 @@
+generatorOptions:
+  disableNameSuffixHash: true
+  
+bases:
+  - ../../base
+  
+namespace: {{NAMESPACE}}
+
+nameSuffix: -{{ENV}}
+commonLabels:
+    app: {{PID-APP}}
+    env: {{ENV}}
+
+patchesStrategicMerge:
+  - ssetings.yaml
+  - cmaps.yaml
+  - cm-uwsgi.yaml
+
