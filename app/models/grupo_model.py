@@ -254,8 +254,13 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
             res_tareas = session.query(TareaXGrupo.id_grupo, 
                                        Tarea.id, 
                                        Tarea.titulo, 
-                                       Tarea.tipo_tarea,
-                                       Tarea.eliminado
+                                       Tarea.id_tipo_tarea,
+                                       Tarea.id_subtipo_tarea,
+                                      # Tarea.subtipo_tarea,
+                                      # Tarea.tipo_tarea,
+                                       Tarea.eliminado,
+                                       Tarea.estado,
+                                       Tarea.fecha_actualizacion
                                        ).join(Tarea, Tarea.id==TareaXGrupo.id_tarea
                                                    ).filter(TareaXGrupo.id_grupo==res.id).all()
             
@@ -278,7 +283,11 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                     tarea = {
                         "id": row.id,
                         "titulo": row.titulo,
-                        "tipo_tarea": row.tipo_tarea,
+                        "id_tipo_tarea": row.id_tipo_tarea,
+                        "id_subtipo_tarea": row.id_subtipo_tarea,
+                        "estado": row.estado,
+                        #"subtipo_tarea": row.subtipo_tarea,
+                        #"tipo_tarea": row.tipo_tarea,
                         "eliminado": row.eliminado,
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
@@ -359,6 +368,12 @@ def update_grupo(id='', **kwargs):
         grupo.nombre = kwargs['nombre']
     if 'descripcion' in kwargs:
         grupo.descripcion = kwargs['descripcion']
+    if 'suspendido' in kwargs:
+        grupo_con_tarea= session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
+        if len(grupo_con_tarea)>0:
+            raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
+        grupo.suspendido = kwargs['suspendido']
+    
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
     if 'id_user_actualizacion' in kwargs:
@@ -651,6 +666,10 @@ def delete_grupo(id,todos=False):
     if grupo is None:
         raise Exception("Grupo no encontrado")
     
+    grupo_con_tarea= session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
+    if len(grupo_con_tarea)>0:
+        raise Exception("No se puede eliminar el grupo. El grupo tiene tareas sin cerrar")
+       
     if todos:
         # Eliminar todos los hijos
         print("Eliminar todos los hijos")

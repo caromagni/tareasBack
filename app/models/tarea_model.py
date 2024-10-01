@@ -46,7 +46,10 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
             subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.id_tipo == id_tipo_tarea).first()
             if subtipo_tarea is None:
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
-        
+    else:
+        if id_subtipo_tarea is not None:
+            raise Exception("Debe ingresar el tipo de tarea")
+            
     if id_user_actualizacion is not None:
         qryusuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion).first()
         if qryusuario is None:
@@ -161,6 +164,7 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
 
 def update_tarea(id='', **kwargs):
     ################################
+    controla_tipo=False
     session: scoped_session = current_app.session
     tarea = session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
    
@@ -182,25 +186,45 @@ def update_tarea(id='', **kwargs):
         expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
         if expediente is None:
             raise Exception("Expediente no encontrado")
-        tarea.id_expediente = kwargs['id_expediente']           
+        tarea.id_expediente = kwargs['id_expediente']    
+    #Validacion de tipo y subtipo de tarea
     if 'id_tipo_tarea' in kwargs:
         tipo = session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
         if tipo is  None:
-            raise Exception("Tipo de tarea no encontrado")
+            raise Exception("Tipo de tarea no encontrado:" + kwargs['id_tipo_tarea'])
         
         nombre_tipo=tipo.nombre
-
         if 'id_subtipo_tarea' in kwargs:
             subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
             nombre_subtipo = subtipo.nombre
+            print("nombre_subtipo:",nombre_subtipo)
             subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea']).first()
             if subtipo is None:
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
            
             tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
-            tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
+            tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
+        #no se ingreso subtipo de tarea, verifico con el subtipo actual
+        else:
+            subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == tarea.id_subtipo_tarea, SubtipoTarea.id_tipo==kwargs['id_tipo_tarea']).first()
+            if subtipo is None:
+                raise Exception("El tipo de tarea '" + nombre_tipo + "' no se corresponde al subtipo de tarea actual")
+
+            tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
+    else:
+        #no se ingreso tipo de tarea , verifico con el tipo actual         
+        if 'id_subtipo_tarea' in kwargs:
+            subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
+            if subtipo is None:
+                raise Exception("Subtipo de tarea no encontrado")
+            #verifico que el subtipo de tarea corresponda al tipo de tarea actual
+            nombre_subtipo = subtipo.nombre
+            subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs["id_subtipo_tarea"], SubtipoTarea.id_tipo==tarea.id_tipo_tarea).first()
+            if subtipo is None:
+                raise Exception("El tipo de tarea actual no se corresponde con el subtipo ingresado: '" + nombre_subtipo )
+            tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
 
     if 'plazo' in kwargs:
         tarea.plazo = kwargs['plazo']
@@ -303,7 +327,9 @@ def update_tarea(id='', **kwargs):
         "plazo": tarea.plazo,
         "prioridad": tarea.prioridad,
         "id_tipo_tarea": tarea.id_tipo_tarea,
+        "id_subtipo_tarea": tarea.id_subtipo_tarea,
         "tipo_tarea": tarea.tipo_tarea,
+        "subtipo_tarea": tarea.subtipo_tarea,
         "id_expediente": tarea.id_expediente,
         "expediente": tarea.expediente,
         "id_actuacion": tarea.id_actuacion,
