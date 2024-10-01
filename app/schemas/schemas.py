@@ -832,3 +832,87 @@ class NotaCountAllOut(Schema):
 class NotaCountOut(Schema):
     count = Integer()
     data = Nested(NotaOut, many=True)    
+
+############## Labels ####################  
+    
+class LabelIn(Schema):    
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    color = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a #xxxxxx")) 
+    id_grupo = String(required=True)
+    eliminado = Boolean()
+    id_user_creacion = String(required=True)
+    fecha_creacion = String(validate=validate_fecha)
+    fecha_eliminacion = String(validate=validate_fecha)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+
+class LabelPatchIn(Schema):
+    titulo = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    nombre = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    eliminado = Boolean()
+    id_user_creacion = String(required=True)
+    fecha_creacion= String(validate=validate_fecha)
+    fecha_eliminacion = String(validate=validate_fecha)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+    
+class LabelOut(Schema):
+    id = String()
+    nombre = String()
+    color = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String()
+    fecha_actualizacion = String()
+    id_user_creacion = String()
+    id_grupo_padre = String()
+
+class LabelAllOut(Schema):
+    id = String()
+    nombre = String()
+    color = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String()
+    fecha_actualizacion = String()
+    id_user_creacion = String()
+    id_grupo_padre = String()
+
+
+class LabelIdOut(Schema):
+    id = String()
+    nombre = String()
+    color = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String()
+    fecha_actualizacion = String()
+    id_user_creacion = String()
+    id_grupo_padre = String()
+
+    
+class LabelGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    nombre = String(default="")
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+    id_usuario_creacion = String()
+    id_tarea = String()
+    eliminado = Boolean()
+    fecha_creacion = String()
+
+class LabelCountAllOut(Schema):
+    count = Integer()
+    data = Nested(LabelAllOut, many=True)
+    
+
+class LabelCountOut(Schema):
+    count = Integer()
+    data = Nested(LabelOut, many=True)    

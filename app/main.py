@@ -11,6 +11,7 @@ from .blueprints.herarquia import herarquia_b
 from .blueprints.actuacion import actuacion_b
 from .blueprints.expediente import expediente_b
 from .blueprints.nota import nota_b
+from .blueprints.label import label_b
 from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
 from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
@@ -68,6 +69,8 @@ def create_app():
     app.register_blueprint(actuacion_b)
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
+    app.register_blueprint(label_b)
+
 
     # Register custom error handlers
     register_error_handlers(app)
