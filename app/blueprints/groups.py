@@ -1,20 +1,20 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
+from ..api_key import *
+import jwt
 from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
 from ..schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
 from datetime import datetime
-import jwt
 from ..common.keycloak import get_public_key
 import os
+
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
 
-
-
-@auth.verify_token
+#@auth.verify_token
 def verify_token():
     token_encabezado = request.headers.get('Authorization')
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
@@ -25,7 +25,7 @@ def verify_token():
         try:
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
-          
+            print("token:",token)
             payload = jwt.decode(jwt=token, key=jwt_pk, algorithms=jwt_alg, audience=jwt_aud)
             
             return payload
@@ -37,15 +37,37 @@ def verify_token():
         except Exception as e:
             raise ValidationError( 'Error al decodificar el token. Inicie sesión nuevamente.')
     else:
-        raise ValidationError( 'No se encontró el token de autorización.' )
+        return None
+        #raise ValidationError( 'No se encontró el token de autorización.' )
  
-# parser=groups_b.parser()
-# parser.add_argument('Authorization', type=str,
-#                     location='headers',
-#                     help='Bearer Access Token: "Bearer" token',
-#                     required=True)
 
-
+#@auth.verify_token
+#@auth.login_required
+def verificar_header():
+    ############### verifico si viene api key######################
+        token_payload = verify_token()
+        x_api_key = request.headers.get('x-api-key')
+        x_api_system = request.headers.get('x-api-system')
+        print("x_api_system:",x_api_system)
+        print("x_api_key:",x_api_key)
+        # Verificar si se proporciona el token o API key
+        if token_payload is None and x_api_key is None:
+            #raise ValidationError("Token o api-key no validos")
+            print("Token o api key no validos")
+       
+        if token_payload is not None:            
+            nombre_usuario=token_payload['preferred_username']
+            print("###########Token valido############")
+            print("nombre_usuario:",nombre_usuario)
+            return True
+       
+        if x_api_key is not None:
+            if x_api_system is None:
+                raise ValidationError("api-system no valida")
+            if not verify_api_key(x_api_key, x_api_system):
+                raise ValidationError("api-key no valida")
+            else:
+                return True
 
 @groups_b.doc(description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
@@ -54,11 +76,7 @@ def verify_token():
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        #token_payload = verify_token()
-        #print("token_payload:",token_payload)
-        #nombre_usuario=token_payload['preferred_username']
-        #print("nombre_usuario:",nombre_usuario)
-        #print("json_data:",json_data)
+
         res = update_grupo(id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
@@ -71,12 +89,21 @@ def patch_grupo(id_grupo: str, json_data: dict):
         raise ValidationError(err)
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
-@groups_b.doc(description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @groups_b.get('/grupo')
-@groups_b.input(GroupGetIn, location='query')
+@groups_b.input(GroupGetIn,  location='query')
 @groups_b.output(GroupCountOut)
+#@auth.login_required
+#@groups_b.auth_required(auth)
 def get_grupo(query_data: dict):
+    
     try:
+        ###############Valida token o api-key ########################
+        if not verificar_header():
+            #raise ValidationError("Token o api-key no validos")   
+            print("Token o api key no validos")    
+        ##############################################################
+
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         print(type(per_page))
