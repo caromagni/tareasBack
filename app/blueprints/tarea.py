@@ -16,6 +16,7 @@ import uuid
 import json
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
+
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
