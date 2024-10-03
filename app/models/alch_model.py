@@ -148,14 +148,17 @@ class HerarquiaGrupoGrupo(Base):
 
 class Label(Base):
     __tablename__ = 'label'
-    __table_args__ = {'schema': 'tareas'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'campo libre de labels que puede tener en principio 3 niveles de visibilidad, personal, juzgado y externo(abogados)'}
 
+    eliminado = Column(Boolean)
+    fecha_creacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime)
+    fecha_actualizacion = Column(DateTime)
     id = Column(UUID, primary_key=True)
-    codigo = Column(String, nullable=False)
+    id_grupo_padre = Column(UUID)
+    id_user_creacion = Column(UUID, nullable=False)
     nombre = Column(String)
-    fecha_actualizacion = Column(ARRAY(DateTime()), nullable=False)
-    id_user_actualizacion = Column(UUID, nullable=False)
-    descripcion = Column(String)
+    color = Column(String)
 
 
 t_multimedia = Table(
@@ -197,7 +200,7 @@ class TipoNota(Base):
     __table_args__ = {'schema': 'tareas'}
 
     eliminado = Column(Boolean)
-    fecha_actualizacion = Column(DateTime)
+    fecha_actualizacion = Column(ARRAY(DateTime()), nullable=False)
     fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
     id = Column(UUID, primary_key=True)
@@ -381,7 +384,6 @@ t_label_x_tarea = Table(
     Column('id_user_actualizacion', UUID),
     schema='tareas'
 )
-
 
 class Nota(Base):
     __tablename__ = 'nota'

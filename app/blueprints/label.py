@@ -1,0 +1,140 @@
+from datetime import date, timedelta
+from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from ..models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label
+from app.common.error_handling import DataError, DataNotFound, ValidationError
+from ..models.alch_model import Usuario, Rol, Label
+#from flask_jwt_extended import jwt_required
+from apiflask import APIBlueprint
+from flask import request, current_app
+from datetime import datetime
+from sqlalchemy.orm import scoped_session
+from ..common.usher import get_roles
+import uuid
+import json
+
+label_b = APIBlueprint('label_blueprint', __name__)
+###############
+@label_b.before_request
+def before_request():
+    print("Antes de la petición")
+    print(request.headers)
+
+################################ NOTAS ################################
+@label_b.doc(description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.get('/label')
+@label_b.input(LabelGetIn, location='query')
+@label_b.output(LabelCountOut)
+def get_labels(query_data: dict):
+    try:
+        page = 1
+        per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant = 0
+        nombre = ""
+        eliminado = None
+        label_color = ""
+        id_user_creacion = None
+        id_tarea = None
+        id_grupo_padre = None
+        fecha_desde = "01/01/1900"
+        fecha_hasta = datetime.now().strftime("%d/%m/%Y")
+
+        if request.args.get('page') is not None:
+            page = int(request.args.get('page'))
+        if request.args.get('per_page') is not None:
+            per_page = int(request.args.get('per_page'))
+        if request.args.get('id_user_creacion') is not None:
+            id_user_creacion = request.args.get('id_user_creacion')       
+        if request.args.get('nombre') is not None:
+            nombre = request.args.get('nombre')
+        if request.args.get('id_tarea') is not None:
+            id_tarea = request.args.get('id_tarea') 
+        if request.args.get('eliminado') is not None:
+            eliminado = request.args.get('eliminado')           
+        if request.args.get('fecha_desde') is not None:
+            fecha_desde = request.args.get('fecha_desde')
+        if request.args.get('fecha_hasta') is not None:
+            fecha_hasta = request.args.get('fecha_hasta')
+        if request.args.get('label_color') is not None:
+            label_color = request.args.get('label_color')  
+
+        res, cant = get_all_label(page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+
+        data = {
+            "count": cant,
+            "data": LabelAllOut().dump(res, many=True)
+        }
+        
+        current_app.session.remove()
+        return data
+    
+    except Exception as err:
+        raise ValidationError(err) 
+
+
+@label_b.doc(description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.get('/label/<string:id>')
+@label_b.output(LabelIdOut)
+def get_label(id:str):
+    print('label.py')
+    try:
+        res = get_label_by_id(id)
+        if res is None:
+            raise DataNotFound("Label no encontrada")
+
+        result = LabelIdOut().dump(res)
+        current_app.session.remove()
+        return result
+    
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err) 
+
+
+@label_b.doc(description='Alta de Label', summary='Alta y asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.post('/label')
+@label_b.input(LabelIn)
+@label_b.output(LabelOut)
+def post_label(json_data: dict):
+    try:
+        print("#"*50)
+        print(json_data)
+        print("#"*50)
+        res = insert_label(**json_data)
+        if res is None:
+            result = {
+                    "valido":"fail",
+                    "code": 800,
+                    "error": "Error en insert label",
+                    "error_description": "No se pudo insertar la label"
+                }
+            res = MsgErrorOut().dump(result)
+        
+        return LabelOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err)    
+
+#################DELETE########################
+@label_b.doc(description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.delete('/label/<string:id>')
+def del_label(id: str):
+    try:
+        res = delete_label(id)
+        print("res:",res)
+        if res is None:
+           raise DataNotFound("Label no encontrada")
+        else:
+            print("Label eliminada:", res)
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id label": id,
+                    "nombre": res.nombre
+                } 
+        
+        return result
+    
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err)
