@@ -70,6 +70,9 @@ class SmartNested(Nested):
             return {"id": int(getattr(obj, attr + "_id"))}
         return super(SmartNested, self).serialize(attr, obj, accessor)
 
+############Header Schema####################
+class HeaderSchema(Schema):
+    api_system = String()
 ###############ApiFlask####################  
 class PageIn(Schema):
     page = Integer(default=1)

@@ -1,73 +1,27 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from ..api_key import *
-import jwt
 from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
-from ..common.error_handling import ValidationError, DataError, DataNotFound
+from ..common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
 from ..schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
 from datetime import datetime
-from ..common.keycloak import get_public_key
-import os
+from ..common.auth import verificar_header
 
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
 
-#@auth.verify_token
-def verify_token():
-    token_encabezado = request.headers.get('Authorization')
-    jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
-    jwt_alg=current_app.config['JWT_ALGORITHM']
-    jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
 
-    if token_encabezado:
-        try:
-            # Decodificar y verificar el token
-            token = token_encabezado.split(' ')[1]
-            print("token:",token)
-            payload = jwt.decode(jwt=token, key=jwt_pk, algorithms=jwt_alg, audience=jwt_aud)
-            
-            return payload
-            
-        except jwt.ExpiredSignatureError:
-            raise ValidationError( 'Token expirado. Inicie sesión nuevamente.')
-        except jwt.InvalidTokenError as e:
-            raise ValidationError( 'Token inválido. Inicie sesión nuevamente.')
-        except Exception as e:
-            raise ValidationError( 'Error al decodificar el token. Inicie sesión nuevamente.')
-    else:
-        return None
-        #raise ValidationError( 'No se encontró el token de autorización.' )
- 
-
-#@auth.verify_token
-#@auth.login_required
-def verificar_header():
-    ############### verifico si viene api key######################
-        token_payload = verify_token()
-        x_api_key = request.headers.get('x-api-key')
-        x_api_system = request.headers.get('x-api-system')
-        print("x_api_system:",x_api_system)
-        print("x_api_key:",x_api_key)
-        # Verificar si se proporciona el token o API key
-        if token_payload is None and x_api_key is None:
-            #raise ValidationError("Token o api-key no validos")
-            print("Token o api key no validos")
-       
-        if token_payload is not None:            
-            nombre_usuario=token_payload['preferred_username']
-            print("###########Token valido############")
-            print("nombre_usuario:",nombre_usuario)
-            return True
-       
-        if x_api_key is not None:
-            if x_api_system is None:
-                raise ValidationError("api-system no valida")
-            if not verify_api_key(x_api_key, x_api_system):
-                raise ValidationError("api-key no valida")
-            else:
-                return True
+#################Before requests ##################
+@groups_b.before_request
+def before_request():
+    print("Antes de la petición")
+    print(request.headers)
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")  
+####################################################
 
 @groups_b.doc(description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
@@ -93,28 +47,17 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.get('/grupo')
 @groups_b.input(GroupGetIn,  location='query')
 @groups_b.output(GroupCountOut)
-#@auth.login_required
-#@groups_b.auth_required(auth)
 def get_grupo(query_data: dict):
     
     try:
-        ###############Valida token o api-key ########################
-        if not verificar_header():
-            #raise ValidationError("Token o api-key no validos")   
-            print("Token o api key no validos")    
-        ##############################################################
-
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        print(type(per_page))
         nombre=""
         eliminado=False
         suspendido=False
         path_name=False
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
-        print("query_data:",query_data)
-        print("per_page:",per_page)
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
         if(request.args.get('suspendido') is not None):

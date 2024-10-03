@@ -16,17 +16,12 @@ from .models.alch_model import Base
 from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from .config import Config
 from app.api_key import *
-#from flask import Flask
-#from flask_jwt_extended import JWTManager
-#import jwt
 
 
 def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    auth = HTTPTokenAuth()
-    #auth = HTTPTokenAuth(scheme='Bearer')
     
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
@@ -34,8 +29,6 @@ def create_app():
     app.config['JWT_IDENTITY_CLAIM'] = Config.JWT_IDENTITY_CLAIM
 
 
-    #jwt = JWTManager(app=app)
-    #apikey
     app.security_schemes = {  # equals to use config SECURITY_SCHEMES
         'ApiKeyAuth': {
         'type': 'apiKey',
@@ -54,9 +47,6 @@ def create_app():
         }
     }
    
-        
-
-
     app.config['DEBUG'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
@@ -92,7 +82,7 @@ def create_app():
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
 
-
+    
     ###Api Key
     print("#####################")
     print("Iniciando servidor...")
@@ -112,7 +102,7 @@ def create_app():
     # Register custom error handlers
     register_error_handlers(app)
 
-
+    
 
     return app
 

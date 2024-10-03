@@ -16,6 +16,9 @@ class ConfigNotFound(AppErrorBaseClass):
 class ValidationError(AppErrorBaseClass):
     pass
 
+class UnauthorizedError(AppErrorBaseClass):
+    pass
+
 class GetTokenError(AppErrorBaseClass):
     pass
 
@@ -72,7 +75,12 @@ def register_error_handlers(app):
         #system_error = sys.exc_info()
         #return jsonify(e.with_traceback(system_error[2])), 403
         return jsonify(error='ValidationError', error_description=str(e), code=800), 403
-   
+    
+    @app.errorhandler(UnauthorizedError)
+    def handle_object_not_found_error(e):
+        print(e)
+        return jsonify(error='Unauthorized', error_description=str(e), code=401), 401
+
     @app.errorhandler(GetTokenError)
     def handle_object_not_found_error(e):
         print(e)
