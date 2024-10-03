@@ -15,9 +15,11 @@ from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
 from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from .config import Config
+from app.api_key import *
 #from flask import Flask
 #from flask_jwt_extended import JWTManager
 #import jwt
+
 
 def create_app():
 
@@ -33,6 +35,27 @@ def create_app():
 
 
     #jwt = JWTManager(app=app)
+    #apikey
+    app.security_schemes = {  # equals to use config SECURITY_SCHEMES
+        'ApiKeyAuth': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'x-api-key'
+        },
+        'ApiKeySystemAuth':{
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'x-api-system'
+        },
+        'BearerAuth': {
+        'type': 'http',
+        'scheme': 'bearer',
+        'bearerFormat': 'JWT'
+        }
+    }
+   
+        
+
 
     app.config['DEBUG'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
@@ -69,6 +92,23 @@ def create_app():
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
 
+
+    ###Api Key
+    print("#####################")
+    print("Iniciando servidor...")
+    print("#####################\n")
+    fresh_api_key=generate_api_key()
+    print("INSTRUCTIONS:")
+    print("1. COPIAR API KEY GENERADO (SOLO SE VERA 1 VEZ)")
+    hashed_fresh_api_key = hash_api_key(fresh_api_key)
+    print(fresh_api_key)
+    print("2. GUARDAR API KEY EN UN LUGAR SEGURO Y COMPARTIR A CLIENTE EXTERNO")
+    print("3. SI SE PIERDE API KEY, GENERAR UNA NUEVA")
+    print("4. AGREGAR NUEVA LINEA EN EL ARCHIVO DE CONFIGURACION DE API KEYS USANDO EL HASH DE LA API KEY, NO GUARDAR LA API KEY ORIGINAL! (api_keys.json)")
+    hashed_fresh_api_key = base64.b64encode(hash_api_key(fresh_api_key)).decode('utf-8')
+    print(hashed_fresh_api_key)
+    print("5. SI SE DESEA VERIFICAR LA API KEY, USAR LA FUNCION verify_api_key() pasando 3 paramentros, el hash de la api key, la api key(que viene del request) y el nombre de la aplicacion") 
+
     # Register custom error handlers
     register_error_handlers(app)
 
@@ -79,3 +119,4 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run()
+
