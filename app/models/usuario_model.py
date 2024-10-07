@@ -23,7 +23,7 @@ def get_usuario_by_id(id):
                                   ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False).all()
         
         #Traigo los grupos hijos
-        res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
+        res_tareas = session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
                                   ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
         
 
@@ -33,9 +33,11 @@ def get_usuario_by_id(id):
                         "id": row.id,
                         "titulo": row.titulo,
                         "id_tipo_tarea": row.id_tipo_tarea,
-                        "eliminado": row.eliminado
+                        "eliminado": row.eliminado,
+                        "reasignada": row.asignada_usr_eliminado
                     }
                 tareas.append(tarea)
+            print("tareas:", tareas)
 
         if res_grupos is not None:
             for row in res_grupos:
