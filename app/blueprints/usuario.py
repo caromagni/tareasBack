@@ -102,8 +102,8 @@ def get_usuario_id(id: str):
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo"
+                    "ErrorDesc":"Usuario no encontrado",
+                    "ErrorMsg":"No se encontró el usuario"
                 } 
             return result
         current_app.session.remove()

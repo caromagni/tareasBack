@@ -498,6 +498,16 @@ class UsuarioOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
 
+class UsuarioTareaOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    reasignada = Boolean()
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
 
 class UsuarioAllOut(Schema):
     id = String()
@@ -554,7 +564,7 @@ class TareaAllOut(Schema):
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     grupos = List(Nested(GroupOut), only=("id", "nombre"))
-    usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))
+    usuarios = List(Nested(UsuarioTareaOut))
 
 class TareaCountAllOut(Schema):
     count = Integer()
@@ -572,6 +582,7 @@ class TareaUsuarioIn(Schema):
 class TareaUsrOut(Schema):
     id = String()
     titulo = String()
+    reasignada=Boolean()
 
 
 class UsuarioIdOut(Schema):
@@ -586,7 +597,7 @@ class UsuarioIdOut(Schema):
     dni = String()
     email = String()
     username = String()
-    tareas = List(Nested(TareaUsrOut, only=("id", "titulo")))
+    tareas = List(Nested(TareaUsrOut, only=("id", "titulo", "reasignada")))
     grupos = List(Nested(GroupOut, only=("id", "nombre")))
     
 

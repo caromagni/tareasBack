@@ -49,6 +49,34 @@ class Auditoria_Tarea(Base):
     usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)
 
+class Auditoria_TareaxGrupo(Base):
+    __tablename__ = 'auditoria_tareaxgrupo'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)
+    
+
+class Auditoria_TareaAsignadaUsuario(Base):
+    __tablename__ = 'auditoria_tarea_asignada_usuario'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)    
 
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'
@@ -414,6 +442,7 @@ class TareaAsignadaUsuario(Base):
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion= Column(UUID, nullable=False)
     notas = Column(String)
+    eliminado = Column(Boolean, default=False)
 
     tarea = relationship('Tarea')
     usuario = relationship('Usuario')
@@ -428,6 +457,7 @@ class TareaXGrupo(Base):
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
+    eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
