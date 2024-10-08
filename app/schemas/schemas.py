@@ -176,6 +176,13 @@ class GroupOut(Schema):
     level = Integer()
     base = Boolean()
 
+class GroupTareaOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    asignada = Boolean()
+    fecha_asignacion = String()
+
 class UsuarioGroupIdOut(Schema):
     id = String()
     fecha_actualizacion = String()
@@ -366,7 +373,6 @@ class TareaPatchIn(Schema):
 
 class TareaOut(Schema):
     id = String()
-    #id_grupo = String()
     prioridad = Integer()
     estado = Integer()
     id_actuacion = String()
@@ -388,6 +394,8 @@ class TareaOut(Schema):
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
+    reasignada_usr = Boolean(default=False)
+    reasignada_grupo = Boolean(default=False)
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
@@ -502,7 +510,8 @@ class UsuarioTareaOut(Schema):
     id = String()
     nombre = String()
     apellido = String()
-    reasignada = Boolean()
+    asignada = Boolean()
+    fecha_asignacion = String()
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
@@ -563,7 +572,7 @@ class TareaAllOut(Schema):
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
-    grupos = List(Nested(GroupOut), only=("id", "nombre"))
+    grupos = List(Nested(GroupTareaOut))
     usuarios = List(Nested(UsuarioTareaOut))
 
 class TareaCountAllOut(Schema):
