@@ -120,10 +120,10 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
-                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
             
             if existe_grupo.suspendido==True:
-                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre)
+                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             
             nuevoID_tareaxgrupo=uuid.uuid4()
@@ -144,7 +144,7 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
                 raise Exception("Error en el ingreso de Usuario. Usuario no existente")
             
             if existe_usuario.eliminado==True:
-                raise Exception("Error en el ingreso de Usuarios. Usuario eliminado: " + existe_usuario.apelllido)
+                raise Exception("Error en el ingreso de Usuarios. Usuario eliminado: " + existe_usuario.apelllido + '- id: ' + str(existe_usuario.id))
 
             
             if existe_usuario is not None:
@@ -246,11 +246,18 @@ def update_tarea(id='', **kwargs):
     if 'grupo' in kwargs:
         #elimino los grupos existentes para ese usuario
         grupos_usuarios=session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id)
-        grupos_usuarios.delete()
+        """ if grupos_usuarios:
+            for gr in grupos_usuarios:
+                session.delete(gr) """
 
-        """ for grupo in grupos_usuarios:
+        """ if grupos_usuarios is not None:
+            print("Elimino grupos de la tarea")
+            grupos_usuarios.delete() """
+
+        for grupo in grupos_usuarios:
             grupo.eliminado=True
-            grupo.fecha_actualizacion=datetime.now() """
+            grupo.fecha_actualizacion=datetime.now()
+            grupo.id_user_actualizacion=kwargs['id_user_actualizacion'] 
 
         #controlo que el grupo exista y lo asocio al usuario
         for group in kwargs['grupo']:
@@ -259,10 +266,10 @@ def update_tarea(id='', **kwargs):
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
-                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             if existe_grupo.suspendido==True:
-                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre)
+                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             nuevoID=uuid.uuid4()
             tareaxgrupo = session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id, TareaXGrupo.id_grupo==group['id_grupo']).first()
@@ -274,7 +281,16 @@ def update_tarea(id='', **kwargs):
                     id_user_actualizacion= kwargs['id_user_actualizacion'],
                     fecha_actualizacion=datetime.now()
                 )
+                print("#"*50)
+                print("nuevo_tarea_grupo:",nuevo_tarea_grupo)
+                print("#"*50)
                 session.add(nuevo_tarea_grupo)
+            else:
+                if tareaxgrupo.eliminado==True:
+                    tareaxgrupo.eliminado=False
+                    tareaxgrupo.fecha_actualizacion=datetime.now()
+                    tareaxgrupo.id_user_actualizacion=kwargs['id_user_actualizacion']    
+
             grupo = {
                 "id": existe_grupo.id,
                 "nombre": existe_grupo.nombre
@@ -284,7 +300,16 @@ def update_tarea(id='', **kwargs):
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
         usuarios_tarea=session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id)
-        usuarios_tarea.delete()
+        if usuarios_tarea:
+            for usuario in usuarios_tarea:
+                usuario.eliminado=True
+                usuario.fecha_actualizacion=datetime.now()
+            """ for usr in usuarios_tarea:
+                session.delete(usr) """
+
+        """ if usuarios_tarea is not None:
+            print("Elimino usuarios de la tarea")
+            usuarios_tarea.delete() """
 
         """ for usuario in usuarios_tarea:
             usuario.eliminado=True
@@ -297,7 +322,7 @@ def update_tarea(id='', **kwargs):
                 raise Exception("Error en el ingreso de usuarios. Usuario no existente")
             
             if existe_usuario.eliminado==True:
-                raise Exception("Error en el ingreso de usuarios. Usuario eliminado: " + existe_usuario.nombre)
+                raise Exception("Error en el ingreso de usuarios. Usuario eliminado: " + existe_usuario.apellido + ' - id: ' + str(existe_usuario.id))
 
             nuevoID=uuid.uuid4()
             asigna_usuario = session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id, TareaAsignadaUsuario.id_usuario==user['id_usuario']).first()
@@ -309,7 +334,13 @@ def update_tarea(id='', **kwargs):
                     id_user_actualizacion= kwargs['id_user_actualizacion'],
                     fecha_actualizacion=datetime.now()
                 )
+                print("Asigna tarea a usuario:",nuevo_asigna_usuario)
                 session.add(nuevo_asigna_usuario)
+            else:
+                if asigna_usuario.eliminado==True:
+                    asigna_usuario.eliminado=False
+                    asigna_usuario.fecha_actualizacion=datetime.now()
+                    asigna_usuario.id_user_actualizacion=kwargs['id_user_actualizacion']
 
             usuario = {
                 "id": existe_usuario.id,
@@ -619,11 +650,15 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
 
-    #if id_usuario_asignado is not None:
-    #    query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado)
-
-    #if id_grupo is not None:
-    #    query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id_grupo)
+    if id_usuario_asignado is not None:
+        usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario no encontrado")
+        
+        query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado)
+        
+    if id_grupo is not None:
+        query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id_grupo)
 
     if prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
@@ -646,18 +681,21 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
         usuarios=[]
         grupos=[]
         #Consulto los usuarios asignados a la tarea
-        print("Tarea encontrada:", res)
-        res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido
+        if id_usuario_asignado is not None:
+            res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada')
+                                  ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id, TareaAsignadaUsuario.id_usuario==id_usuario_asignado).all()
+        else:
+            res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada')
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
-        print("Usuarios:", res_usuarios)
-        print("Id tarea:", res.id)
+        
         
         if res_usuarios is not None:
             for row in res_usuarios:
                 usuario = {
                     "id": row.id,
                     "nombre": row.nombre,
-                    "apellido": row.apellido
+                    "apellido": row.apellido,
+                    "reasignada": row.reasignada
                 }
                 usuarios.append(usuario)
 
