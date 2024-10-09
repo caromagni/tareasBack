@@ -440,6 +440,7 @@ class TareaAsignadaUsuario(Base):
     id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_asignacion = Column(DateTime) 
     id_user_actualizacion= Column(UUID, nullable=False)
     notas = Column(String)
     eliminado = Column(Boolean, default=False)
@@ -457,6 +458,7 @@ class TareaXGrupo(Base):
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
+    fecha_asignacion = Column(DateTime)
     eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
 from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn
-from ..models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
+from ..models.tarea_model import get_all_tarea, get_all_tarea1, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
 from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol
@@ -59,12 +59,8 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
                             urlCU='patch/usuario'
                         case 'eliminar-tipo-tarea':
                             urlCU='delete/tipo_tarea'
-                        case 'consulta_usuario_tarea':
-                            urlCU='get/tarea_usr'
-                        case 'alta_usuario_tarea':
-                            urlCU='post/tarea_usr'
                         case 'consulta_usuarios_tarea':
-                            urlCU='get/tarea_usr'
+                            urlCU='get/usuario_tarea'
                         case 'consulta_tarea_id':
                             urlCU='get/tarea'
                         case 'consulta_tareas_usuario':
@@ -477,7 +473,7 @@ def get_tarea(id_tarea:str):
         raise ValidationError(err) 
 
 @tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea_usr/<string:tarea_id>')
+@tarea_b.get('/ususario_tarea/<string:tarea_id>')
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    
@@ -490,9 +486,9 @@ def get_usuarios_asignados(tarea_id:str):
     except Exception as err:
         raise ValidationError(err)
 
-@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.post('/tarea_usr')
-@tarea_b.input(TareaUsuarioIn)
+#@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.post('/tarea_usr')
+#@tarea_b.input(TareaUsuarioIn)
 #@tarea_b.output(TareaOut)
 def post_usuario_tarea(json_data: dict):
     try:
