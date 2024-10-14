@@ -392,6 +392,18 @@ class TareaPatchIn(Schema):
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
 
+class TipoNotaTareaOut(Schema):
+    id = String()
+    nombre = String()
+
+class NotaTareaOut(Schema):
+    id = String()
+    titulo = String()
+    nota = String()
+    id_tipo_nota = String()
+    fecha_creacion = String()
+    tipo_nota = Nested(TipoNotaTareaOut, only=("id", "nombre")) 
+
 class TareaOut(Schema):
     id = String()
     prioridad = Integer()
@@ -419,6 +431,7 @@ class TareaOut(Schema):
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     reasignada_usr = Boolean(default=False)
     reasignada_grupo = Boolean(default=False)
+    notas = List(Nested(NotaTareaOut))
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
@@ -681,6 +694,7 @@ class TareaIdOut(Schema):
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
     usuarios = List(Nested(UsuarioTareaOut))
+    notas = List(Nested(NotaTareaOut))
 
 
 ###############Marshmallow####################
@@ -810,6 +824,7 @@ class NotaOut(Schema):
     fecha_actualizacion = String()
     tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
     id_user_creacion = String()
+    id_tarea = String()
 
 class NotaAllOut(Schema):
     id = String()

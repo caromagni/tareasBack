@@ -2,11 +2,11 @@ import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from ..common.functions import controla_fecha
-from sqlalchemy import text
+from sqlalchemy import desc
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from .alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:
@@ -551,6 +551,7 @@ def get_tarea_by_id(id):
     results = []
     usuarios=[]
     grupos=[]
+    notas=[]
  
 
     if res is not None:
@@ -564,7 +565,9 @@ def get_tarea_by_id(id):
                                   ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== res.id).all()
 
         
+        res_notas = session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
 
+            
         if res_usuarios is not None:
             for row in res_usuarios:
                 usuario = {
@@ -585,6 +588,18 @@ def get_tarea_by_id(id):
                     "fecha_asignacion": row.fecha_asignacion
                 }
                 grupos.append(grupo)
+
+        if res_notas is not None:
+            for row in res_notas:
+                nota = {
+                    "id": row.id,
+                    "nota": row.nota,
+                    "id_tipo_nota": row.id_tipo_nota,
+                    "tipo_nota": row.tipo_nota,
+                    "titulo": row.titulo,
+                    "fecha_creacion": row.fecha_creacion
+                }
+                notas.append(nota)         
 
 
         ###################Formatear el resultado####################
@@ -611,7 +626,8 @@ def get_tarea_by_id(id):
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
             "grupos": grupos,
-            "usuarios": usuarios
+            "usuarios": usuarios,
+            "notas": notas
         }
 
         results.append(result)
@@ -777,6 +793,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     #print("result:", result)
     results = []
+    notas=[]
     if result is not None:
         reasignada_usr=False
         reasignada_grupo=False
@@ -788,7 +805,22 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
             if id_grupo is not None:
                 tarea_asignada_grupo = session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == reg.id, TareaXGrupo.id_grupo == id_grupo).first()
                 if tarea_asignada_grupo is not None:
-                    reasignada_grupo = (tarea_asignada_grupo.eliminado)        
+                    reasignada_grupo = (tarea_asignada_grupo.eliminado)   
+
+            res_notas = session.query(Nota).filter(Nota.id_tarea== reg.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
+
+            if res_notas is not None:
+                for row in res_notas:
+                    nota = {
+                        "id": row.id,
+                        "nota": row.nota,
+                        "id_tipo_nota": row.id_tipo_nota,
+                        "tipo_nota": row.tipo_nota,
+                        "titulo": row.titulo,
+                        "fecha_creacion": row.fecha_creacion
+                    }
+                    notas.append(nota) 
+
             result = {
                 "caratula_expediente": reg.caratula_expediente,
                 "cuerpo": reg.cuerpo,
@@ -814,7 +846,8 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 "prioridad": reg.prioridad,
                 "titulo": reg.titulo,
                 "reasignada_usr": reasignada_usr,
-                "reasignada_grupo": reasignada_grupo
+                "reasignada_grupo": reasignada_grupo,
+                "notas": notas
             }
             results.append(result)
 
