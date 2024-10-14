@@ -597,7 +597,10 @@ def get_tarea_by_id(id):
                     "id_tipo_nota": row.id_tipo_nota,
                     "tipo_nota": row.tipo_nota,
                     "titulo": row.titulo,
-                    "fecha_creacion": row.fecha_creacion
+                    "fecha_creacion": row.fecha_creacion,
+                    "id_user_creacion": row.id_user_creacion,
+                    "user_creacion": row.user_creacion,
+                    "id_user_actualizacion": row.id_user_actualizacion
                 }
                 notas.append(nota)         
 
@@ -627,7 +630,9 @@ def get_tarea_by_id(id):
             "fecha_creacion": res.fecha_creacion,
             "grupos": grupos,
             "usuarios": usuarios,
-            "notas": notas
+            "notas": notas,
+            "id_user_actualizacion": res.id_user_actualizacion,
+            "user_actualizacion": res.user_actualizacion
         }
 
         results.append(result)
@@ -687,6 +692,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
     for res in res_tareas:
         usuarios=[]
         grupos=[]
+        notas=[]
         #Consulto los usuarios asignados a la tarea
         res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
@@ -716,7 +722,22 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
                 }
                 grupos.append(grupo)            
         
+        res_notas = session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
 
+        if res_notas is not None:
+            for row in res_notas:
+                nota = {
+                    "id": row.id,
+                    "nota": row.nota,
+                    "id_tipo_nota": row.id_tipo_nota,
+                    "tipo_nota": row.tipo_nota,
+                    "titulo": row.titulo,
+                    "fecha_creacion": row.fecha_creacion, 
+                    "id_user_creacion": row.id_user_creacion,
+                    "user_creacion": row.user_creacion,
+                    "id_user_actualizacion": row.id_user_actualizacion
+                }
+                notas.append(nota) 
         ###################Formatear el resultado####################
 
         result = {  
@@ -743,7 +764,10 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
             "grupos": grupos,
-            "usuarios": usuarios
+            "usuarios": usuarios,
+            "notas": notas,
+            "id_user_actualizacion": res.id_user_actualizacion,
+            "user_actualizacion": res.user_actualizacion
         }
         results.append(result)
     
@@ -817,7 +841,10 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                         "id_tipo_nota": row.id_tipo_nota,
                         "tipo_nota": row.tipo_nota,
                         "titulo": row.titulo,
-                        "fecha_creacion": row.fecha_creacion
+                        "fecha_creacion": row.fecha_creacion, 
+                        "id_user_creacion": row.id_user_creacion,
+                        "user_creacion": row.user_creacion,
+                        "id_user_actualizacion": row.id_user_actualizacion
                     }
                     notas.append(nota) 
 
@@ -842,6 +869,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 "id_tipo_tarea": reg.id_tipo_tarea,
                 "tipo_tarea": reg.tipo_tarea,
                 "id_user_actualizacion": reg.id_user_actualizacion,
+                "user_actualizacion": reg.user_actualizacion,
                 "plazo": reg.plazo,
                 "prioridad": reg.prioridad,
                 "titulo": reg.titulo,

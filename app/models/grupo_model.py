@@ -186,6 +186,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                     "codigo_nomenclador": grupo.codigo_nomenclador,
                     "fecha_creacion": grupo.fecha_creacion,
                     "id_user_actualizacion": grupo.id_user_actualizacion,
+                    "id_user_asignado_default": grupo.id_user_asignado_default,
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }
@@ -301,6 +302,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                 "fecha_creacion": res.fecha_creacion,
                 "fecha_actualizacion": res.fecha_actualizacion,
                 "id_user_actualizacion": res.id_user_actualizacion,
+                "id_user_asignado_default": res.id_user_asignado_default,
                 "eliminado": res.eliminado,
                 "suspendido": res.suspendido,
                 "usuarios": usuarios,
@@ -378,6 +380,12 @@ def update_grupo(id='', **kwargs):
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
     if 'id_user_actualizacion' in kwargs:
         grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+    if 'id_user_asignado_deault' in kwargs:
+        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_deault'], Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario no encontrado")
+        
+        grupo.id_user_asignado_deault = kwargs['id_user_asignado_deault']
 
     # Siempre actualizar la fecha de actualización
     grupo.fecha_actualizacion = datetime.now()
@@ -401,8 +409,19 @@ def update_grupo(id='', **kwargs):
     session.commit()
     return grupo
 
-def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion='', id_padre='', base=False):
+def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_deault=None):
     session: scoped_session = current_app.session
+    #Validaciones
+    if id_user_asignado_deault is not None:
+        usuario = session.query(Usuario).filter(Usuario.id==id_user_asignado_deault, Usuario.eliminado==False).first()
+        if usuario is None: 
+            raise Exception("Usuario de asignación de tareas no encontrado")
+
+    if id_user_actualizacion is not None:
+        usuario = session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
+        if usuario is None: 
+            raise Exception("Usuario de actualización no encontrado")
+
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
     nuevo_grupo = Grupo(
@@ -412,6 +431,7 @@ def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_use
         base=base,
         codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
+        id_user_asignado_deault=id_user_asignado_deault,
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now()
     )

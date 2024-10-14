@@ -149,6 +149,7 @@ class GroupIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String(required=True)
+    id_user_asignación_default= String()
     id_padre = String() 
     base = Boolean(default=False)
     codigo_nomenclador = String(validate=[
@@ -188,6 +189,7 @@ class GroupOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
+    id_user_asignado_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
@@ -234,6 +236,9 @@ class GroupIdOut(Schema):
     descripcion = String()
     eliminado = Boolean()
     fecha_creacion = DateTime()
+    fecha_actualizacion = DateTime()
+    id_user_actualizacion = String()
+    id_user_asignación_default = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
@@ -335,7 +340,26 @@ class ListUsuario(Schema):
 
 class ListGrupo(Schema):
     id_grupo = String()    
-    
+
+class UsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_persona_ext = String()
+    nombre_completo = String(dump_only=True)  
+    username = String()
+    email = String()
+    dni = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
 class TareaIn(Schema):
     prioridad = Integer(required=True, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
@@ -402,6 +426,9 @@ class NotaTareaOut(Schema):
     nota = String()
     id_tipo_nota = String()
     fecha_creacion = String()
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    id_user_actualizacion = String()
     tipo_nota = Nested(TipoNotaTareaOut, only=("id", "nombre")) 
 
 class TareaOut(Schema):
@@ -425,6 +452,7 @@ class TareaOut(Schema):
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
+    user_actualizacion= Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
@@ -443,8 +471,6 @@ class TareaGetIn(Schema):
     id_tipo_tarea = String()
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
-    id_usuario_asignado = String()
-    id_grupo = String()
     id_expediente = String()
     id_actuacion = String()
     prioridad = Integer()
@@ -457,6 +483,7 @@ class GroupAllOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
+    id_user_asignación_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
@@ -523,24 +550,6 @@ class UsuarioGetIn(Schema):
     eliminado = Boolean()
     suspendido = Boolean()
 
-class UsuarioOut(Schema):
-    id = String()
-    fecha_actualizacion = String()
-    id_user_actualizacion = String()
-    nombre = String()
-    apellido = String()
-    id_persona_ext = String()
-    nombre_completo = String(dump_only=True)  
-    username = String()
-    email = String()
-    dni = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
-
-    @post_dump
-    def add_nombre_completo(self, data, **kwargs):
-        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
-        return data
 
 class UsuarioTareaOut(Schema):
     id = String()
@@ -604,6 +613,7 @@ class TareaAllOut(Schema):
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
@@ -695,6 +705,8 @@ class TareaIdOut(Schema):
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
     usuarios = List(Nested(UsuarioTareaOut))
     notas = List(Nested(NotaTareaOut))
+    id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
 
 
 ###############Marshmallow####################
@@ -710,7 +722,6 @@ class TipoTareaSchema(Schema):
     nombre =fields.String() 
     id_user_actualizacion = fields.String() 
     fecha_actualizacion =fields.DateTime()
-
 
                                           
 
@@ -793,10 +804,8 @@ class NotaIn(Schema):
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
     id_user_creacion = String(required=True)
-    fecha_creacion = String(validate=validate_fecha)
     id_tarea = String()
-    fecha_eliminacion = String(validate=validate_fecha)
-    fecha_actualizacion = String(validate=validate_fecha)
+    id_user_actualizacion = String()    
 
 
 class NotaPatchIn(Schema):
@@ -824,6 +833,8 @@ class NotaOut(Schema):
     fecha_actualizacion = String()
     tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
     id_user_creacion = String()
+    user_creacion = Nested(UsuarioOut, only=("id", "nombre", "apellido"))
+    id_user_actualizacion = String()
     id_tarea = String()
 
 class NotaAllOut(Schema):
@@ -835,6 +846,9 @@ class NotaAllOut(Schema):
     fecha_eliminacion = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    id_user_actualizacion = String()
     tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
     id_tarea = String()
 
@@ -850,6 +864,9 @@ class NotaIdOut(Schema):
     fecha_actualizacion = String()   
     tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
     id_tarea = String()
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioOut, only=("id", "nombre", "apellido"))
+    id_user_actualizacion = String()
 
     
 class NotaGetIn(Schema):
@@ -859,7 +876,7 @@ class NotaGetIn(Schema):
     id_tipo_nota = String()
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
-    id_usuario_creacion = String()
+    id_user_creacion = String()
     id_tarea = String()
     eliminado = Boolean()
     fecha_creacion = String()
@@ -871,7 +888,7 @@ class NotaCountAllOut(Schema):
 
 class NotaCountOut(Schema):
     count = Integer()
-    data = Nested(NotaOut, many=True)    
+    data = Nested(NotaAllOut, many=True)    
 
 ############## Labels ####################  
     
