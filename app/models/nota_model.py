@@ -48,19 +48,19 @@ def delete_tipo_nota(id):
 
 ##########################NOTAS #############################################
 
-def insert_nota(titulo='', nota='', id_tipo_nota=None, eliminado=False, fecha_eliminacion=None, fecha_actualizacion=None, id_user_creacion=None,  fecha_creacion=None, id_tarea=None):
+def insert_nota(titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_creacion=None, id_user_actualizacion=None, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
 
     nuevoID_nota=uuid.uuid4()
 
     nueva_nota = Nota(
         eliminado=eliminado,
-        fecha_actualizacion=fecha_actualizacion,
+        fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now(),
-        fecha_eliminacion=fecha_eliminacion,
         id_tarea=id_tarea,
         id_tipo_nota=id_tipo_nota,
         id_user_creacion=id_user_creacion,
+        id_user_actualizacion=id_user_actualizacion,
         id=nuevoID_nota,
         nota=nota,
         titulo=titulo,
@@ -90,6 +90,7 @@ def update_nota(id='', **kwargs):
         nota.titulo = kwargs['titulo'].upper()  
         
     nota.fecha_actualizacion = datetime.now()
+    nota.id_user_actualizacion = kwargs['id_user_actualizacion']
     
 
     ###################Formatear el resultado####################
@@ -101,6 +102,9 @@ def update_nota(id='', **kwargs):
         "id_tarea": nota.id_expediente,
         "nota": nota.nota,
         "eliminado": nota.eliminado,
+        "id_user_creacion": nota.id_user_creacion,
+        "user_creacion": nota.user_creacion,
+        "id_user_actualizacion": nota.id_user_actualizacion,
         "fecha_eliminacion": nota.fecha_eliminacion,
         "fecha_actualizacion": nota.fecha_actualizacion,
         "fecha_creacion": nota.fecha_creacion,

@@ -149,6 +149,7 @@ class Grupo(Base):
 
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
+    id_user_asignado_default = Column(UUID)
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String)
     descripcion = Column(String)
@@ -159,6 +160,7 @@ class Grupo(Base):
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
+
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
@@ -342,7 +344,7 @@ class Tarea(Base):
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     fecha_creacion = Column(DateTime)
     fecha_inicio = Column(DateTime)
@@ -356,6 +358,7 @@ class Tarea(Base):
     grupo = relationship('Grupo')
     expediente = relationship('ExpedienteExt')
     actuacion = relationship('ActuacionExt')
+    user_actualizacion = relationship('Usuario')
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
@@ -424,11 +427,14 @@ class Nota(Base):
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
     id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
-    id_user_creacion = Column(UUID)
+    id_user_creacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    id_user_actualizacion = Column(UUID)
     nota = Column(String)
     tarea = relationship('Tarea')
     tipo_nota = relationship('TipoNota')
     titulo = Column(String)
+    user_creacion = relationship('Usuario')
+    #usuario_actualizacion = relationship('Usuario')
 
 
 
