@@ -28,7 +28,7 @@ def before_request():
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-
+        
         res = update_grupo(id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
@@ -161,7 +161,6 @@ def get_usrsbygrupo(id_grupo: str):
 #@groups_b.output(GroupOut)
 def post_grupo(json_data: dict):
     try:
-        
         res = insert_grupo(**json_data)
         if res is None:
             result={

@@ -35,7 +35,7 @@ def get_grupo_by_id(id):
                                     UsuarioGrupo.id_usuario,
                                     Usuario.id,
                                     Usuario.nombre,
-                                    Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id).all()
+                                    Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
         
         if res_hijos is not None:
             print("tiene hijos")
@@ -76,7 +76,10 @@ def get_grupo_by_id(id):
             "padre": padres,
             "hijos": hijos,
             "usuarios": usuarios,
-            "nomenclador": res.nomenclador
+            "nomenclador": res.nomenclador,
+            "id_user_actualizacion": res.id_user_actualizacion,
+            "id_user_asignado_default": res.id_user_asignado_default,
+            "fecha_actualizacion": res.fecha_actualizacion
         }
         print("Resultado:", results)
         #results.append(result)
@@ -359,12 +362,17 @@ def get_grupos_herarquia_labels():
 
 def update_grupo(id='', **kwargs):
     session: scoped_session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado==False).first()
+    grupo = session.query(Grupo).filter(Grupo.id == id).first()
 
     if grupo is None:
         return None
+    
+    if grupo.eliminado:
+        raise Exception("Grupo eliminado")
+    
+    if grupo.suspendido:
+        raise Exception("Grupo suspendido")
 
-    print("Grupo encontrado:", grupo)
 
     if 'nombre' in kwargs:
         grupo.nombre = kwargs['nombre']
@@ -378,14 +386,26 @@ def update_grupo(id='', **kwargs):
     
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
+
     if 'id_user_actualizacion' in kwargs:
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
-    if 'id_user_asignado_deault' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_deault'], Usuario.eliminado==False).first()
+        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
         if usuario is None:
-            raise Exception("Usuario no encontrado")
+            raise Exception("Usuario de actualizacion no encontrado")
         
-        grupo.id_user_asignado_deault = kwargs['id_user_asignado_deault']
+        grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+
+    print("Antes del if")
+
+    if 'id_user_asignado_default' in kwargs:
+        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario asignado default no encontrado")
+        
+        usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==kwargs['id_user_asignado_default'], UsuarioGrupo.eliminado==False).first()
+        if usuario_grupo is None:
+            raise Exception("Usuario no asignado al grupo")
+
+        grupo.id_user_asignado_default = kwargs['id_user_asignado_default']
 
     # Siempre actualizar la fecha de actualización
     grupo.fecha_actualizacion = datetime.now()
@@ -406,14 +426,34 @@ def update_grupo(id='', **kwargs):
             herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
             herarquia.fecha_actualizacion = datetime.now()
 
+    if 'usuario' in kwargs:
+        print("Actualizando usuarios")
+        for usuario in kwargs['usuario']:
+            encuentra_usuario = session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
+            if encuentra_usuario is None:
+                raise Exception("Usuario no encontrado:" + usuario['id_usuario'])
+            if encuentra_usuario.eliminado:
+                raise Exception("Usuario eliminado:" + usuario['id_usuario'])
+            
+            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==usuario['id_usuario'], UsuarioGrupo.eliminado==False).first()
+            if usuario_grupo is None:
+                nuevo_usuario_grupo = UsuarioGrupo(
+                    id=uuid.uuid4(),
+                    id_grupo=id,
+                    id_usuario=usuario['id_usuario'],
+                    fecha_actualizacion=datetime.now(),
+                    id_user_actualizacion=kwargs['id_user_actualizacion']
+                )
+                session.add(nuevo_usuario_grupo)
+
     session.commit()
     return grupo
 
-def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_deault=None):
+def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
     session: scoped_session = current_app.session
     #Validaciones
-    if id_user_asignado_deault is not None:
-        usuario = session.query(Usuario).filter(Usuario.id==id_user_asignado_deault, Usuario.eliminado==False).first()
+    if id_user_asignado_default is not None:
+        usuario = session.query(Usuario).filter(Usuario.id==id_user_asignado_default, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de asignación de tareas no encontrado")
 
@@ -431,11 +471,23 @@ def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_use
         base=base,
         codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
-        id_user_asignado_deault=id_user_asignado_deault,
+        id_user_asignado_default=id_user_asignado_default,
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now()
     )
     session.add(nuevo_grupo)
+
+    #Agregar el usuario asignado por defecto al grupo
+    if id_user_asignado_default is not None:
+        nuevoID_usr_grp=uuid.uuid4()
+        nuevo_usuario_grupo = UsuarioGrupo(
+            id=nuevoID_usr_grp,
+            id_grupo=nuevoID_grupo,
+            id_usuario=id_user_asignado_default,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+        session.add(nuevo_usuario_grupo)
 
     if id_padre is not '':        
         nueva_herarquia = HerarquiaGrupoGrupo(
