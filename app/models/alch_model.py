@@ -200,7 +200,7 @@ class TipoNota(Base):
     __table_args__ = {'schema': 'tareas'}
 
     eliminado = Column(Boolean)
-    fecha_actualizacion = Column(ARRAY(DateTime()), nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
     fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
     id = Column(UUID, primary_key=True)
