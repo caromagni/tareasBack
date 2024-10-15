@@ -311,6 +311,7 @@ def update_usuario(id='', **kwargs):
             if existe_grupo.eliminado==True:
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
+            #asocio el grupo al usuario
             nuevoID=uuid.uuid4()
             usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id, UsuarioGrupo.id_grupo==group['id_grupo'], UsuarioGrupo.eliminado==False).first()
             if usuario_grupo is None:
@@ -322,6 +323,14 @@ def update_usuario(id='', **kwargs):
                     fecha_actualizacion=datetime.now()
                 )
                 session.add(nuevo_usuario_grupo)
+
+            #si el usuario es el asignado por defecto para tareas, lo actualizo en el grupo
+            if 'asignado_default' in group:
+                if group['asignado_default'] == True:
+                    existe_grupo.id_user_asignado_default = id
+                    existe_grupo.fecha_actualizacion = datetime.now() 
+                    existe_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+
 
     if 'id_grupo' in kwargs:      
         nuevoID=uuid.uuid4()

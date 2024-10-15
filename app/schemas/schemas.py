@@ -103,7 +103,16 @@ class ExpedienteOut(Schema):
     id_ext = String()
     caratula = String()
     estado = String()
+###############Listas####################
+class ListUsuario(Schema):
+    id_usuario = String()
 
+class ListGrupo(Schema):
+    id_grupo = String()    
+
+class ListUsrGrupo(Schema):
+    asignado_default = Boolean()  
+    id_grupo = String() 
 ###############Groups####################
 class HerarquiaGroupGroupInput(Schema):
     eliminado = Boolean()
@@ -149,7 +158,7 @@ class GroupIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String(required=True)
-    id_user_asignación_default= String()
+    id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
     codigo_nomenclador = String(validate=[
@@ -167,12 +176,14 @@ class GroupPatchIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String(required=True)
+    id_user_asignado_default= String()
     id_padre = String()  
     codigo_nomenclador = String(validate=[
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
     ])
     suspendido = Boolean()
+    usuario = List(Nested(ListUsuario))
 
 class GroupGetIn(Schema):
     page = Integer(default=1)
@@ -189,7 +200,7 @@ class GroupOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
-    id_user_asignado_default = String()
+    #id_user_asignado_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
@@ -238,7 +249,7 @@ class GroupIdOut(Schema):
     fecha_creacion = DateTime()
     fecha_actualizacion = DateTime()
     id_user_actualizacion = String()
-    id_user_asignación_default = String()
+    id_user_asignado_default = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
@@ -335,11 +346,8 @@ class SubtipoTareaOut(Schema):
     fecha_actualizacion = String()
     base = Boolean()
 
-class ListUsuario(Schema):
-    id_usuario = String()
 
-class ListGrupo(Schema):
-    id_grupo = String()    
+         
 
 class UsuarioOut(Schema):
     id = String()
@@ -483,7 +491,7 @@ class GroupAllOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
-    id_user_asignación_default = String()
+    id_user_asignado_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
@@ -514,7 +522,7 @@ class UsuarioIn(Schema):
     ])
     id_user_actualizacion = String()
     id_persona_ext = String()
-    grupo = List(Nested(ListGrupo))
+    grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
     username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
@@ -533,7 +541,7 @@ class UsuarioInPatch(Schema):
     suspendido = Boolean()
     id_user_actualizacion = String(required=True)
     id_persona_ext = String()
-    grupo = List(Nested(ListGrupo))
+    grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
     username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
