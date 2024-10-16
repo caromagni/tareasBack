@@ -98,7 +98,6 @@ def get_grupo_detalle(query_data: dict):
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
-        print("query_data:",query_data)
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -112,8 +111,6 @@ def get_grupo_detalle(query_data: dict):
 
         res, cant=get_all_grupos_detalle(page,per_page, nombre, fecha_desde, fecha_hasta)
         
-        print("res:",res)
-       
         data = {
                 "count": cant,
                 "data": GroupAllOut().dump(res, many=True)
