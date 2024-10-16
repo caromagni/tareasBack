@@ -200,7 +200,7 @@ class GroupOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
-    #id_user_asignado_default = String()
+    id_user_asignado_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
