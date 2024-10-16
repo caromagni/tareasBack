@@ -279,10 +279,9 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
                     usuarios.append(usuario)
-            
-           
+
             if res_tareas is not None:
-                print("tiene tareas:", len(res_tareas))
+                print("Tiene tareas:", len(res_tareas))
                 for row in res_tareas:
                     tarea = {
                         "id": row.id,

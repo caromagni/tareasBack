@@ -224,6 +224,8 @@ class UsuarioGroupIdOut(Schema):
     nombre = String()
     apellido = String()
     id_persona_ext = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
     #nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
 
 
@@ -628,6 +630,8 @@ class TareaAllOut(Schema):
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     grupos = List(Nested(GroupTareaOut))
     usuarios = List(Nested(UsuarioTareaOut))
+    reasignada_usuario = Boolean()
+    reasignada_grupo = Boolean()
 
 class TareaCountAllOut(Schema):
     count = Integer()
