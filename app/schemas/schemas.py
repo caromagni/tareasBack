@@ -754,14 +754,14 @@ class TareaxGrupoIdOut(Schema):
     fecha_inicio = String()
     fecha_fin = String()
     plazo = Integer()
-    #tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
-    #subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
-    #actuacion = Nested(ActuacionOut, only=("id", "nombre"))
-    #expediente = Nested(ExpedienteOut, only=("id", "caratula"))
-    usuarios = List(Nested(UsuarioTareaOut))
-    notas = List(Nested(NotaTareaOut))
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
+    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
+    #usuarios = List(Nested(UsuarioTareaOut))
+    #notas = List(Nested(NotaTareaOut))
     id_user_actualizacion = String()
-    #user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
+    user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
 
 
 ###############Marshmallow####################

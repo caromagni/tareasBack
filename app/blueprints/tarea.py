@@ -474,15 +474,24 @@ def get_tarea(id_tarea:str):
     
 @tarea_b.doc(description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_grupo/<string:id_grupo>')
-@tarea_b.output(TareaxGrupoIdOut(many=True))
+#@tarea_b.output(TareaxGrupoIdOut(many=True))
+@tarea_b.output(TareaCountAllOut)
 def get_tarea_grupo(id_grupo:str):
     try:
-        res = get_tarea_grupo_by_id(id_grupo) 
-        if res is None or len(res) == 0:
-            raise DataNotFound("El grupo no tiene tareas asignadas")
+        page=1
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant=0
 
+        res, cant = get_tarea_grupo_by_id(id_grupo, page, per_page) 
+        
+        data = {
+                "count": cant,
+                "data": TareaAllOut().dump(res, many=True)
+            }
+        
         current_app.session.remove()
-        return res
+        return data
+        #return res
     
     except DataNotFound as err:
         raise DataError(800, err)
