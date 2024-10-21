@@ -494,6 +494,7 @@ class TareaOut(Schema):
 class TareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
+    id_tarea = String()
     titulo = String(default="")
     id_tipo_tarea = String()
     fecha_desde = String(validate=validate_fecha)

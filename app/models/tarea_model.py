@@ -840,13 +840,17 @@ def get_tarea_grupo_by_id(id_grupo, page=1, per_page=10):
     return res, total
     return res_tarea 
 
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
     print("estado:", estado)
     print("tipo de dato:", type(estado))
     print("prioridad:", prioridad)
     print("tipo de dato:", type(prioridad))
     session: scoped_session = current_app.session
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
+    
+    if id_tarea is not None:
+        query = query.filter(Tarea.id == id_tarea)
+    
     if titulo != '':
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
 
