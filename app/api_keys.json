@@ -1,0 +1,22 @@
+[
+    {
+        "api_key": "HERE IS THE HASHED API KEY",
+        "expire_date": 30,
+        "api_key_name": "HERE IS THE NAME OF THE OTHER SERVER/CLIENT THAT USES THE API KEY"
+    },
+    {
+        "api_key": "JDJiJDEyJHF2OXl1NDVqeHBGa1hjbGxWekJsVU9ldjNydGl4dS9sMXAuazY5UkpPaWxLd3d6R3ROUXpH",
+        "expire_date": 30,
+        "api_key_name": "backend_tareas666"
+    },
+    {
+        "api_key": "JDJiJDEyJFlob1NqeDNPNTcyd0MwS00zdmtxaU9sR3RVWHpWaUdnVFY4eHllOW5qclBQNnpXMDFYcmpP",
+        "expire_date": 30,
+        "api_key_name": "backend_test"
+    },
+    {
+        "api_key": "JDJiJDEyJGVzL3ZiVm9lLkJmZXVZWnc4UU5EcGVwc1B4WUVxME5Cb1hhcW01a1lzamVnZ0tjWW5QZmdl",
+        "expire_date": 30,
+        "api_key_name": "backend_tareas"
+    }    
+]
