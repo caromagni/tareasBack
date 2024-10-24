@@ -102,6 +102,7 @@ def get_grupo_by_id(id):
             "id": res.id,
             "nombre": res.nombre,
             "descripcion": res.descripcion,
+            "base": res.base,
             "eliminado": res.eliminado,
             "padre": padres,
             "hijos": hijos,
