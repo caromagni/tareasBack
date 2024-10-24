@@ -115,6 +115,7 @@ class ActuacionExt(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_ext = Column(UUID)
     nombre = Column(String)
     #id_tipo_actuacion = Column(UUID)
     id_tipo_actuacion = Column(ForeignKey('tareas.tipo_actuacion_ext.id'), nullable=False)
@@ -138,9 +139,11 @@ class ExpedienteExt(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_ext = Column(UUID, nullable=False)
+    id_ext = Column(UUID)
     caratula = Column(String)
     estado = Column(String)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
 
 
 class Grupo(Base):

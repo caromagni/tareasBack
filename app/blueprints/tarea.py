@@ -386,10 +386,10 @@ def get_tareas(query_data: dict):
 
 
 
-@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea_detalle')
-@tarea_b.input(TareaGetIn, location='query')
-@tarea_b.output(TareaCountAllOut)
+#@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.get('/tarea_detalle')
+#@tarea_b.input(TareaGetIn, location='query')
+#@tarea_b.output(TareaCountAllOut)
 def get_tareas_detalle(query_data: dict):
     try:
         ##########Variables de control de acceso####################
@@ -460,7 +460,7 @@ def get_tareas_detalle(query_data: dict):
         raise ValidationError(err) 
 
 @tarea_b.doc(description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea/<string:id_tarea>')
+@tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(TareaIdOut(many=True))
 def get_tarea(id_tarea:str):
     try:
@@ -547,7 +547,7 @@ def post_usuario_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
 
-@tarea_b.doc(description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/tarea/<string:tarea_id>')
 @tarea_b.input(TareaPatchIn)
 #@usuario_b.output(UsuarioOut)
@@ -570,14 +570,14 @@ def patch_tarea(tarea_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
 
-
-@tarea_b.doc(description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.post('/tarea')
 @tarea_b.input(TareaIn)
 @tarea_b.output(TareaOut)
 def post_tarea(json_data: dict):
     try:
         print("#"*50)
+        print("Inserta tarea")
         print(json_data)
         print("#"*50)
         res = insert_tarea(**json_data)
@@ -596,7 +596,7 @@ def post_tarea(json_data: dict):
         raise ValidationError(err)    
 
 #################DELETE########################
-@tarea_b.doc(description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.delete('/tarea/<string:id>')
 def del_tarea(id: str):
     try:
