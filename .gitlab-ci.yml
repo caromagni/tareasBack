@@ -5,9 +5,260 @@
 # Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
 # Note that environment variables can be set in several places
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+
+
+
 stages:
-- test
+  - build-image
+  - deploy
+  - test
+  
+cache:
+    paths:
+    - ./node_modules
+    - builds/
+    - vars/
+    
+
+variables:
+  CICD_TYPE:                "BACKEND"                 ## 'FRONTEND' | 'BACKEND'
+  BASEURL:                  "backend.tareas.pjm.gob.ar"  ## PRODUCTION DOMAIN
+  PROJECT_ID:               "dcm"                     ## PREFIX FOR PODS
+  GROUP_NAMESPACE_PROD:     "gestion-expte"                  ## PROD NAMESPACE IN CLUSTER
+  GROUP_NAMESPACE_STAGE:    "dev-gestion-expte"              ## PROD NAMESPACE IN CLUSTER
+  SVC_TARGET_PORT:          "5000"                    ## PORT LISTEN IN POD
+  KUSTOM_FOLDER_PROD:       "production"              ## KUSTOMIZE PROD  FOLDER && CUSTOMIZATION ENV FILE
+  KUSTOM_FOLDER_STAGE:      "stage"                   ## KUSTOMIZE STAGE FOLDER && CUSTOMIZATION ENV FILE
+  SETTINGS_TYPE:            "env"                     ## CUSTOMIZATION TYPES: 'env' | 'file'
+  SETTINGS_FOLDER:          "customization"           ## CUSTOMIZATION PATH
+  DEPLOY_PODS:              "1"                       ## FLAG FOR DEPLOY APP
+  DEPLOY_CONFIGS:           "1"                       ## FLAG FOR DEPLOY CONFIGS
+  SENSIBLE_SETTINGS_ENABLE: "1"                       ## FLAG FOR DECODE SENSIBLE CONFIGS
+  CONFIG_MAPS_ENABLE:       "1"                       ## FLAG FOR DECODE CONFIG MAPS
+  APP_FOLDER:               "app"                     ## Source Code to copy in dockerfile image - Without '/'
+  PULL_REGISTRY_NAME:       "pull-registry-group-gestion-expte"  ## PULL REGISTRY NAME
+  STAGE_PREFIX:             "dev-"
+  PYTHON_SETTINGS_PREFIX:   "uwsgi-"
+
+
 sast:
   stage: test
 include:
 - template: Security/SAST.gitlab-ci.yml
+
+
+build-image:
+  stage: build-image
+  image: docker:stable-dind 
+  services:
+  - name: docker:dind  
+    command: ["--mtu=1300"]
+
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
+      when: never
+    
+    - if: $CI_COMMIT_REF_NAME == "main" || ($CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_MESSAGE =~ /forcebuild/) || $CI_COMMIT_TAG
+      changes:
+        - "$APP_FOLDER/**/*"
+        - "Dockerfile*"
+        - "requirements.txt"
+     
+  before_script:
+    - mkdir -p vars
+    - DOCKERFILE=./Dockerfile;
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+    - if [[ "$CI_COMMIT_TAG" ]]; then  
+        echo "This is a TAGGED VERSION FOR PRODUCTION --> $CI_COMMIT_TAG";
+        TAG="prod-$CI_COMMIT_TAG";
+        CACHE_FILE=vars/last-prod-tag;
+        if [[ $CICD_TYPE == "FRONTEND" ]]; then APP_FOLDER=$APP_FOLDER/PROD && echo "IS FRONTEND AND SOURCE IS -> $APP_FOLDER"; fi
+      else 
+        echo "This is a BRANCH VERSION --> $CI_COMMIT_REF_NAME";
+        if [[ $CI_COMMIT_REF_NAME == "main" ]]; then
+          TAG="STAGE-$CI_PIPELINE_ID";
+          CACHE_FILE=vars/last-stg-tag;
+          if [[ $CICD_TYPE == "FRONTEND" ]]; then APP_FOLDER=$APP_FOLDER/STAGE && echo "IS FRONTEND AND SOURCE IS -> $APP_FOLDER"; fi
+        else
+          TAG="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID";
+          CACHE_FILE=vars/last-dev-tag;
+          if [[ $CICD_TYPE == "FRONTEND" ]]; then APP_FOLDER=$APP_FOLDER/$CI_COMMIT_REF_NAME && echo "IS FRONTEND AND SOURCE IS -> $APP_FOLDER"; fi
+        fi;
+      fi;
+    - mkdir -p code && cp $APP_FOLDER/* code -Rv && rm code/**/*.enc -rf && ls -lah code
+  
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$TAG" -f $DOCKERFILE .
+    - docker push "$CI_REGISTRY_IMAGE:$TAG"
+    - echo $TAG > $CACHE_FILE
+    - cat vars/*
+  
+  artifacts:
+    paths:
+      - vars/
+
+deploy-k8s-main:
+  image: alpine:3.7
+  stage: deploy
+
+
+  rules:
+    - if: '$DEPLOY_PODS == "0" || $CI_COMMIT_MESSAGE =~ /notdeploy/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
+      when: never
+
+    - if: $CI_COMMIT_REF_NAME == "main" || ($CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_MESSAGE =~ /forcedeploy/) || $CI_COMMIT_TAG
+
+      
+  before_script:
+
+    - apk update  && apk add --no-cache curl grep gnupg wget
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+
+    - if [[ "$CI_COMMIT_TAG" ]]; then  
+        echo "This is a TAGGED VERSION FOR PRODUCTION --> $CI_COMMIT_TAG";
+        CONFIG=$K8S_CONFIG_PROD;
+        KUSTOM_DIR=manifests/deploy/overlays/$KUSTOM_FOLDER_PROD;
+        GROUP_NAMESPACE=$GROUP_NAMESPACE_PROD;
+        ENV="prod";
+        PATHRESOURCE=$CI_PROJECT_NAME;
+        IMAGENAME=$CI_REGISTRY_IMAGE:$(cat ./vars/last-prod-tag);
+
+      else 
+        echo "This is a BRANCH VERSION --> $CI_COMMIT_REF_NAME";
+        CONFIG=$K8S_CONFIG_DEVELOP;
+        KUSTOM_DIR=manifests/deploy/overlays/$KUSTOM_FOLDER_STAGE;
+        GROUP_NAMESPACE=$GROUP_NAMESPACE_STAGE;
+        ENV=$CI_COMMIT_REF_NAME;
+        PATHRESOURCE=$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME;
+        BASEURL=$STAGE_PREFIX$BASEURL;        
+
+        if [[ $CI_COMMIT_REF_NAME == "main" ]]; then
+          IMAGENAME=$CI_REGISTRY_IMAGE:$(cat ./vars/last-stg-tag);
+        else
+          IMAGENAME=$CI_REGISTRY_IMAGE:$(cat ./vars/last-dev-tag);
+        fi;
+      fi;   
+
+    - PID_APP=$PROJECT_ID-$CI_PROJECT_NAME;
+    - APP_NAME=$CI_PROJECT_NAME;
+    - COMPLETEID=$PROJECT_ID-$APP_NAME-$ENV;
+    - GITGROUP="$CI_PROJECT_NAMESPACE"
+      
+  script: 
+    - mkdir -p ${HOME}/.kube && base64 -d $CONFIG >${HOME}/.kube/config
+
+    - echo "GRUPO DE TRABAJO -> $GITGROUP | $APP_NAME | $SENSIBLE_SETTINGS_FILE"
+ 
+    - find ./manifests/ -name "kustomization.yaml" -exec sed -i 's|{{NAMESPACE}}|'$GROUP_NAMESPACE'|g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's|{{GIT-GROUP}}|'$GITGROUP'|g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's|{{IMAGE-NAME}}|'$IMAGENAME'|g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{NAME-PROJECT}}/'$APP_NAME'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{PID-APP}}/'$PID_APP'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{APP-ID}}/'$COMPLETEID'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{ENV}}/'$ENV'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{BASE-URL}}/'$BASEURL'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{TARGET-PORT}}/'$SVC_TARGET_PORT'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{pull-registry-name}}/'$PULL_REGISTRY_NAME'/g' {} +
+
+    - ls $KUSTOM_DIR && cat $KUSTOM_DIR/*
+    - kubectl kustomize $KUSTOM_DIR
+    - kubectl kustomize $KUSTOM_DIR | kubectl apply -f -
+    - kubectl -n $GROUP_NAMESPACE annotate deployments/$COMPLETEID kubernetes.io/change-cause="image $IMAGENAME | $CI_COMMIT_MESSAGE"
+
+configs-k8s-main:
+  image: alpine:3.7
+  stage: deploy
+
+  rules:
+    - if: '$DEPLOY_CONFIGS == "0" || $CI_COMMIT_MESSAGE =~ /notconfig/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
+      when: never
+    
+    - if: $CI_COMMIT_REF_NAME == "main" || ($CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_MESSAGE =~ /forcedeploy/) || $CI_COMMIT_TAG
+      changes:
+        - "customization/**/*"
+        - "manifests/config/**/*"
+        - ".gitlab-ci.yml"
+  
+      
+  before_script:
+
+    - apk update  && apk add --no-cache curl grep gnupg wget
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - curl -LO https://github.com/mozilla/sops/releases/download/v3.5.0/sops-v3.5.0.linux && mv ./sops-v3.5.0.linux /usr/local/bin/sops && chmod 0755 /usr/local/bin/sops
+    - base64 -d $SOPS_CREDENTIALS > scred 
+    - gpg --import scred
+    - gpg --list-keys
+
+    - if [[ "$CI_COMMIT_TAG" ]]; then  
+        echo "This is a TAGGED VERSION FOR PRODUCTION --> $CI_COMMIT_TAG";
+        CONFIG=$K8S_CONFIG_PROD;
+        KUSTOM_DIR=manifests/config/overlays/$KUSTOM_FOLDER_PROD;
+        GROUP_NAMESPACE=$GROUP_NAMESPACE_PROD;
+        ENV="prod";
+        SENSIBLE_SETTINGS_FILE=$SETTINGS_FOLDER/$KUSTOM_FOLDER_PROD.$SETTINGS_TYPE;
+        CMAPS_SETTINGS_FILE=$SETTINGS_FOLDER/cm_$KUSTOM_FOLDER_PROD.$SETTINGS_TYPE;
+        PYTHON_SETTINGS_FILE=$PYTHON_SETTINGS_PREFIX$KUSTOM_FOLDER_PROD.ini;
+      else 
+        echo "This is a BRANCH VERSION --> $CI_COMMIT_REF_NAME";
+        CONFIG=$K8S_CONFIG_DEVELOP;
+        KUSTOM_DIR=manifests/config/overlays/$KUSTOM_FOLDER_STAGE;
+        GROUP_NAMESPACE=$GROUP_NAMESPACE_STAGE;
+        ENV=$CI_COMMIT_REF_NAME;
+        SENSIBLE_SETTINGS_FILE=$SETTINGS_FOLDER/$KUSTOM_FOLDER_STAGE.$SETTINGS_TYPE;
+        CMAPS_SETTINGS_FILE=$SETTINGS_FOLDER/cm_$KUSTOM_FOLDER_STAGE.$SETTINGS_TYPE;
+        PYTHON_SETTINGS_FILE=$PYTHON_SETTINGS_PREFIX$KUSTOM_FOLDER_STAGE.ini;
+      fi;   
+
+    - PID_APP=$PROJECT_ID-$CI_PROJECT_NAME;
+    - APP_NAME=$CI_PROJECT_NAME;
+    - COMPLETEID=$PROJECT_ID-$APP_NAME-$ENV;
+    - GITGROUP="$CI_PROJECT_NAMESPACE"
+          
+  script:
+    - mkdir -p ${HOME}/.kube && base64 -d $CONFIG >${HOME}/.kube/config
+    - echo "GRUPO DE TRABAJO -> $GITGROUP | $APP_NAME | $SENSIBLE_SETTINGS_FILE"
+ 
+    - find ./manifests/ -name "kustomization.yaml" -exec sed -i 's|{{NAMESPACE}}|'$GROUP_NAMESPACE'|g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{NAME-PROJECT}}/'$APP_NAME'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{PID-APP}}/'$PID_APP'/g' {} +
+    - find ./manifests/ -name "*.yaml" -exec sed -i 's/{{ENV}}/'$ENV'/g' {} +
+
+    - if [[ $SETTINGS_TYPE == 'env' ]]; then
+        KCTL_FROM_MODE="--from-env-file";
+      else
+        KCTL_FROM_MODE="--from-file";
+      fi;
+    
+    - if [[ "$CONFIG_MAPS_ENABLE" ]]; then
+        echo "CONFIGS --> 1";
+        kubectl create configmap $PID_APP-cmaps $KCTL_FROM_MODE "$CMAPS_SETTINGS_FILE" --dry-run=client -oyaml > $KUSTOM_DIR/cmaps.yaml;
+        DEPLOY_CONFIGS=1;
+      fi;
+
+    - if [[ "$SENSIBLE_SETTINGS_ENABLE" ]]; then
+        echo "SETTINGS --> 1";
+        sops -d $SENSIBLE_SETTINGS_FILE.enc > $SENSIBLE_SETTINGS_FILE;
+        kubectl create secret generic $PID_APP-sensible-settings $KCTL_FROM_MODE "$SENSIBLE_SETTINGS_FILE" --dry-run=client -oyaml > $KUSTOM_DIR/ssetings.yaml;
+        DEPLOY_CONFIGS=1;
+      fi;
+    
+    - cp $PYTHON_SETTINGS_FILE python-settings
+    - kubectl create configmap $PID_APP-cm-python-settings --from-file python-settings --dry-run=client -oyaml > $KUSTOM_DIR/cm-python-settings.yaml;
+    
+    - echo "CREATED CM SETTINGS..."
+    - cat $KUSTOM_DIR/cm-python-settings.yaml
+    - echo "\n\n"
+
+
+    - if [[ "$DEPLOY_CONFIGS" ]]; then
+        ls $KUSTOM_DIR && cat $KUSTOM_DIR/*;
+        echo "KUSTOMIZING...";
+        kubectl kustomize $KUSTOM_DIR;
+        kubectl kustomize $KUSTOM_DIR | kubectl apply -f -;
+      fi;
+
+    - kubectl rollout restart deployment $PID_APP-$ENV -n $GROUP_NAMESPACE;
+
+
+

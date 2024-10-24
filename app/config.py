@@ -29,6 +29,11 @@ class Config:
         {
             'name': 'localhost',
             'url': 'http://192.168.70.27:5005'
+        },
+        
+        {
+            'name': 'localhost',
+            'url': 'http://localhost:3000'
         }
     ]
     DESCRIPTION='APIs Sistema de Tareas'

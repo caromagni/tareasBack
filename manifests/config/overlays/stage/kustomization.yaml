@@ -1,7 +1,7 @@
 generatorOptions:
   disableNameSuffixHash: true
   
-bases:
+resources:
   - ../../base
   
 namespace: {{NAMESPACE}}
@@ -14,4 +14,5 @@ commonLabels:
 patchesStrategicMerge:
   - ssetings.yaml
   - cmaps.yaml
-  - cm-uwsgi.yaml
+  - cm-python-settings.yaml
+

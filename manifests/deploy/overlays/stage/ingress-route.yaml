@@ -7,13 +7,15 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`{{BASE-URL}}`) && PathPrefix(`/{{SUB-PATH}}`)
+  - match: Host(`{{BASE-URL}}`) && PathPrefix(`/`)
+  # - match: Host(`{{BASE-URL}}`) && PathPrefix(`/`)
     kind: Rule
     services:
     - name: {{APP-ID}}  
       port: 80
-    # middlewares:
-    # - name: strippath-{{APP-ID}}
+    middlewares:
+    - name: strippath-{{APP-ID}}
+    # - name: modheaders-{{APP-ID}}
   tls:
     certResolver: default
 ---
@@ -25,7 +27,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`{{BASE-URL}}`) && PathPrefix(`/{{SUB-PATH}}`)
+  - match: Host(`{{BASE-URL}}`) && PathPrefix(`/`)
     kind: Rule
     services:
     - name: {{APP-ID}}  

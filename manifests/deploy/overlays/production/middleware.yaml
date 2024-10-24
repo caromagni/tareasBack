@@ -5,7 +5,7 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /{{SUB-PATH}}
+      - /{{NAME-PROJECT}}
 
 ---
       

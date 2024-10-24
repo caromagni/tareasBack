@@ -6,4 +6,5 @@ generatorOptions:
 resources:
   - cmaps.yaml 
   - ssetings.yaml
-  - cm-uwsgi.yaml
+  - cm-python-settings.yaml
+

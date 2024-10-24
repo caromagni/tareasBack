@@ -23,15 +23,15 @@ spec:
         - configMapRef:
             name: {{PID-APP}}-cmaps-{{ENV}}
         volumeMounts:
-          - name: uwsgi-config
-            mountPath: /app/uwsgi.ini
-            subPath: uwsgi.ini
+          - name: python-settings
+            mountPath: /python-settings
+            subPath: python-settings
             readOnly: true
       volumes:
-        - name: uwsgi-config
+        - name: python-settings
           configMap:
-            name: {{PID-APP}}-cm-uwsgi-{{ENV}}
+            name: {{PID-APP}}-cm-python-settings-{{ENV}}
 
 
       imagePullSecrets:
-      - name: {{PULL-REGISTRY-NAME}}
+      - name: {{pull-registry-name}}
