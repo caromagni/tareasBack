@@ -136,5 +136,5 @@ dmypy.json
 # dotenv
 .env
 .env.*
-#export_creds.sh
+export_creds.sh
 start.sh
