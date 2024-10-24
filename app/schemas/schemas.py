@@ -949,7 +949,7 @@ class NotaCountOut(Schema):
     
 class LabelIn(Schema):    
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 63 y menor a 25 caracteres"),
         validate_char
     ])
     color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
@@ -958,7 +958,8 @@ class LabelIn(Schema):
     id_user_creacion = String(required=True)
     fecha_creacion = String(validate=validate_fecha)
     fecha_eliminacion = String(validate=validate_fecha)
-    fecha_actualizacion = String(validate=validate_fecha)
+    # fecha_actualizacion = String(validate=validate_fecha)
+    id_tarea = String()
 
 
 class LabelPatchIn(Schema):
@@ -1028,3 +1029,71 @@ class LabelCountAllOut(Schema):
 class LabelCountOut(Schema):
     count = Integer()
     data = Nested(LabelOut, many=True)    
+
+
+############## Labels x Tarea####################  
+
+class LabelXTareaIn(Schema):  
+    activa= Boolean()
+    id_tarea = String(required=True)
+    ids_labels = List(String(),required=True, many=True)
+    id_user_actualizacion = String(required=True)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+
+class LabelXTareaPatchIn(Schema):
+    activa= Boolean()
+    id_tarea = String(required=True)
+    id_label = String(required=True)
+    id_user_actualizacion = String(required=True)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+    
+class LabelXTareaOut(Schema):
+    status = fields.String(required=True)
+    message = fields.String(required=True)
+    data = fields.List(fields.String(), required=True)
+    # activa= Boolean()
+    # id_tarea = String(required=True)
+    # id_label = String(required=True)
+    # id_user_actualizacion = String(required=True)
+    # fecha_actualizacion = String(validate=validate_fecha)
+
+class LabelXTareaAllOut(Schema):
+    id = String()
+    nombre = String()
+    color = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String()
+    fecha_actualizacion = String()
+    id_user_creacion = String()
+    id_grupo_padre = String()
+
+
+class LabelXTareaIdOut(Schema):
+    activa= Boolean()
+    id_tarea = String(required=True)
+    id_label = String(required=True)
+    id_user_actualizacion = String(required=True)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+    
+class LabelXTareaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+    id_usuario_actualizacion = String()
+    id_tarea = String()
+    id_label = String()
+    activa = Boolean()
+
+class LabelXTareaCountAllOut(Schema):
+    count = Integer()
+    data = Nested(LabelXTareaAllOut, many=True)
+    
+
+class LabelXTareaCountOut(Schema):
+    count = Integer()
+    data = Nested(LabelXTareaOut, many=True)  

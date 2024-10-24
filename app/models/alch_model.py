@@ -407,14 +407,27 @@ class FechaIntermedia(Base):
     tarea = relationship('Tarea')
 
 
-t_label_x_tarea = Table(
-    'label_x_tarea', metadata,
-    Column('label_id', ForeignKey('tareas.label.id'), nullable=False),
-    Column('tarea_id', ForeignKey('tareas.tarea.id'), nullable=False),
-    Column('fecha_actualizacion', DateTime),
-    Column('id_user_actualizacion', UUID),
-    schema='tareas'
-)
+# t_label_x_tarea = Table(
+#     'label_x_tarea', metadata,
+#     Column('label_id', ForeignKey('tareas.label.id'), nullable=False),
+#     Column('tarea_id', ForeignKey('tareas.tarea.id'), nullable=False),
+#     Column('fecha_actualizacion', DateTime),
+#     Column('id_user_actualizacion', UUID),
+#     schema='tareas'
+# )
+class LabelXTarea(Base):
+    __tablename__ = 'label_x_tarea'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tarea = Column(ForeignKey('tareas.tarea.id'))
+    id_label = Column(ForeignKey('tareas.label.id'))
+    id_user_actualizacion = Column(UUID)
+    fecha_actualizacion = Column(DateTime)
+    activa = Column(Boolean, default=False)
+
+    label = relationship('Label')
+    tarea = relationship('Tarea')
 
 class Nota(Base):
     __tablename__ = 'nota'

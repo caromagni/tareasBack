@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
-from ..models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label
+from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut, LabelXTareaAllOut, LabelXTareaCountAllOut, LabelXTareaCountOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn
+from ..models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label, get_label_by_tarea, insert_label_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol, Label
 #from flask_jwt_extended import jwt_required
@@ -12,6 +12,8 @@ from ..common.usher import get_roles
 from ..common.auth import verificar_header
 import uuid
 import json
+from flask import jsonify
+
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
@@ -24,7 +26,7 @@ label_b = APIBlueprint('label_blueprint', __name__)
 #         print("Token o api key no validos")  
 # ####################################################
 
-################################ NOTAS ################################
+################################ ETIQUETAS ################################
 @label_b.doc(description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label')
 @label_b.input(LabelGetIn, location='query')
@@ -97,7 +99,7 @@ def get_label(id:str):
         raise ValidationError(err) 
 
 
-@label_b.doc(description='Alta de Label', summary='Alta y asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(LabelIn)
 @label_b.output(LabelOut)
@@ -144,3 +146,56 @@ def del_label(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    
+################################ LABELS X TAREAS ################################
+@label_b.doc(description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.get('/label_tarea/<string:id_tarea>')
+@label_b.output(LabelXTareaIdOut)
+def get_label_tarea(id_tarea:str):
+    try:
+        res, cant = get_label_by_tarea(id_tarea)
+        if res is None:
+            raise DataNotFound("Label no encontrada")
+
+        data = {
+            "count": cant,            
+            "data": LabelXTareaIdOut().dump(res, many=True)
+
+        }
+        print("result:",data) 
+        current_app.session.remove()
+        return jsonify({
+        'status': 'success',
+        'data': data
+    })      
+    
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err) 
+       
+
+@label_b.doc(description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.post('/label_tarea')
+@label_b.input(LabelXTareaIn)
+@label_b.output(LabelXTareaOut)
+def post_label_tarea(json_data: dict):
+    try:
+        print("#"*50)
+        print(json_data)
+        print("#"*50)
+        res = insert_label_tarea(**json_data)
+        print("res:",res)   
+        if res is None:
+            result = {
+                    "valido":"fail",
+                    "code": 800,
+                    "error": "Error en insert label",
+                    "error_description": "No se pudo insertar la label"
+                }
+            res = MsgErrorOut().dump(result)
+        
+        return LabelXTareaOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err)    
