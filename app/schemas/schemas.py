@@ -356,6 +356,7 @@ class GroupIdOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
+    base= Boolean()
     eliminado = Boolean()
     fecha_creacion = DateTime()
     fecha_actualizacion = DateTime()
@@ -396,14 +397,12 @@ class TareaIn(Schema):
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    caratula_expediente = String(validate=[
-        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
-        validate_char
-    ])
+    caratula_expediente = String()
+    nombre_actuacion= String()    
     id_tipo_tarea = String(required=True)
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -415,6 +414,10 @@ class TareaIn(Schema):
     ))
     username = String()
 
+    """ caratula_expediente = String(validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ]) """
 class TareaPatchIn(Schema):
     prioridad = Integer(validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
@@ -591,6 +594,8 @@ class UsuarioTareaOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
 
+
+
 class UsuarioAllOut(Schema):
     id = String()
     fecha_actualizacion = String()
@@ -708,7 +713,20 @@ class TareaUsuarioOut(Schema):
     apellido = String()
     id_grupo = String()
     grupo = String()
-        
+
+class UsuarioGroupTareaOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    asignada = Boolean()
+    fecha_asignacion = String()
+    grupos_usr = List(Nested(GroupOut, only=("id", "nombre")))
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
 class TareaIdOut(Schema):
     id = String()
     titulo = String()
@@ -733,11 +751,13 @@ class TareaIdOut(Schema):
     grupos = List(Nested(GroupTareaOut))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
-    usuarios = List(Nested(UsuarioTareaOut))
+    usuarios = List(Nested(UsuarioGroupTareaOut))
     notas = List(Nested(NotaTareaOut))
     id_user_actualizacion = String()
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
-
+    reasignada_usuario = Boolean()
+    reasignada_grupo = Boolean()
+    
 class TareaxGrupoIdOut(Schema):
     id = String()
     titulo = String()

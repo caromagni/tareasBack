@@ -6,7 +6,7 @@ from sqlalchemy import desc
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from .alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from ..common.utils import *
 
 def es_habil(fecha):
@@ -24,9 +24,10 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     session: scoped_session = current_app.session
     ##############Validaciones################
+    print("##############Validaciones################")
     id_grupo=None
     id_usuario_asignado=None
     if username is not None:
@@ -35,16 +36,43 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
         id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
+    else:
+        raise Exception("Debe ingresar username o id_user_actualizacion")
+
 
 
     if id_expediente is not None:
-        expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
+        expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
         if expediente is None:
-            raise Exception("Expediente no encontrado")
+            nuevoID_expte=uuid.uuid4()
+            insert_expte = ExpedienteExt(id=nuevoID_expte, 
+                                         id_ext=id_expediente, 
+                                         caratula=caratula_expediente,
+                                         fecha_actualizacion=datetime.now(),
+                                         id_user_actualizacion=id_user_actualizacion)
+            session.add(insert_expte)
+            id_expediente = nuevoID_expte
+            #raise Exception("Expediente no encontrado")
+        else:
+            id_expediente = expediente.id    
     if id_actuacion is not None:
-        actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion).first()
+        actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()
+        
         if actuacion is None:
-            raise Exception("Actuacion no encontrada")    
+            print("No se encontro actuacion")
+            nuevoID_actuacion=uuid.uuid4()
+            insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
+                                            id_ext=id_actuacion,
+                                            nombre=nombre_actuacion,
+                                            id_tipo_actuacion=id_tipo_tarea,
+                                            id_user_actualizacion=id_user_actualizacion,
+                                            fecha_actualizacion=datetime.now())
+            session.add(insert_actuacion)
+            id_actuacion = nuevoID_actuacion
+        else:
+            id_actuacion = actuacion.id
+            print("Actuacion encontrada")    
+            #raise Exception("Actuacion no encontrada")    
     if id_tipo_tarea is not None:
         tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
@@ -97,6 +125,7 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
        msg = "Tipo de tarea no encontrado"
        return None, msg
 
+    print("Inserta tarea")
     nuevoID_tarea=uuid.uuid4()
 
     nueva_tarea = Tarea(
@@ -651,9 +680,7 @@ def get_tarea_by_id(id):
     res = session.query(Tarea).filter(Tarea.id == id).first()
     
     results = []
-    usuarios=[]
-    grupos=[]
-    notas=[]
+   
  
 
     if res is not None:
@@ -671,14 +698,31 @@ def get_tarea_by_id(id):
 
             
         if res_usuarios is not None:
+            usuarios=[]
+            grupos=[]
+            notas=[]
+            reasignada_usuario=False
+            reasignada_grupo=False
             for row in res_usuarios:
+                grupos_usr=[]
+                usuario_grupo = session.query(UsuarioGrupo.id_grupo, Grupo.nombre).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario==row.id, UsuarioGrupo.eliminado==False).first()
+                if usuario_grupo is not None:
+                    grupo_usr = {
+                        "id": usuario_grupo.id_grupo,
+                        "nombre": usuario_grupo.nombre
+                    }
+                    grupos_usr.append(grupo_usr)
+
                 usuario = {
                     "id": row.id,
                     "nombre": row.nombre,
                     "apellido": row.apellido,
                     "asignada": not(row.reasignada),
-                    "fecha_asignacion": row.fecha_asignacion
+                    "fecha_asignacion": row.fecha_asignacion,
+                    "grupos_usr": grupos_usr
                 }
+                if row.reasignada:
+                    reasignada_usuario=True
                 usuarios.append(usuario)
 
         if res_grupos is not None:
@@ -689,6 +733,8 @@ def get_tarea_by_id(id):
                     "asignada": not(row.reasignada),
                     "fecha_asignacion": row.fecha_asignacion
                 }
+                if row.reasignada:
+                    reasignada_grupo=True
                 grupos.append(grupo)
 
         if res_notas is not None:
@@ -722,6 +768,7 @@ def get_tarea_by_id(id):
             "subtipo_tarea": res.subtipo_tarea,
             "id_expediente": res.id_expediente,
             "expediente": res.expediente,
+            "caratula_expediente": res.caratula_expediente,
             "id_actuacion": res.id_actuacion,
             "actuacion": res.actuacion,
             "cuerpo": res.cuerpo,
@@ -734,7 +781,9 @@ def get_tarea_by_id(id):
             "usuarios": usuarios,
             "notas": notas,
             "id_user_actualizacion": res.id_user_actualizacion,
-            "user_actualizacion": res.user_actualizacion
+            "user_actualizacion": res.user_actualizacion,
+            "reasignada_usuario": reasignada_usuario,
+            "reasignada_grupo": reasignada_grupo
         }
 
         results.append(result)
