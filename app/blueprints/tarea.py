@@ -315,7 +315,7 @@ def del_subtipo_tarea(id: str):
 ################################TAREAS################################
 #@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@tarea_b.get('/tarea')
+@tarea_b.get('/tarea1')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountOut)
 def get_tareas(query_data: dict):
@@ -386,10 +386,10 @@ def get_tareas(query_data: dict):
 
 
 
-#@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-#@tarea_b.get('/tarea_detalle')
-#@tarea_b.input(TareaGetIn, location='query')
-#@tarea_b.output(TareaCountAllOut)
+@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.get('/tarea')
+@tarea_b.input(TareaGetIn, location='query')
+@tarea_b.output(TareaCountAllOut)
 def get_tareas_detalle(query_data: dict):
     try:
         ##########Variables de control de acceso####################
