@@ -16,7 +16,7 @@ from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
 from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from .config import Config
-from app.api_key import *
+from app.common.api_key import *
 
 
 def create_app():

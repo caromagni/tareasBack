@@ -1,5 +1,5 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
-from ..api_key import *
+from ..common.api_key import *
 from flask import request, current_app
 from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
