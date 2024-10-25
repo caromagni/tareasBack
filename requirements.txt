@@ -44,3 +44,4 @@ urllib3==2.2.2
 webargs==8.4.0
 Werkzeug==3.0.3
 bcrypt==4.2.0
+pika

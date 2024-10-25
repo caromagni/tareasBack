@@ -1,5 +1,5 @@
 from flask import request, current_app
-from ..api_key import *
+from .api_key import *
 import jwt
 from .error_handling import UnauthorizedError, ValidationError
 
