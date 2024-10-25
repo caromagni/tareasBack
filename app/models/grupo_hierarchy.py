@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
-from .alch_model import HerarquiaGrupoGrupo
+from models.alch_model import HerarquiaGrupoGrupo
 from flask import current_app
 
 def find_parent_id(session: Session, id_hijo: str):

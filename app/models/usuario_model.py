@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
+from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
 
 
 def get_usuario_by_id(id):

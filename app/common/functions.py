@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..common.error_handling import ValidationError
+from common.error_handling import ValidationError
 
 from flask import request
 

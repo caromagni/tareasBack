@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.orm import scoped_session, joinedload
 from datetime import datetime, timedelta
-from ..common.functions import controla_fecha
+from common.functions import controla_fecha
 
 from flask import current_app
 

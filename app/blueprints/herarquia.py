@@ -1,9 +1,9 @@
 from apiflask import APIBlueprint
-from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo,get_grupos_all
+from models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo,get_grupos_all
 from typing import List
-from ..schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
-from ..common.error_handling import ValidationError
-from ..common.auth import verificar_header
+from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
+from common.error_handling import ValidationError
+from common.auth import verificar_header
 from flask import current_app, request
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)

@@ -1,17 +1,17 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut
-from ..models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
-from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id
-from app.common.error_handling import DataError, DataNotFound, ValidationError
-from ..models.alch_model import Usuario, Rol
+from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
+from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut
+from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
+from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id
+from common.error_handling import DataError, DataNotFound, ValidationError
+from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
-from ..common.usher import get_roles
-from ..common.auth import verificar_header
+from common.usher import get_roles
+from common.auth import verificar_header
 import uuid
 import json
 

@@ -3,11 +3,11 @@ from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
-from ..models.alch_model import Grupo,Usuario
-from ..models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioAllOut
-from ..common.error_handling import ValidationError, DataError, DataNotFound
-from ..common.auth import verificar_header
+from models.alch_model import Grupo,Usuario
+from models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
+from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioAllOut
+from common.error_handling import ValidationError, DataError, DataNotFound
+from common.auth import verificar_header
 from datetime import datetime
 import requests
 

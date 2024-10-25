@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import ActuacionExt, TipoActuacionExt
+from models.alch_model import ActuacionExt, TipoActuacionExt
 
 
 def get_all_actuaciones():

@@ -1,13 +1,13 @@
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
-from ..common.functions import controla_fecha
+from common.functions import controla_fecha
 from sqlalchemy import desc
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
-from ..common.utils import *
+from models.alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from common.utils import *
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:

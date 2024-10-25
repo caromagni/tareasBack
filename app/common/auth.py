@@ -1,7 +1,7 @@
 from flask import request, current_app
-from .api_key import *
+from common.api_key import *
 import jwt
-from .error_handling import UnauthorizedError, ValidationError
+from common.error_handling import UnauthorizedError, ValidationError
 
 def verify_token():
     token_encabezado = request.headers.get('Authorization')
