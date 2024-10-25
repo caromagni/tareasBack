@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 
 COPY code/ .
 CMD ["uwsgi","--wsgi-file","main.py","--ini","uwsgi.ini"]
-     
+    
