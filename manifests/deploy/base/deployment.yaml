@@ -22,15 +22,15 @@ spec:
             name: {{PID-APP}}-sensible-settings-{{ENV}}
         - configMapRef:
             name: {{PID-APP}}-cmaps-{{ENV}}
-        volumeMounts:
-          - name: python-settings
-            mountPath: /python-settings
-            subPath: python-settings
-            readOnly: true
-      volumes:
-        - name: python-settings
-          configMap:
-            name: {{PID-APP}}-cm-python-settings-{{ENV}}
+        # volumeMounts:
+        #   - name: python-settings
+        #     mountPath: /python-settings
+        #     subPath: python-settings
+        #     readOnly: true
+      # volumes:
+      #   - name: python-settings
+      #     configMap:
+      #       name: {{PID-APP}}-cm-python-settings-{{ENV}}
 
 
       imagePullSecrets:
