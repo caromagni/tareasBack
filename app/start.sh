@@ -45,4 +45,5 @@
 . export_creds.sh
 
 #start app
-flask --app main.py run --host 0.0.0.0 --port 5005 --reload
+uwsgi --wsgi-file main.py --ini ../uwsgi.ini
+
