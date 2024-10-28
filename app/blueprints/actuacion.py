@@ -1,9 +1,9 @@
 from apiflask import APIBlueprint
 from flask import current_app, jsonify, request
 
-from ..models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
-from ..schemas.schemas import  ActuacionOut, TipoActuacionOut
-from ..common.error_handling import ValidationError
+from models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
+from schemas.schemas import  ActuacionOut, TipoActuacionOut
+from common.error_handling import ValidationError
 
 actuacion_b = APIBlueprint('actuacion_blueprint', __name__)
 

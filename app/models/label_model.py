@@ -1,13 +1,13 @@
 import uuid
-from app.models.usuario_model import get_grupos_by_usuario
+from models.usuario_model import get_grupos_by_usuario
 from sqlalchemy.orm import scoped_session, joinedload
 from datetime import datetime, timedelta
-from ..common.functions import controla_fecha
-from .grupo_hierarchy import find_parent_id_recursive
+from common.functions import controla_fecha
+from models.grupo_hierarchy import find_parent_id_recursive
 
 from flask import current_app
 
-from .alch_model import Label, Grupo, HerarquiaGrupoGrupo
+from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 
     
 

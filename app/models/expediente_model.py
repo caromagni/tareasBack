@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import ExpedienteExt
+from models.alch_model import ExpedienteExt
 
 
 def get_all_expedientes():

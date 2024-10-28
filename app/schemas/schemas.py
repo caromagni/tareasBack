@@ -8,7 +8,7 @@ from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested, Li
 from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
-from ..models.alch_model import TipoTarea, Tarea
+from models.alch_model import TipoTarea, Tarea
 import re
 from datetime import datetime
 #ma = Marshmallow()

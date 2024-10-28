@@ -1,13 +1,13 @@
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
-from ..common.functions import controla_fecha
+from common.functions import controla_fecha
 from sqlalchemy import desc
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
-from ..common.utils import *
+from models.alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from common.utils import *
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:
@@ -978,7 +978,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
                     reasignada_grupo=True
                 grupos.append(grupo)            
         
-        res_notas = session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
+        """ res_notas = session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
 
         if res_notas is not None:
             for row in res_notas:
@@ -993,7 +993,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
                     "user_creacion": row.user_creacion,
                     "id_user_actualizacion": row.id_user_actualizacion
                 }
-                notas.append(nota) 
+                notas.append(nota)  """
         ###################Formatear el resultado####################
 
         result = {  

@@ -1,6 +1,6 @@
 
 import os
-from app.common.keycloak import get_public_key
+from common.keycloak import get_public_key
 
 os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')

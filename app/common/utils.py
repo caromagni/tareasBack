@@ -1,4 +1,4 @@
-from ..models.alch_model import Usuario, UsuarioGrupo, Grupo
+from models.alch_model import Usuario, UsuarioGrupo, Grupo
 from sqlalchemy.orm import scoped_session
 from flask import current_app
 

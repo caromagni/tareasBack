@@ -3,10 +3,10 @@ from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
-from ..models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
+from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
 import json
 import uuid
-from ..common.functions import get_user_ip
+from common.functions import get_user_ip
 
 ### modelos para los cuales se generará la auditoría ###
 modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo, TareaXGrupo, TareaAsignadaUsuario} 

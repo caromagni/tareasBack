@@ -1,15 +1,15 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoNotaIn, NotaGetIn, TipoNotaOut, NotaIn, NotaOut, NotaCountOut, NotaIdOut, MsgErrorOut, PageIn, TipoNotaCountOut, NotaCountAllOut, NotaAllOut, NotaPatchIn, NotaIdOut
-from ..models.nota_model import get_all_nota, get_all_tipo_nota, get_nota_by_id, insert_nota, delete_nota, delete_tipo_nota, update_nota, insert_tipo_nota
-from app.common.error_handling import DataError, DataNotFound, ValidationError
-from ..models.alch_model import Usuario, Rol, Nota
+from schemas.schemas import TipoNotaIn, NotaGetIn, TipoNotaOut, NotaIn, NotaOut, NotaCountOut, NotaIdOut, MsgErrorOut, PageIn, TipoNotaCountOut, NotaCountAllOut, NotaAllOut, NotaPatchIn, NotaIdOut
+from models.nota_model import get_all_nota, get_all_tipo_nota, get_nota_by_id, insert_nota, delete_nota, delete_tipo_nota, update_nota, insert_tipo_nota
+from common.error_handling import DataError, DataNotFound, ValidationError
+from models.alch_model import Usuario, Rol, Nota
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
-from ..common.usher import get_roles
-from ..common.auth import verificar_header
+from common.usher import get_roles
+from common.auth import verificar_header
 import uuid
 import json
 

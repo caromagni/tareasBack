@@ -1,22 +1,23 @@
+
 from apiflask import APIFlask, HTTPTokenAuth
 from flask import send_from_directory
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from app.common.error_handling import register_error_handlers
-from .blueprints.groups import groups_b
-from .blueprints.usuario import usuario_b
-from .blueprints.tarea import tarea_b
-from .blueprints.herarquia import herarquia_b
-from .blueprints.actuacion import actuacion_b
-from .blueprints.expediente import expediente_b
-from .blueprints.nota import nota_b
-from .blueprints.label import label_b
-from .blueprints.fix_stuck_in_idle_connections import fix_b
-from .models.alch_model import Base
-from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
-from .config import Config
-from app.common.api_key import *
+from blueprints.groups import groups_b
+from blueprints.usuario import usuario_b
+from blueprints.tarea import tarea_b
+from blueprints.herarquia import herarquia_b
+from blueprints.actuacion import actuacion_b
+from blueprints.expediente import expediente_b
+from blueprints.nota import nota_b
+from blueprints.label import label_b
+from blueprints.fix_stuck_in_idle_connections import fix_b
+from models.alch_model import Base
+from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
+from config import Config
+from common.error_handling import register_error_handlers
+from common.api_key import *
 
 
 def create_app():
@@ -109,7 +110,10 @@ def create_app():
 
     return app
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = create_app()
     app.run()
-
+else:
+    app = create_app()
+    application = app
