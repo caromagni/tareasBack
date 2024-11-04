@@ -174,7 +174,7 @@ def get_label_tarea(id_tarea:str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err) 
-       
+         
 
 @label_b.doc(description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label_tarea')
