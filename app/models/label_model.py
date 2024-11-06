@@ -173,6 +173,22 @@ def delete_label(id_label):
         print("Label no encontrada")
         return None
 
+def get_active_labels(id_grupo):
+    session: scoped_session = current_app.session
+    id_grupo_base = find_parent_id_recursive(session, id_grupo)
+    res = session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
+
+    if res is not None:
+        labels = session.query(LabelXTarea).filter(LabelXTarea.id_label.in_([label.id for label in res]), LabelXTarea.activa == True).all()
+
+        if labels is not None:
+            return labels
+        else:
+            return 'No hay labels activas'
+    else:
+        return 'No hay labels para este grupo'
+    
+
 ############################## LABELS x TAREA ########################################
 def insert_label_tarea (ids_labels, id_tarea, activa=True, fecha_actualizacion=datetime.now(), id_user_actualizacion=None):
     session: scoped_session = current_app.session

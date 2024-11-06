@@ -1082,14 +1082,11 @@ class LabelXTareaOut(Schema):
 
 class LabelXTareaAllOut(Schema):
     id = String()
-    nombre = String()
-    color = String()
-    eliminado = Boolean()
-    fecha_eliminacion = String()
-    fecha_creacion = String()
-    fecha_actualizacion = String()
-    id_user_creacion = String()
-    id_grupo_padre = String()
+    activa= Boolean()
+    id_tarea = String(required=True)
+    ids_labels = List(String(),required=True, many=True)
+    id_user_actualizacion = String(required=True)
+    fecha_actualizacion = String(validate=validate_fecha)
 
 
 class LabelXTareaIdOut(Schema):
