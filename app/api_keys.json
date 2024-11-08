@@ -18,5 +18,10 @@
         "api_key": "JDJiJDEyJGVzL3ZiVm9lLkJmZXVZWnc4UU5EcGVwc1B4WUVxME5Cb1hhcW01a1lzamVnZ0tjWW5QZmdl",
         "expire_date": 30,
         "api_key_name": "backend_tareas"
-    }    
+    },
+    {
+        "api_key": "JDJiJDEyJEp1ZmlzZGd3L1ExcllTU1l3T1NZeS50cFp4cGZVYzJneDAvblJKc2xZdzF6ZWpUakx4V25x",
+        "expire_date": 30,
+        "api_key_name": "backend_tareas_caro"   
+    }
 ]

@@ -15,7 +15,7 @@ def get_actuaciones():
     Actuaciones.
     ==============
 
-    **List Actuaciones.**
+    **List Actuaciones**
 
     :caption: This route returns a list of *actuaciones*.
 

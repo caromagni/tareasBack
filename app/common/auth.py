@@ -21,7 +21,7 @@ def verify_token():
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
             print("token:",token)
-            payload = jwt.decode(jwt=token, key=jwt_pk, algorithms=jwt_alg, audience=jwt_aud)
+            payload = jwt.decode(jwt=token, key=jwt_pk, leeway=50, algorithms=jwt_alg, audience=jwt_aud)
             
             return payload
             
