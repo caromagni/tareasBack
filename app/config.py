@@ -6,6 +6,8 @@ os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')
 class Config:
     # General configuration
+    BORRAR = os.getenv('BORRAR')
+    print("BORRAR: ",BORRAR)
     AUTH_URL=os.getenv('AUTH_URL')
     REALM=os.getenv('REALM')
     # Database configuration
