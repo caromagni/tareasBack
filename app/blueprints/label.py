@@ -33,6 +33,8 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.output(LabelCountOut)
 def get_labels(query_data: dict):
     try:
+
+        print("query_data:",query_data)
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant = 0
@@ -201,10 +203,10 @@ def post_label_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
     
-@label_b.doc(description='Asignacion de Label a tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.put('/label_tarea_del/<string:id_label_tarea>')
+@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.delete('/label_tarea_del/<string:id_label_tarea>')
 # @label_b.input(LabelXTareaIn)
-@label_b.output(LabelXTareaOut)
+@label_b.output(LabelXTareaIdOut)
 def delete_label_tarea(id_label_tarea, **json_data: dict):
     try:
         print("##"*50)
@@ -221,7 +223,7 @@ def delete_label_tarea(id_label_tarea, **json_data: dict):
                 }
             res = MsgErrorOut().dump(result)
         
-        return LabelXTareaOut().dump(res)
+        return LabelXTareaIdOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)    
