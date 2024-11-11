@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+*.gpg
+
 # Distribution / packaging
 .Python
 env/
@@ -139,4 +141,4 @@ dmypy.json
 export_creds.sh
 start.sh
 instala_sops.sh
-*.gpg
+
