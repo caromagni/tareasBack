@@ -138,3 +138,4 @@ dmypy.json
 .env.*
 export_creds.sh
 start.sh
+instala_sops.sh
