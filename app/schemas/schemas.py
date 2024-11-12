@@ -514,7 +514,7 @@ class GroupAllOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
-    id_user_asignado_default = String()
+    id_user_asignado_default = String(required=True)
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
