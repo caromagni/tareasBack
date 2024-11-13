@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
-from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
+from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, get_active_labels, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
 #from flask_jwt_extended import jwt_required
@@ -33,6 +33,8 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.output(LabelCountOut)
 def get_labels(query_data: dict):
     try:
+
+        print("query_data:",query_data)
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant = 0
@@ -201,16 +203,17 @@ def post_label_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
     
-@label_b.doc(description='Asignacion de Label a tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.put('/label_tarea_del/<string:id_label_tarea>')
-# @label_b.input(LabelXTareaIn)
-@label_b.output(LabelXTareaOut)
-def delete_label_tarea(id_label_tarea, **json_data: dict):
+@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.put('/label_tarea_del/<string:id_label>')
+@label_b.input(LabelXTareaPatchIn)
+@label_b.output(LabelXTareaIdOut)
+def delete_label_tarea(id_label: str, json_data: dict):
     try:
         print("##"*50)
+        print(id_label)
         print(json_data)
         print("#"*50)
-        res = delete_label_tarea_model(id_label_tarea, **json_data)
+        res = delete_label_tarea_model(id_label, **json_data)
         print("res:",res)   
         if res is None:
             result = {
@@ -221,7 +224,42 @@ def delete_label_tarea(id_label_tarea, **json_data: dict):
                 }
             res = MsgErrorOut().dump(result)
         
-        return LabelXTareaOut().dump(res)
+        return LabelXTareaIdOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err)    
+    
+@label_b.doc(description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.get('/label_grupo/<string:id_grupo>')
+# @label_b.input(LabelXTareaGetIn)
+@label_b.output(LabelCountAllOut)
+def get_active_labels_grupo(id_grupo:str):
+    try:
+        print("##"*50)
+        print(id_grupo)
+        print("#"*50)
+
+        res, cant = get_active_labels(id_grupo)
+        print("res:",res)   
+        if res is None:
+            result = {
+                    "valido":"fail",
+                    "code": 800,
+                    "error": "Error en delete label",
+                    "error_description": "No se pudo eliminar la etiqueta"
+                }
+            res = MsgErrorOut().dump(result)
+        
+        # return LabelAllOut().dump(res)
+    
+        data = {
+                "count": cant,            
+                "data": LabelAllOut().dump(res, many=True)
+
+            }
+        print("result:",data) 
+        current_app.session.remove()
+        return data
     
     except Exception as err:
         raise ValidationError(err)    

@@ -15,11 +15,11 @@ import json
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
-@nota_b.before_request
-def before_request():
-    if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos") 
+# @nota_b.before_request
+# def before_request():
+#     if not verificar_header():
+#         #raise UnauthorizedError("Token o api-key no validos")   
+#         print("Token o api key no validos") 
 
 
 ####################TIPO DE NOTA######################
@@ -113,10 +113,11 @@ def get_notas(query_data: dict):
         id_tipo_nota = None
         id_user_creacion = None
         id_tarea = None
-        fecha_desde = "01/01/1900"
-        fecha_hasta = datetime.now().strftime("%d/%m/%Y")
+        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_hasta=datetime.now()
 
         if request.args.get('page') is not None:
+            print("page:",request.args.get('page'))
             page = int(request.args.get('page'))
         if request.args.get('per_page') is not None:
             per_page = int(request.args.get('per_page'))

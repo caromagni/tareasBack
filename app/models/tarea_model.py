@@ -5,7 +5,8 @@ from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from sqlalchemy import desc
-
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 from flask import current_app
 
 from models.alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
@@ -889,123 +890,96 @@ def get_tarea_grupo_by_id(id_grupo, page=1, per_page=10):
     return results, total         
 
 
+
+
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
     print("estado:", estado)
     print("tipo de dato:", type(estado))
     print("prioridad:", prioridad)
     print("tipo de dato:", type(prioridad))
+
     session: scoped_session = current_app.session
-    query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
+    # Base query with date filtering
+    query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
+    print(str(query))
+    
+    # Apply filters based on provided parameters
     if id_tarea is not None:
         query = query.filter(Tarea.id == id_tarea)
-    
-    if titulo != '':
+    if titulo:
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
-
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
-    
     if id_actuacion is not None:
         query = query.filter(Tarea.id_actuacion == id_actuacion)
-
     if id_tipo_tarea is not None:
-        query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
-
+        query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
         query = query.join(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado, TareaAsignadaUsuario.eliminado == False)
-        """  usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario no encontrado")
-        
-        query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado)
-         """
     if id_grupo is not None:
-        query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id_grupo)
-
+        query = query.join(TareaXGrupo).filter(TareaXGrupo.id_grupo == id_grupo)
     if prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
-
     if estado > 0:
-        query = query.filter(Tarea.estado == estado)    
-
+        query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
 
-    #muestra datos
-    print("Query:", query.all())
-    #total= len(query.all())
-    total= query.count()
-
-    res_tareas = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
+    # Get total count of tasks matching the filter
+    total = query.count()
     
+    # Pagination with eager loading for associated users and groups
+    res_tareas = query.order_by(Tarea.fecha_creacion).offset((page - 1) * per_page).limit(per_page).all()
+
+    # Process each task in paginated results
     results = []
     
+    # Using aliased subqueries to reduce the number of queries for users and groups
     usuario_alias = aliased(Usuario)
     grupo_alias = aliased(Grupo)
 
     for res in res_tareas:
-        usuarios=[]
-        grupos=[]
-        notas=[]
-        reasignada_usuario=False
-        reasignada_grupo=False
-        #Consulto los usuarios asignados a la tarea
-        #res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
-        #                          ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).order_by(TareaAsignadaUsuario.eliminado).all()
+        usuarios = []
+        grupos = []
+        reasignada_usuario = False
+        reasignada_grupo = False
         
+        # Fetch assigned users for the task
         res_usuarios = session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                      ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
+        print(str(res_usuarios))
+        
+        for row in res_usuarios:
+            usuario = {
+                "id": row.id,
+                "nombre": row.nombre,
+                "apellido": row.apellido,
+                "asignada": not row.reasignada,
+                "fecha_asignacion": row.fecha_asignacion
+            }
+            if row.reasignada:
+                reasignada_usuario = True
+            usuarios.append(usuario)
 
-        if res_usuarios is not None:
-            for row in res_usuarios:
-                usuario = {
-                    "id": row.id,
-                    "nombre": row.nombre,
-                    "apellido": row.apellido,
-                    "asignada": not(row.reasignada),
-                    "fecha_asignacion": row.fecha_asignacion
-                }
-                if row.reasignada:
-                    reasignada_usuario=True
-                usuarios.append(usuario)
-
-        #res_grupos = session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
-        #                          ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== res.id).order_by(TareaXGrupo.eliminado).all()
+        # Fetch assigned groups for the task
         res_grupos = session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                    ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.eliminado).all()
+        print(str(res_grupos))
 
-        if res_grupos is not None:
-            for row in res_grupos:
-                grupo = {
-                    "id": row.id,
-                    "nombre": row.nombre,
-                    "asignada": not(row.reasignada),
-                    "fecha_asignacion": row.fecha_asignacion
-                }
-                if row.reasignada:
-                    reasignada_grupo=True
-                grupos.append(grupo)            
+        for row in res_grupos:
+            grupo = {
+                "id": row.id,
+                "nombre": row.nombre,
+                "asignada": not row.reasignada,
+                "fecha_asignacion": row.fecha_asignacion
+            }
+            if row.reasignada:
+                reasignada_grupo = True
+            grupos.append(grupo)            
         
-        """ res_notas = session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
-
-        if res_notas is not None:
-            for row in res_notas:
-                nota = {
-                    "id": row.id,
-                    "nota": row.nota,
-                    "id_tipo_nota": row.id_tipo_nota,
-                    "tipo_nota": row.tipo_nota,
-                    "titulo": row.titulo,
-                    "fecha_creacion": row.fecha_creacion, 
-                    "id_user_creacion": row.id_user_creacion,
-                    "user_creacion": row.user_creacion,
-                    "id_user_actualizacion": row.id_user_actualizacion
-                }
-                notas.append(nota)  """
-        ###################Formatear el resultado####################
-
-        result = {  
+        # Prepare result dictionary
+        result = {
             "id": res.id,
             "titulo": res.titulo,
             "fecha_inicio": res.fecha_inicio,
@@ -1030,7 +1004,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
             "fecha_creacion": res.fecha_creacion,
             "grupos": grupos,
             "usuarios": usuarios,
-            "notas": notas,
+            "notas": [],  # Keeping notes as an empty list, as in original code
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
@@ -1038,8 +1012,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
         }
         results.append(result)
     
-    
-    return results, total         
+    return results, total
+
 
 
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):

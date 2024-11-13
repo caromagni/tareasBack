@@ -23,7 +23,7 @@ def find_parent_id_recursive(session: Session, id_hijo: str):
     
     if parent_id is None:
         # This is a root node, return None
-        return None
+        return id_hijo
     else:
         # Recursively find the parent of this parent
         grandparent_id = find_parent_id_recursive(session, parent_id)

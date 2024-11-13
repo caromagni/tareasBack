@@ -149,12 +149,11 @@ class ExpedienteExt(Base):
 class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}
-
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
     id_user_asignado_default = Column(UUID)
     fecha_actualizacion = Column(DateTime)
-    nombre = Column(String)
+    nombre = Column(String, nullable=False)
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)

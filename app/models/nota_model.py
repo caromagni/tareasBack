@@ -7,6 +7,7 @@ from flask import current_app
 
 from .alch_model import Nota, TipoNota, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
 
+##########################  TIPO NOTAS #############################################
 
 def get_all_tipo_nota(page=1, per_page=10):
     print("get_tipo_notas - ", page, "-", per_page)
@@ -46,7 +47,7 @@ def delete_tipo_nota(id):
         return None
     
 
-##########################NOTAS #############################################
+##########################  NOTAS #############################################
 
 def insert_nota(titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_creacion=None, id_user_actualizacion=None, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
@@ -114,24 +115,30 @@ def update_nota(id='', **kwargs):
     session.commit()
     return result
 
-def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=None, eliminado=None):
+def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None):
    
     session: scoped_session = current_app.session
     
-    # Convert fecha_desde to datetime object
-    if isinstance(fecha_desde, str):
-        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
+    print('consulta por fechas y id')
+    print(fecha_desde)
+    print(fecha_hasta)
+    # # Convert fecha_desde to datetime object
+    # if isinstance(fecha_desde, str):
+    #     fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
     
-    # Set fecha_hasta to current datetime if not provided
-    if fecha_hasta is None:
-        fecha_hasta = datetime.now()
-    elif isinstance(fecha_hasta, str):
-        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+    # # Set fecha_hasta to current datetime if not provided
+    # if fecha_hasta is None:
+    #     fecha_hasta = datetime.now()
+
+    # elif isinstance(fecha_hasta, str):
+    #     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
 
     query = session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
+    # filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
     print('consulta por parámetros de notas')
     print("id tarea:",id_tarea)
-    print(query)
+    
+    print(query.count())
     if titulo != '':
         query = query.filter(Nota.titulo.ilike(f'%{titulo}%'))
 

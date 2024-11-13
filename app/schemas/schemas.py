@@ -514,7 +514,7 @@ class GroupAllOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
-    id_user_asignado_default = String()
+    id_user_asignado_default = String(required=True)
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
@@ -878,7 +878,7 @@ class NotaIn(Schema):
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
-    id_user_creacion = String(required=True)
+    # id_user_creacion = String(required=True)
     id_tarea = String()
     id_user_actualizacion = String()    
 
@@ -954,7 +954,6 @@ class NotaGetIn(Schema):
     id_user_creacion = String()
     id_tarea = String()
     eliminado = Boolean()
-    fecha_creacion = String()
 
 class NotaCountAllOut(Schema):
     count = Integer()
@@ -1082,14 +1081,11 @@ class LabelXTareaOut(Schema):
 
 class LabelXTareaAllOut(Schema):
     id = String()
-    nombre = String()
-    color = String()
-    eliminado = Boolean()
-    fecha_eliminacion = String()
-    fecha_creacion = String()
-    fecha_actualizacion = String()
-    id_user_creacion = String()
-    id_grupo_padre = String()
+    activa= Boolean()
+    id_tarea = String(required=True)
+    ids_labels = List(String(),required=True, many=True)
+    id_user_actualizacion = String(required=True)
+    fecha_actualizacion = String(validate=validate_fecha)
 
 
 class LabelXTareaIdOut(Schema):
