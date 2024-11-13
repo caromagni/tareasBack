@@ -18,6 +18,8 @@ from common.auditoria  import after_flush  # Importa el archivo que contiene el 
 from config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
+import threading
+from common.chk_messagges import chk_messagges
 
 
 def create_app():
@@ -85,7 +87,7 @@ def create_app():
     app.register_blueprint(nota_b)
     app.register_blueprint(label_b)
 
-
+    
     
     ###Api Key
     print("#####################")
@@ -105,8 +107,11 @@ def create_app():
 
     # Register custom error handlers
     register_error_handlers(app)
-
     
+     ############### CODIGO PARA LANZAR THREADS
+    thread = threading.Thread(target=chk_messagges())
+    thread.daemon = True
+    thread.start()
 
     return app
 
@@ -116,4 +121,6 @@ if __name__ == "__main__":
     app.run()
 else:
     app = create_app()
+   
     application = app
+

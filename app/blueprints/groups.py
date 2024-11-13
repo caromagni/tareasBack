@@ -7,6 +7,7 @@ from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
 from datetime import datetime
 from common.auth import verificar_header
+from common.rabbitmq_utils import *
 
 
 auth = HTTPTokenAuth()
@@ -16,6 +17,15 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
+    #Conecta con rabbitmq
+    data={
+        "msg":"Conectado a rabbitmq",
+        "fecha":datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    }
+    enviar_a_rabbitmq(data)
+    #msg=callback("","","","")
+    #print("#"*50)
+    #print("Mensaje recibido: ",msg)
     if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")  

@@ -45,3 +45,4 @@ uWSGI==2.0.27
 webargs==8.4.0
 Werkzeug==3.0.3
 Sphinx==8.0.2
+pika
