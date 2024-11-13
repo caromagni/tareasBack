@@ -878,7 +878,7 @@ class NotaIn(Schema):
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
-    id_user_creacion = String(required=True)
+    # id_user_creacion = String(required=True)
     id_tarea = String()
     id_user_actualizacion = String()    
 
@@ -954,7 +954,6 @@ class NotaGetIn(Schema):
     id_user_creacion = String()
     id_tarea = String()
     eliminado = Boolean()
-    fecha_creacion = String()
 
 class NotaCountAllOut(Schema):
     count = Integer()
