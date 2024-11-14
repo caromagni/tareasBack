@@ -146,8 +146,12 @@ def get_notas(query_data: dict):
         current_app.session.remove()
         return data
     
+    except ValidationError as err:
+        print(f"Validation error: {err}")
+        return {"error": str(err)}, 400
     except Exception as err:
-        raise ValidationError(err) 
+        print(f"Unexpected error: {err}")
+        raise ValidationError(err)
 
 
 @nota_b.doc(description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
