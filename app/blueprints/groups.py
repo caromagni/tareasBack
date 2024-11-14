@@ -18,14 +18,12 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 @groups_b.before_request
 def before_request():
     #Conecta con rabbitmq
-    data={
+    """ data={
         "msg":"Conectado a rabbitmq",
         "fecha":datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     }
-    enviar_a_rabbitmq(data)
-    #msg=callback("","","","")
-    #print("#"*50)
-    #print("Mensaje recibido: ",msg)
+    enviar_a_rabbitmq(data) """
+ 
     if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")  

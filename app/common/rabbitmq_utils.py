@@ -38,7 +38,6 @@ def enviar_a_rabbitmq(msg):
     channel.basic_publish(exchange='',
                           routing_key='txin',
                           body=mensaje_json)
-    #print(" [x] Enviado a RabbitMQ: %r" % mensaje_json)
     print(f" [x] Enviado a RabbitMQ: {mensaje_json}")
 
     # Cerrar la conexión con el servidor RabbitMQ

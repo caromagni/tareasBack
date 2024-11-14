@@ -124,6 +124,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     print("#"*50)
     print("Path_name:", path_name)
     print("#"*50)
+    fecha_hasta = fecha_hasta + " 23:59:59"
     cursor=None
     session: scoped_session = current_app.session
     # Subconsulta recursiva
@@ -189,15 +190,17 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         
         result =[]
         cursor=session.execute(subquery)
-
-    query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
     
+    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    print("Fecha desde:", fecha_desde)
+    print("Fecha hasta:", fecha_hasta)
+    print("Nombre:", nombre)
     if nombre is not "":
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
-
+    print("Eliminado:", eliminado)
     if eliminado:
         query = query.filter(Grupo.eliminado==eliminado)
-
+    print("Suspendido:", suspendido)
     if suspendido:
         query = query.filter(Grupo.suspendido==suspendido)    
 
@@ -244,10 +247,11 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
 
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
+    fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 
-    query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
+    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
@@ -261,10 +265,11 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
     
 
 def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
+    fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 
-    query= session.query(Grupo).filter(Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta))
+    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
