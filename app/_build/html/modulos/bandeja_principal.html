@@ -1,20 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="es">
+<html lang="es" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Bandeja Principal del Juzgado/Grupo &#8212; documentación de tareas - </title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/conestack.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/translations.js"></script>
+    <title>Lista de Tareas &#8212; documentación de tareas - </title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5703f573" />
+    <link rel="stylesheet" type="text/css" href="../_static/conestack.css?v=4f897864" />
+    <script src="../_static/documentation_options.js?v=e2bb6099"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=d190bf04"></script>
     <link rel="index" title="Índice" href="../genindex.html" />
     <link rel="search" title="Búsqueda" href="../search.html" />
     <link rel="next" title="Calendario" href="calendario.html" />
@@ -83,7 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lista de Tareas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="calendario.html">Calendario</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
 <li class="toctree-l1"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a></li>
@@ -121,17 +118,18 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../referencia_api.html#documentacion-de-swagger">Documentación de Swagger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../referencia_api.html#autenticacion">Autenticación</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../referencia_api.html#endpoints">Endpoints</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="alertas.html#descripcion">Descripción:</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Bandeja Principal del Juzgado/Grupo</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#caracteristicas-principales">Características principales</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#funcionalidad">Funcionalidad</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lista de Tareas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#caracteristicas-y-funcionalidades">Características y Funcionalidades</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ejemplo-de-como-usarlo">Ejemplo de Cómo Usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notas">Notas</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="calendario.html">Calendario</a><ul>
@@ -193,7 +191,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../referencia_api.html">Referencia de la API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="alertas.html">Alertas</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lista de Tareas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="calendario.html">Calendario</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
 <li class="toctree-l2"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a></li>
@@ -220,44 +218,61 @@
     
       <div class="ps-lg-4 mt-3 cs-content">
         
-  <section id="bandeja-principal-del-juzgado-grupo">
-<h1>Bandeja Principal del Juzgado/Grupo<a class="headerlink" href="#bandeja-principal-del-juzgado-grupo" title="Permalink to this heading">#</a></h1>
-<p>La Bandeja Principal del Juzgado/Grupo es un componente central del Sistema de Gestión de Tareas, diseñado para proporcionar una visión general y gestión eficiente de las tareas asociadas a un juzgado o grupo de trabajo específico.</p>
-<section id="caracteristicas-principales">
-<h2>Características principales<a class="headerlink" href="#caracteristicas-principales" title="Permalink to this heading">#</a></h2>
+  <section id="lista-de-tareas">
+<h1>Lista de Tareas<a class="headerlink" href="#lista-de-tareas" title="Link to this heading">#</a></h1>
+<p>La funcionalidad de <strong>Lista de Tareas</strong> permite ver y gestionar las tareas de forma organizada y fácil de usar. Cada tarea se muestra en una tarjeta, con información detallada y opciones de acción. Esta herramienta es ideal para el seguimiento, administración y actualización de tareas dentro de un sistema de gestión.</p>
+<img alt="Vista de ejemplo de la lista de tareas" class="align-center" src="../_images/tarea_card.png" />
+<section id="caracteristicas-y-funcionalidades">
+<h2>Características y Funcionalidades<a class="headerlink" href="#caracteristicas-y-funcionalidades" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt><strong>1. Visualización Clara de Tareas</strong></dt><dd><ul class="simple">
+<li><p><strong>Título y Descripción</strong>: Cada tarea tiene un título que la identifica y una breve descripción para recordar el contenido o el propósito de la tarea.</p></li>
+<li><p><strong>Creación y Actualización</strong>: Muestra quién creó la tarea y cuándo fue actualizada por última vez.</p></li>
+<li><p><strong>Estado y Prioridad</strong>: La tarea indica si está activa o eliminada y tiene un indicador de prioridad (por ejemplo, urgente o normal).</p></li>
+</ul>
+</dd>
+<dt><strong>2. Progreso de la Tarea</strong></dt><dd><ul class="simple">
+<li><p>Una barra de progreso muestra cuánto falta para que la tarea llegue a su fecha de vencimiento.</p></li>
+<li><p>El progreso se calcula automáticamente en función de las fechas de inicio y fin de la tarea, de modo que se pueda hacer un seguimiento visual fácil.</p></li>
+</ul>
+</dd>
+<dt><strong>3. Opciones de Acción en Cada Tarea</strong></dt><dd><ul class="simple">
+<li><p><strong>Ver Tarea</strong>: Permite revisar todos los detalles de la tarea, ideal para tareas complejas o que requieren confirmación.</p></li>
+<li><p><strong>Editar Tarea</strong>: Si necesita hacer ajustes, como actualizar la prioridad o cambiar el estado de la tarea, esta opción está disponible para realizar esos cambios.</p></li>
+<li><p><strong>Eliminar Tarea</strong>: Cuando una tarea ya no es necesaria, puede eliminarse del sistema.</p></li>
+<li><p><strong>Reasignar Tarea</strong>: Si la tarea necesita ser transferida a otra persona o grupo, esta opción permite realizar el cambio.</p></li>
+<li><p><strong>Cambiar Estado</strong>: Permite actualizar el estado de la tarea (por ejemplo, de «pendiente» a «completada»).</p></li>
+</ul>
+</dd>
+<dt><strong>4. Gestión de Notas</strong></dt><dd><ul class="simple">
+<li><p><strong>Ver Notas</strong>: Cada tarea puede tener notas asociadas para un registro más detallado o para dejar comentarios.</p></li>
+<li><p><strong>Agregar Nota</strong>: Puede añadir una nota nueva a la tarea seleccionada para cualquier observación adicional o seguimiento necesario. Al hacer clic, se abre un formulario donde puede escribir la nota y guardarla.</p></li>
+</ul>
+</dd>
+<dt><strong>5. Navegación por Tareas</strong></dt><dd><ul class="simple">
+<li><p>Al final de la lista de tareas, encontrará controles para navegar entre páginas de tareas. Esto es útil cuando tiene muchas tareas y necesita desplazarse entre ellas.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="ejemplo-de-como-usarlo">
+<h2>Ejemplo de Cómo Usarlo<a class="headerlink" href="#ejemplo-de-como-usarlo" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p><strong>Listado de tareas</strong>:
-- Muestra una tabla con todas las tareas del Juzgado/Grupo de Trabajo.
-- Visualización simple de tareas pendientes, en proceso, finalizadas y asignadas.</p></li>
-<li><p><strong>Flexibilidad en la creación de grupos</strong>:
-- Los grupos pueden crearse por Juzgado, rol, u otras categorías según sea necesario.
-- Permite la creación de subgrupos, formando una estructura jerárquica (árbol de relaciones).
-- El Juzgado actúa como el Grupo Base por defecto.</p></li>
-<li><p><strong>Integración con el Sistema de Expedientes</strong>:
-- Visualización de tareas creadas automáticamente a partir de presentaciones de profesionales/agentes externos.</p></li>
-<li><p><strong>Asignación de tareas</strong>:
-- Posibilidad de asignar tareas a usuarios o grupos específicos según criterios de distribución.
-- Opción de autoasignación de tareas y envío a la bandeja personal de cada usuario.</p></li>
-<li><p><strong>Filtros avanzados</strong>:
-- Permite filtrar tareas por grupo, fecha, próximos vencimientos, prioridad, entre otros criterios.
-- Opción de ordenar por fecha, considerando filtros como urgentes/prioritarias independientemente de la fecha.</p></li>
-<li><p><strong>Indicadores de rendimiento</strong>:
-- Muestra tareas pendientes.
-- Indica nuevas tareas por día.
-- Presenta tareas realizadas por mes.</p></li>
-<li><p><strong>Sistema de alertas</strong>:
-- Indicadores intuitivos para tareas próximas a vencer o vencidas.</p></li>
-<li><p><strong>Creación rápida de tareas</strong>:
-- Incluye un componente para agregar nuevas tareas de forma ágil.</p></li>
-<li><p><strong>Administración flexible</strong>:
-- Gestión de grupos y permisos a través de uno o varios administradores.</p></li>
+<li><p><strong>Ver una Tarea</strong>:
+- Haga clic en el icono de «Ver» en la tarea que desea revisar. Esto abrirá todos los detalles de la tarea para que pueda ver toda la información asociada.</p></li>
+<li><p><strong>Editar una Tarea</strong>:
+- Si necesita cambiar detalles como la prioridad, haga clic en «Editar». Realice los cambios y guarde la tarea para actualizar la información.</p></li>
+<li><p><strong>Agregar una Nota</strong>:
+- Para añadir un comentario o detalle importante, haga clic en el botón de «Agregar Nota» en la tarea. Escriba el contenido de la nota y guarde para que quede registrado en la tarea.</p></li>
 </ol>
 </section>
-<section id="funcionalidad">
-<h2>Funcionalidad<a class="headerlink" href="#funcionalidad" title="Permalink to this heading">#</a></h2>
-<p>La Bandeja Principal actúa como el hub central para la gestión de tareas, ofreciendo una interfaz intuitiva y completa para supervisar y administrar el flujo de trabajo del juzgado o grupo. Facilita la distribución eficiente de tareas, el seguimiento del progreso y la identificación rápida de prioridades y cuellos de botella en el proceso.</p>
-<p>Esta herramienta es esencial para mantener una visión clara y actualizada de todas las actividades en curso, permitiendo una gestión más efectiva y una mejor coordinación entre los miembros del equipo o del juzgado. La capacidad de visualizar y filtrar tareas de diferentes estados (pendientes, en proceso, finalizadas, asignadas) proporciona una comprensión rápida del estado general del trabajo.</p>
-<p>La flexibilidad en la creación y gestión de grupos, junto con la posibilidad de establecer jerarquías, permite adaptar el sistema a las estructuras organizativas específicas de cada entidad judicial o administrativa. Esto, combinado con las potentes capacidades de filtrado y ordenación, hace que la Bandeja Principal sea una herramienta versátil y eficaz para la gestión de tareas en entornos judiciales complejos.</p>
+<section id="notas">
+<h2>Notas<a class="headerlink" href="#notas" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>La funcionalidad de <strong>Lista de Tareas</strong> está diseñada para ayudarle a gestionar el flujo de trabajo de manera organizada y clara, manteniendo un registro de tareas y sus detalles.</p></li>
+<li><p>La interfaz ajusta automáticamente la información para que sea fácil de leer en diferentes tamaños de pantalla, asegurando una buena experiencia de usuario en computadoras y dispositivos móviles.</p></li>
+</ul>
+<p>Con <strong>Lista de Tareas</strong>, puede administrar sus tareas de manera eficiente, realizar un seguimiento de su progreso y asegurarse de que todas las tareas estén actualizadas y bien documentadas.</p>
 </section>
 </section>
 
@@ -269,8 +284,9 @@
     <strong class="d-block h6 my-2 pb-2 border-bottom">On this page</strong>
     <nav id="TableOfContents">
       <ul>
-<li><a class="reference internal" href="#caracteristicas-principales">Características principales</a></li>
-<li><a class="reference internal" href="#funcionalidad">Funcionalidad</a></li>
+<li><a class="reference internal" href="#caracteristicas-y-funcionalidades">Características y Funcionalidades</a></li>
+<li><a class="reference internal" href="#ejemplo-de-como-usarlo">Ejemplo de Cómo Usarlo</a></li>
+<li><a class="reference internal" href="#notas">Notas</a></li>
 </ul>
 
     </nav>
@@ -291,10 +307,10 @@
   </li>
 </ul>
       <div class="container text-center text-muted pt-2 pb-2">
-          &#169; Derechos de autor 2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
+          &#169; Copyright 2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
       </div>
       <div class="container text-center text-muted pt-2 pb-2">
-        Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.0.
+        Creado usando <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
       </div>
   </footer>
 </div>

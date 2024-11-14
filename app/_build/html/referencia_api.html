@@ -1,20 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="es">
+<html lang="es" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Referencia de la API &#8212; documentación de tareas - </title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/conestack.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/translations.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5703f573" />
+    <link rel="stylesheet" type="text/css" href="_static/conestack.css?v=4f897864" />
+    <script src="_static/documentation_options.js?v=e2bb6099"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/translations.js?v=d190bf04"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
     <link rel="next" title="Alertas" href="modulos/alertas.html" />
@@ -83,7 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Referencia de la API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/alertas.html">Alertas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modulos/bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulos/bandeja_principal.html">Lista de Tareas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/calendario.html">Calendario</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/creacion_tarea.html">Creación de Tarea</a></li>
@@ -121,17 +118,18 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Referencia de la API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#documentacion-de-swagger">Documentación de Swagger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#autenticacion">Autenticación</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#endpoints">Endpoints</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/alertas.html">Alertas</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modulos/alertas.html#descripcion">Descripción:</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modulos/bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html#caracteristicas-principales">Características principales</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html#funcionalidad">Funcionalidad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulos/bandeja_principal.html">Lista de Tareas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html#caracteristicas-y-funcionalidades">Características y Funcionalidades</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html#ejemplo-de-como-usarlo">Ejemplo de Cómo Usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html#notas">Notas</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modulos/calendario.html">Calendario</a><ul>
@@ -193,7 +191,7 @@
 <li class="toctree-l2"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Referencia de la API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modulos/alertas.html">Alertas</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html">Bandeja Principal del Juzgado/Grupo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modulos/bandeja_principal.html">Lista de Tareas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modulos/calendario.html">Calendario</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modulos/contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modulos/creacion_tarea.html">Creación de Tarea</a></li>
@@ -221,88 +219,22 @@
       <div class="ps-lg-4 mt-3 cs-content">
         
   <section id="referencia-de-la-api">
-<h1>Referencia de la API<a class="headerlink" href="#referencia-de-la-api" title="Permalink to this heading">#</a></h1>
-<p>Esta sección proporciona información detallada sobre los endpoints de API disponibles en el sistema back-end de Tareas.</p>
+<h1>Referencia de la API<a class="headerlink" href="#referencia-de-la-api" title="Link to this heading">#</a></h1>
+<p>Esta sección proporciona una descripción general de la API para el sistema backend de Tareas. La documentación detallada de la API, que incluye todos los endpoints disponibles, formatos de solicitud y respuesta, y requisitos de autenticación, está disponible a través de nuestra interfaz de Swagger.</p>
+<section id="documentacion-de-swagger">
+<h2>Documentación de Swagger<a class="headerlink" href="#documentacion-de-swagger" title="Link to this heading">#</a></h2>
+<p>La referencia completa de la API es accesible a través de nuestra página de Swagger, donde puedes explorar y probar cada endpoint de manera interactiva. Swagger proporciona información actualizada sobre todos los endpoints, los parámetros requeridos y las estructuras de respuesta.</p>
+<ul class="simple">
+<li><p><strong>URL de Swagger en entorno de desarrollo:</strong>
+<code class="docutils literal notranslate"><span class="pre">https://dev-backend.tareas.pjm.gob.ar/docs</span></code></p></li>
+<li><p><strong>URL de Swagger en entorno productivo:</strong>
+<code class="docutils literal notranslate"><span class="pre">https://backend.tareas.pjm.gob.ar/docs</span></code></p></li>
+</ul>
+<p>Visita el enlace anterior para acceder a la información detallada de la API y probar los endpoints directamente.</p>
+</section>
 <section id="autenticacion">
-<h2>Autenticación<a class="headerlink" href="#autenticacion" title="Permalink to this heading">#</a></h2>
-<p>Todas las solicitudes de API requieren autenticación usando JWT (JSON Web Tokens).</p>
-<p>URL Base: <code class="docutils literal notranslate"><span class="pre">https://api.tareas.com/v1</span></code></p>
-</section>
-<section id="endpoints">
-<h2>Endpoints<a class="headerlink" href="#endpoints" title="Permalink to this heading">#</a></h2>
-<section id="tareas">
-<h3>Tareas<a class="headerlink" href="#tareas" title="Permalink to this heading">#</a></h3>
-<dl class="http get">
-<dt class="sig sig-object http" id="get--tasks">
-<span class="sig-name descname"><span class="pre">GET</span> </span><span class="sig-name descname"><span class="pre">/tasks</span></span><a class="headerlink" href="#get--tasks" title="Enlazar permanentemente con esta definición">#</a></dt>
-<dd><p>Recupera una lista de tareas.</p>
-<p><strong>Ejemplo de solicitud</strong>:</p>
-<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/tasks</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
-<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
-</pre></div>
-</div>
-<p><strong>Ejemplo de respuesta</strong>:</p>
-<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
-
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;tareas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Completar documentación del proyecto&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Escribir y revisar toda la documentación del proyecto&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en_progreso&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-30&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Implementar nueva característica&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Desarrollar y probar el nuevo panel de usuario&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;no_iniciado&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-07-15&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="http post">
-<dt class="sig sig-object http" id="post--tasks">
-<span class="sig-name descname"><span class="pre">POST</span> </span><span class="sig-name descname"><span class="pre">/tasks</span></span><a class="headerlink" href="#post--tasks" title="Enlazar permanentemente con esta definición">#</a></dt>
-<dd><p>Crea una nueva tarea.</p>
-<p><strong>Ejemplo de solicitud</strong>:</p>
-<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/tasks</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">api.tareas.com</span>
-<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;su_token_aqui&gt;</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
-
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar cambios de código&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar y aprobar solicitudes de extracción para el último sprint&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;no_iniciado&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-25&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p><strong>Ejemplo de respuesta</strong>:</p>
-<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">201</span> <span class="ne">Created</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
-
-<span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;titulo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar cambios de código&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;descripcion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Revisar y aprobar solicitudes de extracción para el último sprint&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;estado&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;no_iniciado&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;fecha_vencimiento&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-06-25&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<p>Para obtener información más detallada sobre otros endpoints y formatos de solicitud/respuesta, consulte la documentación completa de la API.</p>
-</section>
+<h2>Autenticación<a class="headerlink" href="#autenticacion" title="Link to this heading">#</a></h2>
+<p>Todas las solicitudes de API requieren autenticación usando JWT (JSON Web Tokens). Consulta la documentación de Swagger para obtener detalles sobre la autenticación y ejemplos de solicitudes.</p>
 </section>
 </section>
 
@@ -314,11 +246,8 @@
     <strong class="d-block h6 my-2 pb-2 border-bottom">On this page</strong>
     <nav id="TableOfContents">
       <ul>
+<li><a class="reference internal" href="#documentacion-de-swagger">Documentación de Swagger</a></li>
 <li><a class="reference internal" href="#autenticacion">Autenticación</a></li>
-<li><a class="reference internal" href="#endpoints">Endpoints</a><ul>
-<li><a class="reference internal" href="#tareas">Tareas</a></li>
-</ul>
-</li>
 </ul>
 
     </nav>
@@ -339,10 +268,10 @@
   </li>
 </ul>
       <div class="container text-center text-muted pt-2 pb-2">
-          &#169; Derechos de autor 2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
+          &#169; Copyright 2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
       </div>
       <div class="container text-center text-muted pt-2 pb-2">
-        Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.0.
+        Creado usando <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
       </div>
   </footer>
 </div>

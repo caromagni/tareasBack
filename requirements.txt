@@ -24,6 +24,7 @@ Jinja2==3.1.4
 MarkupSafe==2.1.5
 marshmallow==3.21.2
 packaging==24.0
+pillow==11.0.0
 psycopg2-binary==2.9.9
 pycparser==2.22
 Pygments==2.18.0
@@ -31,6 +32,7 @@ PyJWT==2.9.0
 requests==2.32.3
 six==1.16.0
 snowballstemmer==2.2.0
+Sphinx==8.0.2
 sphinxcontrib-applehelp==2.0.0
 sphinxcontrib-devhelp==2.0.0
 sphinxcontrib-htmlhelp==2.1.0
@@ -44,5 +46,8 @@ urllib3==2.2.2
 uWSGI==2.0.27
 webargs==8.4.0
 Werkzeug==3.0.3
+<<<<<<< HEAD
 Sphinx==8.0.2
 pika
+=======
+>>>>>>> main
