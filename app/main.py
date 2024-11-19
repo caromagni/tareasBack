@@ -18,7 +18,7 @@ from common.auditoria  import after_flush  # Importa el archivo que contiene el 
 from config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
-import threading
+#import threading
 from common.chk_messagges import chk_messagges
 
 

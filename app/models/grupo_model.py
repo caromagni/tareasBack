@@ -124,7 +124,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     print("#"*50)
     print("Path_name:", path_name)
     print("#"*50)
-    fecha_hasta = fecha_hasta + " 23:59:59"
+    #fecha_hasta = fecha_hasta + " 23:59:59"
     cursor=None
     session: scoped_session = current_app.session
     # Subconsulta recursiva
@@ -225,6 +225,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                     "fecha_creacion": grupo.fecha_creacion,
                     "id_user_actualizacion": grupo.id_user_actualizacion,
                     "id_user_asignado_default": grupo.id_user_asignado_default,
+                    "user_asignado_default": grupo.user_asignado_default,
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }
@@ -247,7 +248,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
 
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
-    fecha_hasta = fecha_hasta + " 23:59:59"
+    #fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 
@@ -265,7 +266,7 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
     
 
 def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
-    fecha_hasta = fecha_hasta + " 23:59:59"
+    #fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 

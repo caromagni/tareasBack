@@ -195,12 +195,24 @@ class GroupGetIn(Schema):
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
 
+class UsuarioDefaultOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
 class GroupOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
+    user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
