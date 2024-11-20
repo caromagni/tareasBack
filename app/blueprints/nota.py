@@ -201,6 +201,7 @@ def post_nota(json_data: dict):
 #################DELETE########################
 @nota_b.doc(description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
+@nota_b.output(NotaIdOut)
 def del_nota(id: str):
     try:
         res = delete_nota(id)
@@ -220,3 +221,5 @@ def del_nota(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    except Exception as e:
+        session.rollback()
