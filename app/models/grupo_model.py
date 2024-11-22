@@ -121,10 +121,14 @@ def get_grupo_by_id(id):
 
 
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
-    #print("#"*50)
-    #print("Path_name:", path_name)
-    #print("#"*50)
-    #fecha_hasta = fecha_hasta + " 23:59:59"
+    print ("Fecha desde:", fecha_desde)
+    print ("Fecha hasta:", fecha_hasta)
+    print("Tipo fecha desde:", type(fecha_desde))
+    print("Tipo fecha hasta:", type(fecha_hasta))
+
+    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+    #fecha_hasta = datetime.strftime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
+    
     cursor=None
     session: scoped_session = current_app.session
     # Subconsulta recursiva
@@ -192,21 +196,16 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         cursor=session.execute(subquery)
     
     query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    #print("Fecha desde:", fecha_desde)
-    #print("Fecha hasta:", fecha_hasta)
-    #print("Nombre:", nombre)
+ 
     if nombre is not "":
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
-    #print("Eliminado:", eliminado)
     if eliminado:
         query = query.filter(Grupo.eliminado==eliminado)
-    #print("Suspendido:", suspendido)
     if suspendido:
         query = query.filter(Grupo.suspendido==suspendido)    
 
     total = len(query.all())
-    #print("#"*50)
-    #print("Total de registros:", total)
+
     if cursor:
         for reg in cursor:
             #print(reg.path_name)
@@ -249,6 +248,10 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
+    
+    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+    #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
+    
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 
@@ -267,6 +270,9 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
 def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
+    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+    #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
+    
     session: scoped_session = current_app.session
     total= session.query(Grupo).count()
 

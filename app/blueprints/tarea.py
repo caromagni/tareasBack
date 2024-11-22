@@ -375,8 +375,11 @@ def get_tareas(query_data: dict):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta') 
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+ 
         res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
 
         data = {
@@ -451,8 +454,11 @@ def get_tareas_detalle(query_data: dict):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta') 
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+ 
         res,cant = get_all_tarea_detalle(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, id_tarea, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
 
         data = {

@@ -63,6 +63,7 @@ def get_grupo(query_data: dict):
         path_name=False
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
+        
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
         if(request.args.get('suspendido') is not None):
@@ -77,9 +78,10 @@ def get_grupo(query_data: dict):
             nombre=request.args.get('nombre')
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')  
-        
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
 
         res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         data = {
@@ -113,8 +115,11 @@ def get_grupo_detalle(query_data: dict):
             nombre=request.args.get('nombre')
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')  
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+ 
 
         res, cant=get_all_grupos_detalle(page,per_page, nombre, fecha_desde, fecha_hasta)
         
