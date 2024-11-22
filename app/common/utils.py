@@ -4,7 +4,7 @@ from flask import current_app
 
 def verifica_username(username):
     session: scoped_session = current_app.session
-    username = username.upper()
+    #username = username.upper()
     usuario = session.query(Usuario).filter(Usuario.username == username, Usuario.eliminado==False).first()
     if usuario is None:
         raise Exception("Usuario no encontrado: "+ username)

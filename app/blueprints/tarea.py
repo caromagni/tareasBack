@@ -100,12 +100,12 @@ def control_rol_usuario(token='', nombre_usuario='SIMPERIALE', rol='', url_api='
             print("No tiene permisos")
             return False
         else:
-            print("#"*50)
-            print("Roles de tareas:")
-            for permiso in query_rol:
-                print(f" Email: {permiso.email}, URL API: {permiso.url_api}")
+            #print("#"*50)
+            #print("Roles de tareas:")
+            #for permiso in query_rol:
+            #    print(f" Email: {permiso.email}, URL API: {permiso.url_api}")
             
-            print("#"*50)
+            #print("#"*50)
             return True
             
     
@@ -234,7 +234,7 @@ def get_subtipoTarea(query_data: dict):
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
 
-        print("id_tipo_tarea:",id_tipo_tarea)
+        #print("id_tipo_tarea:",id_tipo_tarea)
 
         res, cant = get_all_subtipo_tarea(page,per_page,id_tipo_tarea, eliminado)
         
@@ -514,7 +514,7 @@ def get_tarea_grupo(id_grupo:str):
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    
-        print("Usuarios asignados a tarea:", tarea_id)
+        #print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
         current_app.session.remove()
@@ -532,7 +532,7 @@ def post_usuario_tarea(json_data: dict):
     
         res, msg = insert_usuario_tarea(**json_data)
         if res is None:
-            print("Tarea ya asignada")
+            #print("Tarea ya asignada")
             result={
                     "valido":"fail",
                     "code": 800,
@@ -563,7 +563,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
         
         res = update_tarea(tarea_id, **json_data)
         if res is None:
-            print("No hay datos que modificar")  
+            #print("No hay datos que modificar")  
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -608,11 +608,11 @@ def post_tarea(json_data: dict):
 def del_tarea(id: str):
     try:
         res = delete_tarea(id)
-        print("res:",res)
+        #print("res:",res)
         if res is None:
            raise DataNotFound("Tarea no encontrada")
         else:
-            print("Tarea eliminada:", res)
+            #print("Tarea eliminada:", res)
             result={
                     "Msg":"Registro eliminado",
                     "Id tarea": id
