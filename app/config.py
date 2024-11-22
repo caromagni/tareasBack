@@ -31,7 +31,7 @@ class Config:
         },
         {
             'name': 'localhost',
-            'url': 'http://192.168.70.27:5005'
+            'url': 'http://172.17.0.2:5005'
         },
         
         {
