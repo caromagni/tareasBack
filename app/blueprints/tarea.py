@@ -3,7 +3,7 @@ from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, Tare
 from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut
 from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
 from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id
-from common.error_handling import DataError, DataNotFound, ValidationError
+from common.error_handling import DataError, DataNotFound, ValidationError, UnauthorizedError
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
@@ -25,10 +25,11 @@ def before_request():
         print("Token o api key no validos")
 
 ######################Control de acceso######################
-def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
+def control_rol_usuario(token='', nombre_usuario='SIMPERIALE', rol='', url_api=''):
     session: scoped_session = current_app.session
 
-    tiempo_vencimiento = timedelta(minutes=30)
+    #tiempo_vencimiento = timedelta(minutes=30)
+    tiempo_vencimiento = timedelta(days=360)
     query_usr = session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
     if query_usr is None:
         print("Usuario no encontrado")
@@ -99,7 +100,12 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
             print("No tiene permisos")
             return False
         else:
-            print("Roles de tareas:",query_rol)
+            #print("#"*50)
+            #print("Roles de tareas:")
+            #for permiso in query_rol:
+            #    print(f" Email: {permiso.email}, URL API: {permiso.url_api}")
+            
+            #print("#"*50)
             return True
             
     
@@ -228,7 +234,7 @@ def get_subtipoTarea(query_data: dict):
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
 
-        print("id_tipo_tarea:",id_tipo_tarea)
+        #print("id_tipo_tarea:",id_tipo_tarea)
 
         res, cant = get_all_subtipo_tarea(page,per_page,id_tipo_tarea, eliminado)
         
@@ -314,8 +320,8 @@ def del_subtipo_tarea(id: str):
         
 ################################TAREAS################################
 #@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@tarea_b.get('/tarea1')
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea con notas', summary='Consulta de tareas con notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.get('/tarea_notas')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountOut)
 def get_tareas(query_data: dict):
@@ -369,8 +375,11 @@ def get_tareas(query_data: dict):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta') 
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+ 
         res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
 
         data = {
@@ -392,13 +401,14 @@ def get_tareas(query_data: dict):
 @tarea_b.output(TareaCountAllOut)
 def get_tareas_detalle(query_data: dict):
     try:
+        print("ENTRANDO A GET TAREAS")
         ##########Variables de control de acceso####################
         token='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJsTVhjMjlEdmFtdEZhZ2tiUWoxQ2Fib1pqSk9OY1lxTE5teE1CWERIZmx3In0.eyJleHAiOjE3MjcyNjMzOTEsImlhdCI6MTcyNTk2OTA1OCwiYXV0aF90aW1lIjoxNzI1OTY3MzkxLCJqdGkiOiJhZDU5MzlhNS03NjkwLTQwNmUtYmZiMi1hNWM1OTMzZTg1MzciLCJpc3MiOiJodHRwczovL2Rldi1hdXRoLnBqbS5nb2IuYXIvYXV0aC9yZWFsbXMvZGV2b3BzIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6Ijg5MWFiOTA5LTMzNzQtNDU2YS04Y2U5LTdiZDJkZjExOWQwYSIsInR5cCI6IkJlYXJlciIsImF6cCI6InVzaGVyIiwibm9uY2UiOiI2MGE5ZGRlZS01ZGY3LTQxNjYtYjk3Ny0zMTBhZDk1MWI3NmIiLCJzZXNzaW9uX3N0YXRlIjoiYTFiMDA2NWQtMzhiOC00YTFmLTk2YzAtMTg0NmU0MzliY2VjIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJ1c2hlciI6eyJyb2xlcyI6WyJhZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsInNpZCI6ImExYjAwNjVkLTM4YjgtNGExZi05NmMwLTE4NDZlNDM5YmNlYyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IlNpbHZpYSBTLiBJbXBlcmlhbGUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzaW1wZXJpYWxlIiwiZ2l2ZW5fbmFtZSI6IlNpbHZpYSBTLiIsImZhbWlseV9uYW1lIjoiSW1wZXJpYWxlIiwiZW1haWwiOiJzaW1wZXJpYWxlQG1haWwuanVzLm1lbmRvemEuZ292LmFyIn0.OnfYhSdrZfz7bL6r1sy3-6DCTeFH8G7VesMbGWh4XGCiFM2IuqpXldrjlhKWI8ahRTKAJEdvXlBn8ht5JtGY1y-ee8RbeVrxtmjmmBHJt-nejXNflhsoXcF_20r3rMyfvM210vtFaUy26YZi7ttIBS6mQaql4Y_DPgL_wAMVoa431ThaDw3Kijcl7nJQ40fBeti0YgiwS3KKvEamf8E-CbX1gCUNoZX_pyP4dWSh9kduNh_K0QU4uqyvVzwyt8_jikcPxWmHQ9SHh31M5_31b6uEgSXx7QqKECs-VzH4GnkdZB3TwRb7fnj0D4jSuSvuUp5Wk_lPcrdNMDX4RxA84w'
         nombre_usuario='simperiale@mail.jus.mendoza.gov.ar'
         url_api='get/tarea'
         rol='administrador'
-        #accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
-        accede = True
+        accede = control_rol_usuario(token, nombre_usuario, rol, url_api)
+        #accede = True
         if accede is False:
             raise DataError(800, "No tiene permisos para acceder a la API")
         #############################################################
@@ -406,6 +416,7 @@ def get_tareas_detalle(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
         titulo=""
+        label=""
         id_expediente=None
         id_actuacion=None
         prioridad=0
@@ -417,6 +428,9 @@ def get_tareas_detalle(query_data: dict):
         id_tarea=None
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
+        fecha_fin_desde=None
+        fecha_fin_hasta=None
+        labels=None
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -428,8 +442,10 @@ def get_tareas_detalle(query_data: dict):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
             id_grupo=request.args.get('id_grupo')      
-        if(request.args.get('titulo') is not None):
+        if(request.args.get('titulo') is not ''):
             titulo=request.args.get('titulo')
+        if(request.args.get('label') is not ''):
+            label=request.args.get('label')
         if(request.args.get('id_tipo_tarea') is not None):
             id_tipo_tarea=request.args.get('id_tipo_tarea') 
         if(request.args.get('id_expediente') is not None):
@@ -444,9 +460,22 @@ def get_tareas_detalle(query_data: dict):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
+            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta') 
-        res,cant = get_all_tarea_detalle(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, id_tarea, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
+            fecha_hasta=request.args.get('fecha_hasta')
+            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+        if(request.args.get('fecha_fin_desde') is not None):
+            fecha_fin_desde=request.args.get('fecha_fin_desde')
+            fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        if(request.args.get('fecha_fin_hasta') is not None):
+            fecha_fin_hasta=request.args.get('fecha_fin_hasta')
+            fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+        if(request.args.get('labels') is not None):
+            labels=request.args.get('labels')
+            labels = labels.split(",")
+            print("Labels:",labels)
+
+        res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado)    
 
         data = {
                 "count": cant,
@@ -507,7 +536,7 @@ def get_tarea_grupo(id_grupo:str):
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    
-        print("Usuarios asignados a tarea:", tarea_id)
+        #print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
         current_app.session.remove()
@@ -525,7 +554,7 @@ def post_usuario_tarea(json_data: dict):
     
         res, msg = insert_usuario_tarea(**json_data)
         if res is None:
-            print("Tarea ya asignada")
+            #print("Tarea ya asignada")
             result={
                     "valido":"fail",
                     "code": 800,
@@ -556,7 +585,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
         
         res = update_tarea(tarea_id, **json_data)
         if res is None:
-            print("No hay datos que modificar")  
+            #print("No hay datos que modificar")  
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -601,11 +630,11 @@ def post_tarea(json_data: dict):
 def del_tarea(id: str):
     try:
         res = delete_tarea(id)
-        print("res:",res)
+        #print("res:",res)
         if res is None:
            raise DataNotFound("Tarea no encontrada")
         else:
-            print("Tarea eliminada:", res)
+            #print("Tarea eliminada:", res)
             result={
                     "Msg":"Registro eliminado",
                     "Id tarea": id

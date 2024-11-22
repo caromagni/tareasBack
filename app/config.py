@@ -6,6 +6,9 @@ os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')
 class Config:
     # General configuration
+    SLEEP=30
+    BORRAR = os.getenv('BORRAR')
+    print("BORRAR: ",BORRAR)
     AUTH_URL=os.getenv('AUTH_URL')
     REALM=os.getenv('REALM')
     # Database configuration
@@ -17,7 +20,7 @@ class Config:
 
     #SQLALCHEMY_DATABASE_URI = os.getenv("SETTINGS_CONECTION")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SHOW_SQLALCHEMY_LOG_MESSAGES = True
+    SHOW_SQLALCHEMY_LOG_MESSAGES = False
 
     ERROR_404_HELP = False
 
@@ -28,7 +31,7 @@ class Config:
         },
         {
             'name': 'localhost',
-            'url': 'http://192.168.70.27:5005'
+            'url': 'http://172.17.0.2:5005'
         },
         
         {
@@ -39,6 +42,7 @@ class Config:
     DESCRIPTION='APIs Sistema de Tareas'
     TITLE='APIs Tareas'
     MAX_ITEMS_PER_RESPONSE=os.getenv('MAX_ITEMS_PER_RESPONSE')
+    
 
     # JWT DECODE CONFIG
     #JWT_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" + 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkc4U80tR0RofRTdcUm07Nv/aK4dZqv7oZAARl7tv0Y6lUHkdkgAhoXMm3Q7+HPOwy8df7zm2bGhTAZyl65o9W9CNoQlEQCmP/DoeizLoRcrNsaLAYXOCrERUw4oqgo4j1N7hboPtdGJJ7bSyngWoRkFT1HRxm0yHnDA8XYhR6DUG5JOeHX6BTUWCopAOGzWQwruG9WB+MCHv9FQnD7TjnukodIuTCOFCeY9yJeqTcct3p8tb6hZmxsOahZvmXc3kXCvO95uJE2Hzl3l4bVVhWvLqXgg+hwQ3GyGPMqEqQx+n3R8fCVQhkRVz1V83mJ0I9YVPMUUcCE0xuI/sbWEZFQIDAQAB' + "\n-----END PUBLIC KEY-----"

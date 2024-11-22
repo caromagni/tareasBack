@@ -100,6 +100,22 @@ class Nomenclador(Base):
     turnos_pass = Column(String(100))
     turnos_des = Column(String(25))
 
+class Usuario(Base):
+    __tablename__ = 'usuario'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    nombre = Column(String)
+    apellido = Column(String)
+    id_persona_ext = Column(UUID)
+    eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
+    username = Column(String)
+    dni = Column(String)
+    email = Column(String)
+
 class TipoActuacionExt(Base):
     __tablename__ = 'tipo_actuacion_ext'
     __table_args__ = {'schema': 'tareas'}
@@ -141,6 +157,7 @@ class ExpedienteExt(Base):
     id = Column(UUID, primary_key=True)
     id_ext = Column(UUID)
     caratula = Column(String)
+    nro_expte= Column(String)
     estado = Column(String)
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
@@ -152,6 +169,7 @@ class Grupo(Base):
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
     id_user_asignado_default = Column(UUID)
+    id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String, nullable=False)
     descripcion = Column(String)
@@ -162,6 +180,7 @@ class Grupo(Base):
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
+    user_asignado_default= relationship('Usuario')
 
 
 class HerarquiaGrupoGrupo(Base):
@@ -267,21 +286,7 @@ class SubtipoTarea(Base):
 
     tipo_tarea = relationship('TipoTarea')
 
-class Usuario(Base):
-    __tablename__ = 'usuario'
-    __table_args__ = {'schema': 'tareas'}
 
-    id = Column(UUID, primary_key=True)
-    fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
-    nombre = Column(String)
-    apellido = Column(String)
-    id_persona_ext = Column(UUID)
-    eliminado  = Column(Boolean, default=False)
-    suspendido = Column(Boolean, default=False)
-    username = Column(String)
-    dni = Column(String)
-    email = Column(String)
 
 
 class AutoAccionAsignacion(Base):

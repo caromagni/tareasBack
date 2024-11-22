@@ -102,6 +102,7 @@ class ExpedienteOut(Schema):
     id = String()
     id_ext = String()
     caratula = String()
+    nro_expte = String()
     estado = String()
 ###############Listas####################
 class ListUsuario(Schema):
@@ -195,12 +196,24 @@ class GroupGetIn(Schema):
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
 
+class UsuarioDefaultOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
 class GroupOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
+    user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
@@ -398,6 +411,7 @@ class TareaIn(Schema):
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
     caratula_expediente = String()
+    nro_expte = String()
     nombre_actuacion= String()    
     id_tipo_tarea = String(required=True)
     id_subtipo_tarea = String()
@@ -493,15 +507,21 @@ class TareaOut(Schema):
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
-  
+class LabelIdIn(Schema):
+    id = String()  
 class TareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
     id_tarea = String()
+    id_usuario_asignado= String()
     titulo = String(default="")
+    #label = String(default="")
+    labels = String(metadata={"id_label": "ids separados por comas"})
     id_tipo_tarea = String()
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
+    fecha_fin_desde = String(validate=validate_fecha)
+    fecha_fin_hasta = String(validate=validate_fecha)
     id_expediente = String()
     id_actuacion = String()
     prioridad = Integer()
