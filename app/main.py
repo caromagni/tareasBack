@@ -56,9 +56,11 @@ def create_app():
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
+    app.config['SHOW_SQLALCHEMY_LOG_MESSAGES'] = Config.SHOW_SQLALCHEMY_LOG_MESSAGES
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
 
     # Initialize the SQLAlchemy engine and session
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False)
     Base.metadata.create_all(engine)
     Session = scoped_session(sessionmaker(bind=engine))
     

@@ -18,6 +18,7 @@ def verify_token():
     
     if token_encabezado:
         try:
+            print("###########Token a decodificar############")
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
             print("token:",token)
