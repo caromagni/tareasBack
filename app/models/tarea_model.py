@@ -918,13 +918,16 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     if labels:
         print("labels:", labels)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
-                ).filter(LabelXTarea.id_label.in_(labels))    
+                ).filter(LabelXTarea.id_label.in_(labels)
+                ).distinct()    
 
     # Get total count of tasks matching the filter
     total = query.count()
     
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
+    for tarea in res_tareas:
+        print(tarea.id, "-", tarea.titulo)
 
     # Process each task in paginated results
     results = []
