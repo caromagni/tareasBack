@@ -231,8 +231,6 @@ class GroupTareaOut(Schema):
     fecha_asignacion = String()
 
 
-
-
 class UsuarioGroupIdOut(Schema):
     id = String()
     fecha_actualizacion = String()

@@ -788,22 +788,26 @@ def get_tarea_by_id(id):
 
 def get_tarea_grupo(username=None, page=1, per_page=10):
     session: scoped_session = current_app.session
-
+    
     if username is not None:
         id_user = verifica_username(username)
         if id_user is None:
             raise Exception("Usuario no encontrado")
-    
+    #id_user = 'f9799cd5-aad3-4339-ac6e-62544e3e64f1'
     # Obtener los grupos del usuario
-    query_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id_user).all()
+    query_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id_user, UsuarioGrupo.eliminado==False).all()
     ids_grupos = [row.id_grupo for row in query_grupo]
 
     # Si el usuario no pertenece a ningún grupo, filtrar por tareas asignadas al usuario
     if not ids_grupos:
+        usuario_alias = aliased(Usuario)
         print("Usuario no pertenece a ningún grupo")
         query = (
             session.query(
                 Tarea,
+                usuario_alias.id.label("usuario_id"),
+                usuario_alias.nombre.label("usuario_nombre"),
+                usuario_alias.apellido.label("usuario_apellido"),
                 Nota.id.label("nota_id"),
                 Nota.nota.label("nota"),
                 Nota.id_tipo_nota.label("nota_tipo_id"),
@@ -812,20 +816,32 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
                 Nota.fecha_creacion.label("nota_fecha_creacion"),
                 Nota.id_user_creacion.label("nota_user_creacion"),
                 Nota.id_user_actualizacion.label("nota_user_actualizacion"),
-                TareaAsignadaUsuario.id_usuario,
-                TareaAsignadaUsuario.eliminado.label("reasignada_usuario"),
+                TareaAsignadaUsuario.fecha_asignacion.label("fecha_asignacion"),
+                TareaAsignadaUsuario.eliminado.label("asignada_usuario")
             )
             .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
+            .join(usuario_alias, TareaAsignadaUsuario.id_usuario == usuario_alias.id)
             .outerjoin(Nota, (Tarea.id == Nota.id_tarea) & (Nota.eliminado == False))  # Notas opcionales
-            .filter(TareaAsignadaUsuario.id_usuario == id_user)
+            .filter(TareaAsignadaUsuario.id_usuario==id_user)
             .order_by(desc(Tarea.fecha_creacion))
         )
-        total = query.count()
+        for row in query:
+            print(row)
+
+        total_query = (
+            session.query(func.count(Tarea.id))
+            .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
+            .filter(TareaAsignadaUsuario.id_usuario==id_user)
+        )
+        total = total_query.scalar()
+
+        # Paginación
         res_tareas = query.offset((page - 1) * per_page).limit(per_page).all()
+
     else:
         # Si el usuario pertenece a grupos, filtrar por tareas asociadas a esos grupos
-        grupo_alias = aliased(Grupo)
         usuario_alias = aliased(Usuario)
+        grupo_alias = aliased(Grupo)
 
         query = (
             session.query(
@@ -842,7 +858,9 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
                 Nota.titulo.label("nota_titulo"),
                 Nota.fecha_creacion.label("nota_fecha_creacion"),
                 Nota.id_user_creacion.label("nota_user_creacion"),
-                Nota.id_user_actualizacion.label("nota_user_actualizacion")
+                Nota.id_user_actualizacion.label("nota_user_actualizacion"),
+                TareaXGrupo.eliminado.label("asignada_grupo"),
+                TareaAsignadaUsuario.eliminado.label("asignada_usuario")
             )
             .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
             .join(grupo_alias, TareaXGrupo.id_grupo == grupo_alias.id)
@@ -852,6 +870,12 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
             .filter(TareaXGrupo.id_grupo.in_(ids_grupos))
             .order_by(desc(Tarea.fecha_creacion))
         )
+
+        for row in query:
+            print(row)
+            print("asignada_grupo:", row.asignada_grupo)
+            print("asignada_usuario:", row.asignada_usuario)
+            print("-------------------------------------------------")
 
         # Calcular el total de tareas
         total_query = (
@@ -871,8 +895,9 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
     for (
         tarea,
         grupo_id, grupo_nombre,
-        usuario_id, usuario_nombre, usuario_apellido,
-        nota_id, nota, nota_tipo_id, nota_tipo, nota_titulo, nota_fecha_creacion, nota_user_creacion, nota_user_actualizacion
+        usuario_id, usuario_nombre, usuario_apellido, 
+        nota_id, nota, nota_tipo_id, nota_tipo, nota_titulo, nota_fecha_creacion, nota_user_creacion, nota_user_actualizacion,
+        asignada_usuario, asignada_grupo
     ) in res_tareas:
         # Agrupar información de la tarea
         if tarea.id not in tareas_agrupadas:
@@ -909,13 +934,13 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
         # Añadir información de grupos
         if grupo_id and grupo_nombre:
             tareas_agrupadas[tarea.id]["grupos"].append(
-                {"id": grupo_id, "nombre": grupo_nombre}
+                {"id": grupo_id, "nombre": grupo_nombre, "asignada": not asignada_grupo}
             )
         
         # Añadir información de usuarios
         if usuario_id and usuario_nombre:
             tareas_agrupadas[tarea.id]["usuarios"].append(
-                {"id": usuario_id, "nombre": usuario_nombre, "apellido": usuario_apellido}
+                {"id": usuario_id, "nombre": usuario_nombre, "apellido": usuario_apellido, "asignada": not asignada_usuario}
             )
 
         # Añadir información de notas
