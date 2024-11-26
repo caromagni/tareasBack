@@ -59,9 +59,11 @@ def hash_api_key(api_key):
 # Verify the API key later
 def verify_api_key(api_key_provided=None, authorized_system=None):
     if not api_key_provided:
-        raise HTTPException(status_code=200, detail=searchError('err-auth-55'))
+        raise HTTPError(status_code=200, detail=searchError('err-auth-54'))
+        #raise HTTPException(status_code=200, detail=searchError('err-auth-55'))
     if not authorized_system:
-        raise HTTPException(status_code=200, detail=searchError('err-auth-56'))
+        raise HTTPError(status_code=200, detail=searchError('err-auth-56'))
+        #raise HTTPException(status_code=200, detail=searchError('err-auth-56'))
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
     file_path = 'api_keys.json'
@@ -78,8 +80,6 @@ def verify_api_key(api_key_provided=None, authorized_system=None):
     if stored_hashed_api_key == 'NOT_FOUND':
         print("API Key not found")
         return False
-    print("Stored API Key: ", stored_hashed_api_key)
-    print("Provided API Key: ", api_key_provided)
     #convert stored_api_key to bytes
     stored_api_key = base64.b64decode(stored_hashed_api_key)
     return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)

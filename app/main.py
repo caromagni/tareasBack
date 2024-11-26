@@ -18,7 +18,7 @@ from common.auditoria  import after_flush  # Importa el archivo que contiene el 
 from config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
-#import threading
+import threading
 from common.chk_messagges import chk_messagges
 
 
@@ -58,6 +58,13 @@ def create_app():
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
     app.config['SHOW_SQLALCHEMY_LOG_MESSAGES'] = Config.SHOW_SQLALCHEMY_LOG_MESSAGES
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
+
+    #################RabbitMQ#################
+    app.config['RABBITMQ_USER'] = Config.RABBITMQ_USER
+    app.config['RABBITMQ_PASSWORD'] = Config.RABBITMQ_PASSWORD
+    app.config['RABBITMQ_HOST'] = Config.RABBITMQ_HOST
+    app.config['RABBITMQ_PORT'] = Config.RABBITMQ_PORT
+    app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
 
     # Initialize the SQLAlchemy engine and session
     engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False)
@@ -110,10 +117,10 @@ def create_app():
     # Register custom error handlers
     register_error_handlers(app)
     
-     ############### CODIGO PARA LANZAR THREADS
-    """   thread = threading.Thread(target=chk_messagges())
-    thread.daemon = True
-    thread.start() """
+     ############### CODIGO PARA LANZAR THREADS ################
+    #thread = threading.Thread(target=chk_messagges())
+    #thread.daemon = True
+    #thread.start()
 
     return app
 

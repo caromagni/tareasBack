@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
 from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut
 from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
-from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id
+from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id, get_tarea_grupo
 from common.error_handling import DataError, DataNotFound, ValidationError, UnauthorizedError
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
@@ -14,18 +14,28 @@ from common.usher import get_roles
 from common.auth import verificar_header
 import uuid
 import json
+from flask import g
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
+global username 
 
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    if not verificar_header():
+    username = verificar_header()
+    if username is None:
+    #if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")
+    if username is 'api-key':
+        print("API KEY")
+        g.username = None
+    else:
+        g.username = username
+        print("Username before:",g.username)    
 
 ######################Control de acceso######################
-def control_rol_usuario(token='', nombre_usuario='SIMPERIALE', rol='', url_api=''):
+def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
     session: scoped_session = current_app.session
 
     #tiempo_vencimiento = timedelta(minutes=30)
@@ -504,19 +514,23 @@ def get_tarea(id_tarea:str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err) 
-    
-@tarea_b.doc(description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea_grupo/<string:id_grupo>')
-#@tarea_b.output(TareaxGrupoIdOut(many=True))
+
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.get('/tarea_grupo/<string:id_grupo>')
+@tarea_b.get('/tarea_grupo')
 @tarea_b.output(TareaCountAllOut)
-def get_tarea_grupo(id_grupo:str):
+#def get_tarea_grupo(id_grupo:str):
+def get_tareas_grupo():    
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
-
-        res, cant = get_tarea_grupo_by_id(id_grupo, page, per_page) 
-        
+        username = g.get('username')
+        print("Tarea grupoo - username", username)
+        #control_rol_usuario('',username, '',"get/tarea_grupo")
+        #get_tarea_grupo
+        res, cant = get_tarea_grupo_by_id(username, page, per_page) 
+        #get_tarea_grupo_by_id
         data = {
                 "count": cant,
                 "data": TareaAllOut().dump(res, many=True)

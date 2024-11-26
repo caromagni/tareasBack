@@ -54,3 +54,12 @@ class Config:
     JWT_ALGORITHM = "RS256"
     JWT_DECODE_AUDIENCE = os.getenv("AUDIENCE")
     JWT_IDENTITY_CLAIM = "jti"
+
+    # RabbitMQ configuration
+    RABBITMQ_USER = os.getenv('RABBITMQ_USER')
+    RABBITMQ_PASSWORD = os.getenv('RABBITMQ_PASSWORD')
+    RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
+    RABBITMQ_PORT = os.getenv('RABBITMQ_PORT')
+    RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
+
+    
