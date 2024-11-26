@@ -45,12 +45,14 @@ def verificar_header():
         if token_payload is None and x_api_key is None:
             #raise UnauthorizedError("Token o api-key no validos")
             print("Token o api key no validos")
+            return None
        
         if token_payload is not None:            
             nombre_usuario=token_payload['preferred_username']
+            email=token_payload['email']
             print("###########Token valido############")
             print("nombre_usuario:",nombre_usuario)
-            return True
+            return email
        
         if x_api_key is not None:
             if x_api_system is None:
@@ -58,4 +60,4 @@ def verificar_header():
             if not verify_api_key(x_api_key, x_api_system):
                 raise UnauthorizedError("api-key no valida")
             else:
-                return True    
+                return "api_key"    
