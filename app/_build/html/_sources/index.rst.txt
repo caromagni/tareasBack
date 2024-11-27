@@ -10,7 +10,8 @@ Documentación de Tareas
    referencia_api
    /modulos/alertas
    /modulos/bandeja_principal
-   /modulos/calendario
+   /modulos/estado_tareas
+   /modulos/plazos
    /modulos/contenido_multimedia
    /modulos/creacion_tarea
    /modulos/grupos
@@ -21,7 +22,7 @@ Documentación de Tareas
    /modulos/tareas_programadas
    /modulos/tareas_recurrentes
    /modulos/visibilidad_externa
-   loindex
+ 
 
 Índices y tablas
 ================

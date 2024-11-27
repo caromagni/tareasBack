@@ -10,3 +10,5 @@ make html
 find _build -type f -exec sed -i 's/ <span>conestack<\/span>/ <span>Tareas SCJ<\/span>/g' {} +
 
 echo "Build completed and replacements made."
+
+. start.sh
