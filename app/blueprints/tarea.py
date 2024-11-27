@@ -620,8 +620,10 @@ def post_tarea(json_data: dict):
         print("#"*50)
         print("Inserta tarea")
         print(json_data)
+        username = g.get('username')
+        print("Usuario tarea.py:", username)
         print("#"*50)
-        res = insert_tarea(**json_data)
+        res = insert_tarea(username, **json_data)
         if res is None:
             result = {
                     "valido":"fail",

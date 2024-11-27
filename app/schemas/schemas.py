@@ -109,7 +109,7 @@ class ListUsuario(Schema):
     id_usuario = String()
 
 class ListGrupo(Schema):
-    id_grupo = String()    
+    id_grupo = String(required=True)    
 
 class ListUsrGrupo(Schema):
     asignado_default = Boolean()  
@@ -415,7 +415,7 @@ class TareaIn(Schema):
     id_subtipo_tarea = String()
     eliminable = Boolean()
     id_user_actualizacion = String()
-    fecha_inicio = String(validate=validate_fecha)
+    fecha_inicio = String(required=True, validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))

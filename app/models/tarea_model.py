@@ -17,7 +17,8 @@ def es_habil(fecha):
         return True    
     
 def calcular_fecha_vencimiento(fecha, plazo):
-    fecha_vencimiento = fecha
+    print("calcula fecha vencimiento:", fecha, "-", plazo)
+    fecha_vencimiento = datetime.strptime(fecha, '%d/%m/%Y')
     dias_agregados = 0
     while dias_agregados < plazo:
         fecha_vencimiento = fecha_vencimiento + timedelta(days=1)
@@ -27,13 +28,13 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
     ##############Validaciones################
     #print("##############Validaciones################")
     id_grupo=None
     id_usuario_asignado=None
-
+    print("Username tareas:",username)
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
@@ -95,9 +96,10 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
         fecha_inicio = datetime.now().date()
 
     if plazo>0:
+        print("Calcula plazos")
         query_inhabilidad = session.query(Inhabilidad).all()
         if len(query_inhabilidad)>0:  
-            fecha_inicio = fecha_inicio + " 23:59:59"                                 
+            #fecha_inicio = fecha_inicio + " 23:59:59"     
             query_inhabilidad = session.query(Inhabilidad).filter(Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio).all()
             if query_inhabilidad is not None:
                 for row in query_inhabilidad:
@@ -161,29 +163,32 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
             session.add(tareaxgrupo) 
 
     else:
-        #Asigna el grupo del usuario que crea la tarea por defecto
-        
-        if id_user_actualizacion is not None:
+        raise Exception ("Debe ingresar al menos un grupo")
+    #Asigna el grupo del usuario que crea la tarea por defecto
+    
+        """ if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
             id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
+            #usr_grupo = verifica_grupo_id(id_user_actualizacion)
         else:
             raise Exception("Debe ingresar username o id_user_actualizacion") 
 
-        if id_grupo is not None:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
-            if existe_grupo is not None:
-                nuevoID_tareaxgrupo=uuid.uuid4()
-                tareaxgrupo= TareaXGrupo(
-                    id=nuevoID_tareaxgrupo,
-                    id_grupo=id_grupo,
-                    id_tarea=nuevoID_tarea,
-                    id_user_actualizacion=id_user_actualizacion,
-                    fecha_asignacion=datetime.now(),
-                    fecha_actualizacion=datetime.now()
-                )
-                session.add(tareaxgrupo)
 
-                id_usuario_asignado = existe_grupo.id_user_asignado_default           
+            if id_grupo is not None:
+                existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
+                if existe_grupo is not None:
+                    nuevoID_tareaxgrupo=uuid.uuid4()
+                    tareaxgrupo= TareaXGrupo(
+                        id=nuevoID_tareaxgrupo,
+                        id_grupo=id_grupo,
+                        id_tarea=nuevoID_tarea,
+                        id_user_actualizacion=id_user_actualizacion,
+                        fecha_asignacion=datetime.now(),
+                        fecha_actualizacion=datetime.now()
+                    )
+                    session.add(tareaxgrupo) """
+
+                           
 
     if usuario is not None:
         for user in usuario:
