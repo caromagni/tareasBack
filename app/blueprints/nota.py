@@ -162,8 +162,12 @@ def get_notas(query_data: dict):
         current_app.session.remove()
         return data
     
+    except ValidationError as err:
+        print(f"Validation error: {err}")
+        return {"error": str(err)}, 400
     except Exception as err:
-        raise ValidationError(err) 
+        print(f"Unexpected error: {err}")
+        raise ValidationError(err)
 
 
 @nota_b.doc(description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -214,6 +218,7 @@ def post_nota(json_data: dict):
 #################DELETE########################
 @nota_b.doc(description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
+@nota_b.output(NotaIdOut)
 def del_nota(id: str):
     try:
         username = g.username
@@ -234,3 +239,5 @@ def del_nota(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    except Exception as e:
+        session.rollback()

@@ -69,15 +69,10 @@ def delete_tipo_nota(username=None, id=None):
 
 def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_creacion=None, id_user_actualizacion=None, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
-    
-    if username is not None:
-        id_user_actualizacion = verifica_username(username)
-    else:
-        raise ValidationError("Usuario no ingresado")    
+    try:
+        nuevoID_nota=uuid.uuid4()
 
-    nuevoID_nota=uuid.uuid4()
-
-    nueva_nota = Nota(
+        nueva_nota = Nota(
         eliminado=eliminado,
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now(),
@@ -90,10 +85,19 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
         titulo=titulo,
     )
 
-    session.add(nueva_nota)
+        session.add(nueva_nota)
        
-    session.commit()
-    return nueva_nota
+        session.commit()
+        return nueva_nota
+    except Exception as e:
+        session.rollback()
+        print(f"Error inserting nota: {e}")
+        raise
+    # session: scoped_session = current_app.session
+
+    
+
+    
 
 def update_nota(id='', **kwargs):
     session: scoped_session = current_app.session
@@ -156,7 +160,7 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
     # elif isinstance(fecha_hasta, str):
     #     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
 
-    query = session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query = session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
     # filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
     print('consulta por parámetros de notas')
     print("id tarea:",id_tarea)
@@ -217,3 +221,4 @@ def delete_nota(username=None, id_nota=None):
     else:
         print("Nota no encontrada")
         return None
+   

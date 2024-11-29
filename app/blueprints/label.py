@@ -185,11 +185,11 @@ def get_label_tarea(id_tarea:str):
         raise ValidationError(err) 
          
 
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.post('/label_tarea')
+@label_b.doc(description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.put('/label_tarea')
 @label_b.input(LabelXTareaIn)
 @label_b.output(LabelXTareaOut)
-def post_label_tarea(json_data: dict):
+def put_label_tarea(json_data: dict):
     try:
         print("#"*50)
         print(json_data)
@@ -211,18 +211,16 @@ def post_label_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
     
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.put('/label_tarea_del/<string:id_label>')
+@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.put('/label_tarea_del/')
 @label_b.input(LabelXTareaPatchIn)
 @label_b.output(LabelXTareaIdOut)
-def delete_label_tarea(id_label: str, json_data: dict):
+def delete_label_tarea(json_data: dict):
     try:
         print("##"*50)
-        print(id_label)
         print(json_data)
         print("#"*50)
-        username = g.username
-        res = delete_label_tarea_model(username, id_label, **json_data)
+        res = delete_label_tarea_model(**json_data)
         print("res:",res)   
         if res is None:
             result = {

@@ -902,13 +902,14 @@ class TipoNotaCountOut(Schema):
     
 class NotaIn(Schema):    
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=15, error="El campo debe ser mayor a 3 y menor a 15 caracteres"),
         validate_char
     ])
-    nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
+    nota = String(validate=validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
     # id_user_creacion = String(required=True)
+    id_user_creacion = String(required=True)
     id_tarea = String()
     id_user_actualizacion = String()    
 
@@ -1084,19 +1085,16 @@ class LabelCountOut(Schema):
 ############## Labels x Tarea####################  
 
 class LabelXTareaIn(Schema):  
-    activa= Boolean()
-    id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
-    id_user_actualizacion = String()
-    fecha_actualizacion = String(validate=validate_fecha)
-
+    id_tarea = String(required=True)
+    id_user_actualizacion = String(required=True)
+    # fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaPatchIn(Schema):
-    activa= Boolean()
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String()
-    fecha_actualizacion = String(validate=validate_fecha)
+    id_user_actualizacion = String(required=True)
+    # fecha_actualizacion = String(validate=validate_fecha)
 
     
 class LabelXTareaOut(Schema):
