@@ -42,7 +42,7 @@
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-#. export_creds.sh
+. export_creds.sh
 #export variables
 echo "exporting variables - corre sops"
 CUSTOM_ENVS=$(sops -d ../customization/local.env.enc)
