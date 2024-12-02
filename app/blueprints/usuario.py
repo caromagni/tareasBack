@@ -10,14 +10,23 @@ from common.error_handling import ValidationError, DataError, DataNotFound
 from common.auth import verificar_header
 from datetime import datetime
 import requests
+from flask import g
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    if not verificar_header():
+    username = verificar_header()
+    if username is None:
+    #if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")
+    if username is 'api-key':
+        print("API KEY")
+        g.username = None
+    else:
+        g.username = username
+        print("Username before:",g.username)
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -44,15 +53,15 @@ def get_grupos_by_usr(id_usuario: str):
         raise ValidationError(err) 
     
 #####################POST#########################
-@usuario_b.doc(description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(UsuarioIn)
 #@usuario_b.output(UsuarioOut)
 def post_usuario(json_data: dict):
     try:
         print('inserta usuario')
-        res=""
-        res = insert_usuario(**json_data)
+        user_actualizacion=g.username        
+        res = insert_usuario(user_actualizacion, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -68,14 +77,15 @@ def post_usuario(json_data: dict):
         raise ValidationError(err)
     
 #################UPDATE####################
-@usuario_b.doc(description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
 @usuario_b.input(UsuarioInPatch)
 #@usuario_b.output(UsuarioOut)
 def patch_usuario(usuario_id: str, json_data: dict):
     try:
-        
-        res = update_usuario(usuario_id, **json_data)
+        username=g.username
+        print("Username usuario.py:",username)
+        res = update_usuario(usuario_id, username, **json_data)
         if res is None:
             print("No hay datos que modificar")  
             result={
@@ -216,12 +226,13 @@ def get_usuarios_detalle(query_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 ######################DELETE######################
-@usuario_b.doc(description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
 #@groups_b.output(GroupOut)
 def del_usuario(id: str):
     try:
-        res = delete_usuario(id)
+        username=g.username
+        res = delete_usuario(username, id)
         if res is None:
             raise DataNotFound("Usuario no encontrado")
             

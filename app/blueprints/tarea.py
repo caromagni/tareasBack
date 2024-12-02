@@ -613,7 +613,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
 
-@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+#@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.post('/tarea')
 @tarea_b.input(TareaIn)
 @tarea_b.output(TareaOut)
@@ -622,11 +622,10 @@ def post_tarea(json_data: dict):
         print("#"*50)
         print("Inserta tarea")
         print(json_data)
-        username = g.get('username')
-        #username="cristiandiaz@jus.mendoza.gov.ar"
-        print("Usuario tarea.py:", username)
-        print("#"*50)
-        res = insert_tarea(username, **json_data)
+        #username = g.get('username')
+        res = insert_tarea(**json_data)
+        #res = insert_tarea(username, **json_data)    
+
         if res is None:
             result = {
                     "valido":"fail",

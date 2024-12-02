@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime
+from common.utils import *
 
 from flask import current_app
 
@@ -227,8 +228,17 @@ def get_grupos_by_usuario(id):
     return res
 
 
-def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
+def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
     session: scoped_session = current_app.session
+
+    if user_actualizacion is not None:
+        id_user_actualizacion = verifica_username(user_actualizacion)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)
     nuevo_usuario = Usuario(
@@ -236,7 +246,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
         nombre=nombre,
         apellido=apellido,
         dni = dni,
-        username = username.upper(),
+        username = username,
         email = email.lower(),
         id_persona_ext=id_persona_ext,
         id_user_actualizacion=id_user_actualizacion,
@@ -267,8 +277,17 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
     return nuevo_usuario
 
 
-def update_usuario(id='', **kwargs):
+def update_usuario(id='',username=None, **kwargs):
     session: scoped_session = current_app.session
+    print("Update usuario")
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
    
     if usuario is None:
@@ -289,8 +308,8 @@ def update_usuario(id='', **kwargs):
         usuario.email = kwargs['email'].lower()           
     if 'id_persona_ext' in kwargs:
         usuario.id_persona_ext = kwargs['id_persona_ext']
-    if 'id_user_actualizacion' in kwargs:
-        usuario.id_user_actualizacion = kwargs['id_user_actualizacion']
+    #if 'id_user_actualizacion' in kwargs:
+        usuario.id_user_actualizacion = id_user_actualizacion
     if 'suspendido' in kwargs:
         usuario.suspendido = kwargs['suspendido']
     usuario.fecha_actualizacion = datetime.now()
@@ -319,7 +338,7 @@ def update_usuario(id='', **kwargs):
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
                     id_usuario=id,
-                    id_user_actualizacion= kwargs['id_user_actualizacion'],
+                    id_user_actualizacion= id_user_actualizacion,
                     fecha_actualizacion=datetime.now()
                 )
                 session.add(nuevo_usuario_grupo)
@@ -329,7 +348,7 @@ def update_usuario(id='', **kwargs):
                 if group['asignado_default'] == True:
                     existe_grupo.id_user_asignado_default = id
                     existe_grupo.fecha_actualizacion = datetime.now() 
-                    existe_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+                    existe_grupo.id_user_actualizacion = id_user_actualizacion
 
 
     if 'id_grupo' in kwargs:      
@@ -340,7 +359,7 @@ def update_usuario(id='', **kwargs):
                 id=nuevoID,
                 id_grupo=kwargs['id_grupo'],
                 id_usuario=id,
-                id_user_actualizacion= kwargs['id_user_actualizacion'],
+                id_user_actualizacion= id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
             )
             session.add(nuevo_usuario_grupo)
@@ -348,14 +367,24 @@ def update_usuario(id='', **kwargs):
     session.commit()
     return usuario
 
-def delete_usuario(id):
+def delete_usuario(username=None, id=None):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
     if usuario is None:
         return None
     
     usuario.eliminado = True
     usuario.fecha_actualizacion = datetime.now()
+    usuario.id_user_actualizacion = id_user_actualizacion
     session.commit()
     return usuario
 
