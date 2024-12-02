@@ -49,7 +49,8 @@ class Config:
     #JWT_ALGORITHM = "RS256"
     #JWT_DECODE_AUDIENCE = "pyapis"
     #JWT_IDENTITY_CLAIM = "jti"
-    
+    print(AUTH_URL)
+
     JWT_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" + get_public_key(AUTH_URL,REALM) + "\n-----END PUBLIC KEY-----"
     JWT_ALGORITHM = "RS256"
     JWT_DECODE_AUDIENCE = os.getenv("AUDIENCE")
