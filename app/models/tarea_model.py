@@ -31,7 +31,7 @@ def calcular_fecha_vencimiento(fecha, plazo):
 def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
     ##############Validaciones################
-    #print("##############Validaciones################")
+    print("##############Validaciones Insert Tarea################")
     id_grupo=None
     id_usuario_asignado=None
     if username is not None:

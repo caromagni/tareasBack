@@ -416,7 +416,7 @@ class TareaIn(Schema):
     id_tipo_tarea = String(required=True)
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String()
+    #id_user_actualizacion = String()
     fecha_inicio = String(required=True, validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -572,12 +572,12 @@ class UsuarioIn(Schema):
         validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
+    #id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
+    username = String(validate=[validate.Length(min=4, max=200, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
     
 
