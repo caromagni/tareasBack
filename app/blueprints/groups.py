@@ -8,6 +8,7 @@ from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, Grou
 from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
+from flask import g
 
 
 auth = HTTPTokenAuth()
@@ -17,25 +18,27 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    #Conecta con rabbitmq
-    """ data={
-        "msg":"Conectado a rabbitmq",
-        "fecha":datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    }
-    enviar_a_rabbitmq(data) """
- 
-    if not verificar_header():
+    username = verificar_header()
+    if username is None:
+    #if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")  
+        print("Token o api key no validos")
+    if username is 'api-key':
+        print("API KEY")
+        g.username = None
+    else:
+        g.username = username
+        print("Username before:",g.username)
 ####################################################
 
-@groups_b.doc(description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
 @groups_b.output(GroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
+        #username=g.username
         res = update_grupo(id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")

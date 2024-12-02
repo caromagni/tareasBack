@@ -404,11 +404,14 @@ def get_grupos_herarquia_labels():
 
 
 def update_grupo(id='', **kwargs):
+    print("Actualizando grupo con id:", id)
     session: scoped_session = current_app.session
     grupo = session.query(Grupo).filter(Grupo.id == id).first()
-
     if grupo is None:
         return None
+    
+    if 'id_user_asignado_default' in kwargs:
+        print("Id user asignado default:", kwargs['id_user_asignado_default'])
     
     if grupo.eliminado:
         raise Exception("Grupo eliminado")
@@ -440,15 +443,18 @@ def update_grupo(id='', **kwargs):
     #print("Antes del if")
 
     if 'id_user_asignado_default' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario asignado default no encontrado")
-        
-        usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==kwargs['id_user_asignado_default'], UsuarioGrupo.eliminado==False).first()
-        if usuario_grupo is None:
-            raise Exception("Usuario no asignado al grupo")
+        if(kwargs['id_user_asignado_default']==""):
+             grupo.id_user_asignado_default = None
+        else:     
+            usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()
+            if usuario is None:
+                raise Exception("Usuario asignado default no encontrado")
+            
+            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==kwargs['id_user_asignado_default'], UsuarioGrupo.eliminado==False).first()
+            if usuario_grupo is None:
+                raise Exception("Usuario por defecto no asignado al grupo")
 
-        grupo.id_user_asignado_default = kwargs['id_user_asignado_default']
+            grupo.id_user_asignado_default = kwargs['id_user_asignado_default']
 
     # Siempre actualizar la fecha de actualización
     grupo.fecha_actualizacion = datetime.now()
