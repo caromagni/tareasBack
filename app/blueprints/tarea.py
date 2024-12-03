@@ -634,7 +634,8 @@ def post_tarea(json_data: dict):
                     "error_description": "No se pudo insertar la tarea"
                 }
             res = MsgErrorOut().dump(result)
-        
+        print("*"*50)
+        print("Tarea insertada:", TareaOut().dump(res))
         return TareaOut().dump(res)
     
     except Exception as err:

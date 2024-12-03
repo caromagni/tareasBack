@@ -709,15 +709,10 @@ def get_tarea_by_id(id):
     
     results = []
    
- 
-
     if res is not None:
-        #Consulto los usuarios asignados a la tarea
-        #print("Tarea encontrada:", res)
         res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).order_by(TareaAsignadaUsuario.eliminado).all()
         
-        #Consulto los grupos asignados a la tarea
         res_grupos = session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                   ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== res.id).order_by(TareaXGrupo.eliminado).all()
 
@@ -731,15 +726,16 @@ def get_tarea_by_id(id):
             notas=[]
             reasignada_usuario=False
             reasignada_grupo=False
+            grupos_usr=[]
             for row in res_usuarios:
-                grupos_usr=[]
-                usuario_grupo = session.query(UsuarioGrupo.id_grupo, Grupo.nombre).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario==row.id, UsuarioGrupo.eliminado==False).first()
+                usuario_grupo = session.query(UsuarioGrupo.id_grupo, Grupo.nombre).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario==row.id, UsuarioGrupo.eliminado==False).all()
                 if usuario_grupo is not None:
-                    grupo_usr = {
-                        "id": usuario_grupo.id_grupo,
-                        "nombre": usuario_grupo.nombre
-                    }
-                    grupos_usr.append(grupo_usr)
+                    for usr_gr in usuario_grupo:
+                        grupo_usr = {
+                           "id": usr_gr.id_grupo,
+                           "nombre": usr_gr.nombre
+                        }
+                        grupos_usr.append(grupo_usr)    
 
                 usuario = {
                     "id": row.id,
