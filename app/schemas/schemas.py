@@ -179,7 +179,7 @@ class GroupPatchIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String()
-    id_user_asignado_default= String()
+    id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
     codigo_nomenclador = String(validate=[
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),

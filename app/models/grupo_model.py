@@ -402,16 +402,11 @@ def get_grupos_herarquia_labels():
     return res                                                                 
 
 
-
 def update_grupo(id='', **kwargs):
-    print("Actualizando grupo con id:", id)
     session: scoped_session = current_app.session
     grupo = session.query(Grupo).filter(Grupo.id == id).first()
     if grupo is None:
         return None
-    
-    if 'id_user_asignado_default' in kwargs:
-        print("Id user asignado default:", kwargs['id_user_asignado_default'])
     
     if grupo.eliminado:
         raise Exception("Grupo eliminado")
@@ -443,7 +438,8 @@ def update_grupo(id='', **kwargs):
     #print("Antes del if")
 
     if 'id_user_asignado_default' in kwargs:
-        if(kwargs['id_user_asignado_default']==""):
+        print("--Id user asignado default:", kwargs['id_user_asignado_default'])
+        if(kwargs['id_user_asignado_default']==None):
              grupo.id_user_asignado_default = None
         else:     
             usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()

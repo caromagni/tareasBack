@@ -168,7 +168,7 @@ class Grupo(Base):
     __table_args__ = {'schema': 'tareas'}
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
-    id_user_asignado_default = Column(UUID)
+    #id_user_asignado_default = Column(UUID)
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String, nullable=False)
