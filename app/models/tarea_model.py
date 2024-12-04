@@ -12,6 +12,24 @@ from flask import current_app
 from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from common.utils import *
 
+def nombre_estado(estado):
+    if estado == 1:
+        return "Pendiente"
+    if estado == 2:
+        return "En proceso"
+    if estado == 3:
+        return "Finalizada"
+    if estado == 4:
+        return "Cancelada"
+
+def nombre_prioridad(prioridad):
+    if prioridad == 1:
+        return "Alta"
+    if prioridad == 2:
+        return "Media"
+    if prioridad == 3:
+        return "Baja"
+
 def es_habil(fecha):
     if fecha.weekday() >= 5:
         return True    
@@ -784,8 +802,10 @@ def get_tarea_by_id(id):
             "fecha_inicio": res.fecha_inicio,
             "fecha_fin": res.fecha_fin,
             "plazo": res.plazo,
-            "prioridad": res.prioridad,
-            "estado": res.estado,
+            #"prioridad": res.prioridad,
+            #"estado": res.estado,
+            "prioridad": {'id': res.prioridad, 'descripcion': nombre_prioridad(res.prioridad)},
+            "estado": {'id': res.estado, 'descripcion': nombre_estado(res.estado)},
             "id_tipo_tarea": res.id_tipo_tarea,
             "id_subtipo_tarea": res.id_subtipo_tarea,
             "tipo_tarea": res.tipo_tarea,
@@ -1275,8 +1295,10 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "fecha_inicio": res.fecha_inicio,
             "fecha_fin": res.fecha_fin,
             "plazo": res.plazo,
-            "prioridad": res.prioridad,
-            "estado": res.estado,
+            #"prioridad": res.prioridad,
+            #"estado": res.estado,
+            "prioridad": {'id': res.prioridad, 'descripcion': nombre_prioridad(res.prioridad)},
+            "estado": {'id': res.estado, 'descripcion': nombre_estado(res.estado)},
             "id_tipo_tarea": res.id_tipo_tarea,
             "tipo_tarea": res.tipo_tarea,
             "id_subtipo_tarea": res.id_subtipo_tarea,

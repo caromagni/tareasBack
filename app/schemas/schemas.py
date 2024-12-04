@@ -77,6 +77,14 @@ class HeaderSchema(Schema):
 class PageIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
+###############Prioridad y Estado####################
+class EstadoSchema(Schema):
+    id = fields.Integer()
+    descripcion = fields.String()
+
+class PrioridadSchema(Schema):
+    id = fields.Integer()
+    descripcion = fields.String()    
 ###############Nomenclador####################
 class NomencladorOut(Schema):
     nomenclador = String()
@@ -402,7 +410,7 @@ class UsuarioOut(Schema):
         return data
 
 class TareaIn(Schema):
-    prioridad = Integer(required=True, validate=[
+    prioridad = Integer(required=True, metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String()
     titulo = String(required=True, validate=[
@@ -438,7 +446,7 @@ class TareaIn(Schema):
         validate_char
     ]) """
 class TareaPatchIn(Schema):
-    prioridad = Integer(validate=[
+    prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String()
     titulo = String(validate=[
@@ -534,9 +542,10 @@ class TareaGetIn(Schema):
     fecha_fin_hasta = String(validate=validate_fecha)
     id_expediente = String()
     id_actuacion = String()
-    prioridad = Integer()
+    prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"})
     eliminado = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
+  
     
 ####################Grupos - Tareas - Usuarios ####################
 class GroupAllOut(Schema):
@@ -658,9 +667,14 @@ class UsuarioCountOut(Schema):
 class TareaAllOut(Schema):
     id = String()
     #id_grupo = String()
-    prioridad = Integer()
+    #prioridad = Integer()
     #estado = Integer()
-    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
+    prioridad = fields.Nested(PrioridadSchema, metadata={
+        "description": "1 (alta), 2 (media), 3 (baja)"
+    })
+    estado = fields.Nested(EstadoSchema, metadata={
+        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    })
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
@@ -764,8 +778,12 @@ class TareaIdOut(Schema):
     id_grupo = String()
     grupo = Nested(GroupOut, only=("id", "nombre"))
     prioridad = Integer()
-    estado = Integer()
-    id_actuacion = String()
+    prioridad = fields.Nested(PrioridadSchema, metadata={
+        "description": "1 (alta), 2 (media), 3 (baja)"
+    })
+    estado = fields.Nested(EstadoSchema, metadata={
+        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    })
     id_expediente = String()
     caratula_expediente = String()
     id_tipo_tarea = String()
