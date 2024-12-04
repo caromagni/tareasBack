@@ -6,6 +6,7 @@ from common.rabbitmq_utils import *
 def chk_messagges():
     tiempo=30
     if uwsgi.worker_id() == 1:
+             print("---- RUNING CHECK MESSAGES ----")
              recibir_de_rabbitmq()   
              sleep(tiempo)  
       
