@@ -6,10 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Sops
-*.gpg
-.gpg
-
 # Distribution / packaging
 .Python
 env/
@@ -142,5 +138,3 @@ dmypy.json
 .env.*
 export_creds.sh
 start.sh
-#instala_sops.sh
-
