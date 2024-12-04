@@ -249,6 +249,7 @@ class UsuarioGOut(Schema):
     id = String()
     nombre = String()
     apellido = String()
+    activo = Boolean()
 
 class HerarquiaGroupOut(Schema):
     id = String()
@@ -378,7 +379,7 @@ class GroupIdOut(Schema):
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
-    usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
+    usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))
     tareas = List(Nested(TareaxGroupOut))     
 
 class UsuarioOut(Schema):

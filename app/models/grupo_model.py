@@ -36,7 +36,8 @@ def get_grupo_by_id(id):
                                     UsuarioGrupo.id_usuario,
                                     Usuario.id,
                                     Usuario.nombre,
-                                    Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
+                                    Usuario.apellido,
+                                    UsuarioGrupo.eliminado).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
         
         
         res_tarea = session.query(Tarea.id, 
@@ -76,7 +77,8 @@ def get_grupo_by_id(id):
                 usuario = {
                     "id": row.id,
                     "nombre": row.nombre,
-                    "apellido": row.apellido
+                    "apellido": row.apellido,
+                    "activo": not(row.eliminado)
                 }
                 usuarios.append(usuario)
 
@@ -472,7 +474,13 @@ def update_grupo(id='', **kwargs):
             herarquia.fecha_actualizacion = datetime.now()
 
     if 'usuario' in kwargs:
-        #print("Actualizando usuarios")
+        #elimino los usuarios existentes para ese grupo
+        usuario_grupo=session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == id)
+        for usr in usuario_grupo:
+            usr.eliminado=True
+            usr.fecha_actualizacion=datetime.now()
+            usr.id_user_actualizacion=kwargs['id_user_actualizacion']
+            
         for usuario in kwargs['usuario']:
             encuentra_usuario = session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
             if encuentra_usuario is None:
@@ -480,8 +488,10 @@ def update_grupo(id='', **kwargs):
             if encuentra_usuario.eliminado:
                 raise Exception("Usuario eliminado:" + usuario['id_usuario'])
             
-            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==usuario['id_usuario'], UsuarioGrupo.eliminado==False).first()
+            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==usuario['id_usuario']).first()
+            
             if usuario_grupo is None:
+                #Agrego el usuario al grupo
                 nuevo_usuario_grupo = UsuarioGrupo(
                     id=uuid.uuid4(),
                     id_grupo=id,
@@ -490,6 +500,12 @@ def update_grupo(id='', **kwargs):
                     id_user_actualizacion=kwargs['id_user_actualizacion']
                 )
                 session.add(nuevo_usuario_grupo)
+            else:
+                #encuentra el usuario y lo reactiva 
+                usuario_grupo.eliminado = False
+                usuario_grupo.fecha_actualizacion = datetime.now()
+                usuario_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']    
+                
 
     session.commit()
     return grupo

@@ -1203,15 +1203,15 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
-    if label:
+    """ if label:
         print("label:", label)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).join(Label, Label.id == LabelXTarea.id_label
-                ).filter(Label.nombre.ilike(f"%{label}%"))
+                ).filter(Label.nombre.ilike(f"%{label}%")) """
     if labels:
         print("labels:", labels)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
-                ).filter(LabelXTarea.id_label.in_(labels)
+                ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()    
 
     # Get total count of tasks matching the filter

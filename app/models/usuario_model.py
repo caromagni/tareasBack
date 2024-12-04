@@ -322,6 +322,7 @@ def update_usuario(id='',username=None, **kwargs):
         for grupo in grupos_usuarios:
             grupo.eliminado=True
             grupo.fecha_actualizacion=datetime.now() 
+            
 
         #controlo que el grupo exista y lo asocio al usuario
         for group in kwargs['grupo']:
