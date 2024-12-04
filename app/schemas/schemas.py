@@ -906,7 +906,7 @@ class NotaIn(Schema):
         validate.Length(min=3, max=15, error="El campo debe ser mayor a 3 y menor a 15 caracteres"),
         validate_char
     ])
-    nota = String(validate=validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres")) 
+    nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
     # id_user_creacion = String(required=True)
@@ -917,7 +917,7 @@ class NotaIn(Schema):
 
 class NotaPatchIn(Schema):
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
