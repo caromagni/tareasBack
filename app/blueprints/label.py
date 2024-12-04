@@ -217,10 +217,11 @@ def put_label_tarea(json_data: dict):
 @label_b.output(LabelXTareaIdOut)
 def delete_label_tarea(json_data: dict):
     try:
+        username = g.username
         print("##"*50)
         print(json_data)
         print("#"*50)
-        res = delete_label_tarea_model(**json_data)
+        res = delete_label_tarea_model(username, **json_data)
         print("res:",res)   
         if res is None:
             result = {

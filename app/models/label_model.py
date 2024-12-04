@@ -209,8 +209,16 @@ def get_active_labels(id_grupo):
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea (ids_labels, id_tarea, id_user_actualizacion=None):
+def insert_label_tarea (username=None, **kwargs):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+    else:
+        raise ValidationError("Usuario no ingresado") 
+    
+    id_tarea = kwargs['id_tarea']
+    ids_labels = kwargs['ids_labels']
 
     labelsTarea = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
     # labelsActivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
@@ -256,8 +264,8 @@ def insert_label_tarea (ids_labels, id_tarea, id_user_actualizacion=None):
                 id_label=id_label,
                 id_tarea=id_tarea,
                 activa=True,
-                fecha_creacion=fecha_actualizacion,
-                id_user_creacion=id_user_actualizacion,
+                # fecha_creacion=fecha_actualizacion,
+                # id_user_creacion=id_user_actualizacion,
                 fecha_actualizacion=fecha_actualizacion,
                 id_user_actualizacion=id_user_actualizacion
             )

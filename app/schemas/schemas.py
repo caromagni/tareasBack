@@ -1085,13 +1085,13 @@ class LabelCountOut(Schema):
 class LabelXTareaIn(Schema):  
     ids_labels = List(String(),required=True, many=True)
     id_tarea = String(required=True)
-    id_user_actualizacion = String(required=True)
+    # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaPatchIn(Schema):
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
+    # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
 
     
