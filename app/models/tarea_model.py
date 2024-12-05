@@ -1194,7 +1194,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None):
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
 
     session: scoped_session = current_app.session
   
@@ -1223,6 +1223,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
+    if tiene_notas is not None:
+        query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
     """ if label:
         print("label:", label)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
@@ -1320,6 +1322,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "fecha_eliminacion": res.fecha_eliminacion,
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
+            "tiene_notas": res.tiene_notas_desnz,
             "grupos": grupos,
             "usuarios": usuarios,
             "notas": [],  # Keeping notes as an empty list, as in original code
@@ -1334,7 +1337,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 
 
 
-def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
+def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
     session: scoped_session = current_app.session
@@ -1373,7 +1376,12 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
 
+    if tiene_notas is not None:
+        query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
+
+    print ("Tiene notas:", tiene_notas)
     total = query.count()
+    print("Total de tareas:", total)
 
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     
@@ -1418,7 +1426,8 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                         "fecha_creacion": row.fecha_creacion, 
                         "id_user_creacion": row.id_user_creacion,
                         "user_creacion": row.user_creacion,
-                        "id_user_actualizacion": row.id_user_actualizacion
+                        "id_user_actualizacion": row.id_user_actualizacion,
+                        "eliminado": row.eliminado
                     }
                     notas.append(nota)  
 
