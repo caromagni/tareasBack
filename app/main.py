@@ -118,9 +118,9 @@ def create_app():
     register_error_handlers(app)
     
      ############### CODIGO PARA LANZAR THREADS ################
-    #thread = threading.Thread(target=chk_messagges())
-    #thread.daemon = True
-    #thread.start()
+    """ thread = threading.Thread(target=chk_messagges())
+    thread.daemon = True
+    thread.start() """
 
     return app
 
