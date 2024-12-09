@@ -222,6 +222,7 @@ def post_nota(json_data: dict):
 def del_nota(id: str):
     try:
         username = g.username
+        username = 'simperiale@mail.jus.mendoza.gov.ar'
         res = delete_nota(username,id)
         print("res:",res)
         if res is None:

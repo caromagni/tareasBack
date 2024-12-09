@@ -44,10 +44,10 @@
 
 . export_creds.sh
 #export variables
-echo "exporting variables - corre sops"
-CUSTOM_ENVS=$(sops -d ../customization/local.env.enc)
-echo $CUSTOM_ENVS
-export $CUSTOM_ENVS
+
+#CUSTOM_ENVS=$(sops -d ../customization/local.env.enc)
+#echo $CUSTOM_ENVS
+#export $CUSTOM_ENVS
 #start app
 # flask --app main.py run --host 0.0.0.0 --port 5000 --reload
 uwsgi --wsgi-file main.py --ini ../uwsgi.dev-localhost.ini
