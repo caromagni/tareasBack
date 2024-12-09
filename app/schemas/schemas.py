@@ -491,6 +491,7 @@ class NotaTareaOut(Schema):
     user_creacion = Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     id_user_actualizacion = String()
     tipo_nota = Nested(TipoNotaTareaOut, only=("id", "nombre")) 
+    eliminado = Boolean()
 
 class TareaOut(Schema):
     id = String()
@@ -545,6 +546,7 @@ class TareaGetIn(Schema):
     id_actuacion = String()
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"})
     eliminado = Boolean()
+    tiene_notas = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
   
     
@@ -700,6 +702,7 @@ class TareaAllOut(Schema):
     usuarios = List(Nested(UsuarioTareaOut))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
+    tiene_notas = Boolean()
 
 class TareaCountAllOut(Schema):
     count = Integer()

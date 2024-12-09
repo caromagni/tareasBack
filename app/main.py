@@ -67,7 +67,7 @@ def create_app():
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
 
     # Initialize the SQLAlchemy engine and session
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False)
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False, pool_pre_ping=True)
     Base.metadata.create_all(engine)
     Session = scoped_session(sessionmaker(bind=engine))
     
@@ -118,9 +118,9 @@ def create_app():
     register_error_handlers(app)
     
      ############### CODIGO PARA LANZAR THREADS ################
-    #thread = threading.Thread(target=chk_messagges())
-    #thread.daemon = True
-    #thread.start()
+    """ thread = threading.Thread(target=chk_messagges())
+    thread.daemon = True
+    thread.start() """
 
     return app
 

@@ -360,6 +360,7 @@ class Tarea(Base):
     plazo = Column(Integer)
     eliminado = Column(Boolean, default=False)
     estado = Column(Integer)
+    tiene_notas_desnz = Column(Boolean, default=False)
 
     tipo_tarea = relationship('TipoTarea')
     subtipo_tarea = relationship('SubtipoTarea')

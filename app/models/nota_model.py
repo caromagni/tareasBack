@@ -6,7 +6,7 @@ from common.utils import *
 from common.error_handling import ValidationError
 from flask import current_app
 
-from .alch_model import Nota, TipoNota, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
+from .alch_model import Nota, TipoNota, Tarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
 
 ##########################  TIPO NOTAS #############################################
 
@@ -70,8 +70,23 @@ def delete_tipo_nota(username=None, id=None):
 def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
 
+    notas = session.query(Nota).filter(Nota.eliminado==False).all()
+    if notas is not None:
+        for n in notas:
+            tareasnota = session.query(Tarea).filter(Tarea.id == n.id_tarea, Tarea.eliminado==False).first()
+            if tareasnota is not None:
+                tareasnota.tiene_notas_desnz=True
+            
+    tarea_nota = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
+
     if username is not None:
         id_user_creacion = verifica_username(username)
+
+    tarea_nota = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
+
+    if tarea_nota is None:
+        raise ValidationError("Tarea no encontrada")
+
     try:
         nuevoID_nota=uuid.uuid4()
 
@@ -89,9 +104,15 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
     )
 
         session.add(nueva_nota)
-       
+
+        
+        tarea_nota.fecha_actualizacion=datetime.now()
+        tarea_nota.id_user_actualizacion=id_user_creacion
+        tarea_nota.tiene_notas_desnz=True
+
         session.commit()
         return nueva_nota
+    
     except Exception as e:
         session.rollback()
         print(f"Error inserting nota: {e}")
@@ -213,17 +234,40 @@ def delete_nota(username=None, id_nota=None):
         raise ValidationError("Usuario no ingresado")  
     
     nota = session.query(Nota).filter(Nota.id == id_nota, Nota.eliminado==False).first()
-    if nota is not None:     
-        if(nota.id_user_creacion != id_user_actualizacion):
-            return "Usuario no autorizado para eliminar la nota" 
-        else:        
-            nota.eliminado=True
-            nota.fecha_eliminacion=datetime.now()
-            nota.fecha_actualizacion=datetime.now()
-            nota.id_user_actualizacion=id_user_actualizacion
-            session.commit()
-            return nota    
-    else:
-        print("Nota no encontrada??"+id_nota)
-        return None
+
+    if nota is None:
+        raise ValidationError("Nota no encontrada")
+    
+      
+    if(nota.id_user_creacion != id_user_actualizacion):
+        raise ValidationError("Usuario no autorizado para eliminar la nota")
+
+    #print("Tarea de nota a eliminar:", nota.id_tarea)
+            
+    nota.eliminado=True
+    nota.fecha_eliminacion=datetime.now()
+    nota.fecha_actualizacion=datetime.now()
+    nota.id_user_actualizacion=id_user_actualizacion
+
+    tarea_nota = session.query(Tarea, Nota.id).join(Nota, Tarea.id==nota.id_tarea).filter(Tarea.eliminado==False, Nota.eliminado==False, Nota.id is not id_nota, Tarea.id==nota.id_tarea, Nota.id_tarea==nota.id_tarea).all()
+    print("#"*50)
+    #print("Tarea nota:", len(tarea_nota))
+    #print("Tarea id:", nota.id_tarea)
+    if len(tarea_nota)==0:
+        tarea = session.query(Tarea).filter(Tarea.id==nota.id_tarea, Tarea.eliminado==False).first()
+        tarea.tiene_notas_desnz=False
+    """ else:
+        print("Tarea tiene más notas")
+        for t in tarea_nota:
+            #print("Tarea con notas:", t.id)
+            print("Nota a elimnar:", id_nota)
+            print("Id de nota sin eliminar:", t.id) """
+        
+    
+    
+
+    
+    session.commit()
+    return nota    
+    
    
