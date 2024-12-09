@@ -1343,7 +1343,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     session: scoped_session = current_app.session
     
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-    if titulo != '':
+    if titulo is not '':
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
