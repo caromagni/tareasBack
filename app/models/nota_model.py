@@ -242,20 +242,26 @@ def delete_nota(username=None, id_nota=None):
     if(nota.id_user_creacion != id_user_actualizacion):
         raise ValidationError("Usuario no autorizado para eliminar la nota")
 
+    #print("Tarea de nota a eliminar:", nota.id_tarea)
             
     nota.eliminado=True
     nota.fecha_eliminacion=datetime.now()
     nota.fecha_actualizacion=datetime.now()
     nota.id_user_actualizacion=id_user_actualizacion
 
-    tarea_nota = session.query(Tarea).join(Nota, Tarea.id==nota.id_tarea).filter(Tarea.eliminado==False, Nota.eliminado==False, Nota.id != id_nota, Tarea.id==nota.id_tarea).all()
-    print("Tarea nota:", len(tarea_nota))
+    tarea_nota = session.query(Tarea, Nota.id).join(Nota, Tarea.id==nota.id_tarea).filter(Tarea.eliminado==False, Nota.eliminado==False, Nota.id is not id_nota, Tarea.id==nota.id_tarea, Nota.id_tarea==nota.id_tarea).all()
+    print("#"*50)
+    #print("Tarea nota:", len(tarea_nota))
+    #print("Tarea id:", nota.id_tarea)
     if len(tarea_nota)==0:
         tarea = session.query(Tarea).filter(Tarea.id==nota.id_tarea, Tarea.eliminado==False).first()
         tarea.tiene_notas_desnz=False
-    else:
+    """ else:
+        print("Tarea tiene más notas")
         for t in tarea_nota:
-            print("Tarea con notas:", t.id)
+            #print("Tarea con notas:", t.id)
+            print("Nota a elimnar:", id_nota)
+            print("Id de nota sin eliminar:", t.id) """
         
     
     

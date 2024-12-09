@@ -200,6 +200,7 @@ def post_nota(json_data: dict):
         print(json_data)
         print("#"*50)
         username = g.username
+        print("Username:",username)
         res = insert_nota(username, **json_data)
         if res is None:
             result = {
@@ -216,13 +217,13 @@ def post_nota(json_data: dict):
         raise ValidationError(err)    
 
 #################DELETE########################
-@nota_b.doc(description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
 # @nota_b.output(NotaIdOut)
 def del_nota(id: str):
     try:
         username = g.username
-        username = 'simperiale@mail.jus.mendoza.gov.ar'
+        #username = 'simperiale@mail.jus.mendoza.gov.ar'
         res = delete_nota(username,id)
         print("res:",res)
         if res is None:
@@ -246,4 +247,4 @@ def del_nota(id: str):
     except Exception as err:
         raise ValidationError(err)
     except Exception as e:
-        session.rollback()
+        current_app.session.rollback()

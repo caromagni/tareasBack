@@ -540,6 +540,7 @@ def get_tareas_grupo():
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
         username = g.get('username')
+        #username ='simperiale@ju.mendoza.gov.ar'
         print("Tarea grupo - username", username)
         #res, cant = get_tarea_grupo_by_id(username, page, per_page) 
         res, cant = get_tarea_grupo(username, page, per_page)
@@ -634,9 +635,11 @@ def post_tarea(json_data: dict):
         print("#"*50)
         print("Inserta tarea")
         print(json_data)
+        #Modificado para el Migue - Agregar token
         #username = g.get('username')
-        res = insert_tarea(**json_data)
         #res = insert_tarea(username, **json_data)    
+        res = insert_tarea(**json_data)
+        
 
         if res is None:
             result = {
