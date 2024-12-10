@@ -285,7 +285,13 @@ class GroupsUsuarioOut(Schema):
     id_grupo = String()
     nombre_grupo = String()
     codigo_nomenclador = String()
-    
+    descripcion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    fecha_creacion = String()
+    fecha_hasta= String()
+    fecha_actualizacion= String()
+    id_user_actualizacion= String()
 
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()
@@ -683,6 +689,8 @@ class TareaAllOut(Schema):
     cuerpo = String()
     id_expediente = String()
     caratula_expediente = String()
+    expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()

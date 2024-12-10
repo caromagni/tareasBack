@@ -222,7 +222,14 @@ def get_grupos_by_usuario(id):
                   Usuario.apellido.label("apellido"),
                   Grupo.id.label("id_grupo"),
                   Grupo.nombre.label("nombre_grupo"),
-                  Grupo.codigo_nomenclador.label("codigo_nomenclador")
+                  Grupo.eliminado.label("eliminado"),
+                  Grupo.suspendido.label("suspendido"),
+                  Grupo.descripcion.label("descripcion"),  
+                  Grupo.codigo_nomenclador.label("codigo_nomenclador"),
+                  Grupo.fecha_creacion.label("fecha_creacion"),
+                  Grupo.fecha_hasta.label("fecha_hasta"),
+                  Grupo.fecha_actualizacion.label("fecha_actualizacion"),
+                  Grupo.id_user_actualizacion.label("id_user_actualizacion"),
                   ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
                   ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
                   ).filter(Usuario.id == id, UsuarioGrupo.eliminado==False).all()                                    
