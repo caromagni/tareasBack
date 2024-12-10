@@ -358,6 +358,7 @@ def get_tareas(query_data: dict):
         estado = 0
         eliminado=None
         tiene_notas=None
+        id_tarea=None
         id_tipo_tarea=None
         id_usuario_asignado=None
         id_grupo=None
@@ -374,6 +375,8 @@ def get_tareas(query_data: dict):
             id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
+        if(request.args.get('id_tarea') is not None):
+            id_tarea=request.args.get('id_tarea')     
         if(request.args.get('id_tipo_tarea') is not None):
             id_tipo_tarea=request.args.get('id_tipo_tarea') 
         if(request.args.get('id_expediente') is not None):
@@ -395,7 +398,7 @@ def get_tareas(query_data: dict):
             fecha_hasta=request.args.get('fecha_hasta')
             fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
  
-        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
                 "count": cant,
