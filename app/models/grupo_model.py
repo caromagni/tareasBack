@@ -303,7 +303,8 @@ def get_all_base(id):
                 0 AS level,
                 true AS is_parentless,
                 g.id AS group_id,
-                g.base AS is_base
+                g.base AS is_base,
+                g.eliminado AS eliminado    
             FROM 
                 tareas.grupo g
             LEFT JOIN 
@@ -324,7 +325,8 @@ def get_all_base(id):
                 gt.level + 1 AS level,
                 false AS is_parentless,
                 gp_hijo.id AS group_id,
-                gp_padre.base AS is_base
+                gp_padre.base AS is_base,
+                gp_hijo.eliminado AS eliminado    
             FROM 
                 tareas.herarquia_grupo_grupo hgg
             INNER JOIN 
@@ -346,6 +348,7 @@ def get_all_base(id):
             gt.level,
             gt.is_parentless,
             gt.group_id,
+            gt.eliminado,
             gt.is_base
         FROM 
             GroupTree gt
@@ -372,6 +375,8 @@ def get_all_base(id):
             "child_name": reg.child_name,
             "path": reg.path,
             "path_name": reg.path_name,
+            "eliminado": reg.eliminado,
+            "is_base": reg.is_base,
             "is_parentless": reg.is_parentless,
         }    
 
@@ -400,6 +405,8 @@ def get_all_base(id):
                 "child_name": grupo['child_name'],
                 "path": grupo['path'],
                 "path_name": grupo['path_name'],
+                "eliminado": grupo['eliminado'],
+                "is_base": grupo['is_base'],
                 "is_parentless": grupo['is_parentless'],
                 }
             
