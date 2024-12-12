@@ -381,6 +381,14 @@ class TareaxGroupOut(Schema):
     fecha_inicio = String()
     fecha_fin = String()        
 
+class GroupsBaseOut(Schema):
+    id = String()
+    id_padre = String()
+    id_hijo = String()
+    path = String()
+    path_name = String()
+    is_parentless = Boolean()
+
 class GroupIdOut(Schema):
     id = String()
     nombre = String()

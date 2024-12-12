@@ -4,7 +4,7 @@ from flask import request, current_app
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut
 from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
@@ -152,7 +152,7 @@ def get_grupo_id(id: str):
 
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase/<string:id>')
-@groups_b.output(GroupIdOut())
+@groups_b.output(GroupsBaseOut(many=True))
 def get_all_grupobase(id: str):
     try:
         print("id:",id)
@@ -178,13 +178,14 @@ def get_usrsbygrupo(id_grupo: str):
         raise ValidationError(err)  
     
 #################POST####################
-@groups_b.doc(description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(GroupIn)
 #@groups_b.output(GroupOut)
 def post_grupo(json_data: dict):
     try:
-        res = insert_grupo(**json_data)
+        username=g.username
+        res = insert_grupo(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",

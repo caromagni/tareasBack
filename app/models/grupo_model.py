@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects import postgresql
 from apiflask.fields import Integer, String
 from flask import current_app
-
+from common.utils import *
 
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 
@@ -246,7 +246,33 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
 
     return result_paginated, total
+def encontrar_grupo_base(res_grupos, id):
+    for r in res_grupos:
+        if id == str(r['id_hijo']):
+            print("############ENCONTRADO##############")
+            if r['is_parentless']:
+                print("GRUPO BASE ENCONTRADO:", r)
+                return r  # Retornar el grupo base si es parentless
+            else:
+                print("PADRE:", r['id_padre'])
+                # Llamada recursiva con el padre como nuevo ID
+                return encontrar_grupo_base(res_grupos, str(r['id_padre']))    
 
+def buscar_mismos_base(res_grupos, id, grupos_acumulados=None):
+    if grupos_acumulados is None:
+        grupos_acumulados = []
+
+    hijos_directos = [r for r in res_grupos if r['id_padre'] == id]
+    
+    grupos_acumulados.extend(hijos_directos)    
+    
+    print ("Grupos acumulados:", hijos_directos)
+
+    for hijo in hijos_directos:
+        buscar_mismos_base(res_grupos, hijo['id_hijo'], grupos_acumulados)
+    
+    return grupos_acumulados
+    
 def get_all_base(id):
     cursor=None
     session: scoped_session = current_app.session
@@ -280,7 +306,7 @@ def get_all_base(id):
                 hgg.id_hijo,
                 gp_padre.descripcion AS parent_name,
                 gp_hijo.descripcion AS child_name,
-                gt.path || ' -> ' || hgg.id_hijo::text AS path,
+                gt.path || ',' || hgg.id_hijo::text AS path,
                 gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
                 gt.level + 1 AS level,
                 false AS is_parentless,
@@ -316,39 +342,60 @@ def get_all_base(id):
 
     # Ejecutar la subconsulta
     cursor = session.execute(subquery)
-    if cursor:
-        print("Cursor:", cursor)
-    else:
-        print("Cursor vacío")    
-    #result = cursor.fetchall()
+    
+    result = cursor.fetchall()
+    res_grupos=[]
     res=[]
-    for reg in cursor:
-        print(reg.path_name,"-", reg.is_base, "-", reg.is_parentless)
-        
-# Identificar el grupo base del grupo dado
-    grupo_dado = session.query(Grupo).filter(Grupo.id == id).first()
-    grupo_base = next((r for r in cursor if r.id_hijo == grupo_dado.id and r.is_parentless), None)
-    i=0
+    #print("Result:", result)
+    #print('#'*50)
+    for reg in result:
+        #print(reg.group_id,"- id padre: ",reg.id_padre,"-id hijo:",reg.id_hijo,"-", reg.path_name,"-", reg.is_base, "-", reg.is_parentless)
+        print(reg.path_name)
+        data = {
+            "id": reg.group_id,
+            "id_padre": reg.id_padre,
+            "id_hijo": reg.id_hijo,
+            "path": reg.path,
+            "path_name": reg.path_name,
+            "is_parentless": reg.is_parentless,
+        }    
+
+        res_grupos.append(data)
+
+    grupo_base = None
+    
+    grupo_base=encontrar_grupo_base(res_grupos, id)
+
+    print("GRUPO BASE DE ID:", id,"-", grupo_base)
+    grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
-        grupos_mismo_base = [r for r in cursor if r.id_padre == grupo_base.id_padre]
+        
+        #grupos_mismo_base.append(buscar_mismos_base(res_grupos, grupo_base['id']))
+        grupos_mismo_base = [r for r in res_grupos if r['id_padre'] == grupo_base['id']]
+        #grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
         print(grupos_mismo_base)
         for grupo in grupos_mismo_base:
-            print(grupo.path_name)
-            data = {"id": reg.id_hijo,
-                    "nombre": grupo.nombre,
-                    "path": reg.path,
-                    "path_name": reg.path_name
+            print(grupo['path_name'])
+            data = {
+                "id": grupo['id'],
+                "id_padre": grupo['id_padre'],
+                "id_hijo": grupo['id_hijo'],
+                "path": grupo['path'],
+                "path_name": grupo['path_name'],
+                "is_parentless": grupo['is_parentless'],
                 }
-            i=i+1
+            
             res.append(data)
     else:
-        print("No se encontró un grupo base para el ID proporcionado.")                                                                     
+        print("No se encontró un grupo base para el ID proporcionado.")
+
+    return res                                                                          
         
      
 
    
-    return res, i
+    #return res, i
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
@@ -612,9 +659,17 @@ def update_grupo(id='', **kwargs):
     session.commit()
     return grupo
 
-def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
+def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
     session: scoped_session = current_app.session
     #Validaciones
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     if id_user_asignado_default is not None:
         usuario = session.query(Usuario).filter(Usuario.id==id_user_asignado_default, Usuario.eliminado==False).first()
         if usuario is None: 
