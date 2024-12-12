@@ -53,6 +53,8 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuaci
     id_usuario_asignado=None
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+    else:
+        raise Exception("Error en el ingreso de Usuario. Usuario no existente")    
 
     if id_expediente is not None:
         expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
@@ -1462,7 +1464,8 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 "titulo": reg.titulo,
                 "reasignada_usr": reasignada_usr,
                 "reasignada_grupo": reasignada_grupo,
-                "notas": notas
+                "notas": notas,
+                "tiene_notas": reg.tiene_notas_desnz
             }
             results.append(result)
 

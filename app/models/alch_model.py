@@ -157,7 +157,7 @@ class ExpedienteExt(Base):
     id = Column(UUID, primary_key=True)
     id_ext = Column(UUID)
     caratula = Column(String)
-    nro_expte= Column(String)
+    nro_expte= Column(String, default=None)
     estado = Column(String)
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
