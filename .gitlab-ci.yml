@@ -48,10 +48,18 @@ include:
 
 build-image:
   stage: build-image
-  image: docker:stable-dind 
+  
+  #para runers locales
+  image: docker:stable 
   services:
-  - name: docker:dind  
+  - name: docker:18-dind  
     command: ["--mtu=1300"]
+  
+  #para runers de gitlab
+  #image: docker:stable-dind 
+  #services:
+  #- name: docker:dind  
+  #  command: ["--mtu=1300"]
 
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'

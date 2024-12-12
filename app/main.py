@@ -20,7 +20,8 @@ from common.error_handling import register_error_handlers
 from common.api_key import *
 import threading
 from common.chk_messagges import chk_messagges
-
+import sys
+sys.setrecursionlimit(100)
 
 def create_app():
 

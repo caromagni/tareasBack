@@ -258,21 +258,34 @@ def encontrar_grupo_base(res_grupos, id):
                 # Llamada recursiva con el padre como nuevo ID
                 return encontrar_grupo_base(res_grupos, str(r['id_padre']))    
 
-def buscar_mismos_base(res_grupos, id, grupos_acumulados=None):
+def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     if grupos_acumulados is None:
         grupos_acumulados = []
-
-    hijos_directos = [r for r in res_grupos if r['id_padre'] == id]
     
+    if visitados is None:
+        visitados = set()
+    
+    if id in visitados:
+        return grupos_acumulados
+    
+    hijos_directos = []
+    
+    visitados.add(id)
+    
+    for r in res_grupos:
+        if r['id_padre'] == id:
+            hijos_directos.append(r)
+
     grupos_acumulados.extend(hijos_directos)    
     
-    print ("Grupos acumulados:", hijos_directos)
+    print ("Hijos directos:", hijos_directos)
 
     for hijo in hijos_directos:
-        buscar_mismos_base(res_grupos, hijo['id_hijo'], grupos_acumulados)
+        buscar_mismos_base(res_grupos, hijo['id_hijo'], grupos_acumulados, visitados)
     
     return grupos_acumulados
-    
+
+
 def get_all_base(id):
     cursor=None
     session: scoped_session = current_app.session
@@ -283,8 +296,8 @@ def get_all_base(id):
             SELECT 
                 g.id AS id_padre,
                 g.id AS id_hijo,
-                g.descripcion AS parent_name,
-                g.descripcion AS child_name,
+                g.nombre AS parent_name,
+                g.nombre AS child_name,
                 g.id::text AS path,
                 COALESCE(g.nombre, g.id::text) AS path_name,
                 0 AS level,
@@ -304,9 +317,9 @@ def get_all_base(id):
             SELECT 
                 hgg.id_padre,
                 hgg.id_hijo,
-                gp_padre.descripcion AS parent_name,
-                gp_hijo.descripcion AS child_name,
-                gt.path || ',' || hgg.id_hijo::text AS path,
+                gp_padre.nombre AS parent_name,
+                gp_hijo.nombre AS child_name,
+                gt.path || ' -> ' || hgg.id_hijo::text AS path,
                 gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
                 gt.level + 1 AS level,
                 false AS is_parentless,
@@ -355,6 +368,8 @@ def get_all_base(id):
             "id": reg.group_id,
             "id_padre": reg.id_padre,
             "id_hijo": reg.id_hijo,
+            "parent_name": reg.parent_name,
+            "child_name": reg.child_name,
             "path": reg.path,
             "path_name": reg.path_name,
             "is_parentless": reg.is_parentless,
@@ -371,9 +386,9 @@ def get_all_base(id):
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
         
-        #grupos_mismo_base.append(buscar_mismos_base(res_grupos, grupo_base['id']))
-        grupos_mismo_base = [r for r in res_grupos if r['id_padre'] == grupo_base['id']]
-        #grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
+        #grupos_mismo_base = [r for r in res_grupos if r['id_padre'] == grupo_base['id']]
+        grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
+
         print(grupos_mismo_base)
         for grupo in grupos_mismo_base:
             print(grupo['path_name'])
@@ -381,6 +396,8 @@ def get_all_base(id):
                 "id": grupo['id'],
                 "id_padre": grupo['id_padre'],
                 "id_hijo": grupo['id_hijo'],
+                "parent_name": grupo['parent_name'],
+                "child_name": grupo['child_name'],
                 "path": grupo['path'],
                 "path_name": grupo['path_name'],
                 "is_parentless": grupo['is_parentless'],
