@@ -390,7 +390,9 @@ class GroupsBaseOut(Schema):
     path = String()
     path_name = String()
     is_parentless = Boolean()
-
+    eliminado = Boolean()
+    is_base = Boolean()
+    
 class GroupIdOut(Schema):
     id = String()
     nombre = String()
