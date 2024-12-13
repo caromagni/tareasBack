@@ -1,5 +1,6 @@
 import uuid
 from models.usuario_model import get_grupos_by_usuario
+from models.tarea_model import get_tarea_by_id
 from sqlalchemy.orm import scoped_session, joinedload
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
@@ -30,18 +31,20 @@ from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 #     else:
 #         return buscar_grupo_padre_recursivo(padre.id)
 
-def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_user_creacion=None, id_grupo=None, id_tarea=None):
+def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_tarea=None):
     session: scoped_session = current_app.session
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_creacion = verifica_username(username)
     else:
-        raise ValidationError("Usuario no ingresado")  
+        raise ValidationError("Usuario no ingresado 0")  
     
     nuevoID_label=uuid.uuid4()
-    # id_grupo = get_grupos_by_usuario(id_user_creacion)
-    id_grupo_padre=find_parent_id_recursive(session, id_grupo)
     id_tarea = id_tarea
+    tarea = get_tarea_by_id(id_tarea)
+    id_grupo = tarea[0]['grupos'][0]['id']
+    print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
+    id_grupo_padre=find_parent_id_recursive(session, id_grupo)
 
     print('id_grupo_padre:', id_grupo_padre)
 
@@ -49,7 +52,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
         eliminado=eliminado,
         fecha_eliminacion=fecha_eliminacion,
         fecha_creacion=datetime.now(),
-        id_user_creacion=id_user_actualizacion,
+        id_user_creacion=id_user_creacion,
         id=nuevoID_label,
         color=color,
         id_grupo_padre=id_grupo_padre,
@@ -60,7 +63,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
 
     ids_labels = [nuevoID_label]
 
-    insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, id_user_actualizacion=id_user_creacion)
+    insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, username=username)
 
        
     session.commit()
@@ -105,9 +108,14 @@ def update_label(id='', **kwargs):
     return result
 
 
-def get_all_label(page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
+def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
    
     session: scoped_session = current_app.session
+    
+    if username is not None:
+        id_user = verifica_username(username)
+    else:
+        raise ValidationError("Usuario no ingresado")
     
     """  # Convert fecha_desde to datetime object
     if isinstance(fecha_desde, str):
@@ -215,7 +223,7 @@ def insert_label_tarea (username=None, **kwargs):
     if username is not None:
         id_user_actualizacion = verifica_username(username)
     else:
-        raise ValidationError("Usuario no ingresado") 
+        raise ValidationError("Usuario no ingresado 1") 
     
     id_tarea = kwargs['id_tarea']
     ids_labels = kwargs['ids_labels']

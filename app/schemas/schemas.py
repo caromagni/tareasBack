@@ -1046,9 +1046,9 @@ class LabelIn(Schema):
         validate_char
     ])
     color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
-    id_grupo = String(required=True)
+    # id_grupo = String(required=True)
     eliminado = Boolean()
-    id_user_creacion = String(required=True)
+    # id_user_creacion = String(required=True)
     fecha_creacion = String(validate=validate_fecha)
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)

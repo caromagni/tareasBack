@@ -40,6 +40,8 @@ def before_request():
 @label_b.output(LabelCountOut)
 def get_labels(query_data: dict):
     try:
+        username = g.username
+
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant = 0
@@ -73,7 +75,7 @@ def get_labels(query_data: dict):
         if request.args.get('label_color') is not None:
             label_color = request.args.get('label_color')  
 
-        res, cant = get_all_label(page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
         data = {
             "count": cant,
             "data": LabelAllOut().dump(res, many=True)
