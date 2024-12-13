@@ -132,8 +132,6 @@ dmypy.json
 # local virtual environments
 .local_env
 .local
-uwsgi.dev-localhost.ini
-
 
 # dotenv
 .env
@@ -142,5 +140,4 @@ export_creds.sh
 start.sh
 uwsgi.dev-localhost.ini
 #instala_sops.sh
-*.sh
 
