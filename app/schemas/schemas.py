@@ -299,6 +299,10 @@ class UsuariosGroupOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
+    username = String()
+    email = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
     
 ###############Tareas y Tipo de Tareas Base####################  
 class TipoTareaIn(Schema):
