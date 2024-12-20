@@ -45,9 +45,15 @@ def get_grupos_by_usr(id_usuario: str):
                 } 
             return result
         
+        data = {
+                
+                "data":  GroupsUsuarioOut().dump(res, many=True)
+        }
+
         current_app.session.remove()    
         #return res
-        return GroupsUsuarioOut().dump(res, many=True)
+        #return GroupsUsuarioOut().dump(res, many=True)
+        return data
     
     except Exception as err:
         raise ValidationError(err) 
@@ -70,8 +76,13 @@ def post_usuario(json_data: dict):
                     "ErrorMsg":"No se pudo insertar el usuario"
                 } 
             return result
-            
-        return UsuarioOut().dump(res)
+        data = {
+                
+                "data": UsuarioOut().dump(res)
+        }
+
+        #return UsuarioOut().dump(res)
+        return data
     
     except Exception as err:
         raise ValidationError(err)
@@ -95,7 +106,13 @@ def patch_usuario(usuario_id: str, json_data: dict):
                     "ErrorMsg":"No se encontró el usuario a modificar"
                 } 
             return result
-        return UsuarioOut().dump(res)    
+        
+        data = {
+                
+                "data": UsuarioOut().dump(res)
+        }
+        #return UsuarioOut().dump(res)    
+        return data
         
     
     except Exception as err:
@@ -116,8 +133,13 @@ def get_usuario_id(id: str):
                     "ErrorMsg":"No se encontró el usuario"
                 } 
             return result
+        data = {
+                
+                "data":  UsuarioIdOut().dump(res, many=True)
+        }
         current_app.session.remove()
-        return UsuarioIdOut().dump(res, many=True)
+        #return UsuarioIdOut().dump(res, many=True)
+        return data
         
 
 #############GET CON PARAMETROS######################## 
@@ -237,13 +259,13 @@ def del_usuario(id: str):
             raise DataNotFound("Usuario no encontrado")
             
         else:
-            result={
+            data={
                     "Msg":"Registro eliminado",
                     "Id usuario": id,
                     "usuario": res.nombre
                 } 
         
-        return result
+        return data
     
     except DataNotFound as err:
         raise DataError(800, err)
