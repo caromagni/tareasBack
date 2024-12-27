@@ -835,7 +835,20 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
-    
+
+class TareaHIstoriaUserIdOut(Schema):
+    id_task = String()
+    titulo = String()
+    id_usuario = String()
+    apellido = String()
+    username = String()
+    eliminado = Boolean()
+    eliminado_anterior = Boolean()
+    fecha_actualizacion_anterior = String()
+    #eliminado_nueva = Boolean()
+    fecha_actualizacion = String()
+
+
 class TareaxGrupoIdOut(Schema):
     id = String()
     titulo = String()
