@@ -299,6 +299,10 @@ class UsuariosGroupOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
+    username = String()
+    email = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
     
 ###############Tareas y Tipo de Tareas Base####################  
 class TipoTareaIn(Schema):
@@ -453,7 +457,7 @@ class TareaIn(Schema):
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
-    ))
+    ), default=1)
     """  estado = fields.Integer(validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
@@ -629,7 +633,7 @@ class UsuarioInPatch(Schema):
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
+    #username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
 
 class UsuarioGetIn(Schema):
@@ -831,7 +835,20 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
-    
+
+class TareaHIstoriaUserIdOut(Schema):
+    id_task = String()
+    titulo = String()
+    id_usuario = String()
+    apellido = String()
+    username = String()
+    eliminado = Boolean()
+    eliminado_anterior = Boolean()
+    fecha_actualizacion_anterior = String()
+    #eliminado_nueva = Boolean()
+    fecha_actualizacion = String()
+
+
 class TareaxGrupoIdOut(Schema):
     id = String()
     titulo = String()

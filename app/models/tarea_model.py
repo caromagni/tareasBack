@@ -10,7 +10,12 @@ from sqlalchemy import desc
 from flask import current_app
 
 from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Auditoria_TareaAsignadaUsuario 
 from common.utils import *
+
+from sqlalchemy import func, cast, Text
+from sqlalchemy.types import Boolean, TIMESTAMP
+from sqlalchemy.dialects.postgresql import JSONB
 
 def nombre_estado(estado):
     if estado == 1:
@@ -46,7 +51,7 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
+def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
     print("##############Validaciones Insert Tarea################")
     id_grupo=None
@@ -720,6 +725,55 @@ def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', no
     session.add(asigna_usuario)
     session.commit()
     return asigna_usuario, msg
+
+def get_tarea_historia_usr_by_id(id):
+    session: scoped_session = current_app.session
+    query = (
+    session.query(
+        Tarea.id.label("id_tarea"),
+        Tarea.titulo,
+        TareaAsignadaUsuario.id_usuario,
+        Usuario.apellido,
+        Usuario.username,
+        TareaAsignadaUsuario.eliminado,
+        func.coalesce(
+            cast(Auditoria_TareaAsignadaUsuario.datos_anteriores[("eliminado")].astext, Boolean),
+            False
+        ).label("eliminado_anterior"),
+        func.coalesce(
+            cast(Auditoria_TareaAsignadaUsuario.datos_nuevos[("eliminado")].astext, Boolean),
+            False
+        ).label("eliminado_nueva"),
+        cast(
+            Auditoria_TareaAsignadaUsuario.datos_anteriores[("fecha_actualizacion")].astext,
+            TIMESTAMP
+        ).label("fecha_actualizacion_anterior"),
+        cast(
+            Auditoria_TareaAsignadaUsuario.datos_nuevos[("fecha_actualizacion")].astext,
+            TIMESTAMP
+        ).label("fecha_actualizacion"),
+    )
+    .outerjoin(
+        TareaAsignadaUsuario,
+        Tarea.id == TareaAsignadaUsuario.id_tarea
+    )
+    .outerjoin(
+        Auditoria_TareaAsignadaUsuario,
+        Auditoria_TareaAsignadaUsuario.id_registro == TareaAsignadaUsuario.id
+    )
+    .outerjoin(
+        Usuario,
+        TareaAsignadaUsuario.id_usuario == Usuario.id
+    )
+    .filter(Tarea.id == id)  # Se utiliza la variable aquí
+    .order_by(Usuario.apellido, Auditoria_TareaAsignadaUsuario.fecha_actualizacion.desc())
+    )
+
+# Ejecutar la consulta
+    result = query.all()
+    print (result)
+    return result
+
 
 def get_tarea_by_id(id):
     session: scoped_session = current_app.session
