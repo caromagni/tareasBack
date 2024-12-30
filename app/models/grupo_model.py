@@ -752,7 +752,11 @@ def get_usuarios_by_grupo(id):
                   Grupo.nombre.label("nombre_grupo"),
                   Usuario.nombre.label("nombre"),
                   Usuario.apellido.label("apellido"),
-                  Usuario.id.label("id_usuario")                  
+                  Usuario.id.label("id_usuario"),
+                  Usuario.eliminado.label("eliminado"),
+                  Usuario.suspendido.label("suspendido"),
+                  Usuario.username.label("username"),
+                  Usuario.email.label("email")                  
                   ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
                   ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
                   ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all() 

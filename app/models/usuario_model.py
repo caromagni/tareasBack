@@ -251,6 +251,13 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
     else:
         raise Exception("Usuario no ingresado")
 
+    qry_username = session.query(Usuario).filter(Usuario.username == username).first()
+    if qry_username is not None:
+        raise Exception("Ya existe un usuario con el username ingresado")
+    qry_email = session.query(Usuario).filter(Usuario.email == email).first()
+    if qry_email is not None:
+        raise Exception("Ya existe un usuario con el email ingresado")
+    
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)
     nuevo_usuario = Usuario(
@@ -312,12 +319,19 @@ def update_usuario(id='',username=None, **kwargs):
         usuario.nombre = kwargs['nombre']
     if 'apellido' in kwargs:
         usuario.apellido = kwargs['apellido']
-    if 'username' in kwargs:
-        usuario.username = kwargs['username'].upper()
+    #if 'username' in kwargs:
+        #qry_username = session.query(Usuario).filter(Usuario.username == kwargs['username'], Usuario.eliminado==False).first()
+        #usuario.username = kwargs['username']
     if 'dni' in kwargs:
         usuario.dni = kwargs['dni']
     if 'email' in kwargs:
-        usuario.email = kwargs['email'].lower()           
+        qry_username = session.query(Usuario).filter(Usuario.email == kwargs['email']).first()
+        if qry_username is not None:
+            raise Exception("Ya existe un usuario con el email ingresado")
+        
+        usuario.username = kwargs['email'].lower()
+        usuario.email = kwargs['email'].lower()  
+
     if 'id_persona_ext' in kwargs:
         usuario.id_persona_ext = kwargs['id_persona_ext']
     #if 'id_user_actualizacion' in kwargs:
