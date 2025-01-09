@@ -6,9 +6,14 @@ from common.rabbitmq_utils import *
 def chk_messagges():
     tiempo=30
     if uwsgi.worker_id() == 1:
-             print("---- RUNING CHECK MESSAGES ----")
-             recibir_de_rabbitmq()   
-             sleep(tiempo)  
+            try:
+                 print("---- RUNING CHECK MESSAGES ----")
+                 recibir_de_rabbitmq()   
+                 sleep(tiempo)
+            except Exception as e:
+                    print("Error en chk_messagges: ",e)
+                    sleep(tiempo) 
+            
       
 
 """ def chequea_txid(app=''):

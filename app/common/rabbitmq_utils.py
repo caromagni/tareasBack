@@ -7,7 +7,7 @@ from flask import current_app
 def conectar_rabbitmq1():
     global connection
     global channel
-
+    
     rabbitmq_params = {
       #'user': current_app.config['RABBITMQ_USER'],
       'user': os.environ.get('RABBITMQ_USER'),
@@ -17,23 +17,23 @@ def conectar_rabbitmq1():
       'vhost': os.environ.get('RABBITMQ_VHOST')
     }
 
-    #credentials = pika.PlainCredentials(rabbitmq_params['user'], rabbitmq_params['password'])
-
-    connection_parameter=pika.ConnectionParameters(host=rabbitmq_params['host'],
+    try:
+        connection_parameter=pika.ConnectionParameters(host=rabbitmq_params['host'],
                                                 port=rabbitmq_params['port'],
                                                 virtual_host=rabbitmq_params['vhost'],
                                                 credentials=pika.PlainCredentials(rabbitmq_params['user'],  rabbitmq_params['password']))
 
-    #'172.17.0.3'
-    #connection_parameter=pika.ConnectionParameters(host='172.17.0.3', port=5672, virtual_host='/', credentials=pika.PlainCredentials('tareas', 'tareas'))
-    connection = pika.BlockingConnection(connection_parameter)
-    #connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-    channel = connection.channel()
+        #connection_parameter=pika.ConnectionParameters(host='172.17.0.3', port=5672, virtual_host='/', credentials=pika.PlainCredentials('tareas', 'tareas'))
+        connection = pika.BlockingConnection(connection_parameter)
+        channel = connection.channel()
 
     # Declarar la cola en la que quieres enviar los mensajes
-    channel.queue_declare(queue='expte_params', durable=True, passive=True)
+        channel.queue_declare(queue='expte_params', durable=True, passive=True)
     #channel.queue_declare(queue='txout', durable=True)     
-    return connection, channel 
+        return connection, channel 
+    except Exception as e:
+        print("Error en conectar_rabbitmq1: ",e)
+        return None, None
 
 # Establecer la conexión con el servidor RabbitMQ
 def conectar_rabbitmq():
