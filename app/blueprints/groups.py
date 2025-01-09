@@ -31,15 +31,15 @@ def before_request():
         print("Username before:",g.username)
 ####################################################
 
-#@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
 @groups_b.output(GroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        #username=g.username
-        res = update_grupo(id_grupo, **json_data)
+        username=g.username
+        res = update_grupo(username, id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
             

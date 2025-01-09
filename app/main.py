@@ -19,6 +19,7 @@ from config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
 import threading
+import logging
 from common.chk_messagges import chk_messagges
 import sys
 sys.setrecursionlimit(100)
@@ -121,7 +122,8 @@ def create_app():
      ############### CODIGO PARA LANZAR THREADS ################
     """ thread = threading.Thread(target=chk_messagges())
     thread.daemon = True
-    thread.start() """
+    thread.start()  
+    logging.info("Hilo de recepción de mensajes iniciado.") """
 
     return app
 

@@ -607,8 +607,17 @@ def get_grupos_herarquia_labels():
     return res                                                                 
 
 
-def update_grupo(id='', **kwargs):
+def update_grupo(username=None,id='', **kwargs):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     grupo = session.query(Grupo).filter(Grupo.id == id).first()
     if grupo is None:
         return None
@@ -616,8 +625,8 @@ def update_grupo(id='', **kwargs):
     if grupo.eliminado:
         raise Exception("Grupo eliminado")
     
-    if grupo.suspendido:
-        raise Exception("Grupo suspendido")
+    """ if grupo.suspendido:
+        raise Exception("Grupo suspendido") """
 
 
     if 'nombre' in kwargs:
@@ -633,12 +642,12 @@ def update_grupo(id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    if 'id_user_actualizacion' in kwargs:
+    """ if 'id_user_actualizacion' in kwargs:
         usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
         if usuario is None:
             raise Exception("Usuario de actualizacion no encontrado")
         
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
 
     #print("Antes del if")
 
@@ -667,13 +676,15 @@ def update_grupo(id='', **kwargs):
                 id=uuid.uuid4(),
                 id_padre=kwargs['id_padre'],
                 id_hijo=id,
-                id_user_actualizacion=kwargs['id_user_actualizacion'],
+                #id_user_actualizacion=kwargs['id_user_actualizacion'],
+                id_user_actualizacion= id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
             )
             session.add(nueva_herarquia)
         else:
             herarquia.id_padre = kwargs['id_padre']
-            herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
+            #herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
+            herarquia.id_user_actualizacion = id_user_actualizacion
             herarquia.fecha_actualizacion = datetime.now()
 
     if 'usuario' in kwargs:
@@ -682,7 +693,8 @@ def update_grupo(id='', **kwargs):
         for usr in usuario_grupo:
             usr.eliminado=True
             usr.fecha_actualizacion=datetime.now()
-            usr.id_user_actualizacion=kwargs['id_user_actualizacion']
+            #usr.id_user_actualizacion=kwargs['id_user_actualizacion']
+            usr.id_user_actualizacion=id_user_actualizacion
             
         for usuario in kwargs['usuario']:
             encuentra_usuario = session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
@@ -700,14 +712,14 @@ def update_grupo(id='', **kwargs):
                     id_grupo=id,
                     id_usuario=usuario['id_usuario'],
                     fecha_actualizacion=datetime.now(),
-                    id_user_actualizacion=kwargs['id_user_actualizacion']
+                    id_user_actualizacion=id_user_actualizacion
                 )
                 session.add(nuevo_usuario_grupo)
             else:
                 #encuentra el usuario y lo reactiva 
                 usuario_grupo.eliminado = False
                 usuario_grupo.fecha_actualizacion = datetime.now()
-                usuario_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']    
+                usuario_grupo.id_user_actualizacion = herarquia.id_user_actualizacion    
                 
 
     session.commit()
