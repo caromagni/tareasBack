@@ -7,7 +7,7 @@ from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
-from common.rabbitmq_utils import *
+#from app.common.rabbitmq_utils import *
 from flask import g
 
 

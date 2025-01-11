@@ -20,7 +20,8 @@ from common.error_handling import register_error_handlers
 from common.api_key import *
 import threading
 import logging
-from common.chk_messagges import chk_messagges
+#from common.rabbitmq_utils import *
+from common.chk_messagges import *
 import sys
 sys.setrecursionlimit(100)
 
@@ -119,11 +120,12 @@ def create_app():
     # Register custom error handlers
     register_error_handlers(app)
     
-     ############### CODIGO PARA LANZAR THREADS ################
-    """ thread = threading.Thread(target=chk_messagges())
-    thread.daemon = True
-    thread.start()  
-    logging.info("Hilo de recepción de mensajes iniciado.") """
+    ############### CODIGO PARA LANZAR THREADS ################
+    if uwsgi.worker_id() == 1:
+        thread = threading.Thread(target=chk_messagges, args=(app,))
+        thread.daemon = True
+        thread.start()
+        print("Hilo de recepción de mensajes iniciado.")
 
     return app
 

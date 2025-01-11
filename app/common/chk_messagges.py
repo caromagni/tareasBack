@@ -1,18 +1,38 @@
 from time import sleep
 import uwsgi
-from common.rabbitmq_utils import *
+#from app.common.rabbitmq_utils import RabbitMQHandler
+from common.rabbitmq_utils import RabbitMQHandler
     
 # Consumir mensajes de la cola
-def chk_messagges():
-    tiempo=30
-    if uwsgi.worker_id() == 1:
-            try:
-                 print("---- RUNING CHECK MESSAGES ----")
-                 recibir_de_rabbitmq()   
-                 sleep(tiempo)
-            except Exception as e:
-                    print("Error en chk_messagges: ",e)
-                    sleep(tiempo) 
+
+def chk_messagges(app):
+    tiempo=10
+    handler = RabbitMQHandler()
+    handler.connect()
+    #if uwsgi.worker_id() == 1:
+    #if uwsgi.worker_id() == 1:
+    while True:
+        print("handler.channel: ", handler.channel)
+        if handler.channel:
+            with app.app_context():
+                print("---- RUNNING CHECK MESSAGES ----")
+                try:
+                    handler.start_consuming()
+                    sleep(tiempo)
+                except Exception as e:
+                    print("Error en chk_messagges:", e)
+                    sleep(tiempo)
+                
+    """         if handler.channel:
+                with app.app_context():
+                    print("---- RUNNING CHECK MESSAGES ----")
+                    try:
+                        handler.start_consuming()
+                        sleep(tiempo)
+                    except Exception as e:
+                        print("Error en chk_messagges:", e)
+                        sleep(tiempo) """
+                       
             
       
 
