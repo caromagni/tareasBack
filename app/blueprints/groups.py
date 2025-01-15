@@ -157,11 +157,11 @@ def get_grupo_id(id: str):
 def get_all_grupobase(query_data: dict):
     try:
         id_grupo=None
-        usuarios =False
+        usuarios=False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
-            usuarios=request.args.get('usuarios')    
+            usuarios=bool(request.args.get('usuarios'))    
         res = get_all_base(id, usuarios)
         
         current_app.session.remove()

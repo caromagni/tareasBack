@@ -272,6 +272,7 @@ class TipoTarea(Base):
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
+    id_ext = Column(UUID)
 
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'

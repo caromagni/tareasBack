@@ -365,8 +365,9 @@ def get_all_base(id, usuarios=False):
     result = cursor.fetchall()
     res_grupos=[]
     res=[]
+    print("Usuarios:", usuarios)
+    print(type(usuarios))
     for reg in result:
-        print(reg.path_name)
         usuarios_gr = []
         if usuarios==True:
             res_usuarios = session.query(UsuarioGrupo.id,
@@ -379,8 +380,9 @@ def get_all_base(id, usuarios=False):
                                         Usuario.suspendido,
                                         Usuario.username
                                         ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
-                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo, UsuarioGrupo.eliminado==False).all()
-           
+                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo and UsuarioGrupo.eliminado==False).all()
+           #UsuarioGrupo.eliminado==False
+            
             if res_usuarios is not None:
                 for row in res_usuarios:
                     usuario = {
@@ -414,7 +416,6 @@ def get_all_base(id, usuarios=False):
     
     grupo_base=encontrar_grupo_base(res_grupos, id)
 
-    print("GRUPO BASE DE ID:", id,"-", grupo_base)
     grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
