@@ -4,10 +4,10 @@ from flask import request, current_app
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
-from common.rabbitmq_utils import *
+#from app.common.rabbitmq_utils import *
 from flask import g
 
 
@@ -31,15 +31,15 @@ def before_request():
         print("Username before:",g.username)
 ####################################################
 
-#@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
 @groups_b.output(GroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        #username=g.username
-        res = update_grupo(id_grupo, **json_data)
+        username=g.username
+        res = update_grupo(username, id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
             
@@ -151,12 +151,18 @@ def get_grupo_id(id: str):
         raise ValidationError(err)
 
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/grupos_grupobase/<string:id>')
+@groups_b.get('/grupos_grupobase')
+@groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut(many=True))
-def get_all_grupobase(id: str):
+def get_all_grupobase(query_data: dict):
     try:
-        print("id:",id)
-        res = get_all_base(id)
+        id_grupo=None
+        usuarios=False
+        if(request.args.get('id_grupo') is not None):
+            id=request.args.get('id_grupo')
+        if(request.args.get('usuarios') is not None):
+            usuarios=bool(request.args.get('usuarios'))    
+        res = get_all_base(id, usuarios)
         
         current_app.session.remove()
         return res

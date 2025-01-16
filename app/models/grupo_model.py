@@ -253,12 +253,12 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
 def encontrar_grupo_base(res_grupos, id):
     for r in res_grupos:
         if id == str(r['id_hijo']):
-            print("############ENCONTRADO##############")
+           # print("############ENCONTRADO##############")
             if r['is_parentless']:
-                print("GRUPO BASE ENCONTRADO:", r)
+                #print("GRUPO BASE ENCONTRADO:", r)
                 return r  # Retornar el grupo base si es parentless
             else:
-                print("PADRE:", r['id_padre'])
+               # print("PADRE:", r['id_padre'])
                 # Llamada recursiva con el padre como nuevo ID
                 return encontrar_grupo_base(res_grupos, str(r['id_padre']))    
 
@@ -282,7 +282,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
 
     grupos_acumulados.extend(hijos_directos)    
     
-    print ("Hijos directos:", hijos_directos)
+    #print ("Hijos directos:", hijos_directos)
 
     for hijo in hijos_directos:
         buscar_mismos_base(res_grupos, hijo['id_hijo'], grupos_acumulados, visitados)
@@ -290,7 +290,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     return grupos_acumulados
 
 
-def get_all_base(id):
+def get_all_base(id, usuarios=False):
     cursor=None
     session: scoped_session = current_app.session
     # Subconsulta recursiva
@@ -308,7 +308,8 @@ def get_all_base(id):
                 true AS is_parentless,
                 g.id AS group_id,
                 g.base AS is_base,
-                g.eliminado AS eliminado    
+                g.eliminado AS eliminado,
+                g.suspendido AS suspendido        
             FROM 
                 tareas.grupo g
             LEFT JOIN 
@@ -330,7 +331,8 @@ def get_all_base(id):
                 false AS is_parentless,
                 gp_hijo.id AS group_id,
                 gp_padre.base AS is_base,
-                gp_hijo.eliminado AS eliminado    
+                gp_hijo.eliminado AS eliminado,
+                gp_hijo.suspendido AS suspendido        
             FROM 
                 tareas.herarquia_grupo_grupo hgg
             INNER JOIN 
@@ -353,6 +355,7 @@ def get_all_base(id):
             gt.is_parentless,
             gt.group_id,
             gt.eliminado,
+            gt.suspendido,        
             gt.is_base
         FROM 
             GroupTree gt
@@ -366,11 +369,36 @@ def get_all_base(id):
     result = cursor.fetchall()
     res_grupos=[]
     res=[]
-    #print("Result:", result)
-    #print('#'*50)
+    print("Usuarios:", usuarios)
+    print(type(usuarios))
     for reg in result:
-        #print(reg.group_id,"- id padre: ",reg.id_padre,"-id hijo:",reg.id_hijo,"-", reg.path_name,"-", reg.is_base, "-", reg.is_parentless)
-        print(reg.path_name)
+        usuarios_gr = []
+        if usuarios==True:
+            res_usuarios = session.query(UsuarioGrupo.id,
+                                        UsuarioGrupo.id_grupo,
+                                        UsuarioGrupo.id_usuario,
+                                        Usuario.id,
+                                        Usuario.nombre,
+                                        Usuario.apellido,
+                                        Usuario.eliminado,
+                                        Usuario.suspendido,
+                                        Usuario.username
+                                        ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
+                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo and UsuarioGrupo.eliminado==False).all()
+           #UsuarioGrupo.eliminado==False
+            
+            if res_usuarios is not None:
+                for row in res_usuarios:
+                    usuario = {
+                        "id_usuario": row.id,
+                        "nombre": row.nombre,
+                        "apellido": row.apellido,
+                        "eliminado": row.eliminado,
+                        "suspendido": row.suspendido,
+                        "username": row.username
+                    }
+                    usuarios_gr.append(usuario)
+
         data = {
             "id": reg.group_id,
             "id_padre": reg.id_padre,
@@ -380,8 +408,10 @@ def get_all_base(id):
             "path": reg.path,
             "path_name": reg.path_name,
             "eliminado": reg.eliminado,
+            "suspendido": reg.suspendido,
             "is_base": reg.is_base,
             "is_parentless": reg.is_parentless,
+            "usuarios": usuarios_gr
         }    
 
         res_grupos.append(data)
@@ -390,17 +420,16 @@ def get_all_base(id):
     
     grupo_base=encontrar_grupo_base(res_grupos, id)
 
-    print("GRUPO BASE DE ID:", id,"-", grupo_base)
     grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
         
-        #grupos_mismo_base = [r for r in res_grupos if r['id_padre'] == grupo_base['id']]
         grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
 
-        print(grupos_mismo_base)
+        #print(grupos_mismo_base)
         for grupo in grupos_mismo_base:
-            print(grupo['path_name'])
+            #print(grupo['path_name'])
+
             data = {
                 "id": grupo['id'],
                 "id_padre": grupo['id_padre'],
@@ -410,8 +439,10 @@ def get_all_base(id):
                 "path": grupo['path'],
                 "path_name": grupo['path_name'],
                 "eliminado": grupo['eliminado'],
+                "suspendido": grupo['suspendido'],
                 "is_base": grupo['is_base'],
                 "is_parentless": grupo['is_parentless'],
+                "usuarios": grupo['usuarios']
                 }
             
             res.append(data)
@@ -581,8 +612,17 @@ def get_grupos_herarquia_labels():
     return res                                                                 
 
 
-def update_grupo(id='', **kwargs):
+def update_grupo(username=None,id='', **kwargs):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     grupo = session.query(Grupo).filter(Grupo.id == id).first()
     if grupo is None:
         return None
@@ -590,8 +630,8 @@ def update_grupo(id='', **kwargs):
     if grupo.eliminado:
         raise Exception("Grupo eliminado")
     
-    if grupo.suspendido:
-        raise Exception("Grupo suspendido")
+    """ if grupo.suspendido:
+        raise Exception("Grupo suspendido") """
 
 
     if 'nombre' in kwargs:
@@ -607,12 +647,12 @@ def update_grupo(id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    if 'id_user_actualizacion' in kwargs:
+    """ if 'id_user_actualizacion' in kwargs:
         usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
         if usuario is None:
             raise Exception("Usuario de actualizacion no encontrado")
         
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
+        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
 
     #print("Antes del if")
 
@@ -641,13 +681,15 @@ def update_grupo(id='', **kwargs):
                 id=uuid.uuid4(),
                 id_padre=kwargs['id_padre'],
                 id_hijo=id,
-                id_user_actualizacion=kwargs['id_user_actualizacion'],
+                #id_user_actualizacion=kwargs['id_user_actualizacion'],
+                id_user_actualizacion= id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
             )
             session.add(nueva_herarquia)
         else:
             herarquia.id_padre = kwargs['id_padre']
-            herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
+            #herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
+            herarquia.id_user_actualizacion = id_user_actualizacion
             herarquia.fecha_actualizacion = datetime.now()
 
     if 'usuario' in kwargs:
@@ -656,7 +698,8 @@ def update_grupo(id='', **kwargs):
         for usr in usuario_grupo:
             usr.eliminado=True
             usr.fecha_actualizacion=datetime.now()
-            usr.id_user_actualizacion=kwargs['id_user_actualizacion']
+            #usr.id_user_actualizacion=kwargs['id_user_actualizacion']
+            usr.id_user_actualizacion=id_user_actualizacion
             
         for usuario in kwargs['usuario']:
             encuentra_usuario = session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
@@ -674,14 +717,14 @@ def update_grupo(id='', **kwargs):
                     id_grupo=id,
                     id_usuario=usuario['id_usuario'],
                     fecha_actualizacion=datetime.now(),
-                    id_user_actualizacion=kwargs['id_user_actualizacion']
+                    id_user_actualizacion=id_user_actualizacion
                 )
                 session.add(nuevo_usuario_grupo)
             else:
                 #encuentra el usuario y lo reactiva 
                 usuario_grupo.eliminado = False
                 usuario_grupo.fecha_actualizacion = datetime.now()
-                usuario_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']    
+                usuario_grupo.id_user_actualizacion = herarquia.id_user_actualizacion    
                 
 
     session.commit()

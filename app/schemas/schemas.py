@@ -303,6 +303,12 @@ class UsuariosGroupOut(Schema):
     email = String()
     eliminado = Boolean()
     suspendido = Boolean()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
     
 ###############Tareas y Tipo de Tareas Base####################  
 class TipoTareaIn(Schema):
@@ -383,7 +389,11 @@ class TareaxGroupOut(Schema):
     #subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     fecha_creacion = String()
     fecha_inicio = String()
-    fecha_fin = String()        
+    fecha_fin = String()   
+
+class GroupsBaseIn(Schema):
+    id_grupo = String()
+    usuarios = Boolean()
 
 class GroupsBaseOut(Schema):
     id = String()
@@ -395,7 +405,9 @@ class GroupsBaseOut(Schema):
     path_name = String()
     is_parentless = Boolean()
     eliminado = Boolean()
+    suspendido = Boolean()
     is_base = Boolean()
+    usuarios = List(Nested(UsuariosGroupOut))
     
 class GroupIdOut(Schema):
     id = String()
@@ -449,7 +461,7 @@ class TareaIn(Schema):
     id_subtipo_tarea = String()
     eliminable = Boolean()
     #id_user_actualizacion = String()
-    fecha_inicio = String(required=True, validate=validate_fecha)
+    fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
@@ -458,16 +470,8 @@ class TareaIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ), default=1)
-    """  estado = fields.Integer(validate=validate.OneOf(
-        [estado.value for estado in EstadoEnum], 
-        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
-    )) """
     username = String()
 
-    """ caratula_expediente = String(validate=[
-        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
-        validate_char
-    ]) """
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
@@ -495,10 +499,72 @@ class TareaPatchIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
-    """ estado = fields.Integer(validate=validate.OneOf(
+
+class TareaPatchV2In(Schema):
+    id_tarea = String()
+    prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
+        validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
+    id_actuacion = String()
+    titulo = String(validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    id_expediente = String()
+    caratula_expediente = String(validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ])
+    id_tipo_tarea = String()
+    id_subtipo_tarea = String()
+    eliminable = Boolean()
+    id_user_actualizacion = String()
+    fecha_inicio = String(validate=validate_fecha)
+    fecha_fin = String(validate=validate_fecha)
+    plazo = Integer(default=0)
+    usuario = List(Nested(ListUsuario))
+    grupo = List(Nested(ListGrupo))
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
-    )) """
+    ))
+
+class IdTarea(Schema):
+    id = String()
+
+class TareaPatchLoteV2In(Schema):
+    upd_tarea = List(Nested(TareaPatchV2In))
+    
+class TareaPatchLoteIn(Schema):
+    tareas = List(Nested(IdTarea))
+    titulo = String()
+    prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
+        validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
+    id_actuacion = String()
+    id_expediente = String()
+    caratula_expediente = String(validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
+    ])
+    id_tipo_tarea = String()
+    id_subtipo_tarea = String()
+    eliminable = Boolean()
+    id_user_actualizacion = String()
+    fecha_inicio = String(validate=validate_fecha)
+    fecha_fin = String(validate=validate_fecha)
+    plazo = Integer(default=0)
+    usuario = List(Nested(ListUsuario))
+    grupo = List(Nested(ListGrupo))
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
+        [estado.value for estado in EstadoEnum], 
+        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
+    ))
+        
+class TareaPatchLoteOut(Schema):
+    tareas_error = List(String())
+    tareas_ok = List(Nested(IdTarea))
+
+
 
 class TipoNotaTareaOut(Schema):
     id = String()
@@ -694,14 +760,14 @@ class UsuarioCountOut(Schema):
 class TareaAllOut(Schema):
     id = String()
     #id_grupo = String()
-    #prioridad = Integer()
-    #estado = Integer()
-    prioridad = fields.Nested(PrioridadSchema, metadata={
+    prioridad = Integer()
+    estado = Integer()
+    """ prioridad = fields.Nested(PrioridadSchema, metadata={
         "description": "1 (alta), 2 (media), 3 (baja)"
     })
     estado = fields.Nested(EstadoSchema, metadata={
         "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    })
+    }) """
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
@@ -729,6 +795,10 @@ class TareaAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
+
+class TareaPatchLoteV2Out(Schema):
+    tareas_error = List(String())
+    tareas_ok = List(Nested(TareaAllOut))
 
 class TareaCountAllOut(Schema):
     count = Integer()
