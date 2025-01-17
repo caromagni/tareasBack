@@ -2,10 +2,17 @@
 from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, Date, ForeignKey, Integer, String, Table, Time, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.ext.declarative import declarative_base
+
 import uuid
-Base = declarative_base()
-metadata = Base.metadata
+
+# metadata = Base.metadata
+
+
+from sqlalchemy.orm import DeclarativeBase
+
+class Base(DeclarativeBase):
+    pass
 
 class Auditoria(Base):
     __tablename__ = 'auditoria'
@@ -213,17 +220,17 @@ class Label(Base):
     color = Column(String)
 
 
-t_multimedia = Table(
-    'multimedia', metadata,
-    Column('id', UUID, nullable=False),
-    Column('link', String),
-    Column('id_tipo_link', UUID),
-    Column('fecha_actualizacion', DateTime),
-    Column('id_user_actualizacion', UUID),
-    Column('id_entidad', UUID, nullable=False),
-    Column('nombre_entidad', String, nullable=False),
-    schema='tareas',
-)
+# t_multimedia = Table(
+#     'multimedia', metadata,
+#     Column('id', UUID, nullable=False),
+#     Column('link', String),
+#     Column('id_tipo_link', UUID),
+#     Column('fecha_actualizacion', DateTime),
+#     Column('id_user_actualizacion', UUID),
+#     Column('id_entidad', UUID, nullable=False),
+#     Column('nombre_entidad', String, nullable=False),
+#     schema='tareas',
+# )
 
 
 

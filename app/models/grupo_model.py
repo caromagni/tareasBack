@@ -132,7 +132,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     #fecha_hasta = datetime.strftime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
     
     cursor=None
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     # Subconsulta recursiva
     if path_name=='true':
         #print("Con consulta recursiva")
@@ -197,7 +197,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         result =[]
         cursor=session.execute(subquery)
     
-    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query= Grupo.query.filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
  
     if nombre is not "":
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))

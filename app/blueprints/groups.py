@@ -161,7 +161,8 @@ def get_all_grupobase(query_data: dict):
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
-            usuarios=request.args.get('usuarios')    
+            usuarios=request.args.get('usuarios')
+        print("before grupos_grupobase query")        
         res = get_all_base(id, usuarios)
         
         current_app.session.remove()
