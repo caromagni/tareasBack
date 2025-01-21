@@ -296,6 +296,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
 
 def get_all_base(id, usuarios=False):
     cursor=None
+   
     #session: scoped_session = current_app.session
     # Subconsulta recursiva
     subquery = text("""

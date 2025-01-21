@@ -7,14 +7,13 @@ from models.alch_model import Usuario, Rol, Label
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
-from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
 from common.auth import verificar_header
 import uuid
 import json
 from flask import jsonify
 from flask import g
-
+from alchemy_db import db
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
@@ -79,7 +78,7 @@ def get_labels(query_data: dict):
             "data": LabelAllOut().dump(res, many=True)
         }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -97,7 +96,7 @@ def get_label(id:str):
             raise DataNotFound("Label no encontrada")
 
         result = LabelIdOut().dump(res)
-        current_app.session.remove()
+        
         return result
     
     except DataNotFound as err:
@@ -172,7 +171,7 @@ def get_label_tarea(id_tarea:str):
 
         }
         print("result:",data) 
-        current_app.session.remove()
+        
         return data
         #return jsonify({
         #'status': 'success',
@@ -266,7 +265,7 @@ def get_active_labels_grupo(id_grupo:str):
 
             }
         print("result:",data) 
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:

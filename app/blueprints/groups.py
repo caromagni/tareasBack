@@ -10,7 +10,7 @@ from common.auth import verificar_header
 from common.rabbitmq_utils import *
 from flask import g
 from alchemy_db import db
-
+import traceback
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -162,11 +162,13 @@ def get_all_grupobase(query_data: dict):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
             usuarios=request.args.get('usuarios')
-        print("before grupos_grupobase query")        
+       
+                    
         res = get_all_base(id, usuarios)
      
         return res
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)        
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           

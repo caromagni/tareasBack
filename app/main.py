@@ -109,7 +109,7 @@ def create_app():
     #app.register_blueprint(actuacion_b)
     #app.register_blueprint(expediente_b)
     #app.register_blueprint(nota_b)
-    #app.register_blueprint(label_b)
+    app.register_blueprint(label_b)
 
     
     
