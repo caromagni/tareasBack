@@ -198,16 +198,23 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         cursor=db.session.execute(subquery)
     
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    
+    
+    # Build all filters in a list
+    filters = []
 
- 
-    if nombre is not "":
-        query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
+    if nombre:
+        filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
     if eliminado:
-        query = query.filter(Grupo.eliminado==eliminado)
+        filters.append(Grupo.eliminado == eliminado)
     if suspendido:
-        query = query.filter(Grupo.suspendido==suspendido)    
+        filters.append(Grupo.suspendido == suspendido)
 
-    total = len(query.all())
+    # Apply all filters at once
+    query = query.filter(*filters)
+
+    total = query.count()
+   
 
     if cursor:
         for reg in cursor:

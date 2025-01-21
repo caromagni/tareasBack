@@ -50,7 +50,7 @@ def get_grupos_by_usr(id_usuario: str):
                 "data":  GroupsUsuarioOut().dump(res, many=True)
         }
 
-        current_app.session.remove()    
+      
         #return res
         #return GroupsUsuarioOut().dump(res, many=True)
         return data
@@ -137,7 +137,7 @@ def get_usuario_id(id: str):
                 
                 "data":  UsuarioIdOut().dump(res, many=True)
         }
-        current_app.session.remove()
+        
         #return UsuarioIdOut().dump(res, many=True)
         return data
         
@@ -190,7 +190,7 @@ def get_usuario(query_data: dict):
                 "data": UsuarioOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -242,7 +242,7 @@ def get_usuarios_detalle(query_data: dict):
                 "data": UsuarioAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:

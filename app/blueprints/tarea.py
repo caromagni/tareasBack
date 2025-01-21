@@ -15,6 +15,7 @@ from common.auth import verificar_header
 import uuid
 import json
 from flask import g
+from alchemy_db import db
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 
@@ -36,18 +37,18 @@ def before_request():
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
 
     #tiempo_vencimiento = timedelta(minutes=30)
     tiempo_vencimiento = timedelta(days=360)
-    query_usr = session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
+    query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
     if query_usr is None:
         print("Usuario no encontrado")
         return False
     else:
         id_usuario = query_usr.id
         email = query_usr.email
-        query_rol = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
+        query_rol = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
         if len(query_rol)==0:
             #######Consultar CU Api Usher##########
             roles = get_roles(token)
@@ -98,13 +99,13 @@ def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
                         descripcion_ext=cu['descripcion_corta_cu'],
                         url_api=urlCU
                     )
-                    session.add(nuevo_rol)
-                    session.commit()
+                    db.session.add(nuevo_rol)
+                    db.session.commit()
                     print("Nuevo Rol Guardado:",nuevo_rol.id)
                 
-            session.commit()
+            db.session.commit()
             
-        query_permisos = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
+        query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
         
         if len(query_permisos)==0:
             print("No tiene permisos")
@@ -145,7 +146,7 @@ def get_tipoTareas(query_data: dict):
                 "data": TipoTareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
    
@@ -254,7 +255,7 @@ def get_subtipoTarea(query_data: dict):
                 "data": SubtipoTareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
    
@@ -405,7 +406,7 @@ def get_tareas(query_data: dict):
                 "data": TareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -501,7 +502,7 @@ def get_tareas_detalle(query_data: dict):
             grupos=request.args.get('grupos')
             grupos = grupos.split(",")
             print("Grupo:",grupos)    
-
+        print("right before the get_all_tarea_detalle call")
         res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
@@ -509,7 +510,7 @@ def get_tareas_detalle(query_data: dict):
                 "data": TareaAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -524,7 +525,7 @@ def get_tarea(id_tarea:str):
         if res is None or len(res) == 0:
             raise DataNotFound("Tarea no encontrada")
 
-        current_app.session.remove()
+        
         return res
     
     except DataNotFound as err:
@@ -541,7 +542,7 @@ def get_tarea_historia_usr(id_tarea:str):
         if res is None or len(res) == 0:
             raise DataNotFound("Tarea no encontrada")
 
-        current_app.session.remove()
+        
         return res
     
     except DataNotFound as err:
@@ -570,7 +571,7 @@ def get_tareas_grupo():
                 "data": TareaAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except DataNotFound as err:
@@ -586,7 +587,7 @@ def get_usuarios_asignados(tarea_id:str):
         print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
-        current_app.session.remove()
+        
         return res
 
     except Exception as err:
@@ -617,7 +618,7 @@ def post_usuario_tarea(json_data: dict):
                     "id_tarea": res.id_tarea,
                     "Msg":"Tarea asignada"
                 } 
-        current_app.session.remove()
+        
         return result
     
     except Exception as err:
