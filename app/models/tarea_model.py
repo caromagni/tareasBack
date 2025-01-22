@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from sqlalchemy import desc
 from flask import current_app
-
+import traceback
 from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 from common.utils import *
@@ -41,7 +41,8 @@ def es_habil(fecha):
     
 def calcular_fecha_vencimiento(fecha, plazo):
     print("calcula fecha vencimiento:", fecha, "-", plazo)
-    fecha_vencimiento = datetime.strptime(fecha, '%d/%m/%Y')
+    #fecha_vencimiento = datetime.strptime(fecha, '%d/%m/%Y')
+    fecha_vencimiento=fecha
     dias_agregados = 0
     while dias_agregados < plazo:
         fecha_vencimiento = fecha_vencimiento + timedelta(days=1)
@@ -113,10 +114,34 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
             raise Exception("Debe ingresar el tipo de tarea")
             
 
+
+
+#   /$$$$$$  /$$$$$$ /$$    /$$    /$$ /$$$$$$  /$$$$$$ 
+#  /$$__  $$|_  $$_/| $$   | $$   | $$|_  $$_/ /$$__  $$
+# | $$  \__/  | $$  | $$   | $$   | $$  | $$  | $$  \ $$
+# |  $$$$$$   | $$  | $$   |  $$ / $$/  | $$  | $$$$$$$$
+#  \____  $$  | $$  | $$    \  $$ $$/   | $$  | $$__  $$
+#  /$$  \ $$  | $$  | $$     \  $$$/    | $$  | $$  | $$
+# |  $$$$$$/ /$$$$$$| $$$$$$$$\  $/    /$$$$$$| $$  | $$
+#  \______/ |______/|________/ \_/    |______/|__/  |__/
+
+#we need to review this, as the calcular_fecha_vencimiento will modify the original fecha fin date.
+#we need to check if the fecha_fin is not None, and if it is, we need to calculate the fecha_fin
+#else, the fecha fin in must always match the fecha_inicio + plazo or it will be inconsistent
+
     ####################Calculo de plazo##################
     con_plazo=False
     if fecha_inicio is None:
         fecha_inicio = datetime.now().date()
+        
+
+   #format date from DD/MM/YYYY to DD-MM-YYYY
+    fecha_inicio = controla_fecha(fecha_inicio)
+
+    print("after format")
+    print(fecha_inicio)
+    
+
 
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
@@ -126,14 +151,17 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
             if query_inhabilidad is not None:
                 for row in query_inhabilidad:
                     plazo=plazo+1
-
+        print("calcular fecha")
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
-  
+   
     tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
        msg = "Tipo de tarea no encontrado"
        return None, msg
-
+    print("DATES FORMATS TO BE INSERTED")
+    print("fecha_inicio:", fecha_inicio)
+    print("fecha_fin:", fecha_fin)
+    print("fecha_creacion:", datetime.now())
     nuevoID_tarea=uuid.uuid4()
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
@@ -186,6 +214,7 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
 
     else:
         raise Exception ("Debe ingresar al menos un grupo")
+        
     #Asigna el grupo del usuario que crea la tarea por defecto
     
         """ if id_user_actualizacion is not None:

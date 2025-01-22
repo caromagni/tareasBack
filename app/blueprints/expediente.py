@@ -2,7 +2,7 @@ from apiflask import Schema, abort, APIBlueprint
 from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
-from sqlalchemy.orm import scoped_session
+
 from models.expediente_model import get_all_expedientes
 from schemas.schemas import  ExpedienteOut
 from common.error_handling import ValidationError
@@ -31,7 +31,7 @@ def get_expedientes():
                 "ErrorMsg": "No se encontraron datos de expedientes"
             }
             return result
-        current_app.session.remove()    
+            
         return res
 
     except Exception as err:

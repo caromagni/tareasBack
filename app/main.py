@@ -106,9 +106,9 @@ def create_app():
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
     #app.register_blueprint(fix_b)
-    #app.register_blueprint(actuacion_b)
-    #app.register_blueprint(expediente_b)
-    #app.register_blueprint(nota_b)
+    app.register_blueprint(actuacion_b)
+    app.register_blueprint(expediente_b)
+    app.register_blueprint(nota_b)
     app.register_blueprint(label_b)
 
     
