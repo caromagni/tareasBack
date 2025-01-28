@@ -654,7 +654,7 @@ def patch_lote_tareas(json_data: dict):
     try:
         username = g.get('username')
         print('username patch en lote:',username)
- 
+   
         res = update_lote_tareas(username, **json_data)
         
         if res is None:
