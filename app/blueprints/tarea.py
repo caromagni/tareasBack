@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut
+from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut, TareaPatchLoteV2Out, TareaPatchLoteV2In
 from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea, get_tarea_historia_usr_by_id
-from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, update_lote_tareas, get_tarea_grupo
+from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, update_lote_tareas, get_tarea_grupo, update_lote_tareas_v2
 from common.error_handling import DataError, DataNotFound, ValidationError, UnauthorizedError
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
@@ -671,6 +671,33 @@ def patch_lote_tareas(json_data: dict):
      
     except Exception as err:
         raise ValidationError(err)
+
+################V2 LOTE TAREAS####################
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.patch('/lote_tareas_v2')
+@tarea_b.input(TareaPatchLoteV2In)
+def patch_lote_tareasv2(json_data: dict):
+    try:
+        username = g.get('username')
+        print('username patch en lote:',username)
+
+        res = update_lote_tareas_v2(username, **json_data)
+        
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Tarea no encontrada",
+                    "ErrorMsg":"No se encontró la tarea a modificar"
+                } 
+            return result
+        
+        return TareaPatchLoteV2Out().dump(res)    
+        
+    
+    except Exception as err:
+        raise ValidationError(err)
+    
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.post('/tarea')

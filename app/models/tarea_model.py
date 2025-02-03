@@ -535,6 +535,39 @@ def update_tarea(id='', username=None, **kwargs):
     db.session.commit()
     return result
 
+def update_lote_tareas_v2(username=None, **kwargs):
+    print("update_tarea_V2")
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+        if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+        else:
+            if 'id_user_actualizacion' in kwargs:
+                verifica_usr_id(kwargs['id_user_actualizacion'])
+                id_user_actualizacion = kwargs['id_user_actualizacion']
+              
+            else:
+                raise Exception("Debe ingresar username o id_user_actualizacion")
+            
+    if 'upd_tarea' in kwargs:
+        upd_tarea = kwargs['upd_tarea']
+        datos = []
+        datos_error = []
+        for tareas_update in upd_tarea:
+           resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
+           if resp is None:
+                datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
+               
+           datos.append(resp)
+
+    result = {
+        "tareas_error": datos_error,
+        "tareas_ok": datos
+    }
+
+    return result
+
 def update_lote_tareas(username=None, **kwargs):
     
     print("update_tarea")

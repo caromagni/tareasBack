@@ -7,8 +7,6 @@ os.environ.setdefault('postgres_password', 'NOT_SET')
 class Config:
     # General configuration
     SLEEP=30
-    BORRAR = os.getenv('BORRAR')
-    print("BORRAR: ",BORRAR)
     AUTH_URL=os.getenv('AUTH_URL')
     REALM=os.getenv('REALM')
     # Database configuration
@@ -33,11 +31,10 @@ class Config:
             'name': 'localhost',
             'url': 'http://172.17.0.2:5005'
         },
-        
         {
             'name': 'localhost',
             'url': 'http://localhost:3000'
-        }
+        }    
     ]
     DESCRIPTION='APIs Sistema de Tareas'
     TITLE='APIs Tareas'
