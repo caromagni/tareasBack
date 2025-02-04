@@ -3,9 +3,9 @@ from datetime import datetime
 from common.error_handling import ValidationError
 
 #import requests
-from flask import request
+#from flask import request
 
-def get_user_ip():
+""" def get_user_ip():
     if request.headers.get('X-Forwarded-For'):
         # Si la solicitud ha pasado por un proxy, esta cabecera contendrá la IP real del cliente
         ip = request.headers['X-Forwarded-For'].split(',')[0]
@@ -13,7 +13,7 @@ def get_user_ip():
         # Si no hay proxy, se obtiene la IP directamente
         ip = request.remote_addr
     print("Funcion IP del usuario:", ip)
-    return ip 
+    return ip  """
 
 def controla_fecha(fecha_in=''):
     if (fecha_in == ""):
