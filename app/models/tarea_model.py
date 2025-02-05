@@ -426,7 +426,7 @@ def update_tarea(id_tarea='', username=None, **kwargs):
                     tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
 
             grupo = {
-                "id": existe_grupo.id,
+                "id_grupo": existe_grupo.id,
                 "nombre": existe_grupo.nombre,
                 "asignado": 'True',
                 "fecha_asisgnacion": datetime.now()
@@ -473,7 +473,7 @@ def update_tarea(id_tarea='', username=None, **kwargs):
                     asigna_usuario.id_user_actualizacion=id_user_actualizacion
 
             usuario = {
-                "id": existe_usuario.id,
+                "id_usuario": existe_usuario.id,
                 "nombre": existe_usuario.nombre,
                 "apellido": existe_usuario.apellido,
                 "asignado": 'True',
@@ -528,8 +528,8 @@ def update_tarea(id_tarea='', username=None, **kwargs):
         "fecha_actualizacion": tarea.fecha_actualizacion,
         "fecha_creacion": tarea.fecha_creacion,
         "id_grupo": tarea.id_grupo,
-        "grupos": grupos,
-        "usuarios": usuarios
+        "grupo": grupos,
+        "usuario": usuarios
     }
 
     db.session.commit()
