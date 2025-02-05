@@ -683,6 +683,7 @@ def patch_lote_tareasv2(json_data: dict):
 
         res = update_lote_tareas_v2(username, **json_data)
         
+        
         if res is None:
             result={
                     "valido":"fail",
