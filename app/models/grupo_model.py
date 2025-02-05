@@ -506,10 +506,11 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
             tareas=[]
            
             res_usuario = db.session.query(UsuarioGrupo.id_grupo,
+                                        UsuarioGrupo.eliminado.label("eliminado_usrgrupo"),
                                         Usuario.id, Usuario.nombre, 
-                                        Usuario.apellido, 
-                                        Usuario.eliminado, 
-                                        Usuario.suspendido, 
+                                        Usuario.apellido,
+                                        Usuario.eliminado.label("eliminado_usr"), 
+                                        Usuario.suspendido.label("suspendido_usr"), 
                                         Usuario.fecha_actualizacion
                         ).join(Usuario, Usuario.id==UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo==res.id).all()
             
@@ -520,9 +521,10 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                                        Tarea.id_subtipo_tarea,
                                       # Tarea.subtipo_tarea,
                                       # Tarea.tipo_tarea,
-                                       Tarea.eliminado,
+                                       Tarea.eliminado.label("tarea_eliminado"),
                                        Tarea.estado,
-                                       Tarea.fecha_actualizacion
+                                       Tarea.fecha_actualizacion,
+                                       TareaXGrupo.eliminado.label("eliminado_tareaxgrupo"),
                                        ).join(Tarea, Tarea.id==TareaXGrupo.id_tarea
                                                    ).filter(TareaXGrupo.id_grupo==res.id).all()
             
@@ -532,8 +534,9 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                         "apellido": row.apellido,
                         "nombre": row.nombre,
                         "id": row.id,
-                        "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
+                        "eliminado_grupo": row.eliminado_usrgrupo,
+                        "usr_eliminado": row.eliminado_usr,
+                        "usr_suspendido": row.suspendido_usr,
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
                     usuarios.append(usuario)
@@ -549,7 +552,8 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                         "estado": row.estado,
                         #"subtipo_tarea": row.subtipo_tarea,
                         #"tipo_tarea": row.tipo_tarea,
-                        "eliminado": row.eliminado,
+                        "eliminado_grupo": row.eliminado_tareaxgrupo,
+                        "tarea_eliminado": row.tarea_eliminado,
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
                     tareas.append(tarea)

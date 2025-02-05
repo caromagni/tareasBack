@@ -272,6 +272,7 @@ class TipoTarea(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_ext = Column(UUID)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
     # descripcion = Column(String, nullabe=False)
@@ -512,4 +513,13 @@ class Rol(Base):
     url_api = Column(String, nullable=False)
     descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
+
+class Parametros(Base):
+    __tablename__ = 'parametros'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    table = Column(String)
+    columns = Column(ARRAY(String))
+    activo = Column(Boolean)    
     

@@ -555,7 +555,7 @@ def update_lote_tareas_v2(username=None, **kwargs):
         datos = []
         datos_error = []
         for tareas_update in upd_tarea:
-           resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
+           resp = update_tarea(tareas_update['id'], username, **tareas_update)
            if resp is None:
                 datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
                
@@ -1091,7 +1091,7 @@ def get_tarea_by_id(id):
                         grupos_usr.append(grupo_usr)    
 
                 usuario = {
-                    "id": row.id,
+                    "id_usuario": row.id,
                     "nombre": row.nombre,
                     "apellido": row.apellido,
                     "asignada": not(row.reasignada),
@@ -1105,7 +1105,7 @@ def get_tarea_by_id(id):
         if res_grupos is not None:
             for row in res_grupos:
                 grupo = {
-                    "id": row.id,
+                    "id_grupo": row.id,
                     "nombre": row.nombre,
                     "asignada": not(row.reasignada),
                     "fecha_asignacion": row.fecha_asignacion
@@ -1156,8 +1156,8 @@ def get_tarea_by_id(id):
             "fecha_eliminacion": res.fecha_eliminacion,
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
-            "grupos": grupos,
-            "usuarios": usuarios,
+            "grupo": grupos,
+            "usuario": usuarios,
             "notas": notas,
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
@@ -1607,7 +1607,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         
         for row in res_usuarios:
             usuario = {
-                "id": row.id,
+                "id_usuario": row.id,
                 "nombre": row.nombre,
                 "apellido": row.apellido,
                 "asignada": not row.reasignada,
@@ -1624,7 +1624,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 
         for row in res_grupos:
             grupo = {
-                "id": row.id,
+                "id_grupo": row.id,
                 "nombre": row.nombre,
                 "asignada": not row.reasignada,
                 "fecha_asignacion": row.fecha_asignacion
@@ -1660,8 +1660,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
             "tiene_notas": res.tiene_notas_desnz,
-            "grupos": grupos,
-            "usuarios": usuarios,
+            "grupo": grupos,
+            "usuario": usuarios,
             "notas": [],  # Keeping notes as an empty list, as in original code
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
