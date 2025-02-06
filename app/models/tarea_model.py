@@ -371,7 +371,13 @@ def update_tarea(id_tarea='', username=None, **kwargs):
     if 'estado' in kwargs:
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
-        tarea.titulo = kwargs['titulo'].upper()  
+        tarea.titulo = kwargs['titulo'].upper() 
+    if 'fecha_inicio' in kwargs:
+        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        tarea.fecha_inicio = fecha_inicio
+    if 'fecha_fin' in kwargs:
+        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        tarea.fecha_fin = fecha_fin        
     
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
