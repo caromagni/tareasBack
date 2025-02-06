@@ -157,7 +157,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                                     ).order_by(Grupo.nombre).all()
             
             #Traigo las tareas asignadas al usuario
-            res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
+            """ res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
                                     ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id, TareaAsignadaUsuario.eliminado==False
                                     ).order_by(Tarea.titulo).all()
             
@@ -171,7 +171,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                         "id_tipo_tarea": row.id_tipo_tarea,
                         "eliminado": row.eliminado
                     }
-                    tareas.append(tarea)
+                    tareas.append(tarea) """
 
             if res_grupos is not None:
                 #print("Tiene grupos-", len(res_grupos))
@@ -200,8 +200,8 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "dni": res.dni,
                 "username": res.username,
                 "email": res.email,
-                "grupo": grupos,
-                "tareas": tareas
+                "grupo": grupos
+                #"tareas": tareas
             }
             results.append(result)
 
