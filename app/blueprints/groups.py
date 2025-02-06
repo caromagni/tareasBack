@@ -4,7 +4,7 @@ from flask import request, current_app
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
@@ -35,7 +35,7 @@ def before_request():
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
-@groups_b.output(GroupOut)
+@groups_b.output(GetGroupCountOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
@@ -55,7 +55,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @groups_b.get('/grupo')
 @groups_b.input(GroupGetIn,  location='query')
-@groups_b.output(GroupCountOut)
+@groups_b.output(GetGroupCountOut)
 def get_grupo(query_data: dict):
     
     try:
@@ -90,7 +90,7 @@ def get_grupo(query_data: dict):
         res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         data = {
                 "count": cant,
-                "data": GroupOut().dump(res, many=True)
+                "data": GetGroupOut().dump(res, many=True)
             }
         
         
@@ -204,7 +204,7 @@ def post_grupo(json_data: dict):
             res = MsgErrorOut().dump(result)
             return res
             
-        return GroupOut().dump(res)
+        return GetGroupOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)  

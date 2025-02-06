@@ -254,6 +254,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
 
     return result_paginated, total
+
 def encontrar_grupo_base(res_grupos, id):
     for r in res_grupos:
         if id == str(r['id_hijo']):
@@ -1087,8 +1088,7 @@ def delete_grupo(id,todos=False):
     return grupo
 
 def undelete_grupo(id):
-    #session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
+    grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
     grupo.eliminado = False

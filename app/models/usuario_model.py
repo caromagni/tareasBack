@@ -43,7 +43,7 @@ def get_usuario_by_id(id):
         if res_grupos is not None:
             for row in res_grupos:
                 grupo = {
-                        "id": row.id,
+                        "id_grupo": row.id,
                         "nombre": row.nombre,
                         "eliminado": row.eliminado,
                         "suspendido": row.suspendido,
@@ -66,7 +66,7 @@ def get_usuario_by_id(id):
             "fecha_actualizacion": res.fecha_actualizacion,
             "eliminado": res.eliminado,
             "suspendido": res.suspendido,
-            "grupos": grupos,
+            "grupo": grupos,
             "tareas": tareas
         }
 
@@ -162,7 +162,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
             
 
             if res_tareas is not None:
-                print("Tiene tareas-", len(res_tareas))
+                #print("Tiene tareas-", len(res_tareas))
                 for row in res_tareas:
                     tarea = {
                         "id": row.id,
@@ -173,10 +173,10 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                     tareas.append(tarea)
 
             if res_grupos is not None:
-                print("Tiene grupos-", len(res_grupos))
+                #print("Tiene grupos-", len(res_grupos))
                 for row in res_grupos:
                     grupo = {
-                        "id": row.id,
+                        "id_grupo": row.id,
                         "nombre": row.nombre,
                         "eliminado": row.eliminado,
                         "suspendido": row.suspendido,
@@ -199,7 +199,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "dni": res.dni,
                 "username": res.username,
                 "email": res.email,
-                "grupos": grupos,
+                "grupo": grupos,
                 "tareas": tareas
             }
             results.append(result)

@@ -218,8 +218,25 @@ class UsuarioDefaultOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
 
-class GroupOut(Schema):
+class GetGroupOut(Schema):
     id = String()
+    nombre = String()
+    descripcion = String()
+    id_user_actualizacion = String()
+    id_user_asignado_default = String()
+    user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    fecha_actualizacion = String()
+    fecha_creacion = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    eliminado = Boolean()
+    suspendido = Boolean()
+    path_name = String()
+    path = String()
+    level = Integer()
+    base = Boolean()
+
+class GroupOut(Schema):
+    id_grupo = String()
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
@@ -674,6 +691,10 @@ class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GroupOut, many=True)
 
+class GetGroupCountOut(Schema):
+    count = Integer()
+    data = Nested(GetGroupOut, many=True)
+
 class GroupCountAllOut(Schema):
     count = Integer()
     data = Nested(GroupAllOut, many=True)
@@ -750,7 +771,7 @@ class UsuarioAllOut(Schema):
     id_persona_ext = String()
     eliminado = Boolean()
     suspendido = Boolean()
-    grupos = List(Nested(GroupOut), only=("id", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
+    grupo = List(Nested(GroupOut), only=("id_grupo", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
     tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
     dni = String()
     email = String()
@@ -846,7 +867,7 @@ class UsuarioIdOut(Schema):
     email = String()
     username = String()
     tareas = List(Nested(TareaUsrOut, only=("id", "titulo", "reasignada")))
-    grupos = List(Nested(GroupOut, only=("id", "nombre")))
+    grupo = List(Nested(GroupOut, only=("id_grupo", "nombre")))
     
 
 class TipoTareaCountOut(Schema):
@@ -878,7 +899,7 @@ class UsuarioGroupTareaOut(Schema):
     apellido = String()
     asignada = Boolean()
     fecha_asignacion = String()
-    grupos_usr = List(Nested(GroupOut, only=("id", "nombre")))
+    grupos_usr = List(Nested(GroupOut, only=("id_grupo", "nombre")))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
@@ -890,7 +911,7 @@ class TareaIdOut(Schema):
     titulo = String()
     cuerpo = String()
     id_grupo = String()
-    grupo = Nested(GroupOut, only=("id", "nombre"))
+    grupo = Nested(GroupOut, only=("id_grupo", "nombre"))
     prioridad = Integer()
     prioridad = fields.Nested(PrioridadSchema, metadata={
         "description": "1 (alta), 2 (media), 3 (baja)"

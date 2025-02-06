@@ -1087,7 +1087,7 @@ def get_tarea_by_id(id):
                 if usuario_grupo is not None:
                     for usr_gr in usuario_grupo:
                         grupo_usr = {
-                           "id": usr_gr.id_grupo,
+                           "id_grupo": usr_gr.id_grupo,
                            "nombre": usr_gr.nombre
                         }
                         grupos_usr.append(grupo_usr)    
