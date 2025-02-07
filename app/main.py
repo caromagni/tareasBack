@@ -2,8 +2,13 @@
 from apiflask import APIFlask, HTTPTokenAuth
 from flask import send_from_directory
 from flask_cors import CORS
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+
+from flask_sqlalchemy import SQLAlchemy
+# from sqlalchemy.orm import DeclarativeBase
+
+#from sqlalchemy import create_engine
+#from sqlalchemy.orm import sessionmaker, scoped_session
+
 from blueprints.groups import groups_b
 from blueprints.usuario import usuario_b
 from blueprints.tarea import tarea_b
@@ -13,6 +18,7 @@ from blueprints.expediente import expediente_b
 from blueprints.nota import nota_b
 from blueprints.label import label_b
 from blueprints.fix_stuck_in_idle_connections import fix_b
+from blueprints.ai_assistant import ai_assistant
 from models.alch_model import Base
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config import Config
@@ -20,10 +26,14 @@ from common.error_handling import register_error_handlers
 from common.api_key import *
 import threading
 import logging
-#from common.rabbitmq_utils import *
 from common.chk_messagges import *
 import sys
+from models.alch_model import Base
+from alchemy_db import db
+
 sys.setrecursionlimit(100)
+
+
 
 def create_app():
 
@@ -68,14 +78,18 @@ def create_app():
     app.config['RABBITMQ_HOST'] = Config.RABBITMQ_HOST
     app.config['RABBITMQ_PORT'] = Config.RABBITMQ_PORT
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
-
+    
     # Initialize the SQLAlchemy engine and session
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True, pool_pre_ping=True)
-    Base.metadata.create_all(engine)
-    Session = scoped_session(sessionmaker(bind=engine))
+   
+
+    db.init_app(app)
+   
+    #engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False, pool_pre_ping=True)
+    #Base.metadata.create_all(engine)
+    #Session = scoped_session(sessionmaker(bind=engine))
     
     # Attach the session to the app instance
-    app.session = Session
+    #app.session = Session
 
     # Enable CORS
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
@@ -93,11 +107,12 @@ def create_app():
     app.register_blueprint(herarquia_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
-    app.register_blueprint(fix_b)
+    #app.register_blueprint(fix_b)
     app.register_blueprint(actuacion_b)
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
     app.register_blueprint(label_b)
+    app.register_blueprint(ai_assistant)
 
     
     
@@ -121,12 +136,12 @@ def create_app():
     register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    if uwsgi.worker_id() == 1:
-        thread = threading.Thread(target=chk_messagges, args=(app, Session))
+    """  if uwsgi.worker_id() == 1:
+        thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
         print("Hilo de recepción de mensajes iniciado.")
-
+ """
     return app
 
 

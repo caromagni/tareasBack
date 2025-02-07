@@ -7,14 +7,14 @@ from sqlalchemy.dialects import postgresql
 from apiflask.fields import Integer, String
 from flask import current_app
 from common.utils import *
-
+from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 
 
 def get_grupo_by_id(id):
 
-    session: scoped_session = current_app.session
-    res = session.query(Grupo).filter(Grupo.id == str(id)).first()
+    #session: scoped_session = current_app.session
+    res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
     #print("Grupo encontrado:", res.nombre)
     results=[]
     hijos=[]
@@ -24,14 +24,14 @@ def get_grupo_by_id(id):
 
     if res is not None:
         #Traigo el padre
-        res_padre = session.query(HerarquiaGrupoGrupo.id_padre, Grupo.nombre, Grupo.eliminado
+        res_padre = db.session.query(HerarquiaGrupoGrupo.id_padre, Grupo.nombre, Grupo.eliminado
                                   ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_padre).filter(HerarquiaGrupoGrupo.id_hijo == res.id).all()
         
         #Traigo los grupos hijos
-        res_hijos = session.query(HerarquiaGrupoGrupo.id_hijo, Grupo.nombre, Grupo.eliminado
+        res_hijos = db.session.query(HerarquiaGrupoGrupo.id_hijo, Grupo.nombre, Grupo.eliminado
                                   ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == res.id).all()
         
-        res_usuario = session.query(UsuarioGrupo.id,
+        res_usuario = db.session.query(UsuarioGrupo.id,
                                     UsuarioGrupo.id_grupo,
                                     UsuarioGrupo.id_usuario,
                                     Usuario.id,
@@ -40,7 +40,7 @@ def get_grupo_by_id(id):
                                     UsuarioGrupo.eliminado).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
         
         
-        res_tarea = session.query(Tarea.id, 
+        res_tarea = db.session.query(Tarea.id, 
                                     Tarea.titulo,
                                     Tarea.estado,
                                     Tarea.fecha_creacion,
@@ -134,7 +134,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     #fecha_hasta = datetime.strftime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
     
     cursor=None
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     # Subconsulta recursiva
     if path_name=='true':
         #print("Con consulta recursiva")
@@ -197,18 +197,26 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                 gt.path;""")
         
         result =[]
-        cursor=session.execute(subquery)
+        cursor=db.session.execute(subquery)
     
-    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
- 
-    if nombre is not "":
-        query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado:
-        query = query.filter(Grupo.eliminado==eliminado)
-    if suspendido:
-        query = query.filter(Grupo.suspendido==suspendido)    
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    
+    
+    # Build all filters in a list
+    filters = []
 
-    total = len(query.all())
+    if nombre:
+        filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
+    if eliminado:
+        filters.append(Grupo.eliminado == eliminado)
+    if suspendido:
+        filters.append(Grupo.suspendido == suspendido)
+
+    # Apply all filters at once
+    query = query.filter(*filters)
+
+    total = query.count()
+   
 
     if cursor:
         for reg in cursor:
@@ -250,6 +258,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     #calculate the milliseconds that took from start to finish
     print("TOTAL_PROCESSING_TIME:", datetime.now()-start_time)
     return result_paginated, total
+
 def encontrar_grupo_base(res_grupos, id):
     for r in res_grupos:
         if id == str(r['id_hijo']):
@@ -292,7 +301,8 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
 
 def get_all_base(id, usuarios=False):
     cursor=None
-    session: scoped_session = current_app.session
+   
+    #session: scoped_session = current_app.session
     # Subconsulta recursiva
     subquery = text("""
         WITH RECURSIVE GroupTree AS (
@@ -364,7 +374,7 @@ def get_all_base(id, usuarios=False):
         """)
 
     # Ejecutar la subconsulta
-    cursor = session.execute(subquery)
+    cursor = db.session.execute(subquery)
     
     result = cursor.fetchall()
     res_grupos=[]
@@ -374,7 +384,7 @@ def get_all_base(id, usuarios=False):
     for reg in result:
         usuarios_gr = []
         if usuarios==True:
-            res_usuarios = session.query(UsuarioGrupo.id,
+            res_usuarios = db.session.query(UsuarioGrupo.id,
                                         UsuarioGrupo.id_grupo,
                                         UsuarioGrupo.id_usuario,
                                         Usuario.id,
@@ -462,10 +472,10 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
     #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
     
-    session: scoped_session = current_app.session
-    total= session.query(Grupo).count()
+    #session: scoped_session = current_app.session
+    total= db.session.query(Grupo).count()
 
-    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query= db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
@@ -483,10 +493,10 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
     #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
     
-    session: scoped_session = current_app.session
-    total= session.query(Grupo).count()
+    #session: scoped_session = current_app.session
+    total= db.session.query(Grupo).count()
 
-    query= session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query= db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if nombre:
         query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
@@ -501,24 +511,26 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
             usuarios=[]
             tareas=[]
            
-            res_usuario = session.query(UsuarioGrupo.id_grupo,
+            res_usuario = db.session.query(UsuarioGrupo.id_grupo,
+                                        UsuarioGrupo.eliminado.label("eliminado_usrgrupo"),
                                         Usuario.id, Usuario.nombre, 
-                                        Usuario.apellido, 
-                                        Usuario.eliminado, 
-                                        Usuario.suspendido, 
+                                        Usuario.apellido,
+                                        Usuario.eliminado.label("eliminado_usr"), 
+                                        Usuario.suspendido.label("suspendido_usr"), 
                                         Usuario.fecha_actualizacion
                         ).join(Usuario, Usuario.id==UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo==res.id).all()
             
-            res_tareas = session.query(TareaXGrupo.id_grupo, 
+            res_tareas = db.session.query(TareaXGrupo.id_grupo, 
                                        Tarea.id, 
                                        Tarea.titulo, 
                                        Tarea.id_tipo_tarea,
                                        Tarea.id_subtipo_tarea,
                                       # Tarea.subtipo_tarea,
                                       # Tarea.tipo_tarea,
-                                       Tarea.eliminado,
+                                       Tarea.eliminado.label("tarea_eliminado"),
                                        Tarea.estado,
-                                       Tarea.fecha_actualizacion
+                                       Tarea.fecha_actualizacion,
+                                       TareaXGrupo.eliminado.label("eliminado_tareaxgrupo"),
                                        ).join(Tarea, Tarea.id==TareaXGrupo.id_tarea
                                                    ).filter(TareaXGrupo.id_grupo==res.id).all()
             
@@ -528,8 +540,9 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                         "apellido": row.apellido,
                         "nombre": row.nombre,
                         "id": row.id,
-                        "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
+                        "eliminado_grupo": row.eliminado_usrgrupo,
+                        "usr_eliminado": row.eliminado_usr,
+                        "usr_suspendido": row.suspendido_usr,
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
                     usuarios.append(usuario)
@@ -545,7 +558,8 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
                         "estado": row.estado,
                         #"subtipo_tarea": row.subtipo_tarea,
                         #"tipo_tarea": row.tipo_tarea,
-                        "eliminado": row.eliminado,
+                        "eliminado_grupo": row.eliminado_tareaxgrupo,
+                        "tarea_eliminado": row.tarea_eliminado,
                         "fecha_actualizacion": row.fecha_actualizacion
                     }
                     tareas.append(tarea)
@@ -571,13 +585,13 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/20
 
 
 def get_all_herarquia():
-    session: scoped_session = current_app.session
-    res =session.query(HerarquiaGrupoGrupo).all()
+    #session: scoped_session = current_app.session
+    res =db.session.query(HerarquiaGrupoGrupo).all()
     return res
 
 def get_grupos_herarquia():
-    session: scoped_session = current_app.session
-    res=session.query(Grupo.id, Grupo.nombre, HerarquiaGrupoGrupo.id_hijo, HerarquiaGrupoGrupo.id_padre)\
+    #session: scoped_session = current_app.session
+    res=db.session.query(Grupo.id, Grupo.nombre, HerarquiaGrupoGrupo.id_hijo, HerarquiaGrupoGrupo.id_padre)\
         .join(HerarquiaGrupoGrupo, Grupo.id == HerarquiaGrupoGrupo.id_padre)\
         .all()
     #print(len(res))
@@ -586,10 +600,10 @@ def get_grupos_herarquia():
 def get_grupos_herarquia_labels():
     GrupoPadre = aliased(Grupo)
     GrupoHijo = aliased(Grupo)
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     
     # Realizar la consulta con los joins necesarios
-    res = session.query(
+    res = db.session.query(
             Grupo.id.label("id"),
             Grupo.id_user_actualizacion.label("user_actualizacion"),
             Grupo.fecha_actualizacion.label("fecha_actualizacion"),
@@ -613,7 +627,7 @@ def get_grupos_herarquia_labels():
 
 
 def update_grupo(username=None,id='', **kwargs):
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -623,7 +637,7 @@ def update_grupo(username=None,id='', **kwargs):
     else:
         raise Exception("Usuario no ingresado")
     
-    grupo = session.query(Grupo).filter(Grupo.id == id).first()
+    grupo = db.session.query(Grupo).filter(Grupo.id == id).first()
     if grupo is None:
         return None
     
@@ -639,7 +653,7 @@ def update_grupo(username=None,id='', **kwargs):
     if 'descripcion' in kwargs:
         grupo.descripcion = kwargs['descripcion']
     if 'suspendido' in kwargs:
-        grupo_con_tarea= session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
+        grupo_con_tarea= db.session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
         if len(grupo_con_tarea)>0:
             raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
         grupo.suspendido = kwargs['suspendido']
@@ -661,11 +675,11 @@ def update_grupo(username=None,id='', **kwargs):
         if(kwargs['id_user_asignado_default']==None):
              grupo.id_user_asignado_default = None
         else:     
-            usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()
+            usuario= db.session.query(Usuario).filter(Usuario.id==kwargs['id_user_asignado_default'], Usuario.eliminado==False).first()
             if usuario is None:
                 raise Exception("Usuario asignado default no encontrado")
             
-            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==kwargs['id_user_asignado_default'], UsuarioGrupo.eliminado==False).first()
+            usuario_grupo = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==kwargs['id_user_asignado_default'], UsuarioGrupo.eliminado==False).first()
             if usuario_grupo is None:
                 raise Exception("Usuario por defecto no asignado al grupo")
 
@@ -675,7 +689,7 @@ def update_grupo(username=None,id='', **kwargs):
     grupo.fecha_actualizacion = datetime.now()
     
     if 'id_padre' in kwargs:
-        herarquia = session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).first()      
+        herarquia = db.session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).first()      
         if herarquia is None:
             nueva_herarquia = HerarquiaGrupoGrupo(
                 id=uuid.uuid4(),
@@ -685,7 +699,7 @@ def update_grupo(username=None,id='', **kwargs):
                 id_user_actualizacion= id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
             )
-            session.add(nueva_herarquia)
+            db.session.add(nueva_herarquia)
         else:
             herarquia.id_padre = kwargs['id_padre']
             #herarquia.id_user_actualizacion = kwargs['id_user_actualizacion']
@@ -694,7 +708,7 @@ def update_grupo(username=None,id='', **kwargs):
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para ese grupo
-        usuario_grupo=session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == id)
+        usuario_grupo=db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == id)
         for usr in usuario_grupo:
             usr.eliminado=True
             usr.fecha_actualizacion=datetime.now()
@@ -702,13 +716,13 @@ def update_grupo(username=None,id='', **kwargs):
             usr.id_user_actualizacion=id_user_actualizacion
             
         for usuario in kwargs['usuario']:
-            encuentra_usuario = session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
+            encuentra_usuario = db.session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
             if encuentra_usuario is None:
                 raise Exception("Usuario no encontrado:" + usuario['id_usuario'])
             if encuentra_usuario.eliminado:
                 raise Exception("Usuario eliminado:" + usuario['id_usuario'])
             
-            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==usuario['id_usuario']).first()
+            usuario_grupo = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo==id, UsuarioGrupo.id_usuario==usuario['id_usuario']).first()
             
             if usuario_grupo is None:
                 #Agrego el usuario al grupo
@@ -719,7 +733,7 @@ def update_grupo(username=None,id='', **kwargs):
                     fecha_actualizacion=datetime.now(),
                     id_user_actualizacion=id_user_actualizacion
                 )
-                session.add(nuevo_usuario_grupo)
+                db.session.add(nuevo_usuario_grupo)
             else:
                 #encuentra el usuario y lo reactiva 
                 usuario_grupo.eliminado = False
@@ -727,11 +741,11 @@ def update_grupo(username=None,id='', **kwargs):
                 usuario_grupo.id_user_actualizacion = herarquia.id_user_actualizacion    
                 
 
-    session.commit()
+    db.session.commit()
     return grupo
 
 def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -742,12 +756,12 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         raise Exception("Usuario no ingresado")
     
     if id_user_asignado_default is not None:
-        usuario = session.query(Usuario).filter(Usuario.id==id_user_asignado_default, Usuario.eliminado==False).first()
+        usuario = db.session.query(Usuario).filter(Usuario.id==id_user_asignado_default, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de asignación de tareas no encontrado")
 
     if id_user_actualizacion is not None:
-        usuario = session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
+        usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
 
@@ -764,7 +778,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now()
     )
-    session.add(nuevo_grupo)
+    db.session.add(nuevo_grupo)
 
     #Agregar el usuario asignado por defecto al grupo
     if id_user_asignado_default is not None:
@@ -776,7 +790,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
             fecha_actualizacion=datetime.now(),
             id_user_actualizacion=id_user_actualizacion
         )
-        session.add(nuevo_usuario_grupo)
+        db.session.add(nuevo_usuario_grupo)
 
     if id_padre is not '':        
         nueva_herarquia = HerarquiaGrupoGrupo(
@@ -786,16 +800,16 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
             id_user_actualizacion=id_user_actualizacion,
             fecha_actualizacion=datetime.now()
         )
-        session.add(nueva_herarquia)
+        db.session.add(nueva_herarquia)
     
-    session.commit()
+    db.session.commit()
     
     return nuevo_grupo
 
 
 def get_usuarios_by_grupo(id):
-    session: scoped_session = current_app.session
-    res = session.query(Grupo.id.label("id_grupo"),
+    #session: scoped_session = current_app.session
+    res = db.session.query(Grupo.id.label("id_grupo"),
                   Grupo.nombre.label("nombre_grupo"),
                   Usuario.nombre.label("nombre"),
                   Usuario.apellido.label("apellido"),
@@ -813,7 +827,7 @@ def get_usuarios_by_grupo(id):
 
 
 def get_grupos_recursivo():
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     
     
     query = text("""WITH RECURSIVE GroupTree AS (
@@ -873,14 +887,14 @@ def get_grupos_recursivo():
             GroupTree gt
         ORDER BY 
             gt.path;""")
-    res = session.execute(query).fetchall()
+    res = db.session.execute(query).fetchall()
     return res
-
+ 
 
 
 def get_grupos_all(eliminado=None):
     #print("eliminado:", eliminado)
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
     query1 = text("""
   WITH RECURSIVE GroupTree AS (
     -- Anchor member: Start with all parentless nodes
@@ -1006,17 +1020,17 @@ ORDER BY gt.path;
 
     # Ejecutar la consulta con el parámetro `eliminado` si es necesario
     if eliminado is not None:
-        res = session.execute(query, {"eliminado": eliminado}).fetchall()
+        res = db.session.execute(query, {"eliminado": eliminado}).fetchall()
     else:
-        res = session.execute(query).fetchall()
+        res = db.session.execute(query).fetchall()
     
     return res
 
 
 def eliminar_grupo_recursivo(id):
 
-    session: scoped_session = current_app.session
-    hijos = session.query(Grupo.id,
+    #session: scoped_session = current_app.session
+    hijos = db.session.query(Grupo.id,
                   Grupo.eliminado,          
                   HerarquiaGrupoGrupo.id_padre,
                   HerarquiaGrupoGrupo.id_hijo
@@ -1029,21 +1043,21 @@ def eliminar_grupo_recursivo(id):
     for hijo in hijos:
         if not hijo.eliminado:
             eliminar_grupo_recursivo(hijo.id_hijo)
-            grupo = session.query(Grupo).filter(Grupo.id == hijo.id_hijo, Grupo.eliminado==False).first()
+            grupo = db.session.query(Grupo).filter(Grupo.id == hijo.id_hijo, Grupo.eliminado==False).first()
             if grupo is not None:
                 grupo.eliminado = True
-                session.add(grupo)
+                db.session.add(grupo)
 
     
 
 def delete_grupo(id,todos=False):
     #print("Borrando grupo con id:", id)
-    session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+    #session = current_app.session
+    grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
     
-    grupo_con_tarea= session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
+    grupo_con_tarea= db.session.query(TareaXGrupo).join(Tarea, Tarea.id==TareaXGrupo.id_tarea).filter(TareaXGrupo.id_grupo == id, Tarea.estado==1 or Tarea.estado==1).all()
     if len(grupo_con_tarea)>0:
         raise Exception("No se puede eliminar el grupo. El grupo tiene tareas sin cerrar")
        
@@ -1051,14 +1065,14 @@ def delete_grupo(id,todos=False):
         # Eliminar todos los hijos
         #print("Eliminar todos los hijos")
         eliminar_grupo_recursivo(id)
-        grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+        grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
         if grupo:
             grupo.eliminado = True
 
     else:    
         # Eliminar solo el grupo
         #print("Eliminar solo el grupo")
-        tiene_hijos = session.query(HerarquiaGrupoGrupo).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == id, Grupo.eliminado==False).all()
+        tiene_hijos = db.session.query(HerarquiaGrupoGrupo).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == id, Grupo.eliminado==False).all()
         #print("Tiene hijos:", tiene_hijos)
         if len(tiene_hijos)>0:
             #for hijo in tiene_hijos:
@@ -1066,7 +1080,7 @@ def delete_grupo(id,todos=False):
 
             raise Exception("El grupo tiene hijos")
                     
-        grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+        grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
         if grupo:
             grupo.eliminado = True
         else:
@@ -1074,15 +1088,16 @@ def delete_grupo(id,todos=False):
             raise Exception("No se encontró el grupo a eliminar")
             
 
-    session.commit()
+    db.session.commit()
 
     return grupo
 
 def undelete_grupo(id):
-    session = current_app.session
-    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
+    grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
     grupo.eliminado = False
-    session.commit()
+    db.session.commit()
     return grupo    
+
+

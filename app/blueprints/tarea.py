@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut, TareaPatchLoteV2In, TareaPatchLoteV2Out
+from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut, TareaPatchLoteV2Out, TareaPatchLoteV2In
 from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea, get_tarea_historia_usr_by_id
 from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, update_lote_tareas, get_tarea_grupo, update_lote_tareas_v2
 from common.error_handling import DataError, DataNotFound, ValidationError, UnauthorizedError
@@ -15,6 +15,7 @@ from common.auth import verificar_header
 import uuid
 import json
 from flask import g
+from alchemy_db import db
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 
@@ -36,18 +37,18 @@ def before_request():
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
 
     #tiempo_vencimiento = timedelta(minutes=30)
     tiempo_vencimiento = timedelta(days=360)
-    query_usr = session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
+    query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
     if query_usr is None:
         print("Usuario no encontrado")
         return False
     else:
         id_usuario = query_usr.id
         email = query_usr.email
-        query_rol = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
+        query_rol = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
         if len(query_rol)==0:
             #######Consultar CU Api Usher##########
             roles = get_roles(token)
@@ -98,13 +99,13 @@ def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
                         descripcion_ext=cu['descripcion_corta_cu'],
                         url_api=urlCU
                     )
-                    session.add(nuevo_rol)
-                    session.commit()
+                    db.session.add(nuevo_rol)
+                    db.session.commit()
                     print("Nuevo Rol Guardado:",nuevo_rol.id)
                 
-            session.commit()
+            db.session.commit()
             
-        query_permisos = session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
+        query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
         
         if len(query_permisos)==0:
             print("No tiene permisos")
@@ -145,7 +146,7 @@ def get_tipoTareas(query_data: dict):
                 "data": TipoTareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
    
@@ -254,7 +255,7 @@ def get_subtipoTarea(query_data: dict):
                 "data": SubtipoTareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
    
@@ -405,7 +406,7 @@ def get_tareas(query_data: dict):
                 "data": TareaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -501,7 +502,7 @@ def get_tareas_detalle(query_data: dict):
             grupos=request.args.get('grupos')
             grupos = grupos.split(",")
             print("Grupo:",grupos)    
-
+        print("right before the get_all_tarea_detalle call")
         res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
@@ -509,7 +510,7 @@ def get_tareas_detalle(query_data: dict):
                 "data": TareaAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -524,7 +525,7 @@ def get_tarea(id_tarea:str):
         if res is None or len(res) == 0:
             raise DataNotFound("Tarea no encontrada")
 
-        current_app.session.remove()
+        
         return res
     
     except DataNotFound as err:
@@ -541,7 +542,7 @@ def get_tarea_historia_usr(id_tarea:str):
         if res is None or len(res) == 0:
             raise DataNotFound("Tarea no encontrada")
 
-        current_app.session.remove()
+        
         return res
     
     except DataNotFound as err:
@@ -570,7 +571,7 @@ def get_tareas_grupo():
                 "data": TareaAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except DataNotFound as err:
@@ -586,7 +587,7 @@ def get_usuarios_asignados(tarea_id:str):
         print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
-        current_app.session.remove()
+        
         return res
 
     except Exception as err:
@@ -617,7 +618,7 @@ def post_usuario_tarea(json_data: dict):
                     "id_tarea": res.id_tarea,
                     "Msg":"Tarea asignada"
                 } 
-        current_app.session.remove()
+        
         return result
     
     except Exception as err:
@@ -653,7 +654,7 @@ def patch_lote_tareas(json_data: dict):
     try:
         username = g.get('username')
         print('username patch en lote:',username)
-
+   
         res = update_lote_tareas(username, **json_data)
         
         if res is None:
@@ -667,9 +668,37 @@ def patch_lote_tareas(json_data: dict):
         
         return TareaPatchLoteOut().dump(res)    
         
+     
+    except Exception as err:
+        raise ValidationError(err)
+
+################V2 LOTE TAREAS####################
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.patch('/lote_tareas_v2')
+@tarea_b.input(TareaPatchLoteV2In)
+def patch_lote_tareasv2(json_data: dict):
+    try:
+        username = g.get('username')
+        print('username patch en lote:',username)
+
+        res = update_lote_tareas_v2(username, **json_data)
+        
+        
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Tarea no encontrada",
+                    "ErrorMsg":"No se encontró la tarea a modificar"
+                } 
+            return result
+        
+        return TareaPatchLoteV2Out().dump(res)    
+        
     
     except Exception as err:
         raise ValidationError(err)
+    
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/lote_tareas_v2')

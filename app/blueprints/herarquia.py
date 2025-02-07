@@ -37,7 +37,7 @@ def get_gruposh():
                 "data": GroupHOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return res
        
     
@@ -64,7 +64,7 @@ def get_niveles():
         res = {
                 "data": HerarquiaOut().dump(res, many=True)
             }
-        current_app.session.remove()
+        
         return res 
  
     
@@ -95,7 +95,7 @@ def herarquias_all_(query_data: dict):
         res = {
                 "data": HerarquiaAllOut().dump(res, many=True)
             }
-        current_app.session.remove()
+        
         return res 
  
     

@@ -1,16 +1,20 @@
 # auditoria.py
 from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
+from alchemy_db import db
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
-import json
 import uuid
 from common.functions import get_user_ip
+#from flask import request, has_request_context
+
+
+
 
 ### modelos para los cuales se generará la auditoría ###
 modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo, TareaXGrupo, TareaAsignadaUsuario} 
-
+#session = db.session
 """ tablas_auditoria = {
     'tarea': Auditoria_Tarea,
     'grupo': Auditoria_Grupo,
@@ -43,17 +47,14 @@ def convert_to_serializable(value):
 
 def get_serializable_dict(instance):
     return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
-    """  try:
-        return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
-    except Exception as e:
-        return ""     """
-    #return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
-
-@event.listens_for(scoped_session, 'after_flush')
+    
+#@event.listens_for(scoped_session, 'after_flush')
+@event.listens_for(db.session, 'after_flush')
 def after_flush(session, flush_context):
     print("entra a after_flush")
     ip = get_user_ip()
-    
+    #ip='172.17.0.1'
+    print("ip:", ip)
     def get_nombre_tabla(modelo):
         print("modelo:", modelo)
         match modelo:
@@ -98,7 +99,7 @@ def after_flush(session, flush_context):
                 
             )
             print("auditoria:", auditoria)
-            session.add(auditoria)
+            db.session.add(auditoria)
             
     for instance in session.dirty: # Update
         if isinstance(instance, tuple(modelos)):  
@@ -123,6 +124,7 @@ def after_flush(session, flush_context):
                 usuario_actualizacion=get_user_actualizacion(instance),
                 ip_usuario=ip
             )
+            print("auditoria UPDATE:", auditoria)
             session.add(auditoria)
 
     for instance in session.deleted:
@@ -145,4 +147,4 @@ def after_flush(session, flush_context):
                 usuario_actualizacion=get_user_actualizacion(instance),
                 ip_usuario=ip
             )
-            session.add(auditoria)
+            db.session.add(auditoria)

@@ -2,18 +2,16 @@ import pika
 import json
 import os
 from flask import current_app
-from sqlalchemy.orm import scoped_session
+from alchemy_db import db
 from models.alch_model import Parametros, Usuario, TipoTarea, SubtipoTarea
-from common.functions import get_user_ip
 import requests
-from time import sleep
 import uuid
 from datetime import datetime
 
 def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("Checking updates...")
 
-        res = session.query(Parametros).filter(Parametros.table == entity).first()
+        res = db.session.query(Parametros).filter(Parametros.table == entity).first()
         if not res:
             print(f"No se encontró la tabla {entity} en los parámetros.")
             #raise Exception(f"No se encontró la tabla {entity} en los parámetros para actualizar.")
@@ -48,16 +46,27 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                 
                 print("valid_attributes: ", valid_attributes)
                 if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
-                    query = session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
+                    query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':
-                    query = session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
-                if query is not None:
-                    print("Registro encontrado en " + entity + ", actualizando..." + entity_id)
-                    for key, value in valid_attributes.items():
-                        if key != 'id':
-                            setattr(query, key, value)
-                    session.commit()
-                    print("Actualizaciones realizadas.")
+                    query = db.session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
+                if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
+                    if query is not None:
+                        print("Registro encontrado en " + entity + ", actualizando..." + entity_id)
+                        for key, value in valid_attributes.items():
+                            if key != 'id':
+                                print("key: ", key, "- value: ", value)
+                                setattr(query, key, value)
+                            if key == 'descripcion':
+                                query.nombre = value
+                            if key == 'id':
+                                query.id_ext = value
+                            if key == 'habilitado':
+                                query.eliminado = not(value)  
+                            if key == 'descripcion_corta':
+                                query.codigo_humano = value          
+                        query.fecha_actualizacion = datetime.now()
+                        db.session.commit()
+                        print("Actualizaciones realizadas.")
                 else:
                     #Hacer un insert
                     #if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
@@ -73,8 +82,8 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                             query.id_persona_ext = entity_id
                             query.fecha_actualizacion = datetime.now()
 
-                        session.add(query)    
-                        session.commit()
+                        db.session.add(query)    
+                        db.session.commit()
                         print("Registro creado.")
 
             except Exception as e:
@@ -118,8 +127,7 @@ class RabbitMQHandler:
         print(f" [x] Received {body}")
         self.objeto = json.loads(body.decode('utf-8'))
         with current_app.app_context():
-            session = current_app.session
-            self.process_message(session)
+            self.process_message(db.session)
 
     def process_message(self, session):
         if not self.objeto:
@@ -134,7 +142,6 @@ class RabbitMQHandler:
         check_updates(session, entity, action, entity_id, url)
 
 
-
     def start_consuming(self):
         if not self.channel:
             print("No se puede consumir mensajes sin conexión.")
@@ -147,8 +154,6 @@ class RabbitMQHandler:
         except KeyboardInterrupt:
             print("Consumo de mensajes detenido manualmente.")
             raise Exception("Consumo de mensajes detenido manualmente.")
-        """finally:
-            if self.connection:
-                self.connection.close() """
+       
     
 

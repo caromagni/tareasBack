@@ -59,7 +59,7 @@ def get_tipoNotas(query_data: dict):
                 "data": TipoNotaOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
    
@@ -159,7 +159,7 @@ def get_notas(query_data: dict):
             "data": NotaAllOut().dump(res, many=True)
         }
         
-        current_app.session.remove()
+        
         return data
     
     except ValidationError as err:
@@ -181,7 +181,7 @@ def get_nota(id:str):
             raise DataNotFound("Nota no encontrada")
 
         result = NotaIdOut().dump(res)
-        current_app.session.remove()
+        
         return result
     
     except DataNotFound as err:
