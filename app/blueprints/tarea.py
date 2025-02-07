@@ -700,32 +700,6 @@ def patch_lote_tareasv2(json_data: dict):
         raise ValidationError(err)
     
 
-@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@tarea_b.patch('/lote_tareas_v2')
-@tarea_b.input(TareaPatchLoteV2In)
-def patch_lote_tareasv2(json_data: dict):
-    try:
-        username = g.get('username')
-        print('username patch en lote:',username)
-
-        res = update_lote_tareas_v2(username, **json_data)
-        
-        if res is None:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Tarea no encontrada",
-                    "ErrorMsg":"No se encontró la tarea a modificar"
-                } 
-            return result
-        
-        return TareaPatchLoteV2Out().dump(res)    
-        
-    
-    except Exception as err:
-        raise ValidationError(err)
-    
-
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.post('/tarea')
 @tarea_b.input(TareaIn)

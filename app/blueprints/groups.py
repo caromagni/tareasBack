@@ -271,7 +271,7 @@ def restaura_grupo(id: str):
 #         return res
     
 #   except Exception as err:
-#         raise ValidationError(err)
+#      git    raise ValidationError(err)
   
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(GroupsBaseIn, location='query')
