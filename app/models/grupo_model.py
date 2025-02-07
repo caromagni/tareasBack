@@ -247,6 +247,8 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
 
     return result_paginated, total
 def encontrar_grupo_base(res_grupos, id):
+    print("ID:", id)
+    print("Res grupos:", res_grupos)
     for r in res_grupos:
         if id == str(r['id_hijo']):
            # print("############ENCONTRADO##############")
@@ -368,7 +370,7 @@ def get_all_base(id, usuarios=False):
     for reg in result:
         print(reg.path_name)
         usuarios_gr = []
-        if usuarios==True:
+        if usuarios == "true":
             res_usuarios = session.query(UsuarioGrupo.id,
                                         UsuarioGrupo.id_grupo,
                                         UsuarioGrupo.id_usuario,
@@ -450,6 +452,11 @@ def get_all_base(id, usuarios=False):
 
    
     #return res, i
+
+def get_grupo_base(grupos, id):   
+    grupo_base=encontrar_grupo_base(grupos, id)
+    return grupo_base
+
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"

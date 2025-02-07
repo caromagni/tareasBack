@@ -1,10 +1,10 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from common.api_key import *
 from flask import request, current_app
-from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
+from models.grupo_model import get_grupo_base, get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
+from schemas.schemas import GroupBaseOut, GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
@@ -255,3 +255,37 @@ def restaura_grupo(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    
+# ##################Grupo Base####################
+# @groups_b.doc(description='Buscar el grupo base', summary='Grupo Base', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
+# @groups_b.get('/get_grupo_base/<string:id>')
+# def getGrupoBase(id: str):
+#   try:
+#         grupos = []
+#         grupos.append(id)
+#         print(grupos)
+#         res = get_grupo_base(grupos, id)
+        
+#         return res
+    
+#   except Exception as err:
+#         raise ValidationError(err)
+  
+@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.input(GroupsBaseIn, location='query')
+@groups_b.output(GroupBaseOut)
+@groups_b.get('/get_grupo_base/<string:id>')
+def getGrupoBase(id: str):
+    try:
+        id_grupo=None
+        usuarios =False
+        if(request.args.get('id_grupo') is not None):
+            id=request.args.get('id_grupo')
+        if(request.args.get('usuarios') is not None):
+            usuarios=request.args.get('usuarios')    
+        res = get_all_base(id, usuarios)
+        
+        current_app.session.remove()
+        return res
+    except Exception as err:
+        raise ValidationError(err)        
