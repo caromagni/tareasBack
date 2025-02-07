@@ -4,15 +4,16 @@ from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaOut
 from common.error_handling import ValidationError
 from sqlalchemy.orm import scoped_session, aliased
-fix_b = APIBlueprint('fix_b', __name__)
+from alchemy_db import db
 from flask import current_app
 from sqlalchemy import text
 
+fix_b = APIBlueprint('fix_b', __name__)
 @fix_b.get('/fix_stuck')
 def fix_bb():
-    session: scoped_session = current_app.session
+    #session: scoped_session = current_app.session
         #res=get_grupos_herarquia()
-    result_raw = session.execute(text('''SELECT 
+    result_raw = db.session.execute(text('''SELECT 
     pg_terminate_backend(pid) 
 FROM 
     pg_stat_activity 

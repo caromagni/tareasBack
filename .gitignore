@@ -138,6 +138,3 @@ dmypy.json
 .env.*
 export_creds.sh
 start.sh
-uwsgi.dev-localhost.ini
-#instala_sops.sh
-

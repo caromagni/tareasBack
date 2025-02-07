@@ -35,22 +35,22 @@ def before_request():
 def get_grupos_by_usr(id_usuario: str):
     try:
         res = get_grupos_by_usuario(id_usuario)
-        print("res:",res)
+        """  print("res:",res)
         if res is None or len(res)==0:
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
                     "ErrorDesc":"Usuario sin grupos",
-                    "ErrorMsg":"No se encontraron datos de usuarios"
+                    "ErrorMsg":"No se encontraron datos de grupos para este usuario"
                 } 
-            return result
+            return result """
         
         data = {
                 
                 "data":  GroupsUsuarioOut().dump(res, many=True)
         }
 
-        current_app.session.remove()    
+      
         #return res
         #return GroupsUsuarioOut().dump(res, many=True)
         return data
@@ -111,6 +111,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
                 
                 "data": UsuarioOut().dump(res)
         }
+
         #return UsuarioOut().dump(res)    
         return data
         
@@ -137,7 +138,7 @@ def get_usuario_id(id: str):
                 
                 "data":  UsuarioIdOut().dump(res, many=True)
         }
-        current_app.session.remove()
+        
         #return UsuarioIdOut().dump(res, many=True)
         return data
         
@@ -190,7 +191,7 @@ def get_usuario(query_data: dict):
                 "data": UsuarioOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -242,7 +243,7 @@ def get_usuarios_detalle(query_data: dict):
                 "data": UsuarioAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:

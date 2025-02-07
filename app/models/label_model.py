@@ -9,7 +9,7 @@ from common.error_handling import ValidationError
 from models.grupo_hierarchy import find_parent_id_recursive
 
 from flask import current_app
-
+from alchemy_db import db
 from .alch_model import Label, Grupo, HerarquiaGrupoGrupo, LabelXTarea, Tarea
 from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 
@@ -17,12 +17,13 @@ from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 
 ########################## LABELS #############################################
 # def buscar_grupo_padre_recursivo(id):
-#     session: scoped_session = current_app.session
+#     
 #     padre = session.query(Grupo.id,
 #                   Grupo.eliminado,          
 #                   HerarquiaGrupoGrupo.id_padre,
 #                   HerarquiaGrupoGrupo.id_hijo
 #                   ).join(HerarquiaGrupoGrupo, Grupo.id == HerarquiaGrupoGrupo.id_hijo
+
 #                   ).filter(HerarquiaGrupoGrupo.id_padre).all() 
 #     print('padre:', padre)
     
@@ -31,8 +32,8 @@ from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 #     else:
 #         return buscar_grupo_padre_recursivo(padre.id)
 
-def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_tarea=None):
-    session: scoped_session = current_app.session
+def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_user_creacion=None, id_grupo=None, id_tarea=None):
+    
     
     if username is not None:
         id_user_creacion = verifica_username(username)
@@ -59,21 +60,21 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
         nombre=nombre,
     )
 
-    session.add(nueva_label)
+    db.session.add(nueva_label)
 
     ids_labels = [nuevoID_label]
 
     insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, username=username)
 
        
-    session.commit()
+    db.session.commit()
 
     return nueva_label
 
 
 def update_label(id='', **kwargs):
-    session: scoped_session = current_app.session
-    label = session.query(LabelXTarea).filter(Label.id == id, Label.eliminado==False).first()
+    
+    label = db.session.query(LabelXTarea).filter(Label.id == id, Label.eliminado==False).first()
    
     if label is None:
         return None
@@ -104,13 +105,13 @@ def update_label(id='', **kwargs):
         
     }
 
-    session.commit()
+    db.session.commit()
     return result
 
 
 def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
    
-    session: scoped_session = current_app.session
+    
     
     if username is not None:
         id_user = verifica_username(username)
@@ -127,7 +128,7 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=
     elif isinstance(fecha_hasta, str):
         fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y') """
 
-    query = session.query(Label).filter(Label.fecha_creacion.between(fecha_desde, fecha_hasta)).order_by(Label.fecha_creacion.desc())
+    query = db.session.query(Label).filter(Label.fecha_creacion.between(fecha_desde, fecha_hasta)).order_by(Label.fecha_creacion.desc())
     #filter(Label.fecha_creacion >= fecha_desde, Label.fecha_creacion <= fecha_hasta)
     print('consulta por parámetros de labels')
     print("Fecha desde:", fecha_desde)
@@ -162,8 +163,8 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=
     return result, total
 
 def get_label_by_id(id):
-    session: scoped_session = current_app.session
-    res = session.query(Label).filter(Label.id == id).first()
+    
+    res = db.session.query(Label).filter(Label.id == id).first()
     print('consulta labels por id')
     print(res)
 
@@ -174,20 +175,20 @@ def get_label_by_id(id):
         return None
 
 def delete_label(username=None, id_label=None):
-    session: scoped_session = current_app.session
+    
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
     else:
         raise ValidationError("Usuario no ingresado")
     
-    label = session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
+    label = db.session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
     print('label id a borrar:', label)
     if label is not None:
         if(label.id_user_creacion != id_user_actualizacion):
             return "Usuario no autorizado para eliminar la etiqueta" 
         else: 
-            labelTarea = session.query(LabelXTarea).filter(LabelXTarea.id_label != id_label, LabelXTarea.activa == True).all()       
+            labelTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_label != id_label, LabelXTarea.activa == True).all()       
             if labelTarea is not None:
                 result = { "status": "error", "message": "La etiqueta está asociada a una tarea activa"}
                 return result
@@ -196,7 +197,7 @@ def delete_label(username=None, id_label=None):
                 label.fecha_eliminacion=datetime.now()
                 label.id_user_actualizacion=id_user_actualizacion
                 label.fecha_actualizacion=datetime.now()
-                session.commit()
+                db.session.commit()
                 return label
         
     else:
@@ -204,10 +205,10 @@ def delete_label(username=None, id_label=None):
         return None
 
 def get_active_labels(id_grupo):
-    session: scoped_session = current_app.session
-    id_grupo_base = find_parent_id_recursive(session, id_grupo)
+    
+    id_grupo_base = find_parent_id_recursive(db, id_grupo)
     print('*********************************************id_grupo_base:', id_grupo_base)
-    res = session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
+    res = db.session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
 
     if res is not None:
         total = len(res)
@@ -218,7 +219,7 @@ def get_active_labels(id_grupo):
 
 ############################## LABELS x TAREA ########################################
 def insert_label_tarea (username=None, **kwargs):
-    session: scoped_session = current_app.session
+    
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -228,9 +229,9 @@ def insert_label_tarea (username=None, **kwargs):
     id_tarea = kwargs['id_tarea']
     ids_labels = kwargs['ids_labels']
 
-    labelsTarea = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
-    # labelsActivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
-    # labelsInactivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == False).all()
+    labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
+    # labelsActivas = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
+    # labelsInactivas = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == False).all()
 
     taskLabels = []
 
@@ -263,19 +264,19 @@ def insert_label_tarea (username=None, **kwargs):
                     label.activa = True
                     label.fecha_actualizacion = fecha_actualizacion
                     label.id_user_actualizacion = id_user_actualizacion
-                    session.commit()
+                    db.session.commit()
                 else:
                     if str(label.id_label) not in viejos_labels:
                         label.activa = False
                         label.fecha_actualizacion = fecha_actualizacion
                         label.id_user_actualizacion = id_user_actualizacion
-                        session.commit()
+                        db.session.commit()
     else:
         for label in labelsTarea:
             label.activa = False
             label.fecha_actualizacion = fecha_actualizacion
             label.id_user_actualizacion = id_user_actualizacion
-            session.commit()
+            db.session.commit()
 
     if(len(nuevos_labels) != 0):
         for id_label in nuevos_labels:
@@ -292,8 +293,8 @@ def insert_label_tarea (username=None, **kwargs):
                 fecha_actualizacion=fecha_actualizacion,
                 id_user_actualizacion=id_user_actualizacion
             )
-            session.add(nueva_label)
-            session.commit()
+            db.session.add(nueva_label)
+            db.session.commit()
 
 
     # if not nueva:
@@ -306,7 +307,7 @@ def insert_label_tarea (username=None, **kwargs):
     #         #     label.activa = False
     #         #     label.fecha_actualizacion = fecha_actualizacion
     #         #     label.id_user_actualizacion = id_user_actualizacion
-    #         #     session.add(label)
+    #         #     db.session.add(label)
     #         #     taskLabels.append(label)
 
     #     # Activar las etiquetas inactivas si vienen en ids_labels
@@ -316,7 +317,7 @@ def insert_label_tarea (username=None, **kwargs):
     #             label.activa = True
     #             label.fecha_actualizacion = fecha_actualizacion
     #             label.id_user_actualizacion = id_user_actualizacion
-    #             session.add(label)
+    #             db.session.add(label)
     #             taskLabels.append(label)
 
     # Crear nuevas etiquetas si no existen en las etiquetas activas o inactivas
@@ -334,10 +335,10 @@ def insert_label_tarea (username=None, **kwargs):
     #             fecha_actualizacion=fecha_actualizacion,
     #             id_user_actualizacion=id_user_actualizacion
     #         )
-    #         session.add(nueva_label)
+    #         db.session.add(nueva_label)
     #         taskLabels.append(nueva_label)
 
-    #     session.commit()
+    #     db.session.commit()
 
     ###################Formatear el resultado####################
     response = {
@@ -350,13 +351,13 @@ def insert_label_tarea (username=None, **kwargs):
 
     return response
     
-    # session: scoped_session = current_app.session
+    # 
     # # labelsTarea = []
 
-    # # labelsTarea = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
+    # # labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
 
-    # labelsActivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
-    # labelsInactivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == False).all()
+    # labelsActivas = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
+    # labelsInactivas = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == False).all()
 
     # # taskLabels = []
     # updateLabels = []
@@ -415,7 +416,7 @@ def insert_label_tarea (username=None, **kwargs):
     #             id_tarea=id_tarea,        
     #         )
         
-    #         session.add(nueva_label_tarea)
+    #         db.session.add(nueva_label_tarea)
     #         taskLabels.append(nueva_label_tarea)
 
     #     for label in updateLabels:
@@ -426,15 +427,15 @@ def insert_label_tarea (username=None, **kwargs):
     #         label.id_user_actualizacion = id_user_actualizacion
             
                     
-    #                     session.add(nueva_label_tarea)
+    #                     db.session.add(nueva_label_tarea)
     #                     taskLabels.append(nueva_label_tarea)
 
     
    
 
 def update_label_tarea(id_label='', id_tarea="", **kwargs):
-    session: scoped_session = current_app.session
-    label_tarea = session.query(LabelXTarea).filter(Label.id == id_label, Tarea.id == id_tarea).first()
+    
+    label_tarea = db.session.query(LabelXTarea).filter(Label.id == id_label, Tarea.id == id_tarea).first()
    
     if label_tarea is None:
         return None
@@ -454,13 +455,13 @@ def update_label_tarea(id_label='', id_tarea="", **kwargs):
         "fecha_actualizacion": label_tarea.fecha_actualizacion,        
     }
 
-    session.commit()
+    db.session.commit()
     return result
 
 def get_label_by_tarea(id_tarea):
     print('entra a get de labels por tarea')
-    session: scoped_session = current_app.session
-    active_labels = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
+    
+    active_labels = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
     print('consulta labels por id de tarea error')
 
     if active_labels is not None:
@@ -484,7 +485,7 @@ def delete_label_tarea_model(username, **kwargs):
     print('kwargs:', kwargs)
     id = kwargs['id_label']
     id_tarea = kwargs['id_tarea']
-    session: scoped_session = current_app.session
+    
     
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -492,7 +493,7 @@ def delete_label_tarea_model(username, **kwargs):
         raise ValidationError("Usuario no ingresado")    
 
    
-    active_label = session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
+    active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
     print('consulta labels por id de tarea')
     print('active_label:', active_label)
 
@@ -500,7 +501,7 @@ def delete_label_tarea_model(username, **kwargs):
         active_label.activa = False
         active_label.fecha_actualizacion = datetime.now()
         active_label.id_user_actualizacion = id_user_actualizacion
-        session.commit()
+        db.session.commit()
         return active_label       
     else:
         print("La tarea no tiene etiquetas activas")

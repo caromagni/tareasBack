@@ -1,5 +1,5 @@
 
-import os
+import os 
 from common.keycloak import get_public_key
 
 os.environ.setdefault('postgres_user', 'NOT_SET')
@@ -7,8 +7,6 @@ os.environ.setdefault('postgres_password', 'NOT_SET')
 class Config:
     # General configuration
     SLEEP=30
-    BORRAR = os.getenv('BORRAR')
-    print("BORRAR: ",BORRAR)
     AUTH_URL=os.getenv('AUTH_URL')
     REALM=os.getenv('REALM')
     # Database configuration
@@ -26,18 +24,17 @@ class Config:
 
     SERVERS = [
         {
-            'name': 'localhost',
-            'url': 'http://localhost:5005'
+            'name': 'dev-tareas',
+            'url': 'https://dev-backend.tareas.pjm.gob.ar/'
         },
         {
             'name': 'localhost',
             'url': 'http://172.17.0.2:5005'
         },
-        
         {
             'name': 'localhost',
             'url': 'http://localhost:3000'
-        }
+        }    
     ]
     DESCRIPTION='APIs Sistema de Tareas'
     TITLE='APIs Tareas'

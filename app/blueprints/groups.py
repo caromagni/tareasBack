@@ -4,12 +4,13 @@ from flask import request, current_app
 from models.grupo_model import get_grupo_base, get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupBaseOut, GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
-from common.rabbitmq_utils import *
+#from app.common.rabbitmq_utils import *
 from flask import g
-
+from alchemy_db import db
+import traceback
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -34,7 +35,7 @@ def before_request():
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
-@groups_b.output(GroupOut)
+@groups_b.output(GetGroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
@@ -54,7 +55,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @groups_b.get('/grupo')
 @groups_b.input(GroupGetIn,  location='query')
-@groups_b.output(GroupCountOut)
+@groups_b.output(GetGroupCountOut)
 def get_grupo(query_data: dict):
     
     try:
@@ -89,10 +90,10 @@ def get_grupo(query_data: dict):
         res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         data = {
                 "count": cant,
-                "data": GroupOut().dump(res, many=True)
+                "data": GetGroupOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -131,7 +132,6 @@ def get_grupo_detalle(query_data: dict):
                 "data": GroupAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -145,7 +145,7 @@ def get_grupo_id(id: str):
         print("id:",id)
         res = get_grupo_by_id(id)
         
-        current_app.session.remove()
+       
         return res
     except Exception as err:
         raise ValidationError(err)
@@ -157,16 +157,18 @@ def get_grupo_id(id: str):
 def get_all_grupobase(query_data: dict):
     try:
         id_grupo=None
-        usuarios =False
+        usuarios=False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
-            usuarios=request.args.get('usuarios')    
+            usuarios=request.args.get('usuarios')
+       
+                    
         res = get_all_base(id, usuarios)
-        
-        current_app.session.remove()
+     
         return res
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)        
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -177,7 +179,7 @@ def get_usrsbygrupo(id_grupo: str):
     try:
         res = get_usuarios_by_grupo(id_grupo)
         
-        current_app.session.remove()
+       
         return res
     
     except Exception as err:
@@ -202,7 +204,7 @@ def post_grupo(json_data: dict):
             res = MsgErrorOut().dump(result)
             return res
             
-        return GroupOut().dump(res)
+        return GetGroupOut().dump(res)
     
     except Exception as err:
         raise ValidationError(err)  
