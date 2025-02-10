@@ -35,7 +35,7 @@ def before_request():
 def get_grupos_by_usr(id_usuario: str):
     try:
         res = get_grupos_by_usuario(id_usuario)
-        print("res:",res)
+        """  print("res:",res)
         if res is None or len(res)==0:
             result={
                     "valido":"fail",
@@ -43,7 +43,7 @@ def get_grupos_by_usr(id_usuario: str):
                     "ErrorDesc":"Usuario sin grupos",
                     "ErrorMsg":"No se encontraron datos de grupos para este usuario"
                 } 
-            return result
+            return result """
         
         data = {
                 
