@@ -17,7 +17,7 @@ def chat():
     ==============
 
     **Chat with Claude 3.5 (Sonnet) via AWS Bedrock**
-
+ 
     :return: JSON object with assistant's response or an error message.
     :rtype: json
     """

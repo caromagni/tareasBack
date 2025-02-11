@@ -81,8 +81,14 @@ def verify_api_key(api_key_provided=None, authorized_system=None):
         print("API Key not found")
         return False
     #convert stored_api_key to bytes
-    stored_api_key = base64.b64decode(stored_hashed_api_key)
-    return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
+    try:
+        print("will decode key from b64 to string")
+        stored_api_key = base64.b64decode(stored_hashed_api_key)
+        print("will use bcrypc to check")
+        return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
+    except Exception as err:
+        print(err)
+
 
 
 

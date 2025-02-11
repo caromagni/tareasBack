@@ -57,7 +57,10 @@ def verificar_header():
         if x_api_key is not None:
             if x_api_system is None:
                 raise UnauthorizedError("api-system no valida")
-            if not verify_api_key(x_api_key, x_api_system):
+            result=verify_api_key(x_api_key, x_api_system)  
+            print("*****result")
+            print(result) 
+            if not result:
                 raise UnauthorizedError("api-key no valida")
             else:
                 return "api_key"    

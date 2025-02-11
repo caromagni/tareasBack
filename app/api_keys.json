@@ -23,5 +23,12 @@
         "api_key": "JDJiJDEyJEp1ZmlzZGd3L1ExcllTU1l3T1NZeS50cFp4cGZVYzJneDAvblJKc2xZdzF6ZWpUakx4V25x",
         "expire_date": 30,
         "api_key_name": "backend_tareas_caro"   
+    },
+    {
+        "api_key": "JDJiJDEyJGoyZmpKcGFHZXFpWkg4TExFeGJJZWU5NThvVXcucUhvRGlnZDlRSXgubjQwUzdwZllKTGdT",
+        "expire_date": 30,
+        "api_key_name": "expedientes_stage"  
     }
 ]
+
+
