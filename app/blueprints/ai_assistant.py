@@ -3,9 +3,9 @@ from flask import current_app, jsonify, request
 import boto3
 import json
 import os
-
-from models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
-from schemas.schemas import ActuacionOut, TipoActuacionOut
+from datetime import datetime
+from models.tarea_model import get_tarea_grupo, get_all_tarea_detalle
+from schemas.schemas import ActuacionOut, TipoActuacionOut,TareaAllOut
 from common.error_handling import ValidationError
 
 ai_assistant = APIBlueprint('ai_assistant', __name__)
@@ -17,20 +17,55 @@ def chat():
     ==============
 
     **Chat with Claude 3.5 (Sonnet) via AWS Bedrock**
-
+ 
     :return: JSON object with assistant's response or an error message.
     :rtype: json
     """
     try:
         # Get the message from request
         data = request.get_json()
+       
         if not data or 'message' not in data:
             return jsonify({
                 "error": "No message provided"
             }), 400
+        if not data or 'loggedUserData' not in data:
+            return jsonify({
+                "error": "No loggedUserData provided"
+            }), 400
+        context="""Eres un asistente de sistema de gestion de tareas,el usuario te puede preguntar por informacion de sus tareas.
+        el usuario pertenece a uno o mas grupos, cada grupo puede tener una o mas tareas asignadas.
+        a continuacion tendras los datos de las tareas del usuario provenientes de la base de datos.
+        luego de los datos, vendran las preguntas del usuario dentro de un arreglo de mensajes, cada mensaje(objeto) tendra in "isUser" para denotar si es el mensage de usuario o tu respuesta.
+        y un campo "text" con el contenido del mensaje.
 
+        datos de tareas:
+        
+
+        """
         user_message = data['message']
+        loggedUser = request.get_json()['loggedUserData']
 
+        #check if ai_temp_data folder exists if not create it
+        if not os.path.exists('ai_temp_data'):
+            os.makedirs('ai_temp_data')
+
+        #fetch all tasks related to the user and save it in a json file in the temp folder with the user id as filename
+        print('user group id is')
+        user_groups=[]
+        for grupo in loggedUser["grupo"]:
+            print("ID GRUPO FOR USER")
+            print(grupo['id_grupo'])
+            user_groups.append(grupo['id_grupo'])
+        print("group array is")
+        print(user_groups)
+        res,cant=get_all_tarea_detalle(grupos=user_groups)
+        print("got all user tasks")
+        print(res)    
+        date_now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(f'ai_temp_data/{loggedUser["id"]+"_"+date_now}.json', 'w') as f:
+            json.dump(TareaAllOut().dump(res, many=True), f, default=str)
+         
         # Initialize Bedrock Runtime client
         bedrock = boto3.client(
             service_name='bedrock-runtime',
@@ -46,7 +81,7 @@ def chat():
             "messages": [
                 {
                     "role": "user",
-                    "content": [{"type": "text", "text": str(user_message)}] 
+                    "content": [{"type": "text", "text": context+str(TareaAllOut().dump(res, many=True))+str(user_message)}] 
                 }
             ]
         }
