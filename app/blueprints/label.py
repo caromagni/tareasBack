@@ -239,16 +239,13 @@ def delete_label_tarea(json_data: dict):
         raise ValidationError(err)    
     
 @label_b.doc(description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.get('/label_grupo/<string:id_grupo>')
+@label_b.get('/label_grupo/<string:id_grupo_base>')
 # @label_b.input(LabelXTareaGetIn)
 @label_b.output(LabelCountAllOut)
-def get_active_labels_grupo(id_grupo:str):
+def get_active_labels_grupo(id_grupo_base:str):
     try:
-        print("##"*50)
-        print(id_grupo)
-        print("#"*50)
-
-        res, cant = get_active_labels(id_grupo)
+       
+        res, cant = get_active_labels(id_grupo_base)
         print("res:",res)   
         if res is None:
             result = {
@@ -262,8 +259,8 @@ def get_active_labels_grupo(id_grupo:str):
         # return LabelAllOut().dump(res)
     
         data = {
-                "count": cant,            
-                "data": LabelAllOut().dump(res, many=True)
+                "count": str(cant),            
+                "data": LabelCountAllOut().dump(res, many=True)
 
             }
         print("result:",data) 
@@ -271,4 +268,4 @@ def get_active_labels_grupo(id_grupo:str):
         return data
     
     except Exception as err:
-        raise ValidationError(err)    
+        raise ValidationError(err)

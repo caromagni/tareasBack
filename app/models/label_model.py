@@ -209,15 +209,23 @@ def delete_label(username=None, id_label=None):
         print("Label no encontrada")
         return None
 
-def get_active_labels(id_grupo):
-    
-    id_grupo_base = find_parent_id_recursive(db, id_grupo)
-    print('*********************************************id_grupo_base:', id_grupo_base)
-    res = db.session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
+############################## LABELS x GRUPO BASE ########################################
+### Busca las etiquetas activas según el grupo base disponibles para todo el árbol de dicho grupo ####
 
-    if res is not None:
-        total = len(res)
-        return res, total
+def get_active_labels(id_grupo_base):
+    print('entra a get de labels por grupo base aaaahhhhhhhhhhkfhaksfhkasdfhñasdfh')
+    # id_grupo_base = find_parent_id_recursive(db, id_grupo)
+    # print('*********************************************id_grupo_base:', id_grupo_base)
+    print("##"*50)
+    # ids_list = ids_grupos_base.split(',')
+    # for id in ids_list:
+    print('id_grupos_base:', id)
+    print("#"*50)
+    labels_group = db.session.query(Label).filter(Label.id_grupo_padre == id, Label.eliminado == False).all()
+    if labels_group is not None:
+        print('labels:', labels_group)
+        total = len(labels_group)
+        return labels_group, total
     else:
         return 'No hay labels para este grupo'
     

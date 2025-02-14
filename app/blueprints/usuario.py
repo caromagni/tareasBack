@@ -290,7 +290,7 @@ def get_rol_usr(token: str):
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/groups_with_base')
 @usuario_b.input(UsuarioGetIn, location='query')
-@usuario_b.output(GroupsBaseUsrOut)
+# @usuario_b.output(GroupsBaseUsrOut)
 def get_groups_base_by_usr(query_data: dict):
     try:
         print('***************ingreso a get grupos by usr**************')
@@ -329,21 +329,20 @@ def get_groups_base_by_usr(query_data: dict):
 
         print('llamo al get all usuarios detalle con los parametros nuevos')
         res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
-        grupos_usr = res[0]['grupo']
-        resultado = []
-        for r in grupos_usr:
+        for r in res[0]['grupo']:
             print("r:",r)
             id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
             print("id_padre:",id_padre)
             r['id_padre']=id_padre
             print("r con id padre:",r)
-            resultado.append(r)
-        data = {
-                "total": cant,
-                "data":  GroupsBaseUsrOut().dump(resultado, many=True)
-        }
-        print('resultado de la busqueda de los grupos base:',data)
-        return data
+
+        # print("resultado:",res)
+        # data = {
+        #         # "total": cant,
+        #         "data":  res
+        # }
+        # print('resultado de la busqueda de los grupos base:',data)
+        return res
     
     except Exception as err:
         raise ValidationError(err)  
