@@ -2,13 +2,15 @@ from apiflask import Schema, abort, APIBlueprint
 from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify, request
-from sqlalchemy.orm import scoped_session
-from models.alch_model import Grupo,Usuario
-from models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
-from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioAllOut
+# from sqlalchemy.orm import scoped_session
+from alchemy_db import db
+from models.alch_model import  Grupo, Usuario
+from models.usuario_model import  get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
+from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, GroupsBaseUsrOut, UsuarioAllOut
 from common.error_handling import ValidationError, DataError, DataNotFound
 from common.auth import verificar_header
 from datetime import datetime
+from models.grupo_hierarchy import find_parent_id_recursive
 import requests
 from flask import g
 
@@ -21,7 +23,7 @@ def before_request():
     #if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")
-    if username is 'api-key':
+    if username == 'api-key':
         print("API KEY")
         g.username = None
     else:
@@ -34,6 +36,7 @@ def before_request():
 #@usuario_b.output(GroupsUsuarioOut(many=True))
 def get_grupos_by_usr(id_usuario: str):
     try:
+        print('***************ingreso a get grupos by usr**************')
         res = get_grupos_by_usuario(id_usuario)
         """  print("res:",res)
         if res is None or len(res)==0:
@@ -283,3 +286,64 @@ def get_rol_usr(token: str):
     resp=r.json()
     print("resp:",resp)
     return resp        
+
+@usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.get('/groups_with_base')
+@usuario_b.input(UsuarioGetIn, location='query')
+# @usuario_b.output(GroupsBaseUsrOut)
+def get_groups_base_by_usr(query_data: dict):
+    try:
+        print('***************ingreso a get grupos by usr**************')
+        print("query_data:",query_data)
+        page=1
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        nombre=""
+        apellido=""
+        id_grupo=None
+        dni=""
+        username=""
+        cant=0
+        eliminado= None
+        suspendido=None
+        
+        print("query_data:",query_data)
+        
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
+        if(request.args.get('id_grupo') is not None):
+            id_grupo=request.args.get('id_grupo')    
+        if(request.args.get('nombre') is not None):
+            nombre=request.args.get('nombre')
+        if(request.args.get('apellido') is not None):
+            apellido=request.args.get('apellido')    
+        if(request.args.get('dni') is not None):
+            dni=request.args.get('dni')
+        if(request.args.get('username') is not None):
+            username=request.args.get('username')
+        if(request.args.get('eliminado') is not None):
+            eliminado=request.args.get('eliminado')
+        if(request.args.get('suspendido') is not None):
+            suspendido=request.args.get('suspendido')                
+
+        print('llamo al get all usuarios detalle con los parametros nuevos')
+        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
+        for r in res[0]['grupo']:
+            print("r:",r)
+            id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
+            print("id_padre:",id_padre)
+            r['id_padre']=id_padre
+            print("r con id padre:",r)
+
+        # print("resultado:",res)
+        # data = {
+        #         # "total": cant,
+        #         "data":  res
+        # }
+        # print('resultado de la busqueda de los grupos base:',data)
+        return res
+    
+    except Exception as err:
+        raise ValidationError(err)  
+    

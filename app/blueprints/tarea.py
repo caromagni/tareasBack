@@ -16,6 +16,7 @@ import uuid
 import json
 from flask import g
 from alchemy_db import db
+import traceback
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 
@@ -23,17 +24,21 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    username = verificar_header()
-    if username is None:
+    user_origin = verificar_header()
+    print("user_origin IN BEFORE REQUEST")
+    print(user_origin)
+    if user_origin is None:
     #if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")
-    if username is 'api-key':
+    if user_origin['type'] is 'api_key':
         print("API KEY")
-        g.username = None
+       
+        print(user_origin['type'])
+        g.user_origin = user_origin
     else:
-        g.username = username
-        print("Username before:",g.username)    
+        g.user_origin = user_origin
+        print("Username before:",g.user_origin)    
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
@@ -710,11 +715,25 @@ def post_tarea(json_data: dict):
         print("Inserta tarea")
         print(json_data)
         #Modificado para el Migue - Agregar token
-        username = g.get('username')
-        if username is None:
+        print("**** G OBJECT *****")
+        print(g.get('user_origin'))
+        user_origin = g.get('user_origin')
+
+        #if username type is api_key then we must use the username that comes inside the body, with the key "username"
+        if user_origin['type'] == 'api_key':
+            
+            print("API KEY ORIGIN")
             res = insert_tarea(**json_data)
-        else:    
-            res = insert_tarea(username, **json_data)    
+          #  print("username:",username)
+        if user_origin['type'] == 'JWT':
+            print("JWT ORIGIN")
+            username = user_origin['user_name']
+            res = insert_tarea(username,**json_data)
+           # print("username:",username)
+
+      
+
+        
         
         
         if res is None:
@@ -730,6 +749,7 @@ def post_tarea(json_data: dict):
         return TareaOut().dump(res)
     
     except Exception as err:
+        traceback.format_exc()
         raise ValidationError(err)    
 
 #################DELETE########################

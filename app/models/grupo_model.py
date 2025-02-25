@@ -123,6 +123,8 @@ def get_grupo_by_id(id):
 
 
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
+    start_time= datetime.now()
+    print("TIMETRACK_INITIAL:",start_time)
     print ("Fecha desde:", fecha_desde)
     print ("Fecha hasta:", fecha_hasta)
     print("Tipo fecha desde:", type(fecha_desde))
@@ -252,7 +254,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         result_paginated= query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page)    
 
     #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
-
+    print("TIMETRACK_FINAL:", datetime.now())
+    #calculate the milliseconds that took from start to finish
+    print("TOTAL_PROCESSING_TIME:", datetime.now()-start_time)
     return result_paginated, total
 
 def encontrar_grupo_base(res_grupos, id):
@@ -375,11 +379,13 @@ def get_all_base(id, usuarios=False):
     result = cursor.fetchall()
     res_grupos=[]
     res=[]
+    print("Usuarios:", usuarios)
+    print(type(usuarios))
     for reg in result:
-        print(reg.path_name)
         usuarios_gr = []
         if usuarios==True:
             res_usuarios = db.session.query(UsuarioGrupo.id,
+            # res_usuarios = session.query(UsuarioGrupo.id,
                                         UsuarioGrupo.id_grupo,
                                         UsuarioGrupo.id_usuario,
                                         Usuario.id,
@@ -389,8 +395,9 @@ def get_all_base(id, usuarios=False):
                                         Usuario.suspendido,
                                         Usuario.username
                                         ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
-                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo, UsuarioGrupo.eliminado==False).all()
-           
+                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo and UsuarioGrupo.eliminado==False).all()
+           #UsuarioGrupo.eliminado==False
+            
             if res_usuarios is not None:
                 for row in res_usuarios:
                     usuario = {
@@ -424,7 +431,6 @@ def get_all_base(id, usuarios=False):
     
     grupo_base=encontrar_grupo_base(res_grupos, id)
 
-    print("GRUPO BASE DE ID:", id,"-", grupo_base)
     grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
@@ -802,20 +808,36 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     return nuevo_grupo
 
 
-def get_usuarios_by_grupo(id):
+def get_usuarios_by_grupo(ids):
     #session: scoped_session = current_app.session
-    res = db.session.query(Grupo.id.label("id_grupo"),
-                  Grupo.nombre.label("nombre_grupo"),
-                  Usuario.nombre.label("nombre"),
-                  Usuario.apellido.label("apellido"),
-                  Usuario.id.label("id_usuario"),
-                  Usuario.eliminado.label("eliminado"),
-                  Usuario.suspendido.label("suspendido"),
-                  Usuario.username.label("username"),
-                  Usuario.email.label("email")                  
-                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                  ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all() 
+    res = []
+    for id in ids:
+        usrs = db.session.query(Grupo.id.label("id_grupo"),
+                    Grupo.nombre.label("nombre_grupo"),
+                    Usuario.nombre.label("nombre"),
+                    Usuario.apellido.label("apellido"),
+                    Usuario.id.label("id_usuario"),
+                    Usuario.eliminado.label("eliminado"),
+                    Usuario.suspendido.label("suspendido"),
+                    Usuario.username.label("username"),
+                    Usuario.email.label("email")                  
+                    ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+                    ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+                    ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all()
+        if usrs is not None:
+            for row in usrs:
+                usuario = {
+                    "id_grupo": row.id_grupo,
+                    "nombre_grupo": row.nombre_grupo,
+                    "id_usuario": row.id_usuario,
+                    "nombre": row.nombre,
+                    "apellido": row.apellido,
+                    "eliminado": row.eliminado,
+                    "suspendido": row.suspendido,
+                    "username": row.username,
+                    "email": row.email
+                }
+                res.append(usuario) 
                                        
     #print("Encontrados:",len(res))
     return res

@@ -7,7 +7,7 @@ from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
-from common.rabbitmq_utils import *
+#from app.common.rabbitmq_utils import *
 from flask import g
 from alchemy_db import db
 import traceback
@@ -157,7 +157,7 @@ def get_grupo_id(id: str):
 def get_all_grupobase(query_data: dict):
     try:
         id_grupo=None
-        usuarios =False
+        usuarios=False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
@@ -257,3 +257,37 @@ def restaura_grupo(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    
+# ##################Grupo Base####################
+# @groups_b.doc(description='Buscar el grupo base', summary='Grupo Base', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
+# @groups_b.get('/get_grupo_base/<string:id>')
+# def getGrupoBase(id: str):
+#   try:
+#         grupos = []
+#         grupos.append(id)
+#         print(grupos)
+#         res = get_grupo_base(grupos, id)
+        
+#         return res
+    
+#   except Exception as err:
+#      git    raise ValidationError(err)
+  
+@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.input(GroupsBaseIn, location='query')
+@groups_b.output(GroupsBaseOut)
+@groups_b.get('/get_grupo_base/<string:id>')
+def getGrupoBase(id: str):
+    try:
+        id_grupo=None
+        usuarios =False
+        if(request.args.get('id_grupo') is not None):
+            id=request.args.get('id_grupo')
+        if(request.args.get('usuarios') is not None):
+            usuarios=request.args.get('usuarios')    
+        res = get_all_base(id, usuarios)
+        
+        current_app.session.remove()
+        return res
+    except Exception as err:
+        raise ValidationError(err)     

@@ -320,6 +320,24 @@ class GroupsUsuarioOut(Schema):
     fecha_hasta= String()
     fecha_actualizacion= String()
     id_user_actualizacion= String()
+    
+    
+class GroupsBaseUsrOut(Schema):
+    #id_usuario = String()
+    #nombre = String()
+    #apellido = String()
+    id_padre = String()
+    id_grupo = String()
+    nombre_grupo = String()
+    codigo_nomenclador = String()
+    descripcion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    fecha_creacion = String()
+    fecha_hasta= String()
+    fecha_actualizacion= String()
+    id_user_actualizacion= String()
+
 
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()
@@ -1207,6 +1225,7 @@ class LabelIn(Schema):
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)
     id_tarea = String()
+    ids_labels = List(String(),required=True, many=True)
 
 
 class LabelPatchIn(Schema):

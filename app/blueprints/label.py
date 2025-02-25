@@ -39,6 +39,8 @@ def before_request():
 @label_b.output(LabelCountOut)
 def get_labels(query_data: dict):
     try:
+        username = g.username
+
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant = 0
@@ -72,7 +74,7 @@ def get_labels(query_data: dict):
         if request.args.get('label_color') is not None:
             label_color = request.args.get('label_color')  
 
-        res, cant = get_all_label(page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
         data = {
             "count": cant,
             "data": LabelAllOut().dump(res, many=True)
@@ -237,17 +239,19 @@ def delete_label_tarea(json_data: dict):
         raise ValidationError(err)    
     
 @label_b.doc(description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.get('/label_grupo/<string:id_grupo>')
+@label_b.get('/label_grupo/<string:ids_grupos_base>')
 # @label_b.input(LabelXTareaGetIn)
-@label_b.output(LabelCountAllOut)
-def get_active_labels_grupo(id_grupo:str):
+# @label_b.output(LabelCountAllOut)
+def get_active_labels_grupo(ids_grupos_base:str):
     try:
-        print("##"*50)
-        print(id_grupo)
-        print("#"*50)
-
-        res, cant = get_active_labels(id_grupo)
-        print("res:",res)   
+        labels = []
+        res, cant = get_active_labels(ids_grupos_base)
+        for label in res:           
+            # data = {
+            #     'data': LabelAllOut().dump(label, many=True)
+            # }
+            labels.append(LabelAllOut().dump(label, many=True))
+        print("array labels formateado:",labels)   
         if res is None:
             result = {
                     "valido":"fail",
@@ -257,16 +261,16 @@ def get_active_labels_grupo(id_grupo:str):
                 }
             res = MsgErrorOut().dump(result)
         
-        # return LabelAllOut().dump(res)
+            return LabelAllOut().dump(res)
     
-        data = {
-                "count": cant,            
-                "data": LabelAllOut().dump(res, many=True)
+        # data = {
+        #         "count": str(cant),            
+        #         "data": LabelAllOut().dump(res, many=True)
 
-            }
-        print("result:",data) 
-        
-        return data
+        #     }
+        # print("result:",data) 
+        print('saliendo del label_b.get /label_grupo/<string:ids_grupos_base>')
+        return labels
     
     except Exception as err:
-        raise ValidationError(err)    
+        raise ValidationError(err)

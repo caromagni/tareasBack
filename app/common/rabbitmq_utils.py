@@ -118,7 +118,6 @@ class RabbitMQHandler:
             self.channel = self.connection.channel()
             self.channel.queue_declare(queue='expte_params', durable=True, passive=True)
             print("RabbitMQ conectado.")
-
         except Exception as e:
             print("Error conectando a RabbitMQ:", e)
             self.connection, self.channel = None, None

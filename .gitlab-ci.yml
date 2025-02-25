@@ -46,31 +46,12 @@ include:
 - template: Security/SAST.gitlab-ci.yml
   
 
-# build-image:
-#   stage: build-image
-#   image: docker:stable-dind 
-#   services:
-#   - name: docker:dind  
-#     command: ["--mtu=1300"]
-
 build-image:
   stage: build-image
-  image: docker:stable 
+  image: docker:stable-dind 
   services:
   - name: docker:19.03.12-dind  
     command: ["--mtu=1300"]
-  
-  #para runers de gitlab
-  #image: docker:stable-dind 
-  #services:
-  #- name: docker:dind  
-  #  command: ["--mtu=1300"]
-
-
-  #image: docker:stable 
-  #services:
-  #- name: docker:18-dind  
-  #  command: ["--mtu=1300"]
 
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'

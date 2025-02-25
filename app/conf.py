@@ -5,6 +5,11 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('./../modulos'))
 
+
+import sphinx_pdj_theme
+
+
+
 # Archivo de configuración para el generador de documentación Sphinx
 
 project = 'tareas'
@@ -19,9 +24,10 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-#html_theme = 'alabaster'
-html_theme = 'conestack'
-
+html_theme = 'alabaster'
+#html_theme = 'conestack'
+#html_theme = 'sphinx_pdj_theme'
+html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
 # Configuración de las páginas del manual

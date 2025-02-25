@@ -52,7 +52,7 @@ def verificar_header():
             email=token_payload['email']
             print("###########Token valido############")
             print("nombre_usuario:",nombre_usuario)
-            return email
+            return {"type":"JWT","user_name":email} 
        
         if x_api_key is not None:
             if x_api_system is None:
@@ -63,4 +63,4 @@ def verificar_header():
             if not result:
                 raise UnauthorizedError("api-key no valida")
             else:
-                return "api_key"    
+                return {"type":"api_key","user_name":x_api_system}     
