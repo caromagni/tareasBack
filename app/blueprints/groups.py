@@ -6,11 +6,12 @@ from common.error_handling import ValidationError, DataError, DataNotFound, Unau
 from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
-from common.auth import verificar_header
+from common.auth import verify_header
 #from app.common.rabbitmq_utils import *
 from flask import g
 from alchemy_db import db
 import traceback
+import logging
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -19,7 +20,7 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    jsonHeader = verificar_header()
+    jsonHeader = verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
@@ -179,12 +180,15 @@ def get_all_grupobase(query_data: dict):
 @groups_b.output(UsuariosGroupOut(many=True))
 def get_usrsbygrupo(id_grupo: str):
     try:
+        
+        logging.info("id_grupo: "+id_grupo)
         res = get_usuarios_by_grupo(id_grupo)
         
        
         return res
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
     
 #################POST####################
@@ -260,20 +264,6 @@ def restaura_grupo(id: str):
     except Exception as err:
         raise ValidationError(err)
     
-# ##################Grupo Base####################
-# @groups_b.doc(description='Buscar el grupo base', summary='Grupo Base', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
-# @groups_b.get('/get_grupo_base/<string:id>')
-# def getGrupoBase(id: str):
-#   try:
-#         grupos = []
-#         grupos.append(id)
-#         print(grupos)
-#         res = get_grupo_base(grupos, id)
-        
-#         return res
-    
-#   except Exception as err:
-#      git    raise ValidationError(err)
   
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(GroupsBaseIn, location='query')
@@ -289,7 +279,7 @@ def getGrupoBase(id: str):
             usuarios=request.args.get('usuarios')    
         res = get_all_base(id, usuarios)
         
-        current_app.session.remove()
         return res
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)     

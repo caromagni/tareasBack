@@ -8,7 +8,7 @@ from models.alch_model import  Grupo, Usuario
 from models.usuario_model import  get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
 from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, GroupsBaseUsrOut, UsuarioAllOut
 from common.error_handling import ValidationError, DataError, DataNotFound
-from common.auth import verificar_header
+from common.auth import verify_header
 from datetime import datetime
 from models.grupo_hierarchy import find_parent_id_recursive
 import requests
@@ -18,7 +18,7 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    jsonHeader = verificar_header()
+    jsonHeader = verify_header()
     print("jsonHeader:",jsonHeader)
     if jsonHeader is None:
     #if not verificar_header():

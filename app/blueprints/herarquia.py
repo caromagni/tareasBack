@@ -3,7 +3,7 @@ from models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, g
 from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
 from common.error_handling import ValidationError
-from common.auth import verificar_header
+from common.auth import verify_header
 from flask import current_app, request, g
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
@@ -11,7 +11,7 @@ herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
-    jsonHeader = verificar_header()
+    jsonHeader = verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():

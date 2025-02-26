@@ -11,12 +11,15 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
-from common.auth import verificar_header
+from common.auth import verify_header
 import uuid
 import json
 from flask import g
 from alchemy_db import db
 import traceback
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 
@@ -24,18 +27,18 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    jsonHeader = verificar_header()
+    jsonHeader = verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
             #raise UnauthorizedError("Token o api-key no validos")   
-            print("Token o api key no validos")
             user_origin=''
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
     
     g.username = user_origin
+    g.type = type_origin
      
 
 ######################Control de acceso######################
@@ -46,7 +49,7 @@ def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
     tiempo_vencimiento = timedelta(days=360)
     query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
     if query_usr is None:
-        print("Usuario no encontrado")
+        logging.error("Usuario no encontrado")
         return False
     else:
         id_usuario = query_usr.id
@@ -152,7 +155,6 @@ def get_tipoTareas(query_data: dict):
         
         return data
     
-   
     except Exception as err:
         raise ValidationError(err)    
  
@@ -682,7 +684,6 @@ def patch_lote_tareas(json_data: dict):
 def patch_lote_tareasv2(json_data: dict):
     try:
         username = g.get('username')
-        print('username patch en lote:',username)
 
         res = update_lote_tareas_v2(username, **json_data)
         
@@ -714,26 +715,17 @@ def post_tarea(json_data: dict):
         print(json_data)
         #Modificado para el Migue - Agregar token
         print("**** G OBJECT *****")
-        print(g.get('user_origin'))
-        user_origin = g.get('user_origin')
-
+        username = g.get('username')
+        type_header = g.get('type')
+        
         #if username type is api_key then we must use the username that comes inside the body, with the key "username"
-        if user_origin['type'] == 'api_key':
-            
-            print("API KEY ORIGIN")
-            res = insert_tarea(**json_data)
-          #  print("username:",username)
-        if user_origin['type'] == 'JWT':
-            print("JWT ORIGIN")
-            username = user_origin['user_name']
-            res = insert_tarea(username,**json_data)
-           # print("username:",username)
-
+        if type_header == 'api_key':
+            logging.info("API KEY ORIGIN")
+            res = insert_tarea(username, type_header, **json_data)
+        if type_header == 'JWT':
+            logging.info("JWT ORIGIN")
+            res = insert_tarea(username, type_header,**json_data)
       
-
-        
-        
-        
         if res is None:
             result = {
                     "valido":"fail",
@@ -747,7 +739,7 @@ def post_tarea(json_data: dict):
         return TareaOut().dump(res)
     
     except Exception as err:
-        traceback.format_exc()
+        print(traceback.format_exc())
         raise ValidationError(err)    
 
 #################DELETE########################

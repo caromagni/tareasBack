@@ -9,7 +9,7 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
-from common.auth import verificar_header
+from common.auth import verify_header
 import uuid
 import json
 from flask import g
@@ -24,7 +24,7 @@ nota_b = APIBlueprint('nota_blueprint', __name__)
 
 @nota_b.before_request
 def before_request():
-    jsonHeader = verificar_header()
+    jsonHeader = verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
