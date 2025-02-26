@@ -24,21 +24,19 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    user_origin = verificar_header()
-    print("user_origin IN BEFORE REQUEST")
-    print(user_origin)
-    if user_origin is None:
-    #if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-    if user_origin['type'] is 'api_key':
-        print("API KEY")
-       
-        print(user_origin['type'])
-        g.user_origin = user_origin
+    jsonHeader = verificar_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            print("Token o api key no validos")
+            user_origin=''
     else:
-        g.user_origin = user_origin
-        print("Username before:",g.user_origin)    
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+     
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
@@ -418,8 +416,8 @@ def get_tareas(query_data: dict):
         raise ValidationError(err) 
 
 
-
-@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tareas', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+#@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountAllOut)

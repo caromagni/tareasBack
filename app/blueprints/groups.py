@@ -19,17 +19,19 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    username = verificar_header()
-    if username is None:
-    #if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-    if username is 'api-key':
-        print("API KEY")
-        g.username = None
+    jsonHeader = verificar_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            print("Token o api key no validos")
+            user_origin=''
     else:
-        g.username = username
-        print("Username before:",g.username)
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+
 ####################################################
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
