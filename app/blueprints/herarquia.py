@@ -16,13 +16,14 @@ def before_request():
     if jsonHeader is None:
         #if not verificar_header():
             #raise UnauthorizedError("Token o api-key no validos")   
-            print("Token o api key no validos")
             user_origin=''
+            type_origin=''
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
     
     g.username = user_origin
+    g.type = type_origin
 ####################################################
 
 @herarquia_b.doc(description='Listado de Grupos padres - Hijos', summary='Grupos padres - hijos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})

@@ -25,13 +25,14 @@ def before_request():
     if jsonHeader is None:
         #if not verificar_header():
             #raise UnauthorizedError("Token o api-key no validos")   
-            print("Token o api key no validos")
             user_origin=''
+            type_origin=''
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
     
     g.username = user_origin
+    g.type = type_origin
 
 ####################################################
 
@@ -171,7 +172,7 @@ def get_all_grupobase(query_data: dict):
      
         return res
     except Exception as err:
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
         raise ValidationError(err)        
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -188,7 +189,7 @@ def get_usrsbygrupo(id_grupo: str):
         return res
     
     except Exception as err:
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
         raise ValidationError(err)  
     
 #################POST####################
@@ -281,5 +282,5 @@ def getGrupoBase(id: str):
         
         return res
     except Exception as err:
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
         raise ValidationError(err)     

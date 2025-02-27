@@ -19,16 +19,18 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 @usuario_b.before_request
 def before_request():
     jsonHeader = verify_header()
-    print("jsonHeader:",jsonHeader)
+    
     if jsonHeader is None:
-    #if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-        user_origin=''
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            user_origin=''
+            type_origin=''
     else:
-        user_origin = jsonHeader['user_name']
-        type_origin = jsonHeader['type']
-    g.username = user_origin 
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})

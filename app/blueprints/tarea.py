@@ -33,6 +33,7 @@ def before_request():
         #if not verificar_header():
             #raise UnauthorizedError("Token o api-key no validos")   
             user_origin=''
+            type_origin=''
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
@@ -521,7 +522,7 @@ def get_tareas_detalle(query_data: dict):
     except Exception as err:
         raise ValidationError(err) 
 
-@tarea_b.doc(description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(TareaIdOut(many=True))
 def get_tarea(id_tarea:str):
@@ -719,12 +720,18 @@ def post_tarea(json_data: dict):
         type_header = g.get('type')
         
         #if username type is api_key then we must use the username that comes inside the body, with the key "username"
+        
         if type_header == 'api_key':
             logging.info("API KEY ORIGIN")
-            res = insert_tarea(username, type_header, **json_data)
-        if type_header == 'JWT':
-            logging.info("JWT ORIGIN")
-            res = insert_tarea(username, type_header,**json_data)
+            res = insert_tarea(**json_data)
+        else:    
+            if type_header == 'JWT':
+                logging.info("JWT ORIGIN")
+                res = insert_tarea(username, **json_data)
+            else:
+                #Esto es para probar sin header - sacarlo en produccion
+                logging.info("NO HEADER ORIGIN")
+                res = insert_tarea(**json_data)    
       
         if res is None:
             result = {
@@ -739,7 +746,7 @@ def post_tarea(json_data: dict):
         return TareaOut().dump(res)
     
     except Exception as err:
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
         raise ValidationError(err)    
 
 #################DELETE########################

@@ -52,17 +52,23 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(username=None, type_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     
     print("##############Validaciones Insert Tarea################")
     id_grupo=None
     id_usuario_asignado=None
-    if type_header is not "api_key":
-        if username is not None:
-            print("before verifying username")
-            id_user_actualizacion = verifica_username(username)
-        else:
-            raise Exception("Error en el ingreso de Usuario. Usuario no existente")    
+    #if type_header is not "api_key":
+    if usr_header is not None:
+        print("verifying token username")
+        id_user_actualizacion = verifica_username(usr_header)
+    #else:
+        #raise Exception("Error en el ingreso de Usuario. Usuario no existente")
+    
+    if username is not None:
+        print("verifying username: " + username)
+        id_user_actualizacion = verifica_username(username)
+    else:
+        raise Exception("Error en el ingreso de Usuario. Usuario no existente")    
 
     if id_expediente is not None:
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()

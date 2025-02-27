@@ -106,5 +106,5 @@ def verify_header():
                 return {"type":"api_key","user_name":x_api_system} 
     except Exception as err:
         logging.error(err)
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
         return None            
