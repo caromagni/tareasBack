@@ -12,6 +12,7 @@ import traceback
 from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 from common.utils import *
+from common.logger_config import logger
 from alchemy_db import db
 from sqlalchemy import func, cast, Text
 from sqlalchemy.types import Boolean, TIMESTAMP
@@ -1643,7 +1644,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
     for tarea in res_tareas:
-        print(tarea.id, "-", tarea.titulo)
+        logger.info(f"Tarea: {tarea.id} - {tarea.titulo}")
 
     # Process each task in paginated results
     results = []
@@ -1728,8 +1729,6 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         }
         results.append(result)
 
-        print("Tarea:", result["id"], "-", result["titulo"])
-    
     return results, total
 
 
