@@ -80,6 +80,9 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
             
     tarea_nota = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
 
+    if eliminado is None:
+        eliminado=False
+        
     if username is not None:
         id_user_creacion = verifica_username(username)
 
