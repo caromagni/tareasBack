@@ -162,7 +162,7 @@ def get_grupo_id(id: str):
 @groups_b.output(GroupsBaseOut(many=True))
 def get_all_grupobase(query_data: dict):
     try:
-        id_grupo=None
+        id=None
         usuarios=False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
@@ -267,10 +267,10 @@ def restaura_grupo(id: str):
         raise ValidationError(err)
     
   
-@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.input(GroupsBaseIn, location='query')
-@groups_b.output(GroupsBaseOut)
-@groups_b.get('/get_grupo_base/<string:id>')
+#@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+#@groups_b.input(GroupsBaseIn, location='query')
+#@groups_b.output(GroupsBaseOut)
+#@groups_b.get('/get_grupo_base/<string:id>')
 def getGrupoBase(id: str):
     try:
         id_grupo=None
