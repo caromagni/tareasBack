@@ -90,19 +90,24 @@ def verify_header():
             logger.info("Token o api key no validos")
             return None
        
-        if token_payload is not None:            
+        if token_payload is not None:    
+            logger.info("Token valido")        
             email=token_payload['email']
             return {"type":"JWT","user_name":email} 
        
         if x_api_key is not None:
             if x_api_system is None:
                 raise UnauthorizedError("api-system no valida")
+            
             result=verify_api_key_in_header(x_api_key, x_api_system)  
             if not result:
                 raise UnauthorizedError("api-key no valida")
             else:
+                logger.info("API Key valido", x_api_key,"-",x_api_system)
                 return {"type":"api_key","user_name":x_api_system} 
+            
     except Exception as err:
+        logger.info("Error en la verificacion de header")
         logger.error(err)
         #print(traceback.format_exc())
         return None            

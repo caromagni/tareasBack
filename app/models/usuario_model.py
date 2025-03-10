@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime
 from common.utils import *
-
+from common.logger_config import logger
 from flask import current_app
 from alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
@@ -38,7 +38,6 @@ def get_usuario_by_id(id):
                         "reasignada": row.asignada_usr_eliminado
                     }
                 tareas.append(tarea)
-            print("tareas:", tareas)
 
         if res_grupos is not None:
             for row in res_grupos:
@@ -136,7 +135,6 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
         query = query.filter(Usuario.suspendido == suspendido)
 
     total= len(query.all())
-    print("total usuarios:", total)
 
     # Ordenamiento y paginación
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)
@@ -157,24 +155,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                                     ).order_by(Grupo.nombre).all()
             
             #Traigo las tareas asignadas al usuario
-            """ res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
-                                    ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id, TareaAsignadaUsuario.eliminado==False
-                                    ).order_by(Tarea.titulo).all()
-            
-
-            if res_tareas is not None:
-                #print("Tiene tareas-", len(res_tareas))
-                for row in res_tareas:
-                    tarea = {
-                        "id": row.id,
-                        "titulo": row.titulo,
-                        "id_tipo_tarea": row.id_tipo_tarea,
-                        "eliminado": row.eliminado
-                    }
-                    tareas.append(tarea) """
-
             if res_grupos is not None:
-                #print("Tiene grupos-", len(res_grupos))
                 for row in res_grupos:
                     grupo = {
                         "id_grupo": row.id,
@@ -216,6 +197,7 @@ def get_grupos_by_usuario(id):
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
     if res is None:
+        
         raise Exception("Usuario no encontrado")
     
     res = db.session.query(Usuario.id.label("id_usuario"),
@@ -246,17 +228,19 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
     else:
+        logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")
 
     qry_username = db.session.query(Usuario).filter(Usuario.username == username).first()
     if qry_username is not None:
+        logger.error("Ya existe un usuario con el username ingresado")
         raise Exception("Ya existe un usuario con el username ingresado")
     qry_email = db.session.query(Usuario).filter(Usuario.email == email).first()
     if qry_email is not None:
+        logger.error("Ya existe un usuario con el email ingresado")
         raise Exception("Ya existe un usuario con el email ingresado")
     
     nuevoID_usuario=uuid.uuid4()
-    print("nuevo_usuario:",nuevoID_usuario)
     nuevo_usuario = Usuario(
         id=nuevoID_usuario,
         nombre=nombre,
@@ -273,9 +257,11 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
         for group in grupo:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
+                logger.error("Error en el ingreso de grupos. Grupo no existente")   
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
 
             if existe_grupo.eliminado==True:
+                logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
             nuevoID=uuid.uuid4()
@@ -295,31 +281,26 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
 
 def update_usuario(id='',username=None, **kwargs):
     
-    print("Update usuario")
+    logger.info("Update usuario")
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
     else:
+        logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")
     
     usuario = db.session.query(Usuario).filter(Usuario.id == id).first()
-    #Usuario.eliminado==False
 
     if usuario is None:
         return None
     
-    print("Usuario encontrado:",usuario)
-
     update_data = {}
     if 'nombre' in kwargs:
         usuario.nombre = kwargs['nombre']
     if 'apellido' in kwargs:
         usuario.apellido = kwargs['apellido']
-    #if 'username' in kwargs:
-        #qry_username = db.session.query(Usuario).filter(Usuario.username == kwargs['username'], Usuario.eliminado==False).first()
-        #usuario.username = kwargs['username']
     if 'dni' in kwargs:
         usuario.dni = kwargs['dni']
     if 'email' in kwargs:
@@ -332,7 +313,6 @@ def update_usuario(id='',username=None, **kwargs):
 
     if 'id_persona_ext' in kwargs:
         usuario.id_persona_ext = kwargs['id_persona_ext']
-    #if 'id_user_actualizacion' in kwargs:
         usuario.id_user_actualizacion = id_user_actualizacion
     if 'suspendido' in kwargs:
         usuario.suspendido = kwargs['suspendido']
@@ -352,9 +332,11 @@ def update_usuario(id='',username=None, **kwargs):
         for group in kwargs['grupo']:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
+                logger.error("Error en el ingreso de grupos. Grupo no existente")
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
+                logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
             grupos_usuarios=db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == group['id_grupo'], UsuarioGrupo.id_usuario==id).first()
@@ -387,6 +369,8 @@ def update_usuario(id='',username=None, **kwargs):
 
 def delete_usuario(username=None, id=None):
     
+    if username is None:
+        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -394,6 +378,7 @@ def delete_usuario(username=None, id=None):
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
     else:
+        logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")
     
     usuario = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
@@ -403,6 +388,6 @@ def delete_usuario(username=None, id=None):
     usuario.eliminado = True
     usuario.fecha_actualizacion = datetime.now()
     usuario.id_user_actualizacion = id_user_actualizacion
-    session.commit()
+    db.session.commit()
     return usuario
 
