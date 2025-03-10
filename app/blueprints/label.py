@@ -14,6 +14,7 @@ import json
 from flask import jsonify
 from flask import g
 from alchemy_db import db
+import traceback
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
@@ -87,6 +88,7 @@ def get_labels(query_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
 
 
@@ -103,10 +105,9 @@ def get_label(id:str):
         result = LabelIdOut().dump(res)
         
         return result
-    
-    except DataNotFound as err:
-        raise DataError(800, err)
+ 
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
 
 
@@ -133,6 +134,7 @@ def post_label(json_data: dict):
         return LabelOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)    
 
 #################DELETE########################
@@ -155,9 +157,8 @@ def del_label(id: str):
         
         return result
     
-    except DataNotFound as err:
-        raise DataError(800, err)
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
     
 ################################ LABELS X TAREAS ################################
@@ -182,10 +183,9 @@ def get_label_tarea(id_tarea:str):
         #'status': 'success',
         #'data': data
     #})      
-    
-    except DataNotFound as err:
-        raise DataError(800, err)
+ 
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
          
 
@@ -213,6 +213,7 @@ def put_label_tarea(json_data: dict):
         return LabelXTareaOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)    
     
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -239,6 +240,7 @@ def delete_label_tarea(json_data: dict):
         return LabelXTareaIdOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)    
     
 @label_b.doc(description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -276,4 +278,5 @@ def get_active_labels_grupo(ids_grupos_base:str):
         return labels
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
