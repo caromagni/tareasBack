@@ -374,13 +374,10 @@ def get_all_base(id, usuarios=False):
     res_grupos=[]
     res=[]
     print("Usuarios:", usuarios)
-    print(type(usuarios))
     for reg in result:
         usuarios_gr = []
-        if usuarios==True:
-            res_usuarios = db.session.query(UsuarioGrupo.id,
-            # res_usuarios = session.query(UsuarioGrupo.id,
-                                        UsuarioGrupo.id_grupo,
+        if usuarios=='true':
+            """ res_usuarios = db.session.query(UsuarioGrupo.id_grupo,
                                         UsuarioGrupo.id_usuario,
                                         Usuario.id,
                                         Usuario.nombre,
@@ -389,9 +386,19 @@ def get_all_base(id, usuarios=False):
                                         Usuario.suspendido,
                                         Usuario.username
                                         ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
-                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo and UsuarioGrupo.eliminado==False).all()
-           #UsuarioGrupo.eliminado==False
+                                        ).filter(UsuarioGrupo.id_grupo == reg.group_id and UsuarioGrupo.eliminado==False).all() """
+            res_usuarios = db.session.query(Usuario.id,
+                                        Usuario.nombre,
+                                        Usuario.apellido,
+                                        Usuario.eliminado,
+                                        Usuario.suspendido,
+                                        Usuario.username
+                                       ).join(UsuarioGrupo, UsuarioGrupo.id_usuario == Usuario.id
+                                       ).filter(UsuarioGrupo.id_grupo == reg.group_id and UsuarioGrupo.eliminado==False).all()
             
+            #res_usuarios = db.session.query(UsuarioGrupo,
+            #                               Usuario).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo == reg.id_hijo).all()
+            print("Usuarios encontrados para el id:",reg.group_id, "-", len(res_usuarios))
             if res_usuarios is not None:
                 for row in res_usuarios:
                     usuario = {
@@ -403,6 +410,8 @@ def get_all_base(id, usuarios=False):
                         "username": row.username
                     }
                     usuarios_gr.append(usuario)
+            else:
+                print("No se encontraron usuarios para el grupo:", reg.id_hijo)        
 
         data = {
             "id": reg.group_id,
