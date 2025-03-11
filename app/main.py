@@ -24,8 +24,6 @@ from common.auditoria  import after_flush  # Importa el archivo que contiene el 
 from config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
-import threading
-import logging
 from common.chk_messagges import *
 import sys
 from models.alch_model import Base

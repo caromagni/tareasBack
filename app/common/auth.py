@@ -2,22 +2,21 @@ from flask import request, current_app
 from common.api_key import *
 import jwt
 from common.error_handling import UnauthorizedError, ValidationError
+from common.logger_config import logger
 import traceback
-import logging
 
-logging.basicConfig(level=logging.INFO)
 
 def verify_jwt_in_header():
     token_encabezado = request.headers.get('Authorization')
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
-    print("Variable jwt_pk:",str(jwt_pk))
-    print("Variable jwt_alg:",str(jwt_alg))
-    #logging.info("Variable jwt_aud:",jwt_aud)
+    #logger.info("Variable jwt_pk:",jwt_pk)
+    #logger.info("Variable jwt_alg:",jwt_alg)
+    #logger.info("Variable jwt_aud:",jwt_aud)
 
     if not token_encabezado:
-        logging.error("No se proporciono token en el encabezado")
+        logger.error("No se proporciono token en el encabezado")
         return None
    
     
@@ -40,11 +39,11 @@ def verify_jwt_in_header():
 
 def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     if not api_key_provided:
-        logging.error("No se proporciono api-key")
+        logger.error("No se proporciono api-key")
         return False
         #raise UnauthorizedError( 'No se proporciono api-key')
     if not authorized_system:
-        logging.error("No se proporciono api-system")
+        logger.error("No se proporciono api-system")
         return False
         #raise UnauthorizedError( 'No se proporciono api-system')
 
@@ -69,13 +68,13 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     #convert stored_api_key to bytes
     try:
         print("will decode key from b64 to string")
-        logging.info("will decode key from b64 to string")
+        logger.info("will decode key from b64 to string")
         stored_api_key = base64.b64decode(stored_hashed_api_key)
         print("will use bcrypc to check")
-        logging.info("will use bcrypc to check")
+        logger.info("will use bcrypc to check")
         return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
-        logging.error(err)
+        logger.error(err)
         print(err)
 
 def verify_header():
@@ -88,23 +87,27 @@ def verify_header():
         # Verificar si se proporciona el token o API key
         if token_payload is None and x_api_key is None:
             #raise UnauthorizedError("Token o api-key no validos")
-            logging.info("Token o api key no validos")
-            #print("Token o api key no validos")
+            logger.info("Token o api key no validos")
             return None
        
-        if token_payload is not None:            
+        if token_payload is not None:    
+            logger.info("Token valido")        
             email=token_payload['email']
             return {"type":"JWT","user_name":email} 
        
         if x_api_key is not None:
             if x_api_system is None:
                 raise UnauthorizedError("api-system no valida")
+            
             result=verify_api_key_in_header(x_api_key, x_api_system)  
             if not result:
                 raise UnauthorizedError("api-key no valida")
             else:
+                logger.info("API Key valido", x_api_key,"-",x_api_system)
                 return {"type":"api_key","user_name":x_api_system} 
+            
     except Exception as err:
-        logging.error(err)
+        logger.info("Error en la verificacion de header")
+        logger.error(err)
         #print(traceback.format_exc())
         return None            

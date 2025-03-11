@@ -70,16 +70,19 @@ def delete_tipo_nota(username=None, id=None):
 def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, fecha_creacion=None, id_tarea=None):
     
 
-    notas = db.session.query(Nota).filter(Nota.eliminado==False).all()
+    """ notas = db.session.query(Nota).filter(Nota.eliminado==False).all()
     
     if notas is not None:
         for n in notas:
             tareasnota = db.session.query(Tarea).filter(Tarea.id == n.id_tarea, Tarea.eliminado==False).first()
             if tareasnota is not None:
-                tareasnota.tiene_notas_desnz=True
-            
+                tareasnota.tiene_notas_desnz=True    """
+
     tarea_nota = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
 
+    if eliminado is None:
+        eliminado=False
+        
     if username is not None:
         id_user_creacion = verifica_username(username)
 
@@ -87,6 +90,12 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
 
     if tarea_nota is None:
         raise ValidationError("Tarea no encontrada")
+    
+    notastarea = db.session.query(Nota).filter(Nota.id_tarea == id_tarea, Nota.eliminado==False).all()
+    
+    if len(notastarea)==0:
+        tarea_nota.tiene_notas_desnz=False
+
     print("NOTAS QUERIED")
     print("*************")
     try:
@@ -110,7 +119,8 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
         
         tarea_nota.fecha_actualizacion=datetime.now()
         tarea_nota.id_user_actualizacion=id_user_creacion
-        tarea_nota.tiene_notas_desnz=True
+        if eliminado==False:
+            tarea_nota.tiene_notas_desnz=True
 
         db.session.commit()
         return nueva_nota

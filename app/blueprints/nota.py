@@ -203,7 +203,6 @@ def post_nota(json_data: dict):
         print(json_data)
         print("#"*50)
         username = g.username
-        print("Username:",username)
         res = insert_nota(username, **json_data)
         if res is None:
             result = {

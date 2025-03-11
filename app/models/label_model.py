@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from common.utils import *
 from common.error_handling import ValidationError
+from common.logger_config  import logger
 from models.grupo_hierarchy import find_parent_id_recursive
 
 from flask import current_app
