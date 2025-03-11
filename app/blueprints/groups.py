@@ -12,7 +12,7 @@ from flask import g
 from alchemy_db import db
 import traceback
 import logging
-
+from cache import cache
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
 
@@ -58,8 +58,10 @@ def patch_grupo(id_grupo: str, json_data: dict):
  ###############CONSULTA SIMPLE DE GRUPOS###################   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @groups_b.get('/grupo')
+
 @groups_b.input(GroupGetIn,  location='query')
 @groups_b.output(GetGroupCountOut)
+#@cache.cached(timeout=500, key_prefix=lambda: request.full_path)
 def get_grupo(query_data: dict):
     
     try:

@@ -30,22 +30,30 @@ from common.chk_messagges import *
 import sys
 from models.alch_model import Base
 from alchemy_db import db
-
+from flask_caching import Cache
 sys.setrecursionlimit(100)
-
+from cache import cache  # Import the shared cache instance
 
 
 def create_app():
 
+
+
+
+
+
     print("Creating app..")
     app = APIFlask(__name__)
-    
+    app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 500  # Optional default timeout
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
     app.config['JWT_IDENTITY_CLAIM'] = Config.JWT_IDENTITY_CLAIM
-
-
+     # Initialize cache with app
+    cache.init_app(app)
+    print("CACHE MODULE INITIALIZED")
+    print(cache)
     app.security_schemes = {  # equals to use config SECURITY_SCHEMES
         'ApiKeyAuth': {
         'type': 'apiKey',
@@ -65,6 +73,7 @@ def create_app():
     }
    
     app.config['DEBUG'] = True
+   
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
@@ -83,6 +92,7 @@ def create_app():
    
 
     db.init_app(app)
+   
    
     #engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False, pool_pre_ping=True)
     #Base.metadata.create_all(engine)

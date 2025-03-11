@@ -12,9 +12,9 @@ def verify_jwt_in_header():
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
-    logging.info("Variable jwt_pk:",jwt_pk)
-    logging.info("Variable jwt_alg:",jwt_alg)
-    logging.info("Variable jwt_aud:",jwt_aud)
+    print("Variable jwt_pk:",str(jwt_pk))
+    print("Variable jwt_alg:",str(jwt_alg))
+    #logging.info("Variable jwt_aud:",jwt_aud)
 
     if not token_encabezado:
         logging.error("No se proporciono token en el encabezado")

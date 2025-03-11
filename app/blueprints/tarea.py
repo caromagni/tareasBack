@@ -46,6 +46,17 @@ def before_request():
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
     #session: scoped_session = current_app.session
 
+
+
+# .d8888. d888888b db      db    db d888888b  .d8b. 
+# 88'  YP   `88'   88      88    88   `88'   d8' `8b
+# `8bo.      88    88      Y8    8P    88    88ooo88
+#   `Y8b.    88    88      `8b  d8'    88    88~~~88
+# db   8D   .88.   88booo.  `8bd8'    .88.   88   88
+# `8888Y' Y888888P Y88888P    YP    Y888888P YP   YP
+
+#review the possibility of running two or more queries at once. for example session.query(Usuario).filter(Usuario.email == nombre_usuario).first() and session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all() in a SINGLE JOIN?
+#this is to save time and compensate for network latency
     #tiempo_vencimiento = timedelta(minutes=30)
     tiempo_vencimiento = timedelta(days=360)
     query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()

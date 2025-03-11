@@ -9,7 +9,7 @@ from flask import current_app
 from common.utils import *
 from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
-
+from cache import cache
 
 def get_grupo_by_id(id):
 
@@ -115,8 +115,12 @@ def get_grupo_by_id(id):
     
     return results    
 
-
+@cache.cached(timeout=500, make_cache_key='all_grupos_nivel')
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
+    if cache.get('all_grupos_nivel'):
+        print(f"Cache HIT for key: 'all_grupos_nivel'")  # Log cache hit
+    else:
+        print(f"Cache MISS for key: 'all_grupos_nivel'")  # Log cache miss
     start_time= datetime.now()
     print("TIMETRACK_INITIAL:",start_time)
     print ("Fecha desde:", fecha_desde)
@@ -292,7 +296,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-
+@cache.cached(timeout=500, make_cache_key='get_all_base')
 def get_all_base(id, usuarios=False):
     cursor=None
    
@@ -460,7 +464,7 @@ def get_all_base(id, usuarios=False):
 
    
     #return res, i
-   
+@cache.cached(timeout=500, make_cache_key='get_all_grupos')
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
@@ -482,7 +486,7 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
     return result, total
     
-
+@cache.cached(timeout=500, make_cache_key='get_all_grupos_detalle')
 def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
