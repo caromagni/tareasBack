@@ -172,12 +172,12 @@ def get_all_grupobase(query_data: dict):
         raise ValidationError(err)        
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/usuarios_grupo/<string:id_grupo>')
+@groups_b.get('/usuarios_grupo/<string:ids_grupos>')
 #@groups_b.input(PageIn, location='query')
 @groups_b.output(UsuariosGroupOut(many=True))
-def get_usrsbygrupo(id_grupo: str):
+def get_usrsbygrupo(ids_grupos: str):
     try:
-        res = get_usuarios_by_grupo(id_grupo)
+        res = get_usuarios_by_grupo(ids_grupos)
         
        
         return res
