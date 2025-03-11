@@ -254,6 +254,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     return result_paginated, total
 
 def encontrar_grupo_base(res_grupos, id):
+    print("Encontrar grupo base para el ID:", id)
     for r in res_grupos:
         if id == str(r['id_hijo']):
            # print("############ENCONTRADO##############")
@@ -375,43 +376,6 @@ def get_all_base(id, usuarios=False):
     res=[]
     print("Usuarios:", usuarios)
     for reg in result:
-        usuarios_gr = []
-        if usuarios=='true':
-            """ res_usuarios = db.session.query(UsuarioGrupo.id_grupo,
-                                        UsuarioGrupo.id_usuario,
-                                        Usuario.id,
-                                        Usuario.nombre,
-                                        Usuario.apellido,
-                                        Usuario.eliminado,
-                                        Usuario.suspendido,
-                                        Usuario.username
-                                        ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
-                                        ).filter(UsuarioGrupo.id_grupo == reg.group_id and UsuarioGrupo.eliminado==False).all() """
-            res_usuarios = db.session.query(Usuario.id,
-                                        Usuario.nombre,
-                                        Usuario.apellido,
-                                        Usuario.eliminado,
-                                        Usuario.suspendido,
-                                        Usuario.username
-                                       ).join(UsuarioGrupo, UsuarioGrupo.id_usuario == Usuario.id
-                                       ).filter(UsuarioGrupo.id_grupo == reg.group_id and UsuarioGrupo.eliminado==False).all()
-            
-            #res_usuarios = db.session.query(UsuarioGrupo,
-            #                               Usuario).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo == reg.id_hijo).all()
-            print("Usuarios encontrados para el id:",reg.group_id, "-", len(res_usuarios))
-            if res_usuarios is not None:
-                for row in res_usuarios:
-                    usuario = {
-                        "id_usuario": row.id,
-                        "nombre": row.nombre,
-                        "apellido": row.apellido,
-                        "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
-                        "username": row.username
-                    }
-                    usuarios_gr.append(usuario)
-            else:
-                print("No se encontraron usuarios para el grupo:", reg.id_hijo)        
 
         data = {
             "id": reg.group_id,
@@ -424,25 +388,47 @@ def get_all_base(id, usuarios=False):
             "eliminado": reg.eliminado,
             "suspendido": reg.suspendido,
             "is_base": reg.is_base,
-            "is_parentless": reg.is_parentless,
-            "usuarios": usuarios_gr
+            "is_parentless": reg.is_parentless
         }    
 
-        res_grupos.append(data)
+        res_grupos.append(data) 
+    
 
     grupo_base = None
-    
+    print("Antes de encontrar grupo base", id)
     grupo_base=encontrar_grupo_base(res_grupos, id)
 
     grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
-        
         grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
 
         #print(grupos_mismo_base)
         for grupo in grupos_mismo_base:
-            #print(grupo['path_name'])
+            usuarios_g = []
+            id_grupo = grupo['id']
+            if usuarios=='true':
+                res_usuarios = db.session.query(UsuarioGrupo.id_grupo,
+                                        UsuarioGrupo.id_usuario,
+                                        Usuario.id,
+                                        Usuario.nombre,
+                                        Usuario.apellido,
+                                        UsuarioGrupo.eliminado
+                                        ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario
+                                        ).filter(UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado==False).all()
+                
+                if res_usuarios is not None:
+                    for row in res_usuarios:
+                        usuario = {
+                            "id_usuario": row.id,
+                            "nombre": row.nombre,
+                            "apellido": row.apellido,
+                            "eliminado": row.eliminado,
+                            "username": row.nombre
+                        }
+                        usuarios_g.append(usuario)
+                else:
+                    print("No se encontraron usuarios para el grupo:", reg.id_hijo)  
 
             data = {
                 "id": grupo['id'],
@@ -456,7 +442,7 @@ def get_all_base(id, usuarios=False):
                 "suspendido": grupo['suspendido'],
                 "is_base": grupo['is_base'],
                 "is_parentless": grupo['is_parentless'],
-                "usuarios": grupo['usuarios']
+                "usuarios": usuarios_g
                 }
             
             res.append(data)
