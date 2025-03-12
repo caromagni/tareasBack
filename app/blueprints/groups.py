@@ -61,51 +61,56 @@ def patch_grupo(id_grupo: str, json_data: dict):
 
 @groups_b.input(GroupGetIn,  location='query')
 @groups_b.output(GetGroupCountOut)
-#@cache.cached(timeout=500, key_prefix=lambda: request.full_path)
 def get_grupo(query_data: dict):
-    
     try:
-        page=1
-        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        nombre=""
-        eliminado=False
-        suspendido=False
-        path_name=False
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
+        page = 1
+        per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        nombre = ""
+        eliminado = False
+        suspendido = False
+        path_name = False
+        
+        fecha_desde = "01/01/2000"  
+        fecha_hasta = "01/01/2100" 
         
         if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado')
+            if request.args.get('eliminado') == 'True':
+                eliminado = True
+            else:
+                eliminado = False
+         
         if(request.args.get('suspendido') is not None):
-            suspendido=request.args.get('suspendido')
+            if request.args.get('suspendido') == 'True':
+                suspendido = True
+            else:
+                suspendido = False
+          
         if(request.args.get('path_name') is not None):
-            path_name=request.args.get('path_name')    
+            path_name = request.args.get('path_name')    
         if(request.args.get('page') is not None):
-            page=int(request.args.get('page'))
+            page = int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
-            per_page=int(request.args.get('per_page'))
+            per_page = int(request.args.get('per_page'))
         if(request.args.get('nombre') is not None):
-            nombre=request.args.get('nombre')
+            nombre = request.args.get('nombre')
         if(request.args.get('fecha_desde') is not None):
-            fecha_desde=request.args.get('fecha_desde')
-            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+            fecha_desde = request.args.get('fecha_desde')
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')
-            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+            fecha_hasta = request.args.get('fecha_hasta')
 
-        res, cant=get_all_grupos_nivel(page,per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
-        data = {
-                "count": cant,
-                "data": GetGroupOut().dump(res, many=True)
-            }
+      
+        res, cant = get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         
+        data = {
+            "count": cant,
+            "data": GetGroupOut().dump(res, many=True)
+        }
         
         return data
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)  
-    
+        raise ValidationError(err)
 #############DETALLE DE GRUPOS###################    
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo_detalle')
