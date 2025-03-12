@@ -849,7 +849,7 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-
+@cache.memoize(timeout=3600)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
     
