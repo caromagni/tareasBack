@@ -37,7 +37,7 @@ def before_request():
 # ####################################################
 
 ################################ ETIQUETAS ################################
-@label_b.doc(description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label')
 @label_b.input(LabelGetIn, location='query')
 @label_b.output(LabelCountOut)
@@ -92,7 +92,7 @@ def get_labels(query_data: dict):
         raise ValidationError(err) 
 
 
-@label_b.doc(description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label/<string:id>')
 @label_b.output(LabelIdOut)
 def get_label(id:str):
@@ -162,7 +162,7 @@ def del_label(id: str):
         raise ValidationError(err)
     
 ################################ LABELS X TAREAS ################################
-@label_b.doc(description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_tarea/<string:id_tarea>')
 @label_b.output(LabelXTareaIdCountAllOut)
 def get_label_tarea(id_tarea:str):
@@ -189,7 +189,7 @@ def get_label_tarea(id_tarea:str):
         raise ValidationError(err) 
          
 
-@label_b.doc(description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
 @label_b.input(LabelXTareaIn)
 @label_b.output(LabelXTareaOut)
@@ -243,7 +243,7 @@ def delete_label_tarea(json_data: dict):
         print(traceback.format_exc())
         raise ValidationError(err)    
     
-@label_b.doc(description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
 # @label_b.input(LabelXTareaGetIn)
 # @label_b.output(LabelCountAllOut)

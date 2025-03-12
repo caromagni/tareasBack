@@ -76,19 +76,25 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
           
 
     if id_expediente is not None:
-        expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
+        print("#"*50)
+        print("id_expediente:", id_expediente)
+        print("#"*50)
+        expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
+
         if expediente is None:
-            nuevoID_expte=uuid.uuid4()
-            insert_expte = ExpedienteExt(id=nuevoID_expte, 
-                                         id_ext=id_expediente, 
-                                         caratula=caratula_expediente,
-                                         nro_expte=nro_expte,
-                                         fecha_actualizacion=datetime.now(),
-                                         id_user_actualizacion=id_user_actualizacion)
-            db.session.add(insert_expte)
-            id_expediente = nuevoID_expte
-        else:
-            id_expediente = expediente.id
+            expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == id_expediente).first()
+            if expediente is None:
+                nuevoID_expte=uuid.uuid4()
+                insert_expte = ExpedienteExt(id=nuevoID_expte, 
+                                            id_ext=id_expediente, 
+                                            caratula=caratula_expediente,
+                                            nro_expte=nro_expte,
+                                            fecha_actualizacion=datetime.now(),
+                                            id_user_actualizacion=id_user_actualizacion)
+                db.session.add(insert_expte)
+                id_expediente = nuevoID_expte
+            else:
+                id_expediente = expediente.id
 
     if id_actuacion is not None:
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()

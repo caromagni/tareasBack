@@ -12,6 +12,7 @@ from common.usher import get_roles
 from common.auth import verify_header
 import uuid
 import json
+import traceback
 from flask import g
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
@@ -40,7 +41,7 @@ def before_request():
 
 
 ####################TIPO DE NOTA######################
-@nota_b.doc(description='Consulta de Tipos de Notas', summary='Tipos de Notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Notas', summary='Tipos de Notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/tipo_nota')
 @nota_b.output(TipoNotaCountOut)
 @nota_b.input(PageIn, location='query')
@@ -67,6 +68,7 @@ def get_tipoNotas(query_data: dict):
     
    
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)    
  
 
@@ -92,6 +94,7 @@ def post_tipo_nota(json_data: dict):
         return TipoNotaOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -112,13 +115,13 @@ def del_tipo_nota(id: str):
         
         return result
     
-    except DataNotFound as err:
-        raise DataError(800, err)
+
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
 
 ################################ NOTAS ################################
-@nota_b.doc(description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota')
 @nota_b.input(NotaGetIn, location='query')
 @nota_b.output(NotaCountOut)
@@ -167,13 +170,15 @@ def get_notas(query_data: dict):
     
     except ValidationError as err:
         print(f"Validation error: {err}")
+        print(traceback.format_exc())
         return {"error": str(err)}, 400
     except Exception as err:
         print(f"Unexpected error: {err}")
+        print(traceback.format_exc())
         raise ValidationError(err)
 
 
-@nota_b.doc(description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota/<string:id>')
 @nota_b.output(NotaIdOut)
 def get_nota(id:str):
@@ -188,8 +193,10 @@ def get_nota(id:str):
         return result
     
     except DataNotFound as err:
+        print(traceback.format_exc())
         raise DataError(800, err)
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
 
 
@@ -216,6 +223,7 @@ def post_nota(json_data: dict):
         return NotaOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)    
 
 #################DELETE########################
@@ -245,8 +253,8 @@ def del_nota(id: str):
 
     
     except DataNotFound as err:
+        print(traceback.format_exc())
         raise DataError(800, err)
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
-    except Exception as e:
-        current_app.session.rollback()
