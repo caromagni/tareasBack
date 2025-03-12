@@ -115,8 +115,8 @@ def get_grupo_by_id(id):
     
     return results    
 
-@cache.cached(timeout=500, make_cache_key='all_grupos_nivel')
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
+@cache.cached(timeout=500)
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000',  fecha_hasta=None, path_name=False, eliminado=False, suspendido=False):
     if cache.get('all_grupos_nivel'):
         print(f"Cache HIT for key: 'all_grupos_nivel'")  # Log cache hit
     else:
@@ -196,7 +196,8 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         
         result =[]
         cursor=db.session.execute(subquery)
-    
+    if fecha_hasta is None:
+        fecha_hasta = datetime.now().strftime('%d/%m/%Y')
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     
@@ -297,7 +298,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-@cache.cached(timeout=500, make_cache_key='get_all_base')
+@cache.cached(timeout=500, make_cache_key=lambda: f"get_all_base_{id}_{usuarios}")
 def get_all_base(id, usuarios=False):
     cursor=None
    
@@ -459,8 +460,9 @@ def get_all_base(id, usuarios=False):
 
    
     #return res, i
-@cache.cached(timeout=500, make_cache_key='get_all_grupos')
-def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
+#@cache.cached(timeout=500, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
+@cache.cached(timeout=500)
+def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y'), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
@@ -481,8 +483,8 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
     return result, total
     
-@cache.cached(timeout=500, make_cache_key='get_all_grupos_detalle')
-def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
+@cache.cached(timeout=500)
+def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y')): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
     #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
