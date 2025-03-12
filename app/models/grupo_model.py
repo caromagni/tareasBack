@@ -11,6 +11,8 @@ from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 from cache import cache
 
+
+@cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
     #session: scoped_session = current_app.session
