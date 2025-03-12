@@ -11,6 +11,8 @@ from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 from cache import cache
 
+
+@cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
     #session: scoped_session = current_app.session
@@ -115,28 +117,37 @@ def get_grupo_by_id(id):
     
     return results    
 
-@cache.cached(timeout=500)
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000',  fecha_hasta=None, path_name=False, eliminado=False, suspendido=False):
-    if cache.get('all_grupos_nivel'):
-        print(f"Cache HIT for key: 'all_grupos_nivel'")  # Log cache hit
-    else:
-        print(f"Cache MISS for key: 'all_grupos_nivel'")  # Log cache miss
-    start_time= datetime.now()
-    print("TIMETRACK_INITIAL:",start_time)
-    print ("Fecha desde:", fecha_desde)
-    print ("Fecha hasta:", fecha_hasta)
+@cache.memoize(timeout=500)
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta='01/01/2100', path_name=False, eliminado=False, suspendido=False):
+    
+    start_time = datetime.now()
+    print("TIMETRACK_INITIAL:", start_time)
+    print("Fecha desde:", fecha_desde)
+    print("Fecha hasta:", fecha_hasta)
     print("Tipo fecha desde:", type(fecha_desde))
     print("Tipo fecha hasta:", type(fecha_hasta))
 
-    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-    #fecha_hasta = datetime.strftime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
+    # # Handle the None default for fecha_hasta
+    if fecha_hasta is not None:
+        fecha_hasta_dt = datetime.strptime(fecha_hasta, "%d/%m/%Y")
+        print("MOFO FECHA DESDE")
+        print(fecha_hasta_dt)
+        
+  
+
+
+    if fecha_desde is not None:
+        fecha_desde_dt = datetime.strptime(fecha_desde, "%d/%m/%Y")
+        print("MOFO FECHA HASTA")
+        print(fecha_desde_dt)
+        
+   
     
-    cursor=None
-    #session: scoped_session = current_app.session
+    cursor = None
+    
     # Subconsulta recursiva
-    if path_name=='true':
-        #print("Con consulta recursiva")
-        subquery= text("""WITH RECURSIVE GroupTree AS (
+    if path_name is True or path_name == 'true':
+        subquery = text("""WITH RECURSIVE GroupTree AS (
                 -- Anchor member: Start with all parentless nodes
                 SELECT 
                     g.id AS id_padre,
@@ -194,12 +205,11 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
             ORDER BY 
                 gt.path;""")
         
-        result =[]
-        cursor=db.session.execute(subquery)
-    if fecha_hasta is None:
-        fecha_hasta = datetime.now().strftime('%d/%m/%Y')
-    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+        result = []
+        cursor = db.session.execute(subquery)
     
+    # Use the datetime objects for date filtering
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     # Build all filters in a list
     filters = []
@@ -212,17 +222,15 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         filters.append(Grupo.suspendido == suspendido)
 
     # Apply all filters at once
-    query = query.filter(*filters)
+    if filters:
+        query = query.filter(*filters)
 
     total = query.count()
    
-
     if cursor:
         for reg in cursor:
-            #print(reg.path_name)
-            grupo=query.filter(Grupo.id==reg.id_hijo).first()
+            grupo = query.filter(Grupo.id == reg.id_hijo).first()
             if grupo is not None:
-                #continue
                 data = {
                     "id": reg.id_hijo,
                     "nombre": grupo.nombre,
@@ -240,23 +248,17 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }
-
                 result.append(data)
 
         start = (page - 1) * per_page
         end = start + per_page
 
-
-    # Extraer los registros de la página actual
+        # Extraer los registros de la página actual
         result_paginated = result[start:end]
+        return result_paginated, total
     else:
-        result_paginated= query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page)    
-
-    #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
-    print("TIMETRACK_FINAL:", datetime.now())
-    #calculate the milliseconds that took from start to finish
-    print("TOTAL_PROCESSING_TIME:", datetime.now()-start_time)
-    return result_paginated, total
+        result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
+        return result_paginated, total
 
 def encontrar_grupo_base(res_grupos, id):
     print("Encontrar grupo base para el ID:", id)
