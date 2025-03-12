@@ -1598,7 +1598,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("*******************************************************")
     print("get_all_tarea_detalle")
     print("*******************************************************")
-  
+    
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:

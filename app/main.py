@@ -35,11 +35,6 @@ from cache import cache  # Import the shared cache instance
 
 def create_app():
 
-
-
-
-
-
     print("Creating app..")
     app = APIFlask(__name__)
     app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
