@@ -66,26 +66,18 @@ def get_grupo(query_data: dict):
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nombre = ""
-        eliminado = False
-        suspendido = False
-        path_name = False
+        eliminado = None
+        suspendido = None
+        path_name = None
         
         fecha_desde = "01/01/2000"  
         fecha_hasta = "01/01/2100" 
         print(suspendido)
         print(eliminado)
         if(request.args.get('eliminado') is not None):
-            if request.args.get('eliminado') == 'True':
-                eliminado = True
-            else:
-                eliminado = False
-         
+            eliminado = request.args.get('eliminado')
         if(request.args.get('suspendido') is not None):
-            if request.args.get('suspendido') == 'True':
-                suspendido = True
-            else:
-                suspendido = False
-          
+            suspendido = request.args.get('suspendido')
         if(request.args.get('path_name') is not None):
             path_name = request.args.get('path_name')    
         if(request.args.get('page') is not None):

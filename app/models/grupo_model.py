@@ -118,14 +118,17 @@ def get_grupo_by_id(id):
     return results    
 
 @cache.memoize(timeout=500)
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta='01/01/2100', path_name=False, eliminado=None, suspendido=None):
-    print('suspendido ', suspendido)
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta='01/01/2100', path_name=None, eliminado=None, suspendido=None):
+    
     start_time = datetime.now()
     print("TIMETRACK_INITIAL:", start_time)
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
     print("Tipo fecha desde:", type(fecha_desde))
     print("Tipo fecha hasta:", type(fecha_hasta))
+    print("Eliminado:", eliminado)
+    print("Suspendido:", suspendido)
+    print("Path name:", path_name)
 
     # # Handle the None default for fecha_hasta
     if fecha_hasta is not None:
@@ -141,7 +144,6 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         print("MOFO FECHA HASTA")
         print(fecha_desde_dt)
         
-   
     
     cursor = None
     
@@ -301,7 +303,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-# @cache.cached(timeout=500)
+@cache.cached(timeout=500)
 def get_all_base(id, usuarios=False):
     cursor=None
    
