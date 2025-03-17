@@ -499,7 +499,7 @@ class TareaIn(Schema):
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    caratula_expediente = String()
+    #caratula_expediente = String()
     nro_expte = String()
     nombre_actuacion= String()    
     id_tipo_tarea = String(required=True)
@@ -527,10 +527,10 @@ class TareaPatchIn(Schema):
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    caratula_expediente = String(validate=[
-        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
-        validate_char
-    ])
+    #caratula_expediente = String(validate=[
+    #    validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+    #    validate_char
+    #])
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
@@ -635,7 +635,7 @@ class TareaOut(Schema):
     cuerpo = String()
     id_expediente = String()
     expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
-    caratula_expediente = String()
+    #caratula_expediente = String()
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
@@ -857,7 +857,7 @@ class TareaAllOut(Schema):
     titulo = String()
     cuerpo = String()
     id_expediente = String()
-    caratula_expediente = String()
+    #caratula_expediente = String()
     expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     id_tipo_tarea = String()
@@ -899,6 +899,9 @@ class TareaUsuarioIn(Schema):
         validate_char
     ])
 
+class TareaAlertaIn(Schema):
+    dias_aviso = Integer(required=True)
+    
 class TareaUsrOut(Schema):
     id = String()
     titulo = String()

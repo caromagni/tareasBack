@@ -23,8 +23,11 @@ def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', 
     
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado") 
+            raise Exception("Usuario no ingresado")
     
     nuevoID=uuid.uuid4()
     nuevo_tipo_nota = TipoNota(
@@ -48,8 +51,11 @@ def delete_tipo_nota(username=None, id=None):
     
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado")
+            raise Exception("Usuario no ingresado")
     
     tipo_nota = db.session.query(TipoNota).filter(TipoNota.id == id, TipoNota.eliminado==False).first()
     if tipo_nota is not None:
@@ -77,6 +83,13 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
             tareasnota = db.session.query(Tarea).filter(Tarea.id == n.id_tarea, Tarea.eliminado==False).first()
             if tareasnota is not None:
                 tareasnota.tiene_notas_desnz=True    """
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+    else:
+            raise Exception("Usuario no ingresado")
 
     tarea_nota = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
 

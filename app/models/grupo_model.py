@@ -9,8 +9,10 @@ from flask import current_app
 from common.utils import *
 from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
+from cache import cache
 
 
+@cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
     #session: scoped_session = current_app.session
@@ -115,24 +117,37 @@ def get_grupo_by_id(id):
     
     return results    
 
-
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
-    start_time= datetime.now()
-    print("TIMETRACK_INITIAL:",start_time)
-    print ("Fecha desde:", fecha_desde)
-    print ("Fecha hasta:", fecha_hasta)
+@cache.memoize(timeout=500)
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta='01/01/2100', path_name=False, eliminado=None, suspendido=None):
+    print('suspendido ', suspendido)
+    start_time = datetime.now()
+    print("TIMETRACK_INITIAL:", start_time)
+    print("Fecha desde:", fecha_desde)
+    print("Fecha hasta:", fecha_hasta)
     print("Tipo fecha desde:", type(fecha_desde))
     print("Tipo fecha hasta:", type(fecha_hasta))
 
-    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-    #fecha_hasta = datetime.strftime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
+    # # Handle the None default for fecha_hasta
+    if fecha_hasta is not None:
+        fecha_hasta_dt = datetime.strptime(fecha_hasta, "%d/%m/%Y")
+        print("MOFO FECHA DESDE")
+        print(fecha_hasta_dt)
+        
+  
+
+
+    if fecha_desde is not None:
+        fecha_desde_dt = datetime.strptime(fecha_desde, "%d/%m/%Y")
+        print("MOFO FECHA HASTA")
+        print(fecha_desde_dt)
+        
+   
     
-    cursor=None
-    #session: scoped_session = current_app.session
+    cursor = None
+    
     # Subconsulta recursiva
-    if path_name=='true':
-        #print("Con consulta recursiva")
-        subquery= text("""WITH RECURSIVE GroupTree AS (
+    if path_name is True or path_name == 'true':
+        subquery = text("""WITH RECURSIVE GroupTree AS (
                 -- Anchor member: Start with all parentless nodes
                 SELECT 
                     g.id AS id_padre,
@@ -190,34 +205,33 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
             ORDER BY 
                 gt.path;""")
         
-        result =[]
-        cursor=db.session.execute(subquery)
+        result = []
+        cursor = db.session.execute(subquery)
     
-    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    
+    # Use the datetime objects for date filtering
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
     
     # Build all filters in a list
     filters = []
 
     if nombre:
         filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado:
+    if eliminado==True or eliminado==False:
         filters.append(Grupo.eliminado == eliminado)
-    if suspendido:
+    if suspendido==True or suspendido==False:
         filters.append(Grupo.suspendido == suspendido)
 
     # Apply all filters at once
-    query = query.filter(*filters)
-
+    if filters:
+        query = query.filter(*filters)
+    
     total = query.count()
    
 
     if cursor:
         for reg in cursor:
-            #print(reg.path_name)
-            grupo=query.filter(Grupo.id==reg.id_hijo).first()
+            grupo = query.filter(Grupo.id == reg.id_hijo).first()
             if grupo is not None:
-                #continue
                 data = {
                     "id": reg.id_hijo,
                     "nombre": grupo.nombre,
@@ -235,23 +249,17 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }
-
                 result.append(data)
 
         start = (page - 1) * per_page
         end = start + per_page
 
-
-    # Extraer los registros de la página actual
+        # Extraer los registros de la página actual
         result_paginated = result[start:end]
+        return result_paginated, total
     else:
-        result_paginated= query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page)    
-
-    #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
-    print("TIMETRACK_FINAL:", datetime.now())
-    #calculate the milliseconds that took from start to finish
-    print("TOTAL_PROCESSING_TIME:", datetime.now()-start_time)
-    return result_paginated, total
+        result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
+        return result_paginated, total
 
 def encontrar_grupo_base(res_grupos, id):
     print("Encontrar grupo base para el ID:", id)
@@ -293,7 +301,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-
+# @cache.cached(timeout=500)
 def get_all_base(id, usuarios=False):
     cursor=None
    
@@ -455,8 +463,9 @@ def get_all_base(id, usuarios=False):
 
    
     #return res, i
-   
-def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
+#@cache.cached(timeout=500, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
+@cache.cached(timeout=500)
+def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y'), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
@@ -477,8 +486,8 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
     return result, total
     
-
-def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now()): 
+@cache.cached(timeout=500)
+def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y')): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
     #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
@@ -1058,9 +1067,23 @@ def eliminar_grupo_recursivo(id):
 
     
 
-def delete_grupo(id,todos=False):
+def delete_grupo(username=None, id='', todos=False):
     #print("Borrando grupo con id:", id)
     #session = current_app.session
+    
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if username is None:
+        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        logger.error("Id de usuario no ingresado")
+        #raise Exception("Usuario no ingresado")    
+    
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
@@ -1100,7 +1123,16 @@ def delete_grupo(id,todos=False):
 
     return grupo
 
-def undelete_grupo(id):
+def undelete_grupo(username=None, id=None):
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+    else:
+            raise Exception("Usuario no ingresado")
+    
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")

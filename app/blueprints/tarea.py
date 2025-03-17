@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut, TareaPatchLoteV2Out, TareaPatchLoteV2In
+from schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut, TareaHIstoriaUserIdOut, TareaPatchLoteIn, TareaPatchLoteOut, TareaPatchLoteV2Out, TareaPatchLoteV2In, TareaAlertaIn
 from models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea, get_tarea_historia_usr_by_id
-from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, update_lote_tareas, get_tarea_grupo, update_lote_tareas_v2
+from models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, update_lote_tareas, get_tarea_grupo, update_lote_tareas_v2, tareas_a_vencer
 from common.error_handling import DataError, DataNotFound, ValidationError, UnauthorizedError
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
@@ -45,6 +45,17 @@ def before_request():
 def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
     #session: scoped_session = current_app.session
 
+
+
+# .d8888. d888888b db      db    db d888888b  .d8b. 
+# 88'  YP   `88'   88      88    88   `88'   d8' `8b
+# `8bo.      88    88      Y8    8P    88    88ooo88
+#   `Y8b.    88    88      `8b  d8'    88    88~~~88
+# db   8D   .88.   88booo.  `8bd8'    .88.   88   88
+# `8888Y' Y888888P Y88888P    YP    Y888888P YP   YP
+
+#review the possibility of running two or more queries at once. for example session.query(Usuario).filter(Usuario.email == nombre_usuario).first() and session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all() in a SINGLE JOIN?
+#this is to save time and compensate for network latency
     #tiempo_vencimiento = timedelta(minutes=30)
     tiempo_vencimiento = timedelta(days=360)
     query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
@@ -772,3 +783,29 @@ def del_tarea(id: str):
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)    
+    
+    
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Tareas a vencer', summary='Tareas a vencer', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.get('/alertas')
+@tarea_b.input(TareaAlertaIn, location='query')
+@tarea_b.output(TareaCountAllOut)
+def get_alerta_tarea(query_data: dict):
+    try:
+        dias_aviso=15
+        cant=0
+        username=g.get('username')
+        if(request.args.get('dias_aviso') is not None):
+            dias_aviso=int(request.args.get('dias_aviso'))
+        logger.info("Tareas a vencer")
+        res, cant = tareas_a_vencer(username, dias_aviso)
+        data = {
+                "count": cant,
+                "data": TareaAllOut().dump(res, many=True)
+            }
+        
+        
+        return data
+    
+    except Exception as err:
+        print(traceback.format_exc())
+        raise ValidationError(err)        

@@ -17,7 +17,7 @@ from alchemy_db import db
 from sqlalchemy import func, cast, Text
 from sqlalchemy.types import Boolean, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
-
+from cache import cache
 def nombre_estado(estado):
     if estado == 1:
         return "Pendiente"
@@ -37,8 +37,9 @@ def nombre_prioridad(prioridad):
         return "Baja"
 
 def es_habil(fecha):
-    if fecha.weekday() >= 5:
-        return True    
+    """ if fecha.weekday() >= 5:
+        return True  """ 
+    return fecha.weekday() < 5  
     
 def calcular_fecha_vencimiento(fecha, plazo):
     logger.info("calcula fecha vencimiento:" + str(fecha) + "-" + str(plazo))
@@ -47,10 +48,60 @@ def calcular_fecha_vencimiento(fecha, plazo):
     dias_agregados = 0
     while dias_agregados < plazo:
         fecha_vencimiento = fecha_vencimiento + timedelta(days=1)
-        if not es_habil(fecha_vencimiento):
+        if es_habil(fecha_vencimiento):
             dias_agregados = dias_agregados + 1
 
     return fecha_vencimiento
+
+def calcular_dias_vencimiento(fecha_vencimiento):
+    """Calcula los días hábiles restantes hasta la fecha de vencimiento"""
+    fecha_actual = datetime.now().date()  # Tomar solo la fecha, sin hora
+    fecha_vencimiento = fecha_vencimiento.date()  # Asegurar que es solo fecha
+    
+    dias_vencimiento = 0
+    fecha_intermedia = fecha_actual
+    
+    while fecha_intermedia < fecha_vencimiento:
+        if es_habil(fecha_intermedia):
+            dias_vencimiento += 1
+        fecha_intermedia += timedelta(days=1)  # Pasar al siguiente día
+    
+    logger.info("dias_vencimiento:" + str(dias_vencimiento) + "-" + str(fecha_vencimiento))
+    return dias_vencimiento
+
+def tareas_a_vencer(username=None, dias_aviso=None):
+    total = 0
+    if username is not None:
+        id_user = verifica_username(username)
+
+        if id_user is not None:
+            verifica_usr_id(id_user)
+        else:
+            raise Exception("Debe ingresar username o id_user_actualizacion")
+            
+    if dias_aviso is None:
+        dias_aviso = 365  # Por defecto, 365 días de aviso
+
+    logger.info("tareas_a_vencer")
+    #Busco las tareas asignadas a todos los grupos del usuario username
+    tareas = (db.session.query(Tarea)
+              .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
+              .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
+              .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
+              .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
+                      Tarea.eliminado == False,
+                      Tarea.estado != 3,
+                      UsuarioGrupo.id_usuario==id_user,
+                      UsuarioGrupo.eliminado==False)  # Estado activo
+              .all())
+    if tareas is not None:
+        total = len(tareas)
+        logger.info("Cantidad de tareas_a_vencer:" + str(total))    
+
+    logger.info("Cantidad de tareas_a_vencer:" + str(total))
+    tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    total = len(tareas_vencer)
+    return tareas_vencer, total
 
 
 def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
@@ -76,19 +127,26 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
           
 
     if id_expediente is not None:
-        expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
+        print("#"*50)
+        print("id_expediente:", id_expediente)
+        print("#"*50)
+        expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
+
         if expediente is None:
-            nuevoID_expte=uuid.uuid4()
-            insert_expte = ExpedienteExt(id=nuevoID_expte, 
-                                         id_ext=id_expediente, 
-                                         caratula=caratula_expediente,
-                                         nro_expte=nro_expte,
-                                         fecha_actualizacion=datetime.now(),
-                                         id_user_actualizacion=id_user_actualizacion)
-            db.session.add(insert_expte)
-            id_expediente = nuevoID_expte
-        else:
-            id_expediente = expediente.id
+            #Cuando viene del portal o de expedientes, se ingresa el id_ext
+            expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == id_expediente).first()
+            if expediente is None:
+                nuevoID_expte=uuid.uuid4()
+                insert_expte = ExpedienteExt(id=nuevoID_expte, 
+                                            id_ext=id_expediente, 
+                                            caratula=caratula_expediente,
+                                            nro_expte=nro_expte,
+                                            fecha_actualizacion=datetime.now(),
+                                            id_user_actualizacion=id_user_actualizacion)
+                db.session.add(insert_expte)
+                id_expediente = nuevoID_expte
+            else:
+                id_expediente = expediente.id
 
     if id_actuacion is not None:
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()
@@ -189,7 +247,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
-        caratula_expediente=caratula_expediente,
+        #caratula_expediente=caratula_expediente,
         id_tipo_tarea=id_tipo_tarea,
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
@@ -330,8 +388,8 @@ def update_tarea(id_tarea='', username=None, **kwargs):
     if tarea is None:
         return None
     
-    if 'caratula_expediente' in kwargs:
-        tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
+    #if 'caratula_expediente' in kwargs:
+        #tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
     if 'cuerpo' in kwargs:
         tarea.cuerpo = kwargs['cuerpo']
     if 'eliminable' in kwargs:
@@ -546,7 +604,7 @@ def update_tarea(id_tarea='', username=None, **kwargs):
         "subtipo_tarea": tarea.subtipo_tarea,
         "id_expediente": tarea.id_expediente,
         "expediente": tarea.expediente,
-        "caratula_expediente": tarea.caratula_expediente,
+       #"caratula_expediente": tarea.caratula_expediente,
         "id_actuacion": tarea.id_actuacion,
         "actuacion": tarea.actuacion,
         "cuerpo": tarea.cuerpo,
@@ -849,7 +907,7 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-
+@cache.memoize(timeout=3600)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
     
@@ -1592,13 +1650,13 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 
-
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+@cache.memoize(timeout=500)
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde='01/01/2000',  fecha_hasta=datetime.now().strftime('%d/%m/%Y'), fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
 
     print("*******************************************************")
     print("get_all_tarea_detalle")
     print("*******************************************************")
-  
+    
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:

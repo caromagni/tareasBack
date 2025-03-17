@@ -38,9 +38,12 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     
     
     if username is not None:
-        id_user_creacion = verifica_username(username)
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado 0")  
+            raise Exception("Usuario no ingresado")  
     
     nuevoID_label=uuid.uuid4()
     id_tarea = id_tarea
@@ -120,10 +123,13 @@ def update_label(id='', **kwargs):
 def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
        
     """ if username is not None:
-        id_user = verifica_username(username)
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado") """
-   
+            raise Exception("Usuario no ingresado")
+    """
 
     query = db.session.query(Label).filter(Label.fecha_creacion.between(fecha_desde, fecha_hasta)).order_by(Label.fecha_creacion.desc())
     if nombre != '':
@@ -162,8 +168,11 @@ def delete_label(username=None, id_label=None):
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado")
+            raise Exception("Usuario no ingresado")
     
     label = db.session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
     print('label id a borrar:', label)
@@ -222,8 +231,11 @@ def insert_label_tarea (username=None, **kwargs):
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado 1") 
+            raise Exception("Usuario no ingresado") 
     
     id_tarea = kwargs['id_tarea']
     ids_labels = kwargs['ids_labels']
@@ -489,8 +501,11 @@ def delete_label_tarea_model(username, **kwargs):
     
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
     else:
-        raise ValidationError("Usuario no ingresado")    
+            raise Exception("Usuario no ingresado")
 
    
     active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()

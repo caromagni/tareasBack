@@ -369,17 +369,17 @@ def update_usuario(id='',username=None, **kwargs):
 
 def delete_usuario(username=None, id=None):
     
-    if username is None:
-        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
-
     if username is not None:
         id_user_actualizacion = verifica_username(username)
+
+    if username is None:
+        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Usuario no ingresado")
-        raise Exception("Usuario no ingresado")
+        logger.error("Id de usuario no ingresado")
+        #raise Exception("Usuario no ingresado"
     
     usuario = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
     if usuario is None:

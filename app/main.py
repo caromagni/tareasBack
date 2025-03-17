@@ -28,22 +28,39 @@ from common.chk_messagges import *
 import sys
 from models.alch_model import Base
 from alchemy_db import db
-
+from flask_caching import Cache
 sys.setrecursionlimit(100)
-
+from cache import cache  # Import the shared cache instance
 
 
 def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    
+    app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 500  # Optional default timeout
+#      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
+# |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
+#  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   
+#  | || |  | |  __/| |___| |___| |  | | |___| |\  | | |/ ___ \|  _ <    
+# |___|_|  |_|_| __|_____|_____|_|  |_|_____|_| \_| |_/_/   \_\_| \_\   
+#  / ___|  / \  / ___| | | | ____|  / ___| |   / _ \| __ )  / \  | |    
+# | |     / _ \| |   | |_| |  _|   | |  _| |  | | | |  _ \ / _ \ | |    
+# | |___ / ___ \ |___|  _  | |___  | |_| | |__| |_| | |_) / ___ \| |___ 
+#  \____/_/ __\_\____|_| |_|_____|  \____|_____\___/|____/_/   \_\_____|
+# |  _ \_ _/ ___|  / \  | __ )| |   | ____|                             
+# | | | | |\___ \ / _ \ |  _ \| |   |  _|                               
+# | |_| | | ___) / ___ \| |_) | |___| |___                              
+# |____/___|____/_/   \_\____/|_____|_____|                             
+    app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
     app.config['JWT_IDENTITY_CLAIM'] = Config.JWT_IDENTITY_CLAIM
-
-
+     # Initialize cache with app
+    cache.init_app(app)
+    print("CACHE MODULE INITIALIZED")
+    print(cache)
     app.security_schemes = {  # equals to use config SECURITY_SCHEMES
         'ApiKeyAuth': {
         'type': 'apiKey',
@@ -63,6 +80,7 @@ def create_app():
     }
    
     app.config['DEBUG'] = True
+   
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
@@ -81,6 +99,7 @@ def create_app():
    
 
     db.init_app(app)
+   
    
     #engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False, pool_pre_ping=True)
     #Base.metadata.create_all(engine)
