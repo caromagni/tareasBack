@@ -12,6 +12,7 @@ import traceback
 from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 from common.utils import *
+from common.logger_config import logger
 from alchemy_db import db
 from sqlalchemy import func, cast, Text
 from sqlalchemy.types import Boolean, TIMESTAMP
@@ -40,7 +41,7 @@ def es_habil(fecha):
         return True    
     
 def calcular_fecha_vencimiento(fecha, plazo):
-    print("calcula fecha vencimiento:", fecha, "-", plazo)
+    logger.info("calcula fecha vencimiento:" + str(fecha) + "-" + str(plazo))
     #fecha_vencimiento = datetime.strptime(fecha, '%d/%m/%Y')
     fecha_vencimiento=fecha
     dias_agregados = 0
@@ -52,15 +53,27 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     
     print("##############Validaciones Insert Tarea################")
     id_grupo=None
     id_usuario_asignado=None
-    if username is not None:
-        id_user_actualizacion = verifica_username(username)
+    #if type_header is not "api_key":
+    if usr_header is not None:
+        print("usr_header:", usr_header)
+        print("verifying token username")
+        id_user_actualizacion = verifica_username(usr_header)
     else:
-        raise Exception("Error en el ingreso de Usuario. Usuario no existente")    
+        #raise Exception("Error en el ingreso de Usuario. Usuario no existente")
+    
+        if username is not None:
+            #print("verifying username: " + username)
+            logger.info("verifying username: " + username)
+            id_user_actualizacion = verifica_username(username)
+        else:
+            logger.error("Error en el ingreso de Usuario. Usuario no existente")
+            raise Exception("Error en el ingreso de Usuario. Usuario no existente")  
+          
 
     if id_expediente is not None:
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
@@ -74,7 +87,6 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
                                          id_user_actualizacion=id_user_actualizacion)
             db.session.add(insert_expte)
             id_expediente = nuevoID_expte
-            #raise Exception("Expediente no encontrado")
         else:
             id_expediente = expediente.id
 
@@ -82,7 +94,6 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()
         
         if actuacion is None:
-            #print("No se encontro actuacion")
             nuevoID_actuacion=uuid.uuid4()
             insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
                                             id_ext=id_actuacion,
@@ -92,6 +103,7 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
                                             fecha_actualizacion=datetime.now())
             db.session.add(insert_actuacion)
             id_actuacion = nuevoID_actuacion
+            logger.info("actuacion insertada")
         else:
             id_actuacion = actuacion.id
            
@@ -99,18 +111,22 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
     if id_tipo_tarea is not None:
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
+            logger.error("Tipo de tarea no encontrado")
             raise Exception("Tipo de tarea no encontrado")
         nombre_tipo=tipo_tarea.nombre
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
+                logger.error("Subtipo de tarea no encontrado")
                 raise Exception("Subtipo de tarea no encontrado")
             nombre_subtipo = subtipo_tarea.nombre
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.id_tipo == id_tipo_tarea).first()
             if subtipo_tarea is None:
+                logger.error("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
     else:
         if id_subtipo_tarea is not None:
+            logger.error("Debe ingresar el tipo de tarea")
             raise Exception("Debe ingresar el tipo de tarea")
             
 
@@ -138,11 +154,9 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
    #format date from DD/MM/YYYY to DD-MM-YYYY
     fecha_inicio = controla_fecha(fecha_inicio)
 
-    print("after format")
-    print(fecha_inicio)
+    #print("after format")
+    #print(fecha_inicio)
     
-
-
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
         if len(query_inhabilidad)>0:  
@@ -217,6 +231,7 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
             db.session.add(tareaxgrupo) 
 
     else:
+        logger.error("Debe ingresar al menos un grupo")
         raise Exception ("Debe ingresar al menos un grupo")
         
     #Asigna el grupo del usuario que crea la tarea por defecto
@@ -250,9 +265,11 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
             id_usuario = user['id_usuario']
             existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario, Usuario.eliminado==False).first()
             if existe_usuario is None:
+                logger.error("Error en el ingreso de Usuario. Usuario no existente")
                 raise Exception("Error en el ingreso de Usuario. Usuario no existente")
             
             if existe_usuario.eliminado==True:
+                logger.error("Error en el ingreso de Usuario. Usuario eliminado")
                 raise Exception("Error en el ingreso de Usuarios. Usuario eliminado: " + existe_usuario.apelllido + '- id: ' + str(existe_usuario.id))
 
             if existe_usuario is not None:
@@ -1632,7 +1649,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
     for tarea in res_tareas:
-        print(tarea.id, "-", tarea.titulo)
+        logger.info(f"Tarea: {tarea.id} - {tarea.titulo}")
 
     # Process each task in paginated results
     results = []
@@ -1717,8 +1734,6 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         }
         results.append(result)
 
-        print("Tarea:", result["id"], "-", result["titulo"])
-    
     return results, total
 
 

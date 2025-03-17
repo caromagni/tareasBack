@@ -40,16 +40,8 @@ def get_grupo_by_id(id):
                                     UsuarioGrupo.eliminado).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
         
         
-        res_tarea = db.session.query(Tarea.id, 
-                                    Tarea.titulo,
-                                    Tarea.estado,
-                                    Tarea.fecha_creacion,
-                                    Tarea.fecha_inicio,
-                                    Tarea.fecha_fin,
-                                    Tarea.id_tipo_tarea,
-                                    Tarea.tipo_tarea,
-                                    Tarea.id_subtipo_tarea
-                                ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id).filter(TareaXGrupo.id_grupo==res.id).all()
+        res_tarea = db.session.query(Tarea
+                                ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id).filter(TareaXGrupo.id_grupo==res.id and TareaXGrupo.eliminado==False).all()
         
         if res_hijos is not None:
             #print("tiene hijos")
@@ -83,7 +75,9 @@ def get_grupo_by_id(id):
                 usuarios.append(usuario)
 
         if res_tarea is not None:
-            #print("tiene tareas: ", len(res_tarea))
+            print("tiene tareas: ", len(res_tarea))
+            tareas=[]
+
             for row in res_tarea:
                 tarea = {
                     "id": row.id,
@@ -96,7 +90,7 @@ def get_grupo_by_id(id):
                     "fecha_creacion": row.fecha_creacion,
                     "fecha_inicio": row.fecha_inicio,
                     "fecha_fin": row.fecha_fin
-                    }
+                }
                 tareas.append(tarea)        
 
         ###################Formatear el resultado####################
@@ -260,6 +254,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     return result_paginated, total
 
 def encontrar_grupo_base(res_grupos, id):
+    print("Encontrar grupo base para el ID:", id)
     for r in res_grupos:
         if id == str(r['id_hijo']):
            # print("############ENCONTRADO##############")
@@ -380,35 +375,7 @@ def get_all_base(id, usuarios=False):
     res_grupos=[]
     res=[]
     print("Usuarios:", usuarios)
-    print(type(usuarios))
     for reg in result:
-        usuarios_gr = []
-        if usuarios==True:
-            res_usuarios = db.session.query(UsuarioGrupo.id,
-            # res_usuarios = session.query(UsuarioGrupo.id,
-                                        UsuarioGrupo.id_grupo,
-                                        UsuarioGrupo.id_usuario,
-                                        Usuario.id,
-                                        Usuario.nombre,
-                                        Usuario.apellido,
-                                        Usuario.eliminado,
-                                        Usuario.suspendido,
-                                        Usuario.username
-                                        ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
-                                        ).filter(UsuarioGrupo.id_grupo == reg.id_hijo and UsuarioGrupo.eliminado==False).all()
-           #UsuarioGrupo.eliminado==False
-            
-            if res_usuarios is not None:
-                for row in res_usuarios:
-                    usuario = {
-                        "id_usuario": row.id,
-                        "nombre": row.nombre,
-                        "apellido": row.apellido,
-                        "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
-                        "username": row.username
-                    }
-                    usuarios_gr.append(usuario)
 
         data = {
             "id": reg.group_id,
@@ -421,25 +388,47 @@ def get_all_base(id, usuarios=False):
             "eliminado": reg.eliminado,
             "suspendido": reg.suspendido,
             "is_base": reg.is_base,
-            "is_parentless": reg.is_parentless,
-            "usuarios": usuarios_gr
+            "is_parentless": reg.is_parentless
         }    
 
-        res_grupos.append(data)
+        res_grupos.append(data) 
+    
 
     grupo_base = None
-    
+    print("Antes de encontrar grupo base", id)
     grupo_base=encontrar_grupo_base(res_grupos, id)
 
     grupos_mismo_base = []
     if grupo_base:
         # Filtrar los grupos con el mismo grupo base
-        
         grupos_mismo_base = buscar_mismos_base(res_grupos, grupo_base['id'])
 
         #print(grupos_mismo_base)
         for grupo in grupos_mismo_base:
-            #print(grupo['path_name'])
+            usuarios_g = []
+            id_grupo = grupo['id']
+            if usuarios=='true':
+                res_usuarios = db.session.query(UsuarioGrupo.id_grupo,
+                                        UsuarioGrupo.id_usuario,
+                                        Usuario.id,
+                                        Usuario.nombre,
+                                        Usuario.apellido,
+                                        UsuarioGrupo.eliminado
+                                        ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario
+                                        ).filter(UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado==False).all()
+                
+                if res_usuarios is not None:
+                    for row in res_usuarios:
+                        usuario = {
+                            "id_usuario": row.id,
+                            "nombre": row.nombre,
+                            "apellido": row.apellido,
+                            "eliminado": row.eliminado,
+                            "username": row.nombre
+                        }
+                        usuarios_g.append(usuario)
+                else:
+                    print("No se encontraron usuarios para el grupo:", reg.id_hijo)  
 
             data = {
                 "id": grupo['id'],
@@ -453,7 +442,7 @@ def get_all_base(id, usuarios=False):
                 "suspendido": grupo['suspendido'],
                 "is_base": grupo['is_base'],
                 "is_parentless": grupo['is_parentless'],
-                "usuarios": grupo['usuarios']
+                "usuarios": usuarios_g
                 }
             
             res.append(data)
@@ -808,36 +797,38 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     return nuevo_grupo
 
 
-def get_usuarios_by_grupo(ids):
-    #session: scoped_session = current_app.session
+def get_usuarios_by_grupo(id):
     res = []
-    for id in ids:
-        usrs = db.session.query(Grupo.id.label("id_grupo"),
-                    Grupo.nombre.label("nombre_grupo"),
-                    Usuario.nombre.label("nombre"),
-                    Usuario.apellido.label("apellido"),
-                    Usuario.id.label("id_usuario"),
-                    Usuario.eliminado.label("eliminado"),
-                    Usuario.suspendido.label("suspendido"),
-                    Usuario.username.label("username"),
-                    Usuario.email.label("email")                  
-                    ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-                    ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                    ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all()
-        if usrs is not None:
-            for row in usrs:
-                usuario = {
-                    "id_grupo": row.id_grupo,
-                    "nombre_grupo": row.nombre_grupo,
-                    "id_usuario": row.id_usuario,
-                    "nombre": row.nombre,
-                    "apellido": row.apellido,
-                    "eliminado": row.eliminado,
-                    "suspendido": row.suspendido,
-                    "username": row.username,
-                    "email": row.email
-                }
-                res.append(usuario) 
+    #for id in ids:
+    print("#"*50)
+    print("ID:", id)
+    usrs = db.session.query(Grupo.id.label("id_grupo"),
+                Grupo.nombre.label("nombre_grupo"),
+                Usuario.nombre.label("nombre"),
+                Usuario.apellido.label("apellido"),
+                Usuario.id.label("id_usuario"),
+                Usuario.eliminado.label("eliminado"),
+                Usuario.suspendido.label("suspendido"),
+                Usuario.username.label("username"),
+                Usuario.email.label("email")                  
+                ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+                ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+                ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all()
+    
+    if usrs is not None:
+        for row in usrs:
+            usuario = {
+                "id_grupo": row.id_grupo,
+                "nombre_grupo": row.nombre_grupo,
+                "id_usuario": row.id_usuario,
+                "nombre": row.nombre,
+                "apellido": row.apellido,
+                "eliminado": row.eliminado,
+                "suspendido": row.suspendido,
+                "username": row.username,
+                "email": row.email
+            }
+            res.append(usuario) 
                                        
     #print("Encontrados:",len(res))
     return res

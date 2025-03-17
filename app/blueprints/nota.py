@@ -9,7 +9,7 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
-from common.auth import verificar_header
+from common.auth import verify_header
 import uuid
 import json
 from flask import g
@@ -24,16 +24,19 @@ nota_b = APIBlueprint('nota_blueprint', __name__)
 
 @nota_b.before_request
 def before_request():
-    username = verificar_header()
-    if username is None:
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-    if username is 'api-key':
-        print("API KEY")
-        g.username = None
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            user_origin=''
+            type_origin=''
     else:
-        g.username = username
-        print("Username before:",g.username)  
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 
 ####################TIPO DE NOTA######################
@@ -200,7 +203,6 @@ def post_nota(json_data: dict):
         print(json_data)
         print("#"*50)
         username = g.username
-        print("Username:",username)
         res = insert_nota(username, **json_data)
         if res is None:
             result = {

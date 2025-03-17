@@ -8,7 +8,9 @@ from models.alch_model import  Grupo, Usuario
 from models.usuario_model import  get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
 from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, GroupsBaseUsrOut, UsuarioAllOut
 from common.error_handling import ValidationError, DataError, DataNotFound
-from common.auth import verificar_header
+from common.auth import verify_header
+from common.logger_config import logger
+import traceback
 from datetime import datetime
 from models.grupo_hierarchy import find_parent_id_recursive
 import requests
@@ -18,17 +20,17 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    username = verificar_header()
-    if username is None:
-    #if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-    if username == 'api-key':
-        print("API KEY")
-        g.username = None
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+            user_origin=None
+            type_origin=None
     else:
-        g.username = username
-        print("Username before:",g.username)
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -38,27 +40,16 @@ def get_grupos_by_usr(id_usuario: str):
     try:
         print('***************ingreso a get grupos by usr**************')
         res = get_grupos_by_usuario(id_usuario)
-        """  print("res:",res)
-        if res is None or len(res)==0:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Usuario sin grupos",
-                    "ErrorMsg":"No se encontraron datos de grupos para este usuario"
-                } 
-            return result """
-        
         data = {
                 
                 "data":  GroupsUsuarioOut().dump(res, many=True)
         }
 
       
-        #return res
-        #return GroupsUsuarioOut().dump(res, many=True)
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
     
 #####################POST#########################
@@ -88,6 +79,7 @@ def post_usuario(json_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
     
 #################UPDATE####################
@@ -120,6 +112,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
         
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
 
 ###############GET BY ID####################
@@ -198,6 +191,7 @@ def get_usuario(query_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err) 
     
 #####################DETALLE DE USUARIOS#######################   
@@ -250,7 +244,9 @@ def get_usuarios_detalle(query_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
+    
 ######################DELETE######################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
@@ -258,6 +254,7 @@ def get_usuarios_detalle(query_data: dict):
 def del_usuario(id: str):
     try:
         username=g.username
+        print("Username usuario.py:",username)
         res = delete_usuario(username, id)
         if res is None:
             raise DataNotFound("Usuario no encontrado")
@@ -271,9 +268,8 @@ def del_usuario(id: str):
         
         return data
     
-    except DataNotFound as err:
-        raise DataError(800, err)
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
 
 ##########Prueba Roles################
@@ -306,7 +302,7 @@ def get_groups_base_by_usr(query_data: dict):
         eliminado= None
         suspendido=None
         
-        print("query_data:",query_data)
+        #print("query_data:",query_data)
         
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -327,23 +323,17 @@ def get_groups_base_by_usr(query_data: dict):
         if(request.args.get('suspendido') is not None):
             suspendido=request.args.get('suspendido')                
 
-        print('llamo al get all usuarios detalle con los parametros nuevos')
         res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
         for r in res[0]['grupo']:
-            print("r:",r)
+            #print("r:",r)
             id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
-            print("id_padre:",id_padre)
+            #print("id_padre:",id_padre)
             r['id_padre']=id_padre
             print("r con id padre:",r)
 
-        # print("resultado:",res)
-        # data = {
-        #         # "total": cant,
-        #         "data":  res
-        # }
-        # print('resultado de la busqueda de los grupos base:',data)
         return res
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
     

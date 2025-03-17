@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from common.utils import *
 from common.error_handling import ValidationError
+from common.logger_config  import logger
 from models.grupo_hierarchy import find_parent_id_recursive
 
 from flask import current_app
@@ -118,27 +119,13 @@ def update_label(id='', **kwargs):
 # Consulta de etiquetas por parámetros
 def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
        
-    if username is not None:
+    """ if username is not None:
         id_user = verifica_username(username)
     else:
-        raise ValidationError("Usuario no ingresado")
-    
-    """  # Convert fecha_desde to datetime object
-    if isinstance(fecha_desde, str):
-        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
-    
-    # Set fecha_hasta to current datetime if not provided
-    if fecha_hasta is None:
-        fecha_hasta = datetime.now()
-    elif isinstance(fecha_hasta, str):
-        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y') """
+        raise ValidationError("Usuario no ingresado") """
+   
 
     query = db.session.query(Label).filter(Label.fecha_creacion.between(fecha_desde, fecha_hasta)).order_by(Label.fecha_creacion.desc())
-    #filter(Label.fecha_creacion >= fecha_desde, Label.fecha_creacion <= fecha_hasta)
-    print('consulta por parámetros de labels')
-    print("Fecha desde:", fecha_desde)
-    print("Fecha hasta:", fecha_hasta)
-    # print(query)
     if nombre != '':
         query = query.filter(Label.nombre.ilike(f'%{nombre}%'))
 
@@ -155,23 +142,15 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=
         query = query.filter(Label.eliminado == eliminado)
 
     #muestra datos
-    # print("Query:", query.all())
     total= len(query.all()) 
-    print('total:', total)
-
-    # result = query.all()
     result = query.order_by(Label.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
 
-    print('resultado de labels')
-    print(total)
     
     return result, total
 
 def get_label_by_id(id):
     
     res = db.session.query(Label).filter(Label.id == id).first()
-    print('consulta labels por id')
-    print(res)
 
     if res is not None:
         return res 
@@ -523,6 +502,7 @@ def delete_label_tarea_model(username, **kwargs):
         active_label.fecha_actualizacion = datetime.now()
         active_label.id_user_actualizacion = id_user_actualizacion
         db.session.commit()
+        print('tarea eliminada')
         return active_label       
     else:
         print("La tarea no tiene etiquetas activas")

@@ -138,3 +138,6 @@ dmypy.json
 .env.*
 export_creds.sh
 start.sh
+#instala_sops.sh
+
+app/ai_temp_data/*

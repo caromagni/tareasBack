@@ -6,7 +6,8 @@ from common.error_handling import ValidationError, DataError, DataNotFound, Unau
 from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
-from common.auth import verificar_header
+from common.auth import verify_header
+from common.logger_config   import logger
 #from app.common.rabbitmq_utils import *
 from flask import g
 from alchemy_db import db
@@ -19,17 +20,20 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    username = verificar_header()
-    if username is None:
-    #if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")
-    if username is 'api-key':
-        print("API KEY")
-        g.username = None
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            user_origin=''
+            type_origin=''
     else:
-        g.username = username
-        print("Username before:",g.username)
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
+
 ####################################################
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -45,10 +49,9 @@ def patch_grupo(id_grupo: str, json_data: dict):
             raise DataNotFound("Grupo no encontrado")
             
         return res
-    
-    except DataNotFound as err:
-        raise DataError(800, err)
+
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
@@ -97,6 +100,7 @@ def get_grupo(query_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
     
 #############DETALLE DE GRUPOS###################    
@@ -135,6 +139,7 @@ def get_grupo_detalle(query_data: dict):
         return data
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
 
 @groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -148,15 +153,16 @@ def get_grupo_id(id: str):
        
         return res
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
 
-@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut(many=True))
 def get_all_grupobase(query_data: dict):
     try:
-        id_grupo=None
+        id=None
         usuarios=False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
@@ -177,12 +183,15 @@ def get_all_grupobase(query_data: dict):
 @groups_b.output(UsuariosGroupOut(many=True))
 def get_usrsbygrupo(ids_grupos: str):
     try:
-        res = get_usuarios_by_grupo(ids_grupos)
+        
+        logger.info("id_grupo: "+id_grupo)
+        res = get_usuarios_by_grupo(id_grupo)
         
        
         return res
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
     
 #################POST####################
@@ -207,6 +216,7 @@ def post_grupo(json_data: dict):
         return GetGroupOut().dump(res)
     
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)  
      
 ##############DELETE####################
@@ -231,9 +241,8 @@ def del_grupo(id: str):
                 } 
         
         return result
-    except DataNotFound as err:
-        raise DataError(800, err)
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
     
 ##################UNDELETE####################
@@ -252,31 +261,16 @@ def restaura_grupo(id: str):
                     "grupo": res.nombre
                 }    
         return result
-    
-    except DataNotFound as err:
-        raise DataError(800, err)
+
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)
     
-# ##################Grupo Base####################
-# @groups_b.doc(description='Buscar el grupo base', summary='Grupo Base', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
-# @groups_b.get('/get_grupo_base/<string:id>')
-# def getGrupoBase(id: str):
-#   try:
-#         grupos = []
-#         grupos.append(id)
-#         print(grupos)
-#         res = get_grupo_base(grupos, id)
-        
-#         return res
-    
-#   except Exception as err:
-#      git    raise ValidationError(err)
   
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut)
-@groups_b.get('/get_grupo_base/<string:id>')
+@groups_b.get('/grupo_base/<string:id>')
 def getGrupoBase(id: str):
     try:
         id_grupo=None
@@ -287,7 +281,7 @@ def getGrupoBase(id: str):
             usuarios=request.args.get('usuarios')    
         res = get_all_base(id, usuarios)
         
-        current_app.session.remove()
         return res
     except Exception as err:
+        print(traceback.format_exc())
         raise ValidationError(err)     
