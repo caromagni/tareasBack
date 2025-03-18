@@ -67,15 +67,12 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     
     #convert stored_api_key to bytes
     try:
-        #print("will decode key from b64 to string")
         logger.info("will decode key from b64 to string")
         stored_api_key = base64.b64decode(stored_hashed_api_key)
-        #print("will use bcrypc to check")
         logger.info("will use bcrypc to check")
         return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
         logger.error(err)
-        #print(err)
 
 def verify_header():
     ############### verifico si viene api key######################
@@ -110,5 +107,4 @@ def verify_header():
     except Exception as err:
         logger.info("Error en la verificacion de header")
         logger.error(err)
-        #print(traceback.format_exc())
         return None            

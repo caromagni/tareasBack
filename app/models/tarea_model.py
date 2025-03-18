@@ -134,8 +134,10 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
         if expediente is None:
             #Cuando viene del portal o de expedientes, se ingresa el id_ext
+            logger.info("Expediente no encontrado - Busca id_ext")
             expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == id_expediente).first()
             if expediente is None:
+                logger.info("Expediente no encontrado - Inserta expediente")
                 nuevoID_expte=uuid.uuid4()
                 insert_expte = ExpedienteExt(id=nuevoID_expte, 
                                             id_ext=id_expediente, 
@@ -146,25 +148,42 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 db.session.add(insert_expte)
                 id_expediente = nuevoID_expte
             else:
+                logger.info("Expediente encontrado - Update del expediente")
+                #id_expediente = expediente.id
+                if caratula_expediente is not None and caratula_expediente.strip() != "":
+                    logger.info("Modifica caratula_expediente:" + caratula_expediente)
+                    expediente.caratula = caratula_expediente
+                if nro_expte is not None and nro_expte.strip() != "":    
+                    logger.info("Modifica nro_expte:" + nro_expte)
+                    expediente.nro_expte=nro_expte
+                expediente.fecha_actualizacion = datetime.now()
                 id_expediente = expediente.id
 
     if id_actuacion is not None:
-        actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()
+        actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion).first()
         
         if actuacion is None:
-            nuevoID_actuacion=uuid.uuid4()
-            insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
-                                            id_ext=id_actuacion,
-                                            nombre=nombre_actuacion,
-                                            id_tipo_actuacion=id_tipo_tarea,
-                                            id_user_actualizacion=id_user_actualizacion,
-                                            fecha_actualizacion=datetime.now())
-            db.session.add(insert_actuacion)
-            id_actuacion = nuevoID_actuacion
-            logger.info("actuacion insertada")
-        else:
-            id_actuacion = actuacion.id
-           
+            actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id_ext == id_actuacion).first()
+            if actuacion is None:
+                logger.info("Actuacion no encontrada - Inserta actuacion")
+                nuevoID_actuacion=uuid.uuid4()
+                insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
+                                                id_ext=id_actuacion,
+                                                nombre=nombre_actuacion,
+                                                id_tipo_actuacion=id_tipo_tarea,
+                                                id_user_actualizacion=id_user_actualizacion,
+                                                fecha_actualizacion=datetime.now())
+                db.session.add(insert_actuacion)
+                id_actuacion = nuevoID_actuacion
+                logger.info("actuacion insertada")
+            else:
+                #actuacion.id_actuacion = actuacion.id
+                logger.info("Actuacion encontrada - Update de actuacion")
+                if nombre_actuacion is not None and nombre_actuacion.strip() != "":
+                    actuacion.nombre = nombre_actuacion
+                    actuacion.id_user_actualizacion = id_user_actualizacion
+                    actuacion.fecha_actualizacion = datetime.now()
+                id_actuacion = actuacion.id
             
     if id_tipo_tarea is not None:
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()

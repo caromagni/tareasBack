@@ -30,8 +30,6 @@ def before_request():
     jsonHeader = verify_header()
     
     if jsonHeader is None:
-        #if not verificar_header():
-            #raise UnauthorizedError("Token o api-key no validos")   
             user_origin=''
             type_origin=''
     else:

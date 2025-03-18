@@ -26,17 +26,17 @@
     },
     {
         "api_key": "JDJiJDEyJGoyZmpKcGFHZXFpWkg4TExFeGJJZWU5NThvVXcucUhvRGlnZDlRSXgubjQwUzdwZllKTGdT",
-        "expire_date": 30,
+        "expire_date": 240,
         "api_key_name": "expedientes_stage"  
     },
     {
         "api_key": "JDJiJDEyJEo1ajc4ZnhON01RR1pkTHpaSXVoQU9XL0thRk1oVHZudWJtT2plVHdOQWVkUndJdk5QSkdx",
-        "expire_date": 30,
+        "expire_date": 240,
         "api_key_name": "test_martin"  
     },
     {
-        "api_key": "JDJiJDEyJEdMZXZuQnZJbzlrUkttaUtsdncuMy5wVXV1NE1WUjg2Z1ViaS44bEZMT1RhSEdzMGhrU2NP",
-        "expire_date": 30,
+        "api_key": "JDJiJDEyJHFiVTVMMHJMR2NIMDZiVGdvZU1HZC50MmdiTDFGM0NDODFLZlhKd0czQS9mS1dmdnQxdlhT",
+        "expire_date": 120,
         "api_key_name": "test_silvia"
     }    
 ]

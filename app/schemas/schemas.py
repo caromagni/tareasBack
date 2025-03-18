@@ -505,7 +505,6 @@ class TareaIn(Schema):
     id_tipo_tarea = String(required=True)
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    #id_user_actualizacion = String()
     fecha_inicio = String(required=True, validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
