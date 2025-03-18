@@ -26,6 +26,7 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
+    print("ENTRANDO A BEFORE REQUEST")
     jsonHeader = verify_header()
     
     if jsonHeader is None:
@@ -745,7 +746,8 @@ def post_tarea(json_data: dict):
             else:
                 #Esto es para probar sin header - no debería pasar - sacarlo en produccion
                 logger.info("NO HEADER ORIGIN")
-                res = insert_tarea(**json_data)    
+                raise ValidationError(800, "No tiene permisos para acceder a la API")
+                #res = insert_tarea(**json_data)    
       
         if res is None:
             result = {
