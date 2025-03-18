@@ -499,7 +499,7 @@ class TareaIn(Schema):
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    #caratula_expediente = String()
+    caratula_expediente = String()
     nro_expte = String()
     nombre_actuacion= String()    
     id_tipo_tarea = String(required=True)

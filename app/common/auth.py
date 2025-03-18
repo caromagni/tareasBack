@@ -67,15 +67,15 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     
     #convert stored_api_key to bytes
     try:
-        print("will decode key from b64 to string")
+        #print("will decode key from b64 to string")
         logger.info("will decode key from b64 to string")
         stored_api_key = base64.b64decode(stored_hashed_api_key)
-        print("will use bcrypc to check")
+        #print("will use bcrypc to check")
         logger.info("will use bcrypc to check")
         return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
         logger.error(err)
-        print(err)
+        #print(err)
 
 def verify_header():
     ############### verifico si viene api key######################
@@ -83,7 +83,8 @@ def verify_header():
         token_payload = verify_jwt_in_header()
         x_api_key = request.headers.get('x-api-key')
         x_api_system = request.headers.get('x-api-system')
-
+        print("x_api_key:",x_api_key)
+        print("x_api_system:",x_api_system)
         # Verificar si se proporciona el token o API key
         if token_payload is None and x_api_key is None:
             #raise UnauthorizedError("Token o api-key no validos")
