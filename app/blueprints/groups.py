@@ -4,7 +4,7 @@ from flask import request, current_app
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verify_header
 from common.logger_config   import logger
@@ -178,15 +178,18 @@ def get_all_grupobase(query_data: dict):
         raise ValidationError(err)        
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/usuarios_grupo/<string:id_grupo>')
-#@groups_b.input(PageIn, location='query')
+#@groups_b.get('/usuarios_grupo/<string:id_grupo>')
+@groups_b.get('/usuarios_grupo')
+@groups_b.input(UsuariosGroupIn, location='query')
 @groups_b.output(UsuariosGroupOut(many=True))
-def get_usrsbygrupo(id_grupo: str):
+def get_usrsbygrupo(query_data: dict):
     try:
-        
-        logger.info("id_grupo: "+id_grupo)
-        res = get_usuarios_by_grupo(id_grupo)
-        
+        grupos=None
+        if(request.args.get('grupos') is not None):
+            grupos = request.args.get('grupos')
+            grupos = [grupo.strip() for grupo in grupos.split(",")]
+        #res = get_usuarios_by_grupo(id_grupo)
+        res = get_usuarios_by_grupo(grupos)
        
         return res
     

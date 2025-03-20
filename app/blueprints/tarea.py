@@ -468,7 +468,7 @@ def get_tareas_detalle(query_data: dict):
         id_grupo=None
         grupos=None
         id_tarea=None
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
         fecha_fin_desde=None
         fecha_fin_hasta=None
