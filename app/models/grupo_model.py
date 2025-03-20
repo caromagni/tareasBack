@@ -807,41 +807,51 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     return nuevo_grupo
 
 
-def get_usuarios_by_grupo(id):
+def get_usuarios_by_grupo(grupos):
+    print("Grupos:", grupos)
     res = []
     #for id in ids:
-    print("#"*50)
-    print("ID:", id)
-    usrs = db.session.query(Grupo.id.label("id_grupo"),
-                Grupo.nombre.label("nombre_grupo"),
-                Usuario.nombre.label("nombre"),
-                Usuario.apellido.label("apellido"),
-                Usuario.id.label("id_usuario"),
-                Usuario.eliminado.label("eliminado"),
-                Usuario.suspendido.label("suspendido"),
-                Usuario.username.label("username"),
-                Usuario.email.label("email")                  
-                ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-                ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                ).filter(Grupo.id == id, UsuarioGrupo.eliminado==False).all()
     
-    if usrs is not None:
-        for row in usrs:
-            usuario = {
-                "id_grupo": row.id_grupo,
-                "nombre_grupo": row.nombre_grupo,
-                "id_usuario": row.id_usuario,
-                "nombre": row.nombre,
-                "apellido": row.apellido,
-                "eliminado": row.eliminado,
-                "suspendido": row.suspendido,
-                "username": row.username,
-                "email": row.email
-            }
-            res.append(usuario) 
+    if grupos is None:
+        logger.error("No se han proporcionado grupos para conultar usuarios")
+        raise Exception("No se han proporcionado grupos para conultar usuarios") 
+
+    usrs = db.session.query(Grupo.id.label("id_grupo"),
+            Grupo.nombre.label("nombre_grupo"),
+            Usuario.nombre.label("nombre"),
+            Usuario.apellido.label("apellido"),
+            Usuario.id.label("id_usuario"),
+            Usuario.eliminado.label("eliminado"),
+            Usuario.suspendido.label("suspendido"),
+            Usuario.username.label("username"),
+            Usuario.email.label("email")                  
+            ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+            ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+            ).filter(Grupo.id.in_(grupos), UsuarioGrupo.eliminado==False
+            ).order_by(Grupo.nombre).all()
+    #.distinct()
+    return usrs
+    #res.append(usrs)
+    
+    """ print("Usuarios grupo:", usrs)
+
+        if usrs is not None:
+            for row in usrs:
+                usuario = {
+                    "id_grupo": row.id_grupo,
+                    "nombre_grupo": row.nombre_grupo,
+                    "id_usuario": row.id_usuario,
+                    "nombre": row.nombre,
+                    "apellido": row.apellido,
+                    "eliminado": row.eliminado,
+                    "suspendido": row.suspendido,
+                    "username": row.username,
+                    "email": row.email
+                }
+                res.append(usuario)   """
                                        
     #print("Encontrados:",len(res))
-    return res
+    return usrs
 
 
 def get_grupos_recursivo():

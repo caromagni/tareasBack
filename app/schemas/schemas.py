@@ -338,7 +338,9 @@ class GroupsBaseUsrOut(Schema):
     fecha_actualizacion= String()
     id_user_actualizacion= String()
 
-
+class UsuariosGroupIn(Schema):
+    grupos = String(metadata={"description": "ids separados por comas. Ej: id1, id2, id3"})
+        
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()
     id_usuario = String()

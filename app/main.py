@@ -138,15 +138,20 @@ def create_app():
     print("Iniciando servidor...")
     print("#####################\n")
     fresh_api_key=generate_api_key()
+    ##Genera el prefijo
+    prefix = ''.join(secrets.choice(string.ascii_uppercase) for _ in range(3))
+    full_fresh_api_key =f"{prefix}-{fresh_api_key}"
     print("INSTRUCTIONS:")
     print("1. COPIAR API KEY GENERADO (SOLO SE VERA 1 VEZ)")
     hashed_fresh_api_key = hash_api_key(fresh_api_key)
-    print(fresh_api_key)
+    
+    print(fresh_api_key+"- Full api-key: "+full_fresh_api_key)
     print("2. GUARDAR API KEY EN UN LUGAR SEGURO Y COMPARTIR A CLIENTE EXTERNO")
     print("3. SI SE PIERDE API KEY, GENERAR UNA NUEVA")
     print("4. AGREGAR NUEVA LINEA EN EL ARCHIVO DE CONFIGURACION DE API KEYS USANDO EL HASH DE LA API KEY, NO GUARDAR LA API KEY ORIGINAL! (api_keys.json)")
     hashed_fresh_api_key = base64.b64encode(hash_api_key(fresh_api_key)).decode('utf-8')
-    print(hashed_fresh_api_key)
+    full_hashed_fresh_api_key =f"{prefix}-{hashed_fresh_api_key}"
+    print(hashed_fresh_api_key+"- Full hashed apy key: "+full_hashed_fresh_api_key)
     print("5. SI SE DESEA VERIFICAR LA API KEY, USAR LA FUNCION verify_api_key() pasando 3 paramentros, el hash de la api key, la api key(que viene del request) y el nombre de la aplicacion") 
 
     # Register custom error handlers

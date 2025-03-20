@@ -468,7 +468,7 @@ def get_tareas_detalle(query_data: dict):
         id_grupo=None
         grupos=None
         id_tarea=None
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
         fecha_fin_desde=None
         fecha_fin_hasta=None
@@ -518,11 +518,9 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('labels') is not None):
             labels=request.args.get('labels')
             labels = labels.split(",")
-            print("Labels:",labels)
         if(request.args.get('grupos') is not None):
             grupos=request.args.get('grupos')
             grupos = grupos.split(",")
-            print("Grupo:",grupos)    
         print("right before the get_all_tarea_detalle call")
         res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 

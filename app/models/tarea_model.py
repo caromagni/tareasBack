@@ -1671,14 +1671,10 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 @cache.cached(timeout=500)
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-
     print("*******************************************************")
     print("get_all_tarea_detalle")
     print("*******************************************************")
-    if fecha_desde is not None:
-        fecha_desde = '01/01/2020'
-    if fecha_hasta is not None:
-        fecha_hasta = datetime.now().strftime('%m/%d/%Y')  #its mm/dd/yyyy
+    
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
