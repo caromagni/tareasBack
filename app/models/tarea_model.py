@@ -1674,16 +1674,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("*******************************************************")
     print("get_all_tarea_detalle")
     print("*******************************************************")
-    """  if fecha_desde is None:
-        fecha_desde = '01/01/2020'
-    #else:
-    #    fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').strftime('%d/%m/%Y')
-
-    if fecha_hasta is not None:
-        fecha_hasta = datetime.now().strftime('%d/%m/%Y')  #its mm/dd/yyyy """
-
-    print("fecha_desde:", fecha_desde)
-    print("fecha_hasta:", fecha_hasta)
+    
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
