@@ -696,7 +696,23 @@ class TareaGetIn(Schema):
     tiene_notas = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
   
-    
+class TareaNotasGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    id_tarea = String()
+    id_usuario_asignado= String()
+    titulo = String(default="")
+    id_tipo_tarea = String()
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+    id_expediente = String()
+    id_actuacion = String()
+    prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"})
+    eliminado = Boolean()
+    tiene_notas = Boolean()
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
+  
+
 ####################Grupos - Tareas - Usuarios ####################
 class GroupAllOut(Schema):
     id = String()
