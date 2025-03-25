@@ -452,10 +452,7 @@ def get_tareas_detalle(query_data: dict):
         #if accede is False:
         #   raise DataError(800, "No tiene permisos para acceder a la API")
         #############################################################
-        page=1
-        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        cant=0
-        titulo=""
+        """ titulo=""
         label=""
         id_expediente=None
         id_actuacion=None
@@ -466,15 +463,13 @@ def get_tareas_detalle(query_data: dict):
         id_tipo_tarea=None
         id_usuario_asignado=None
         id_grupo=None
-        grupos=None
         id_tarea=None
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
         fecha_fin_desde=None
         fecha_fin_hasta=None
         labels=None
-        grupos = None
-
+        grupos = None 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -502,7 +497,7 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')   
         if(request.args.get('tiene_notas') is not None):
-            tiene_notas=request.args.get('tiene_notas')            
+            tiene_notas=request.args.get('tiene_notas'
         if(request.args.get('fecha_desde') is not None):
             fecha_desde=request.args.get('fecha_desde')
             fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
@@ -514,15 +509,45 @@ def get_tareas_detalle(query_data: dict):
             fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         if(request.args.get('fecha_fin_hasta') is not None):
             fecha_fin_hasta=request.args.get('fecha_fin_hasta')
-            fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+            fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)         
         if(request.args.get('labels') is not None):
             labels=request.args.get('labels')
             labels = labels.split(",")
         if(request.args.get('grupos') is not None):
             grupos=request.args.get('grupos')
             grupos = grupos.split(",")
+        """
+        page=1
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant=0
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
+        titulo=request.args.get('titulo')
+        label=request.args.get('label')
+        id_expediente=request.args.get('id_expediente')
+        id_actuacion=request.args.get('id_actuacion')
+        prioridad=request.args.get('prioridad')
+        estado = request.args.get('estado')
+        eliminado=request.args.get('eliminado')
+        id_tipo_tarea=request.args.get('id_tipo_tarea')
+        id_usuario_asignado=request.args.get('id_usuario_asignado')
+        grupos=request.args.get('grupos')
+        #grupos = grupos.split(",")
+        labels=request.args.get('labels')
+        #labels = labels.split(",")
+        id_tarea=request.args.get('id_tarea')
+        fecha_desde=request.args.get('fecha_desde')
+        #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        fecha_hasta=request.args.get('fecha_hasta')
+        #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
+        fecha_fin_desde=request.args.get('fecha_fin_desde')
+        #fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        fecha_fin_hasta=request.args.get('fecha_fin_hasta')
+        tiene_notas=request.args.get('tiene_notas')
         print("right before the get_all_tarea_detalle call")
-        res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
                 "count": cant,

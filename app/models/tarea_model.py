@@ -1669,16 +1669,34 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 
-#@cache.cached(timeout=500)
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+#@cache.momoize(timeout=500)
+@cache.memoize(timeout=3600)
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     print("*******************************************************")
     print("get_all_tarea_detalle")
     print("*******************************************************")
+    
+    if fecha_desde is not None:
+        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+    else:
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+        
+            
+    if fecha_hasta is not None:
+        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+    else:
+        fecha_hasta=datetime.now().date()    
+
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
+    print("Prioridad:", prioridad)
+    print("Estado:", estado)
+
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
+        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%Y-%m-%d').date()
+        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%Y-%m-%d').date()
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
@@ -1693,11 +1711,11 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
         query = query.join(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado, TareaAsignadaUsuario.eliminado == False)
-    if id_grupo is not None:
-        query = query.join(TareaXGrupo).filter(TareaXGrupo.id_grupo == id_grupo)
-    if prioridad > 0:
+    #if id_grupo is not None:
+        #query = query.join(TareaXGrupo).filter(TareaXGrupo.id_grupo == id_grupo)
+    if prioridad and prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
-    if estado > 0:
+    if estado  and estado > 0:
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
@@ -1709,11 +1727,13 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
                 ).join(Label, Label.id == LabelXTarea.id_label
                 ).filter(Label.nombre.ilike(f"%{label}%")) """
     if labels:
+        labels = labels.split(",")
         print("labels:", labels)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
+        grupos = grupos.split(",")
         print("Grupos a filtrar:", grupos)
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
