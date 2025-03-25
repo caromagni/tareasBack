@@ -520,6 +520,10 @@ def get_tareas_detalle(query_data: dict):
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
         titulo=request.args.get('titulo')
         label=request.args.get('label')
         id_expediente=request.args.get('id_expediente')
@@ -530,25 +534,20 @@ def get_tareas_detalle(query_data: dict):
         id_tipo_tarea=request.args.get('id_tipo_tarea')
         id_usuario_asignado=request.args.get('id_usuario_asignado')
         grupos=request.args.get('grupos')
-        grupos = grupos.split(",")
+        #grupos = grupos.split(",")
         labels=request.args.get('labels')
-        labels = labels.split(",")
+        #labels = labels.split(",")
         id_tarea=request.args.get('id_tarea')
         fecha_desde=request.args.get('fecha_desde')
         #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").date()
         fecha_hasta=request.args.get('fecha_hasta')
         #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
-        fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").date()
         fecha_fin_desde=request.args.get('fecha_fin_desde')
         #fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").date()
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
-        #fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)         
-        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").date()
-       
+        tiene_notas=request.args.get('tiene_notas')
         print("right before the get_all_tarea_detalle call")
-        res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
                 "count": cant,
