@@ -1,7 +1,8 @@
 Grupos
 ======
 
-El módulo de Grupos es una componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la organización, colaboración y gestión eficiente de equipos dentro del ámbito judicial o administrativo. Este módulo permite la creación y administración de estructuras jerárquicas de grupos, proporcionando una base sólida para la asignación de tareas, el control de accesos y la coordinación de actividades entre diferentes unidades o equipos de trabajo.
+El módulo de Grupos es una componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la organización, colaboración y gestión eficiente de equipos dentro del ámbito judicial o administrativo. Este módulo permite la creación y administración de estructuras jerárquicas de grupos, proporcionando una base sólida para la asignación de tareas, control de accesos y la coordinación de actividades entre diferentes unidades o equipos de trabajo.
+Grupo Base: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.
 
 Características principales
 ---------------------------

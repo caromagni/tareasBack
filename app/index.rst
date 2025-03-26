@@ -9,6 +9,8 @@ Documentación de Tareas
    arquitectura
    referencia_api
    /modulos/alertas
+   /modulos/grupos
+   /modulos/calendario
    /modulos/asignacion_usuarios_tareas
    /modulos/tareas_asignacion_y_control
    /modulos/etiquetas
