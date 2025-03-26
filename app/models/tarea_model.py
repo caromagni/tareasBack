@@ -1670,7 +1670,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 #@cache.momoize(timeout=500)
-@cache.memoize(timeout=3600)
+# @cache.memoize(timeout=3600)
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     print("*******************************************************")
     print("get_all_tarea_detalle")
