@@ -9,18 +9,17 @@ Módulos principales
 El sistema está compuesto por los siguientes módulos principales:
 
 1. Bandeja Principal del Juzgado/Grupo
-2. Vista de tareas personales
-3. Alertas
+2. Vista de tareas personales y de grupo
+3. Alertas de tareas a vencer
 4. Calendario con días inhábiles
-5. Tareas automáticas
-6. Tareas programadas
-7. Tareas anidadas
-8. Tareas recurrentes
-9. Tareas con fechas intermedias y con distintas alertas
-10. Creación de tarea
-11. Visibilidad externa tarea
-12. Contenido de multimedia tarea/expediente
-13. Grupos
+5. Tareas ingresadas desde el portal del abogado
+6. Tareas ingresadas desde el el sistema de expediente del juzgado
+7. Creación de tarea en el grupo de trabajo (organismo)
+8. Notas: creación de notas en la tarea
+9. Labels o etiquetas de tareas
+10. Visibilidad externa tarea
+11. Contenido de multimedia tarea/expediente
+12. Grupos
 
 Cada uno de estos módulos está diseñado para abordar aspectos específicos de la gestión de tareas, proporcionando una solución completa y versátil para las necesidades de los usuarios en el ámbito judicial y otros entornos de trabajo colaborativo.
 
