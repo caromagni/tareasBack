@@ -446,9 +446,8 @@ def get_tareas(query_data: dict):
         fecha_hasta=request.args.get('fecha_hasta')
         tiene_notas=request.args.get('tiene_notas')
         print("right before the get_all_tarea_detalle call")
-        
-        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_tarea, id_usuario_asignado, fecha_desde, fecha_hasta, prioridad, estado, eliminado, tiene_notas)    
-
+        print("Id tarea:",id_tarea)
+        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_tarea, fecha_desde, fecha_hasta, prioridad, estado, eliminado, tiene_notas)    
         data = {
                 "count": cant,
                 "data": TareaOut().dump(res, many=True)

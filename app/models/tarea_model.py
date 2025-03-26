@@ -1680,8 +1680,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
-        
-            
+
     if fecha_hasta is not None:
         fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
     else:
@@ -1706,13 +1705,11 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
-        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%Y-%m-%d').date()
-        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%Y-%m-%d').date()
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
         query = query.filter(Tarea.id == id_tarea)
-    if titulo:
+    if titulo is not None:
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
@@ -1722,8 +1719,6 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
         query = query.join(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado, TareaAsignadaUsuario.eliminado == False)
-    #if id_grupo is not None:
-        #query = query.join(TareaXGrupo).filter(TareaXGrupo.id_grupo == id_grupo)
     if prioridad and prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
     if estado  and estado > 0:
@@ -1771,7 +1766,6 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         # Fetch assigned users for the task
         res_usuarios = db.session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                      ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
-        #print(str(res_usuarios))
         
         for row in res_usuarios:
             usuario = {
@@ -1788,7 +1782,6 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         # Fetch assigned groups for the task
         res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                    ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.eliminado).all()
-        #print(str(res_grupos))
 
         for row in res_grupos:
             grupo = {
@@ -1856,10 +1849,9 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     else:
         fecha_hasta=datetime.now().date() 
 
-
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-   
-    if titulo is not '':
+
+    if titulo is not None:
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
    
     if id_expediente is not None:
@@ -1872,19 +1864,18 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
 
     if id_tarea is not None:
-        query = query.filter(Tarea.id == id_tarea)    
+        query = query.filter(Tarea.id == id_tarea)
 
     if id_usuario_asignado is not None:
-        #print ("id_usuario_asignado:", id_usuario_asignado)
         usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
         if usuario is None:
             raise Exception("Usuario no encontrado")
         query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado)
 
-    if prioridad > 0:
+    if prioridad and prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
 
-    if estado > 0:
+    if estado and estado > 0:
         query = query.filter(Tarea.estado == estado)
 
     if eliminado is not None:
@@ -1893,9 +1884,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     if tiene_notas is not None:
         query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
 
-    print ("Tiene notas:", tiene_notas)
     total = query.count()
-    print("Total de tareas:", total)
 
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     
