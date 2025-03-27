@@ -1686,25 +1686,17 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     else:
         fecha_hasta=datetime.now().date()
 
-    if fecha_fin_desde is not None:
-        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%Y-%m-%d').date()
-    else:
-        fecha_fin_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
-        
-            
-    if fecha_fin_hasta is not None:
-        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%Y-%m-%d').date()
-    else:
-        fecha_fin_hasta=datetime.now().date()        
-
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
     print("Prioridad:", prioridad)
     print("Estado:", estado)
 
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-    
+    print("Total de tareas:", query.count())
+
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
+        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%Y-%m-%d').date()
+        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%Y-%m-%d').date()
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
@@ -1975,7 +1967,6 @@ def usuarios_tarea(tarea_id=""):
 
 def delete_tarea(username=None, id_tarea=None):
     
-
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
