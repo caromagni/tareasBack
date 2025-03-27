@@ -12,10 +12,10 @@ El sistema está compuesto por los siguientes módulos principales:
 2. Vista de tareas personales y de grupo
 3. Alertas de tareas a vencer
 4. Calendario con días inhábiles
-5. Tareas ingresadas desde el portal del abogado
-6. Tareas ingresadas desde el el sistema de expediente del juzgado
-7. Creación de tarea en el grupo de trabajo (organismo)
-8. Notas: creación de notas en la tarea
+5. Tareas ingresadas desde el Portal del Abogado
+6. Tareas ingresadas desde el Sistema de Expediente del juzgado
+7. Creación de tarea desde el Sistema de Tareas
+8. Notas: creación de notas para una tarea
 9. Labels o etiquetas de tareas
 10. Visibilidad externa tarea
 11. Contenido de multimedia tarea/expediente
