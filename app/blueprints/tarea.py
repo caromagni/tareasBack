@@ -542,6 +542,7 @@ def get_tareas_detalle(query_data: dict):
             grupos=request.args.get('grupos')
             grupos = grupos.split(",")
         """
+        usuario = g.get('username')
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
