@@ -4,13 +4,20 @@ from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
 from common.error_handling import ValidationError
 from common.auth import verify_header
-from flask import current_app, request, g
+from flask import current_app, request, g, jsonify
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
+    print("herarquia.py - before_request -", request.method)
+    print("encabezados:",request.headers)
+    if request.method == 'OPTIONS':
+        print('grupo.py')
+        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
+        return jsonify({"message": "CORS preflight handled"}), 200
+    
     jsonHeader = verify_header()
     
     if jsonHeader is None:

@@ -7,7 +7,7 @@ from common.error_handling import DataError, DataNotFound, ValidationError, Unau
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
@@ -27,17 +27,23 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 @tarea_b.before_request
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
-    jsonHeader = verify_header()
-    
-    if jsonHeader is None:
-            user_origin=''
-            type_origin=''
+    print("tarea.py - before_request -", request.method)
+    print("encabezados:",request.headers)
+    if request.method == 'OPTIONS':
+        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
+        return jsonify({"message": "CORS preflight handled"}), 200
     else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin
+        jsonHeader = verify_header()
+        
+        if jsonHeader is None:
+                user_origin=''
+                type_origin=''
+        else:
+                user_origin = jsonHeader['user_name']
+                type_origin = jsonHeader['type']
+        
+        g.username = user_origin
+        g.type = type_origin
      
 
 ######################Control de acceso######################

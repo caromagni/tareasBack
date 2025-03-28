@@ -11,7 +11,7 @@ from common.usher import get_roles
 from common.auth import verify_header
 import uuid
 import json
-from flask import jsonify
+from flask import jsonify, request
 from flask import g
 from alchemy_db import db
 import traceback
@@ -21,6 +21,14 @@ label_b = APIBlueprint('label_blueprint', __name__)
 # ###############
 @label_b.before_request
 def before_request():
+    print("label.py - before_request -", request.method)
+    print("encabezados:",request.headers)
+    if request.method == 'OPTIONS':
+        print('grupo.py')
+        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
+        return jsonify({"message": "CORS preflight handled"}), 200
+    
+    
     jsonHeader = verify_header()
     
     if jsonHeader is None:

@@ -1,4 +1,4 @@
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from common.api_key import *
 import jwt
 from common.error_handling import UnauthorizedError, ValidationError
@@ -7,6 +7,11 @@ import traceback
 
 
 def verify_jwt_in_header():
+    # Verificar si el método es OPTIONS
+    if request.method == 'OPTIONS':
+        print("OPTIONS")
+        return None 
+    
     token_encabezado = request.headers.get('Authorization')
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
@@ -79,6 +84,10 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
 def verify_header():
     ############### verifico si viene api key######################
     try:
+        if request.method == 'OPTIONS':
+            print("Solicitud OPTIONS recibida, permitiendo sin autenticación Verify Header")
+            return jsonify({"message": "CORS preflight handled"}), 200
+        
         token_payload = verify_jwt_in_header()
         x_api_key = request.headers.get('x-api-key')
         x_api_system = request.headers.get('x-api-system')
@@ -108,4 +117,5 @@ def verify_header():
     except Exception as err:
         logger.info("Error en la verificacion de header")
         logger.error(err)
+        print(traceback.format_exc())
         raise UnauthorizedError(err)
