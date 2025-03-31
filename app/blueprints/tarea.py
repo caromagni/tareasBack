@@ -7,7 +7,7 @@ from common.error_handling import DataError, DataNotFound, ValidationError, Unau
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
@@ -27,6 +27,7 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 @tarea_b.before_request
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
+       
     jsonHeader = verify_header()
     
     if jsonHeader is None:

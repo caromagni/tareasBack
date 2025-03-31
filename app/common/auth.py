@@ -1,4 +1,4 @@
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from common.api_key import *
 import jwt
 from common.error_handling import UnauthorizedError, ValidationError
@@ -7,6 +7,8 @@ import traceback
 
 
 def verify_jwt_in_header():
+    # Verificar si el método es OPTIONS
+    
     token_encabezado = request.headers.get('Authorization')
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
@@ -17,6 +19,7 @@ def verify_jwt_in_header():
 
     if not token_encabezado:
         logger.error("No se proporciono token en el encabezado")
+        #raise UnauthorizedError('No se proporciono token en el encabezado')
         return None
    
     
@@ -40,20 +43,20 @@ def verify_jwt_in_header():
 def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     if not api_key_provided:
         logger.error("No se proporciono api-key")
-        return False
-        #raise UnauthorizedError( 'No se proporciono api-key')
+        #return False
+        raise UnauthorizedError( 'No se proporciono api-key')
     if not authorized_system:
         logger.error("No se proporciono api-system")
-        return False
-        #raise UnauthorizedError( 'No se proporciono api-system')
+        #return False
+        raise UnauthorizedError( 'No se proporciono api-system')
 
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
     file_path = 'api_keys.json'
     with open(file_path, 'r') as f:
         data = json.load(f)
-    print("DATA OF FILE")
-    print(data)
+    #print("DATA OF FILE")
+    #print(data)
     for api_key in data:
         if api_key['api_key_name'] == authorized_system:
             stored_hashed_api_key = api_key['api_key']
@@ -73,10 +76,12 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
         return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
         logger.error(err)
+        raise UnauthorizedError(err)
 
 def verify_header():
     ############### verifico si viene api key######################
     try:
+        
         token_payload = verify_jwt_in_header()
         x_api_key = request.headers.get('x-api-key')
         x_api_system = request.headers.get('x-api-system')
@@ -84,9 +89,8 @@ def verify_header():
         print("x_api_system:",x_api_system)
         # Verificar si se proporciona el token o API key
         if token_payload is None and x_api_key is None:
-            #raise UnauthorizedError("Token o api-key no validos")
             logger.info("Token o api key no validos")
-            return None
+            raise UnauthorizedError("Token o api-key no validos")
        
         if token_payload is not None:    
             logger.info("Token valido")        
@@ -107,4 +111,5 @@ def verify_header():
     except Exception as err:
         logger.info("Error en la verificacion de header")
         logger.error(err)
-        return None            
+        print(traceback.format_exc())
+        #raise UnauthorizedError(err)

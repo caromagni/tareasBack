@@ -75,15 +75,15 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
-docs/_build/doctrees/
-docs/_build/html/
-docs/_build/latex/
-docs/_build/man/
-docs/_build/epub/
-docs/_build/changelogs/
-docs/_build/javadocs/
-_build/
+#docs/_build/
+#docs/_build/doctrees/
+#docs/_build/html/
+#docs/_build/latex/
+#docs/_build/man/
+#docs/_build/epub/
+#docs/_build/changelogs/
+#docs/_build/javadocs/
+#_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints

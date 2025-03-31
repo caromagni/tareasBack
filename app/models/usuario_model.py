@@ -127,6 +127,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
 
     if username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))
+        print("Total de usuarios: ", len(query.all()))
 
     if eliminado is not None:
         query = query.filter(Usuario.eliminado == eliminado)
