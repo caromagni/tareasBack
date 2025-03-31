@@ -7,7 +7,10 @@ import traceback
 
 
 def verify_jwt_in_header():
-    token_encabezado = request.headers.get('Authorization')
+    token_encabezado = request.headers.get('authorization')
+    
+    print("###########Encabezado############")
+    print(request.headers.get('authorization'))
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
@@ -79,31 +82,37 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
 def verify_header():
     ############### verifico si viene api key######################
     try:
-        token_payload = verify_jwt_in_header()
-        x_api_key = request.headers.get('x-api-key')
-        x_api_system = request.headers.get('x-api-system')
-        print("x_api_key:",x_api_key)
-        print("x_api_system:",x_api_system)
-        # Verificar si se proporciona el token o API key
-        if token_payload is None and x_api_key is None:
-            logger.info("Token o api key no validos")
-            raise UnauthorizedError("Token o api-key no validos")
-       
-        if token_payload is not None:    
-            logger.info("Token valido")        
-            email=token_payload['email']
-            return {"type":"JWT","user_name":email} 
-       
-        if x_api_key is not None:
-            if x_api_system is None:
-                raise UnauthorizedError("api-system no valida")
+        print("verifiy headers function in auth") 
+        if request.method == 'OPTIONS':
+            print("OPTIONS!!!!!!! ")
             
-            result=verify_api_key_in_header(x_api_key, x_api_system)  
-            if not result:
-                raise UnauthorizedError("api-key no valida")
-            else:
-                logger.info("API Key valido", x_api_key,"-",x_api_system)
-                return {"type":"api_key","user_name":x_api_system} 
+          
+        else:
+            token_payload = verify_jwt_in_header()
+            x_api_key = request.headers.get('x-api-key')
+            x_api_system = request.headers.get('x-api-system')
+            print("x_api_key:",x_api_key)
+            print("x_api_system:",x_api_system)
+            # Verificar si se proporciona el token o API key
+            if token_payload is None and x_api_key is None:
+                logger.info("Token o api key no validos")
+                raise UnauthorizedError("Token o api-key no validos")
+        
+            if token_payload is not None:    
+                logger.info("Token valido")        
+                email=token_payload['email']
+                return {"type":"JWT","user_name":email} 
+        
+            if x_api_key is not None:
+                if x_api_system is None:
+                    raise UnauthorizedError("api-system no valida")
+                
+                result=verify_api_key_in_header(x_api_key, x_api_system)  
+                if not result:
+                    raise UnauthorizedError("api-key no valida")
+                else:
+                    logger.info("API Key valido", x_api_key,"-",x_api_system)
+                    return {"type":"api_key","user_name":x_api_system} 
             
     except Exception as err:
         logger.info("Error en la verificacion de header")
