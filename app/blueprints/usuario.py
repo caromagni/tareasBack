@@ -1,7 +1,7 @@
 from apiflask import Schema, abort, APIBlueprint
 from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request,make_response
 # from sqlalchemy.orm import scoped_session
 from alchemy_db import db
 from models.alch_model import  Grupo, Usuario
@@ -20,7 +20,9 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    
+    print("************ingreso a before_request Usuarios************")
+    print("Before request user.py")
+
     jsonHeader = verify_header()
     
     if jsonHeader is None:
@@ -32,6 +34,9 @@ def before_request():
     
     g.username = user_origin
     g.type = type_origin
+
+
+
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})

@@ -118,9 +118,20 @@ def get_grupo_by_id(id):
     return results    
 
 @cache.memoize(timeout=500)
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta='01/01/2100', path_name=None, eliminado=None, suspendido=None):
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     
+    if fecha_desde is not None:
+        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+    else:
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+
+    if fecha_hasta is not None:
+        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+    else:
+        fecha_hasta=datetime.now().date()
+
     start_time = datetime.now()
+    
     print("TIMETRACK_INITIAL:", start_time)
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
@@ -131,7 +142,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     print("Path name:", path_name)
 
     # # Handle the None default for fecha_hasta
-    if fecha_hasta is not None:
+    """ if fecha_hasta is not None:
         fecha_hasta_dt = datetime.strptime(fecha_hasta, "%d/%m/%Y")
         print("MOFO FECHA DESDE")
         print(fecha_hasta_dt)
@@ -142,7 +153,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
     if fecha_desde is not None:
         fecha_desde_dt = datetime.strptime(fecha_desde, "%d/%m/%Y")
         print("MOFO FECHA HASTA")
-        print(fecha_desde_dt)
+        print(fecha_desde_dt) """
         
     
     cursor = None
@@ -303,7 +314,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-# @cache.cached(timeout=500)
+@cache.memoize(timeout=500)
 def get_all_base(id, usuarios=False):
     cursor=None
    
@@ -466,7 +477,7 @@ def get_all_base(id, usuarios=False):
    
     #return res, i
 #@cache.cached(timeout=500, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
-@cache.cached(timeout=500)
+@cache.memoize(timeout=500)
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y'), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
@@ -488,19 +499,39 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
     return result, total
     
-@cache.cached(timeout=500)
-def get_all_grupos_detalle(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y')): 
-    #fecha_hasta = fecha_hasta + " 23:59:59"
-    #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-    #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
-    
-    #session: scoped_session = current_app.session
-    total= db.session.query(Grupo).count()
+@cache.memoize(timeout=500)
+def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None): 
+   
+    if fecha_desde is not None:
+        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+    else:
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+
+    if fecha_hasta is not None:
+        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+    else:
+        fecha_hasta=datetime.now().date()
 
     query= db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    
+
+    filters = []
+
     if nombre:
-        query= query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
+        filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
+    if eliminado:
+        filters.append(Grupo.eliminado == eliminado)
+    if suspendido:
+        filters.append(Grupo.suspendido == suspendido)
+
+    # Apply all filters at once
+    if filters:
+        query = query.filter(*filters)    
+
+    if eliminado:
+        filters.append(Grupo.eliminado == eliminado)
+    if suspendido:
+        filters.append(Grupo.suspendido == suspendido)
+
 
     total= len(query.all()) 
 

@@ -1,6 +1,6 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from common.api_key import *
-from flask import request, current_app, jsonify
+from flask import request, current_app, make_response
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
@@ -19,14 +19,15 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 
 #################Before requests ##################
+
+
+#@groups_b.route("/grupo", methods=["OPTIONS"])
 @groups_b.before_request
 def before_request():
-    
+    print("************ingreso a before_request Usuarios************")
     jsonHeader = verify_header()
     
     if jsonHeader is None:
-        #if not verificar_header():
-            #raise UnauthorizedError("Token o api-key no validos")   
             user_origin=None
             type_origin=None
     else:
@@ -36,7 +37,8 @@ def before_request():
     g.username = user_origin
     g.type = type_origin
 
-####################################################
+
+
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
@@ -64,7 +66,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.output(GetGroupCountOut)
 def get_grupo(query_data: dict):
     try:
-        page = 1
+        """ page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nombre = ""
         eliminado = None
@@ -90,9 +92,21 @@ def get_grupo(query_data: dict):
         if(request.args.get('fecha_desde') is not None):
             fecha_desde = request.args.get('fecha_desde')
         if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta = request.args.get('fecha_hasta')
+            fecha_hasta = request.args.get('fecha_hasta') """
 
-      
+        page = 1
+        per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        eliminado = request.args.get('eliminado')
+        suspendido = request.args.get('suspendido')
+        path_name = request.args.get('path_name')
+        if(request.args.get('page') is not None):
+            page = int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page = int(request.args.get('per_page'))
+        nombre = request.args.get('nombre')
+        fecha_desde = request.args.get('fecha_desde')
+        fecha_hasta = request.args.get('fecha_hasta')
+
         res, cant = get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         
         data = {
@@ -114,24 +128,17 @@ def get_grupo_detalle(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        nombre=""
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
-        if(request.args.get('nombre') is not None):
-            nombre=request.args.get('nombre')
-        if(request.args.get('fecha_desde') is not None):
-            fecha_desde=request.args.get('fecha_desde')
-            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')
-            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
- 
+        nombre=request.args.get('nombre')
+        eliminado = request.args.get('eliminado')
+        suspendido = request.args.get('suspendido')
+        fecha_desde=request.args.get('fecha_desde')
+        fecha_hasta=request.args.get('fecha_hasta')
 
-        res, cant=get_all_grupos_detalle(page,per_page, nombre, fecha_desde, fecha_hasta)
+        res, cant=get_all_grupos_detalle(page,per_page, nombre, eliminado, suspendido, fecha_desde, fecha_hasta)
         
         data = {
                 "count": cant,
@@ -291,4 +298,4 @@ def getGrupoBase(id: str):
         return res
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)     
+        raise ValidationError(err)

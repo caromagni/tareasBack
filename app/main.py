@@ -109,9 +109,11 @@ def create_app():
     #app.session = Session
 
     # Enable CORS
-    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
+    #CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": "*"}})
 
-
+    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
+    #CORS(app)
+    
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
         return send_from_directory('_build/html', filename)
@@ -130,6 +132,38 @@ def create_app():
     app.register_blueprint(nota_b)
     app.register_blueprint(label_b)
     app.register_blueprint(ai_assistant)
+
+    from flask import request, make_response
+
+   # Alternatively, for more granular control
+    # @app.after_request
+    # def add_cors_headers(response):
+    #     response.headers['Access-Control-Allow-Credentials'] = 'true'
+    #     response.headers['Vary'] = 'Origin'
+    #     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:2500'
+    #     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    #     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+    #     return response
+
+# # Handle OPTIONS preflight request explicitly
+#     @app.route("/<path:dummy>", methods=["OPTIONS"])
+#     def options_handler(dummy):
+#         # Ensure you've imported make_response and request
+#         response = make_response()
+#         allowed_origins = ["http://localhost:2500", "http://localhost:3000"]
+#         request_origin = request.headers.get("Origin")
+
+#         if request_origin in allowed_origins:
+#             response.headers["Access-Control-Allow-Origin"] = request_origin
+        
+#         # Add 'Access-Control-Allow-Credentials' if using cookies/authentication
+#         response.headers["Access-Control-Allow-Credentials"] = "true"
+
+#         response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
+#         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+#         response.headers["Access-Control-Expose-Headers"] = "Content-Range, X-Content-Range"
+        
+#         return response
 
     
     
@@ -174,4 +208,3 @@ else:
     app = create_app()
    
     application = app
-
