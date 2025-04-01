@@ -4,13 +4,14 @@ from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
 from common.error_handling import ValidationError
 from common.auth import verify_header
-from flask import current_app, request, g
+from flask import current_app, request, g, jsonify
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
+   
     jsonHeader = verify_header()
     
     if jsonHeader is None:

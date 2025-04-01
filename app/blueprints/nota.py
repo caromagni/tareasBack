@@ -13,7 +13,7 @@ from common.auth import verify_header
 import uuid
 import json
 import traceback
-from flask import g
+from flask import g, jsonify, request
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
@@ -25,6 +25,7 @@ nota_b = APIBlueprint('nota_blueprint', __name__)
 
 @nota_b.before_request
 def before_request():
+    
     jsonHeader = verify_header()
     
     if jsonHeader is None:

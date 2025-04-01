@@ -1,4 +1,4 @@
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from common.api_key import *
 import jwt
 from common.error_handling import UnauthorizedError, ValidationError
@@ -20,8 +20,8 @@ def verify_jwt_in_header():
 
     if not token_encabezado:
         logger.error("No se proporciono token en el encabezado")
-        raise UnauthorizedError('No se proporciono token en el encabezado')
-        #return None
+        #raise UnauthorizedError('No se proporciono token en el encabezado')
+        return None
    
     
     if token_encabezado:
@@ -66,7 +66,7 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
             break
     
     if stored_hashed_api_key == 'NOT_FOUND':
-        print("API Key not found")
+        logger.error("API Key not found")
         return False
     
     #convert stored_api_key to bytes
@@ -117,4 +117,4 @@ def verify_header():
     except Exception as err:
         logger.info("Error en la verificacion de header")
         logger.error(err)
-        #raise UnauthorizedError(err)
+        raise UnauthorizedError(err)

@@ -7,7 +7,7 @@ from common.error_handling import DataError, DataNotFound, ValidationError, Unau
 from models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
-from flask import request, current_app
+from flask import request, current_app, jsonify
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from common.usher import get_roles
@@ -27,6 +27,7 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 @tarea_b.before_request
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
+       
     jsonHeader = verify_header()
     
     if jsonHeader is None:
@@ -369,63 +370,6 @@ def get_tareas(query_data: dict):
         #if accede is False:
         #    raise DataError(800, "No tiene permisos para acceder a la API")
         #############################################################
-        """ page=1
-        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        cant=0
-        titulo=""
-        id_expediente=None
-        id_actuacion=None
-        prioridad=0
-        estado = 0
-        eliminado=None
-        tiene_notas=None
-        id_tarea=None
-        id_tipo_tarea=None
-        id_usuario_asignado=None
-        id_grupo=None
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
-
-        if(request.args.get('page') is not None):
-            page=int(request.args.get('page'))
-        if(request.args.get('per_page') is not None):
-            per_page=int(request.args.get('per_page'))
-        if(request.args.get('id_usuario_asignado') is not None):
-            id_usuario_asignado=request.args.get('id_usuario_asignado')   
-        if(request.args.get('id_grupo') is not None):
-            id_grupo=request.args.get('id_grupo')      
-        if(request.args.get('titulo') is not None):
-            titulo=request.args.get('titulo')
-        if(request.args.get('id_tarea') is not None):
-            id_tarea=request.args.get('id_tarea')     
-        if(request.args.get('id_tipo_tarea') is not None):
-            id_tipo_tarea=request.args.get('id_tipo_tarea') 
-        if(request.args.get('id_expediente') is not None):
-            id_expediente=request.args.get('id_expediente')
-        if(request.args.get('id_actuacion') is not None):
-            id_actuacion=request.args.get('id_actuacion')    
-        if(request.args.get('prioridad') is not None):
-            prioridad=int(request.args.get('prioridad'))  
-        if(request.args.get('estado') is not None):
-            estado=int(request.args.get('estado'))    
-        if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado') 
-        if(request.args.get('tiene_notas') is not None):
-            tiene_notas=request.args.get('tiene_notas')               
-        if(request.args.get('fecha_desde') is not None):
-            fecha_desde=request.args.get('fecha_desde')
-            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')
-            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
- 
-        res,cant = get_all_tarea(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado, tiene_notas)    
-
-        data = {
-                "count": cant,
-                "data": TareaOut().dump(res, many=True)
-            } """
-        
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
@@ -477,71 +421,7 @@ def get_tareas_detalle(query_data: dict):
         #if accede is False:
         #   raise DataError(800, "No tiene permisos para acceder a la API")
         #############################################################
-        """ titulo=""
-        label=""
-        id_expediente=None
-        id_actuacion=None
-        prioridad=0
-        estado = 0
-        eliminado=None
-        tiene_notas=None
-        id_tipo_tarea=None
-        id_usuario_asignado=None
-        id_grupo=None
-        id_tarea=None
-        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
-        fecha_fin_desde=None
-        fecha_fin_hasta=None
-        labels=None
-        grupos = None 
-        if(request.args.get('page') is not None):
-            page=int(request.args.get('page'))
-        if(request.args.get('per_page') is not None):
-            per_page=int(request.args.get('per_page'))
-        if(request.args.get('id_tarea') is not None):
-            id_tarea=request.args.get('id_tarea')    
-        if(request.args.get('id_usuario_asignado') is not None):
-            id_usuario_asignado=request.args.get('id_usuario_asignado')   
-        if(request.args.get('id_grupo') is not None):
-            id_grupo=request.args.get('id_grupo')      
-        if(request.args.get('titulo') is not ''):
-            titulo=request.args.get('titulo')
-        if(request.args.get('label') is not ''):
-            label=request.args.get('label')
-        if(request.args.get('id_tipo_tarea') is not None):
-            id_tipo_tarea=request.args.get('id_tipo_tarea') 
-        if(request.args.get('id_expediente') is not None):
-            id_expediente=request.args.get('id_expediente')
-        if(request.args.get('id_actuacion') is not None):
-            id_actuacion=request.args.get('id_actuacion')    
-        if(request.args.get('prioridad') is not None):
-            prioridad=int(request.args.get('prioridad')) 
-        if(request.args.get('estado') is not None):
-            estado=int(request.args.get('estado'))    
-        if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado')   
-        if(request.args.get('tiene_notas') is not None):
-            tiene_notas=request.args.get('tiene_notas'
-        if(request.args.get('fecha_desde') is not None):
-            fecha_desde=request.args.get('fecha_desde')
-            fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta')
-            fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)  
-        if(request.args.get('fecha_fin_desde') is not None):
-            fecha_fin_desde=request.args.get('fecha_fin_desde')
-            fecha_fin_desde = datetime.strptime(fecha_fin_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if(request.args.get('fecha_fin_hasta') is not None):
-            fecha_fin_hasta=request.args.get('fecha_fin_hasta')
-            fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)         
-        if(request.args.get('labels') is not None):
-            labels=request.args.get('labels')
-            labels = labels.split(",")
-        if(request.args.get('grupos') is not None):
-            grupos=request.args.get('grupos')
-            grupos = grupos.split(",")
-        """
+        
         usuario = g.get('username')
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
