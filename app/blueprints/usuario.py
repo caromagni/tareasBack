@@ -37,7 +37,6 @@ def before_request():
 
 
 
-
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
@@ -156,13 +155,6 @@ def get_usuario(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        nombre=""
-        apellido=""
-        dni=""
-        username=""
-        id_grupo=None
-        eliminado= None
-        suspendido=None
         cant=0
         
         print("query_data:",query_data)
@@ -171,20 +163,13 @@ def get_usuario(query_data: dict):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
-        if(request.args.get('id_grupo') is not None):
-            id_grupo=request.args.get('id_grupo')    
-        if(request.args.get('nombre') is not None):
-            nombre=request.args.get('nombre')
-        if(request.args.get('apellido') is not None):
-            apellido=request.args.get('apellido')  
-        if(request.args.get('dni') is not None):
-            dni=request.args.get('dni') 
-        if(request.args.get('username') is not None):
-            username=request.args.get('username')           
-        if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado')
-        if(request.args.get('suspendido') is not None):
-            suspendido=request.args.get('suspendido')    
+        id_grupo=request.args.get('id_grupo')    
+        nombre=request.args.get('nombre')
+        apellido=request.args.get('apellido')  
+        dni=request.args.get('dni') 
+        username=request.args.get('username')           
+        eliminado=request.args.get('eliminado')
+        suspendido=request.args.get('suspendido')    
 
         res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 
@@ -209,14 +194,6 @@ def get_usuarios_detalle(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        nombre=""
-        apellido=""
-        id_grupo=None
-        dni=""
-        username=""
-        cant=0
-        eliminado= None
-        suspendido=None
         
         print("query_data:",query_data)
         
@@ -224,20 +201,13 @@ def get_usuarios_detalle(query_data: dict):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
-        if(request.args.get('id_grupo') is not None):
-            id_grupo=request.args.get('id_grupo')    
-        if(request.args.get('nombre') is not None):
-            nombre=request.args.get('nombre')
-        if(request.args.get('apellido') is not None):
-            apellido=request.args.get('apellido')    
-        if(request.args.get('dni') is not None):
-            dni=request.args.get('dni')
-        if(request.args.get('username') is not None):
-            username=request.args.get('username')
-        if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado')
-        if(request.args.get('suspendido') is not None):
-            suspendido=request.args.get('suspendido')                
+        id_grupo=request.args.get('id_grupo')    
+        nombre=request.args.get('nombre')
+        apellido=request.args.get('apellido')    
+        dni=request.args.get('dni')
+        username=request.args.get('username')
+        eliminado=request.args.get('eliminado')
+        suspendido=request.args.get('suspendido')                
 
         res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 

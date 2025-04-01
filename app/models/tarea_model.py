@@ -69,7 +69,7 @@ def calcular_dias_vencimiento(fecha_vencimiento):
     logger.info("dias_vencimiento:" + str(dias_vencimiento) + "-" + str(fecha_vencimiento))
     return dias_vencimiento
 
-def tareas_a_vencer(username=None, dias_aviso=None):
+def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     total = 0
     if username is not None:
         id_user = verifica_username(username)
@@ -78,27 +78,41 @@ def tareas_a_vencer(username=None, dias_aviso=None):
             verifica_usr_id(id_user)
         else:
             raise Exception("Debe ingresar username o id_user_actualizacion")
-            
+    
+    print("id_user:", id_user)
+
     if dias_aviso is None:
         dias_aviso = 365  # Por defecto, 365 días de aviso
 
-    logger.info("tareas_a_vencer")
-    #Busco las tareas asignadas a todos los grupos del usuario username
-    tareas = (db.session.query(Tarea)
-              .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
-              .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
-              .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
-              .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
-                      Tarea.eliminado == False,
-                      Tarea.estado != 3,
-                      UsuarioGrupo.id_usuario==id_user,
-                      UsuarioGrupo.eliminado==False)  # Estado activo
-              .all())
+    # Consulta base con filtros comunes
+    query = (db.session.query(Tarea)
+            .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
+                    Tarea.eliminado == False,
+                    Tarea.estado != 3))
+
+    if grupos_usr is not None and grupos_usr=='true' or grupos_usr==True:
+        logger.info("tareas_a_vencer asignadas a los grupos del usuario")
+        # Tareas asignadas a todos los grupos del usuario
+        tareas = (query
+                .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
+                .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
+                .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
+                .filter(UsuarioGrupo.id_usuario == id_user,
+                        UsuarioGrupo.eliminado == False)
+                .all())
+    else:
+        # Tareas asignadas directamente al usuario
+        logger.info("tareas_a_vencer asignadas al usuario")
+        tareas = (query
+                .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
+                .filter(TareaAsignadaUsuario.id_usuario == id_user,
+                        TareaAsignadaUsuario.eliminado == False)
+                .all())    
+
     if tareas is not None:
         total = len(tareas)
         logger.info("Cantidad de tareas_a_vencer:" + str(total))    
 
-    logger.info("Cantidad de tareas_a_vencer:" + str(total))
     tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
     total = len(tareas_vencer)
     return tareas_vencer, total
@@ -1197,7 +1211,6 @@ def get_tarea_historia_usr_by_id(id):
 
 
 def get_tarea_by_id(id):
-    
     
     res = db.session.query(Tarea).filter(Tarea.id == id).first()
     

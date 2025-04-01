@@ -217,7 +217,7 @@ def put_label_tarea(json_data: dict):
         print(traceback.format_exc())
         raise ValidationError(err)    
     
-@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea_del/')
 @label_b.input(LabelXTareaPatchIn)
 @label_b.output(LabelXTareaIdOut)
@@ -246,8 +246,9 @@ def delete_label_tarea(json_data: dict):
     
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
-# @label_b.input(LabelXTareaGetIn)
-# @label_b.output(LabelCountAllOut)
+#@label_b.output(LabelAllOut)
+#@label_b.input(LabelXTareaGetIn)
+#@label_b.output(LabelCountAllOut)
 def get_active_labels_grupo(ids_grupos_base:str):
     try:
         labels = []
