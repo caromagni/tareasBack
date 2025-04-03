@@ -316,23 +316,48 @@ def update_label_tarea(id_label='', id_tarea="", **kwargs):
     return result
 
 def get_label_by_tarea(id_tarea):
-    print('entra a get de labels por tarea')
-    
-    active_labels = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
-    print('consulta labels por id de tarea error')
+    print('Fetching labels for task ID:', id_tarea)
+    active_labels = []
 
-    if active_labels is not None:       
-        total = len(active_labels)    
-        return active_labels, total 
-    else:
-        print("La tarea no tiene labels")
-        return None
+    # Query active labels for the given task
+    tasks_labels = db.session.query(LabelXTarea).filter(
+        LabelXTarea.id_tarea == id_tarea,
+        LabelXTarea.activa == True
+    ).all()
+    print('Task labels:', tasks_labels)
+
+    if tasks_labels:
+        # Fetch label details for each active label
+        for row in tasks_labels:
+            active_label = db.session.query(
+                LabelXTarea.id,
+                Label.nombre,
+                Label.color
+            ).join(
+                Label, LabelXTarea.id_label == Label.id
+            ).filter(
+                Label.id == row.id_label,
+                Label.eliminado == False
+            ).first()  # Use `.first()` instead of `.all()` to avoid unnecessary lists
+            print('Active label:', active_label)
+
+            if active_label:
+                label = {
+                    "id": active_label.id,
+                    "nombre": active_label.nombre,
+                    "color": active_label.color
+                }
+                active_labels.append(label)
+
+    total = len(active_labels)
+    print('Total active labels:', total)
+    return active_labels, total
 
 def delete_label_tarea_model(username, **kwargs):
     print('entra a delete de labels por tarea')
     print('kwargs:', kwargs)
-    id = kwargs['id_label']
-    id_tarea = kwargs['id_tarea']
+    id = kwargs['id']
+    # id_tarea = kwargs['id_tarea']
        
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -343,7 +368,7 @@ def delete_label_tarea_model(username, **kwargs):
             raise Exception("Usuario no ingresado")
 
    
-    active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
+    active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id == uuid.UUID(id)).first()
     print('consulta labels por id de tarea')
     print('active_label:', active_label)
 
@@ -357,4 +382,4 @@ def delete_label_tarea_model(username, **kwargs):
     else:
         print("La tarea no tiene etiquetas activas")
         return None
-  
+

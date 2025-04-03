@@ -218,8 +218,8 @@ def put_label_tarea(json_data: dict):
         raise ValidationError(err)    
     
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.put('/label_tarea_del/')
-@label_b.input(LabelXTareaPatchIn)
+@label_b.delete('/label_tarea_del/')
+# @label_b.input(LabelXTareaPatchIn)
 @label_b.output(LabelXTareaIdOut)
 def delete_label_tarea(json_data: dict):
     try:

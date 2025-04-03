@@ -1358,6 +1358,8 @@ class LabelXTareaIdOut(Schema):
     id= String(required=True)
     id_tarea = String(required=True)
     id_label = String(required=True)
+    nombre = String()
+    color = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
