@@ -864,12 +864,14 @@ class TareaAllOut(Schema):
     #id_grupo = String()
     #prioridad = Integer()
     #estado = Integer()
-    prioridad = fields.Nested(PrioridadSchema, metadata={
-        "description": "1 (alta), 2 (media), 3 (baja)"
-    })
-    estado = fields.Nested(EstadoSchema, metadata={
-        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    })
+    #prioridad = fields.Nested(PrioridadSchema, metadata={
+    #    "description": "1 (alta), 2 (media), 3 (baja)"
+    #})
+    prioridad = Integer()
+    #estado = fields.Nested(EstadoSchema, metadata={
+    #    "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    #})
+    estado = Integer()
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
@@ -918,6 +920,7 @@ class TareaUsuarioIn(Schema):
 
 class TareaAlertaIn(Schema):
     dias_aviso = Integer(required=True)
+    grupos_usr = Boolean(default=False)
     
 class TareaUsrOut(Schema):
     id = String()

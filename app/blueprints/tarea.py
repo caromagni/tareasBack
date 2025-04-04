@@ -140,7 +140,7 @@ def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
 
     
 ####################TIPO DE TAREA######################
-@tarea_b.doc(description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(TipoTareaCountOut)
 @tarea_b.input(PageIn, location='query')
@@ -244,7 +244,7 @@ def del_tipo_tarea(id: str):
         raise ValidationError(err)
     
 ###############################SUBTIPO_TAREA################################
-@tarea_b.doc(description='Consulta de Subtipos de Tareas', summary='Subtipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Subtipos de Tareas', summary='Subtipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/subtipo_tarea')
 @tarea_b.output(SubtipoTareaCountOut)
 @tarea_b.input(SubtipoTareaGetIn, location='query')
@@ -478,7 +478,7 @@ def get_tarea(id_tarea:str):
         print(traceback.format_exc())
         raise ValidationError(err) 
 
-@tarea_b.doc(description='Consulta de usuarios x tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}],description='Consulta de usuarios x tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_historia_usr/<string:id_tarea>')
 @tarea_b.output(TareaHIstoriaUserIdOut(many=True))
 def get_tarea_historia_usr(id_tarea:str):
@@ -521,7 +521,7 @@ def get_tareas_grupo():
         print(traceback.format_exc())
         raise ValidationError(err)     
 
-@tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/usuario_tarea/<string:tarea_id>')
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
@@ -718,10 +718,10 @@ def get_alerta_tarea(query_data: dict):
         dias_aviso=15
         cant=0
         username=g.get('username')
-        if(request.args.get('dias_aviso') is not None):
-            dias_aviso=int(request.args.get('dias_aviso'))
+        dias_aviso=int(request.args.get('dias_aviso'))
+        grupos_usr=request.args.get('grupos_usr')
         logger.info("Tareas a vencer")
-        res, cant = tareas_a_vencer(username, dias_aviso)
+        res, cant = tareas_a_vencer(username, dias_aviso, grupos_usr)
         data = {
                 "count": cant,
                 "data": TareaAllOut().dump(res, many=True)

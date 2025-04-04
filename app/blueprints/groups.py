@@ -66,32 +66,6 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.output(GetGroupCountOut)
 def get_grupo(query_data: dict):
     try:
-        """ page = 1
-        per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        nombre = ""
-        eliminado = None
-        suspendido = None
-        path_name = None
-        
-        fecha_desde = "01/01/2000"  
-        fecha_hasta = "01/01/2100" 
-        
-        if(request.args.get('eliminado') is not None):
-            eliminado = request.args.get('eliminado')
-        if(request.args.get('suspendido') is not None):
-            suspendido = request.args.get('suspendido')
-        if(request.args.get('path_name') is not None):
-            path_name = request.args.get('path_name')    
-        if(request.args.get('page') is not None):
-            page = int(request.args.get('page'))
-        if(request.args.get('per_page') is not None):
-            per_page = int(request.args.get('per_page'))
-        if(request.args.get('nombre') is not None):
-            nombre = request.args.get('nombre')
-        if(request.args.get('fecha_desde') is not None):
-            fecha_desde = request.args.get('fecha_desde')
-        if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta = request.args.get('fecha_hasta') """
 
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])

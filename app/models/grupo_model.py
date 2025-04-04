@@ -141,21 +141,6 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
     print("Suspendido:", suspendido)
     print("Path name:", path_name)
 
-    # # Handle the None default for fecha_hasta
-    """ if fecha_hasta is not None:
-        fecha_hasta_dt = datetime.strptime(fecha_hasta, "%d/%m/%Y")
-        print("MOFO FECHA DESDE")
-        print(fecha_hasta_dt)
-        
-  
-
-
-    if fecha_desde is not None:
-        fecha_desde_dt = datetime.strptime(fecha_desde, "%d/%m/%Y")
-        print("MOFO FECHA HASTA")
-        print(fecha_desde_dt) """
-        
-    
     cursor = None
     
     # Subconsulta recursiva
@@ -227,7 +212,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
     # Build all filters in a list
     filters = []
 
-    if nombre:
+    if nombre and nombre != "":
         filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
     if eliminado:
         filters.append(Grupo.eliminado == eliminado)
@@ -257,7 +242,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                     "fecha_creacion": grupo.fecha_creacion,
                     "id_user_actualizacion": grupo.id_user_actualizacion,
                     "id_user_asignado_default": grupo.id_user_asignado_default,
-                    "user_asignado_default": grupo.user_asignado_default,
+                    #"user_asignado_default": grupo.user_asignado_default,
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }
@@ -427,7 +412,7 @@ def get_all_base(id, usuarios=False):
         for grupo in grupos_mismo_base:
             usuarios_g = []
             id_grupo = grupo['id']
-            if usuarios=='true':
+            if usuarios=='true' or usuarios==True:
                 res_usuarios = db.session.query(UsuarioGrupo.id_grupo,
                                         UsuarioGrupo.id_usuario,
                                         Usuario.id,
@@ -587,8 +572,6 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                         "id_tipo_tarea": row.id_tipo_tarea,
                         "id_subtipo_tarea": row.id_subtipo_tarea,
                         "estado": row.estado,
-                        #"subtipo_tarea": row.subtipo_tarea,
-                        #"tipo_tarea": row.tipo_tarea,
                         "eliminado_grupo": row.eliminado_tareaxgrupo,
                         "tarea_eliminado": row.tarea_eliminado,
                         "fecha_actualizacion": row.fecha_actualizacion

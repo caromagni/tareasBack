@@ -29,7 +29,7 @@ def verify_jwt_in_header():
             print("###########Token a decodificar############")
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
-            print("token:",token)
+            #print("token:",token)
             payload = jwt.decode(jwt=token, key=jwt_pk, leeway=50, algorithms=jwt_alg, audience=jwt_aud)
             
             return payload
@@ -85,7 +85,6 @@ def verify_header():
         print("verifiy headers function in auth") 
         if request.method == 'OPTIONS':
             print("OPTIONS!!!!!!! ")
-            
           
         else:
             token_payload = verify_jwt_in_header()
