@@ -864,14 +864,14 @@ class TareaAllOut(Schema):
     #id_grupo = String()
     #prioridad = Integer()
     #estado = Integer()
-    #prioridad = fields.Nested(PrioridadSchema, metadata={
-    #    "description": "1 (alta), 2 (media), 3 (baja)"
-    #})
-    prioridad = Integer()
-    #estado = fields.Nested(EstadoSchema, metadata={
-    #    "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    #})
-    estado = Integer()
+    prioridad = fields.Nested(PrioridadSchema, metadata={
+        "description": "1 (alta), 2 (media), 3 (baja)"
+    })
+    #prioridad = Integer()
+    estado = fields.Nested(EstadoSchema, metadata={
+        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    })
+    #estado = Integer()
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
@@ -926,7 +926,8 @@ class TareaUsrOut(Schema):
     id = String()
     titulo = String()
     reasignada=Boolean()
-
+    fecha_inicio=String()
+    fecha_fin=String()
 
 class UsuarioIdOut(Schema):
     id = String()
@@ -940,7 +941,7 @@ class UsuarioIdOut(Schema):
     dni = String()
     email = String()
     username = String()
-    tareas = List(Nested(TareaUsrOut, only=("id", "titulo", "reasignada")))
+    tareas = List(Nested(TareaUsrOut, only=("id", "titulo", "reasignada", "fecha_inicio", "fecha_fin")))
     grupo = List(Nested(GroupOut, only=("id_grupo", "nombre")))
     
 

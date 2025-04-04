@@ -24,7 +24,7 @@ def get_usuario_by_id(id):
                                   ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False).all()
         
         #Traigo los grupos hijos
-        res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
+        res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado, Tarea.fecha_inicio, Tarea.fecha_fin
                                   ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
         
 
@@ -35,7 +35,9 @@ def get_usuario_by_id(id):
                         "titulo": row.titulo,
                         "id_tipo_tarea": row.id_tipo_tarea,
                         "eliminado": row.eliminado,
-                        "reasignada": row.asignada_usr_eliminado
+                        "reasignada": row.asignada_usr_eliminado,
+                        "fecha_inicio": row.fecha_inicio,
+                        "fecha_fin":row.fecha_fin
                     }
                 tareas.append(tarea)
 
