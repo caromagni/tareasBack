@@ -79,7 +79,7 @@ def get_grupo_by_id(id):
             tareas=[]
 
             for row in res_tarea:
-                
+
                 tarea = {
                     "id": row.id,
                     "titulo": row.titulo,
@@ -206,8 +206,8 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         cursor = db.session.execute(subquery)
     
     # Use the datetime objects for date filtering
-    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
-    
+    #query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
     # Build all filters in a list
     filters = []
 
