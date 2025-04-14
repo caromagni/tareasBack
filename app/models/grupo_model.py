@@ -207,24 +207,25 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         cursor = db.session.execute(subquery)
     
     # Use the datetime objects for date filtering
-    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
     
     # Build all filters in a list
     filters = []
 
     if nombre and nombre != "":
         filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado:
+    if eliminado==True or eliminado==False:
         filters.append(Grupo.eliminado == eliminado)
-    if suspendido:
+    if suspendido==True or suspendido==False:
         filters.append(Grupo.suspendido == suspendido)
 
     # Apply all filters at once
     if filters:
         query = query.filter(*filters)
-
+    
     total = query.count()
    
+
     if cursor:
         for reg in cursor:
             grupo = query.filter(Grupo.id == reg.id_hijo).first()

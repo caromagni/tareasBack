@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from schemas.schemas import LabelXTareaPrueba, LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
 from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, get_active_labels, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
@@ -54,7 +54,7 @@ def get_labels(query_data: dict):
         label_color = ""
         id_user_creacion = None
         id_tarea = None
-        id_grupo_padre = None
+        id_grupo_base = None
         #fecha_desde = "01/01/1900"
         #fecha_hasta = datetime.now().strftime("%d/%m/%Y")
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
@@ -79,7 +79,7 @@ def get_labels(query_data: dict):
         if request.args.get('label_color') is not None:
             label_color = request.args.get('label_color')  
 
-        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_base, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
         data = {
             "count": cant,
             "data": LabelAllOut().dump(res, many=True)
@@ -115,7 +115,7 @@ def get_label(id:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(LabelIn)
-@label_b.output(LabelOut)
+#@label_b.output(LabelOut)
 def post_label(json_data: dict):
     try:
         print("#"*50)
@@ -132,7 +132,26 @@ def post_label(json_data: dict):
                 }
             res = MsgErrorOut().dump(result)
         
-        return LabelOut().dump(res)
+        labels = []
+        """ for label in res:
+            print("label:", label)
+            print("label:", label.id_label)
+            if label != []: 
+                labels.append(LabelXTareaIdOut().dump(label)) """
+
+        data = {
+                "data": LabelXTareaIdOut().dump(res, many=True)
+            }
+        
+        
+        return data
+
+        # Prepare the response data
+        data = {
+                "data": labels
+            }
+        print("result:", data)
+        return data
     
     except Exception as err:
         print(traceback.format_exc())
@@ -193,7 +212,7 @@ def get_label_tarea(id_tarea:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
 @label_b.input(LabelXTareaIn)
-@label_b.output(LabelXTareaOut)
+# @label_b.output(LabelXTareaOut)
 def put_label_tarea(json_data: dict):
     try:
         print("#"*50)
@@ -205,80 +224,95 @@ def put_label_tarea(json_data: dict):
         if res is None:
             result = {
                     "valido":"fail",
-                    "code": 800,
-                    "error": "Error en insert label",
-                    "error_description": "No se pudo insertar la label"
+                    "ErrorCode": 800,
+                    "ErrorDesc": "Error en insert label",
+                    "ErrorMsg": "No se pudo insertar la label"
                 }
+     
             res = MsgErrorOut().dump(result)
+
+        labels = []
+        for label in res:
+            if label != []: 
+                labels.append(LabelXTareaIdOut().dump(label))
+
         
-        return LabelXTareaOut().dump(res)
+
+        # Prepare the response data
+        data = {
+                "data": labels
+            }
+        print("result:", data)
+        return data
+        
+        # return LabelXTareaPrueba().dump(res)
     
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)    
     
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.put('/label_tarea_del/')
-@label_b.input(LabelXTareaPatchIn)
-@label_b.output(LabelXTareaIdOut)
-def delete_label_tarea(json_data: dict):
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.delete('/label_tarea/<string:id>')
+# @label_b.input(LabelXTareaPatchIn)
+# @label_b.output(LabelXTareaIdOut)
+def delete_label_tarea(id: str):
+
     try:
         username = g.username
         print("##"*50)
-        print(json_data)
+        print(id)
         print("#"*50)
-        res = delete_label_tarea_model(username, **json_data)
+        res = delete_label_tarea_model(username, id)
         print("res:",res)   
         if res is None:
-            result = {
-                    "valido":"fail",
-                    "code": 800,
-                    "error": "Error en delete label",
-                    "error_description": "No se pudo eliminar la etiqueta"
-                }
-            res = MsgErrorOut().dump(result)
+            raise DataNotFound("Tipo de tarea no encontrado")
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id label x tarea": id,
+                    } 
         
-        return LabelXTareaIdOut().dump(res)
+        return result
     
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)    
-    
+
+
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
-#@label_b.output(LabelAllOut)
-#@label_b.input(LabelXTareaGetIn)
-#@label_b.output(LabelCountAllOut)
-def get_active_labels_grupo(ids_grupos_base:str):
+# @label_b.output(LabelCountAllOut)
+def get_active_labels_grupo(ids_grupos_base: str):
     try:
-        labels = []
+        # Fetch active labels and count
         res, cant = get_active_labels(ids_grupos_base)
-        for label in res:           
-            # data = {
-            #     'data': LabelAllOut().dump(label, many=True)
-            # }
-            labels.append(LabelAllOut().dump(label, many=True))
-        print("array labels formateado:",labels)   
+        print("res:", res)
         if res is None:
             result = {
-                    "valido":"fail",
-                    "code": 800,
-                    "error": "Error en delete label",
-                    "error_description": "No se pudo eliminar la etiqueta"
-                }
-            res = MsgErrorOut().dump(result)
-        
-            return LabelAllOut().dump(res)
-    
-        # data = {
-        #         "count": str(cant),            
-        #         "data": LabelAllOut().dump(res, many=True)
+                "valido": "fail",
+                "code": 800,
+                "error": "Error en obtener etiquetas",
+                "error_description": "No se encontraron etiquetas activas"
+            }
+            return MsgErrorOut().dump(result)
 
-        #     }
-        # print("result:",data) 
-        print('saliendo del label_b.get /label_grupo/<string:ids_grupos_base>')
-        return labels
-    
+        # Serialize each label and append to the list
+        labels = []
+        for label in res:
+            if label != []: 
+                labels.append(LabelAllOut().dump(label, many=True))
+
+        
+
+        # Prepare the response data
+        data = {
+            "count": str(cant),
+            "data": labels
+        }
+        print("result:", data)
+        return data
+
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)

@@ -17,7 +17,7 @@ from alchemy_db import db
 from sqlalchemy import func, cast, Text
 from sqlalchemy.types import Boolean, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
-from cache import cache
+# from cache import cache
 def nombre_estado(estado):
     if estado == 1:
         return "Pendiente"
@@ -945,7 +945,7 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-@cache.memoize(timeout=3600)
+# @cache.memoize(timeout=3600)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
     
@@ -1688,7 +1688,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 #@cache.momoize(timeout=500)
-@cache.memoize(timeout=3600)
+# @cache.memoize(timeout=3600)
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     print("*******************************************************")
     print("get_all_tarea_detalle")
@@ -1846,7 +1846,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 
 
 #def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-@cache.memoize(timeout=3600)
+# @cache.memoize(timeout=3600)
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
