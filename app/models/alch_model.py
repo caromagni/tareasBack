@@ -85,6 +85,20 @@ class Auditoria_TareaAsignadaUsuario(Base):
     usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)    
 
+class Organismo(Base):
+    __tablename__ = 'organismo'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    circunscripcion_judicial = Column(String, nullable=False)
+    id_fuero = Column(UUID)
+    descripcion = Column(String)
+    descripcion_corta = Column(String)
+    habilitado = Column(Boolean, nullable=False)
+    id_tarea_grupo_base  = Column(UUID)
+    instancia = Column(String)
+
+
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'
     __table_args__ = {'schema': 'tareas'}
@@ -122,6 +136,7 @@ class Usuario(Base):
     username = Column(String)
     dni = Column(String)
     email = Column(String)
+    habilitado = Column(Boolean)
 
 class TipoActuacionExt(Base):
     __tablename__ = 'tipo_actuacion_ext'
@@ -332,6 +347,9 @@ class Inhabilidad(Base):
 
     id = Column(UUID, primary_key=True)
     id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
+    tipo = Column(String)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    id_juez =Column(UUID)
     fecha_desde = Column(Time)
     fecha_hasta = Column(DateTime)
     fecha_actualizacion = Column(DateTime, nullable=False)
@@ -341,7 +359,7 @@ class Inhabilidad(Base):
 
     grupo = relationship('Grupo')
     tipo_inhabilidad = relationship('TipoInhabilidad')
-
+    organismo = relationship('Organismo')
 
 
 class Tarea(Base):

@@ -7,13 +7,13 @@ Características principales
 ---------------------------
 
 1. **Asignación de tareas individuales**:
-   - Capacidad para asignar tareas específicas a usuarios individuales.
+   - Capacidad para asignar tareas específicas a usuarios individuales: al crear la tarea, el usuario puede seleccionar un destinatario específico. En caso de no seleccionar un destinatario, la tarea se asignará automáticamente al usuario por defecto configurado en el grupo de asignación de la tarea. En caso que el grupo no tenga configurado un usuario por defecto, la tarea quedará sólo asignada al grupo. 
    - Opciones para definir prioridades, plazos y detalles de la tarea.
    - Seguimiento del progreso y estado de las tareas asignadas.
    - Visualización de las tareas pendientes y completadas por cada usuario en la bandeja de entrada.
 
 2. **Asignación de tareas a grupos**:
-   - Posibilidad de asignar tareas a grupos de usuarios en lugar de usuarios individuales.
+   - Posibilidad de asignar tareas a grupos de usuarios en lugar de usuarios individuales. Es obligatorio indicar por lo menos un grupo al crear la tarea. 
    - Distribución automática de tareas basada en reglas predefinidas o carga de trabajo.
    - Seguimiento del progreso y estado de las tareas asignadas a grupos.
    - Visualización de las tareas pendientes y completadas por cada grupo en la bandeja de entrada.

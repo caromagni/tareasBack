@@ -1,6 +1,7 @@
 
 from apiflask import APIFlask, HTTPTokenAuth
 from flask import send_from_directory
+import threading
 from flask_cors import CORS
 
 from flask_sqlalchemy import SQLAlchemy
@@ -196,8 +197,8 @@ def create_app():
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
-        print("Hilo de recepción de mensajes iniciado.")
- """
+        print("Hilo de recepción de mensajes iniciado.") """
+
     return app
 
 

@@ -3,10 +3,96 @@ import json
 import os
 from flask import current_app
 from alchemy_db import db
-from models.alch_model import Parametros, Usuario, TipoTarea, SubtipoTarea
+from models.alch_model import Parametros, Usuario, TipoTarea, SubtipoTarea, Organismo, Inhabilidad
 import requests
 import uuid
+from sqlalchemy import text
 from datetime import datetime
+
+def generar_update(entity, campos, valid_attributes, db_session=None, sqlalchemy_obj=None):
+    if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
+        if not sqlalchemy_obj or not db_session:
+            raise ValueError("Se necesita el objeto SQLAlchemy y la sesión para esta entidad especial.")
+        
+        print("Registro encontrado en", entity, ", actualizando... ID:", valid_attributes.get('id'))
+
+        for key, value in valid_attributes.items():
+            if key == 'id':
+                sqlalchemy_obj.id_ext = value
+            elif key == 'descripcion':
+                sqlalchemy_obj.nombre = value
+            elif key == 'descripcion_corta':
+                sqlalchemy_obj.codigo_humano = value
+            elif key == 'habilitado':
+                sqlalchemy_obj.eliminado = not value
+            else:
+                setattr(sqlalchemy_obj, key, value)
+
+        sqlalchemy_obj.fecha_actualizacion = datetime.now()
+        db_session.commit()
+
+        return None, None  # No hay query ni valores, ya se ejecutó el commit
+    
+    else:
+        return construct_update_query(entity, campos, valid_attributes)
+    
+def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy_model_class=None):
+    if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
+        if not sqlalchemy_model_class or not db_session:
+            raise ValueError("Se necesita el modelo SQLAlchemy y la sesión para esta entidad especial.")
+        
+        nuevo_obj = sqlalchemy_model_class()
+
+        for key, value in valid_attributes.items():
+            if key == 'id':
+                nuevo_obj.id_ext = value
+            elif key == 'descripcion':
+                nuevo_obj.nombre = value
+            elif key == 'descripcion_corta':
+                nuevo_obj.codigo_humano = value
+            elif key == 'habilitado':
+                nuevo_obj.eliminado = not value
+            else:
+                setattr(nuevo_obj, key, value)
+
+        nuevo_obj.fecha_actualizacion = datetime.now()
+        db_session.add(nuevo_obj)
+        db_session.commit()
+
+        return None, None  # No hay query ni valores, ya se insertó
+
+    else:
+        return construct_insert_query(entity, campos, valid_attributes)
+    
+
+def construct_update_query(entity, campos, valid_attributes):
+    # Filter campos to only include fields present in valid_attributes
+    update_fields = [field for field in campos if field in valid_attributes and field != 'id']
+    
+    # Construct the SET clause
+    set_clause = ', '.join([f"{field} = :{field}" for field in update_fields])
+    query = f'UPDATE tareas.{entity} SET {set_clause} WHERE id = :id'
+    values = {field: valid_attributes[field] for field in update_fields}
+    values['id'] = valid_attributes['id']
+    return query, values
+
+def construct_insert_query(entity, campos, valid_attributes):
+    # Filter campos to only include fields present in valid_attributes
+    insert_fields = [field for field in campos if field in valid_attributes]
+    
+    # Construct the column names part of the query
+    columns = ', '.join(insert_fields)
+    
+    # Construct the placeholders for values
+    placeholders = ', '.join([f":{field}" for field in insert_fields])
+    
+    # Arma la consulta completa.
+    query = f'INSERT INTO tareas.{entity} ({columns}) VALUES ({placeholders})'
+    
+    # Crea el diccionario de valores en el mismo orden.
+    values = {field: valid_attributes[field] for field in insert_fields}
+    
+    return query, values
 
 def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("Checking updates...")
@@ -18,6 +104,7 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
             return
 
         campos = res.columns
+
         print("campos: ", campos)
         if action in ["POST", "PUT"]:
             print("action: ", action)
@@ -49,42 +136,40 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':
                     query = db.session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
-                if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
-                    if query is not None:
-                        print("Registro encontrado en " + entity + ", actualizando..." + entity_id)
-                        for key, value in valid_attributes.items():
-                            if key != 'id':
-                                print("key: ", key, "- value: ", value)
-                                setattr(query, key, value)
-                            if key == 'descripcion':
-                                query.nombre = value
-                            if key == 'id':
-                                query.id_ext = value
-                            if key == 'habilitado':
-                                query.eliminado = not(value)  
-                            if key == 'descripcion_corta':
-                                query.codigo_humano = value          
-                        query.fecha_actualizacion = datetime.now()
+                if entity == 'organismo':
+                    query = db.session.query(Organismo).filter(Organismo.id == entity_id).first()
+                if entity == 'inhabilidad':
+                    query = db.session.query(Inhabilidad).filter(Inhabilidad.id == entity_id).first()    
+                
+                if query is not None:
+                    #Updates
+
+                    query_final, values = generar_update(
+                                entity,
+                                campos,
+                                valid_attributes,
+                                db_session=db.session,
+                                sqlalchemy_obj=query  # el objeto ya cargado de la BD
+                            )
+                    
+                else:
+                    #Inserts
+                    #Agregar entity=='tipo_act_juzgado' or entity=='tipo_act_parte'
+                    query_final, values = generar_insert(
+                                entity,
+                                campos,
+                                valid_attributes,
+                                db_session=db.session,
+                                sqlalchemy_model_class= TipoTarea  # el objeto ya cargado de la BD
+                            )
+
+                print("#"*50)
+                print("query_final: ", query_final)  
+                print("values: ", values) 
+                if query_final and values:
+                        db.session.execute(text(query_final), values)
                         db.session.commit()
                         print("Actualizaciones realizadas.")
-                else:
-                    #Hacer un insert
-                    #if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
-                    #   model = TipoTarea()
-                    if entity == 'usuario':
-                        model = Usuario()    
-                        query = model
-                        nuevoID=uuid.uuid4()
-                        for key, value in valid_attributes.items():
-                            if key != 'id':
-                                setattr(query, key, value)
-                            query.id = nuevoID
-                            query.id_persona_ext = entity_id
-                            query.fecha_actualizacion = datetime.now()
-
-                        db.session.add(query)    
-                        db.session.commit()
-                        print("Registro creado.")
 
             except Exception as e:
                 print("Error en check_updates:", e)

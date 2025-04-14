@@ -121,12 +121,12 @@ def get_grupo_by_id(id):
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
     else:
         fecha_hasta=datetime.now().date()
 
@@ -488,12 +488,12 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None): 
    
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
     else:
         fecha_hasta=datetime.now().date()
 
