@@ -1695,12 +1695,12 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("*******************************************************")
     
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
     else:
         fecha_hasta=datetime.now().date()
 
@@ -1713,8 +1713,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("Total de tareas:", query.count())
 
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
-        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%Y-%m-%d').date()
-        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%Y-%m-%d').date()
+        fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%d/%m/%Y').date()
+        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%d/%m/%Y').date()
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
@@ -1849,13 +1849,13 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 @cache.memoize(timeout=3600)
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
         
             
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
     else:
         fecha_hasta=datetime.now().date() 
 
