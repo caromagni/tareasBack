@@ -15,9 +15,7 @@ from cache import cache
 @cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
-    #session: scoped_session = current_app.session
     res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
-    #print("Grupo encontrado:", res.nombre)
     results=[]
     hijos=[]
     padres=[]
@@ -77,10 +75,11 @@ def get_grupo_by_id(id):
                 usuarios.append(usuario)
 
         if res_tarea is not None:
-            print("tiene tareas: ", len(res_tarea))
+            #print("tiene tareas: ", len(res_tarea))
             tareas=[]
 
             for row in res_tarea:
+                
                 tarea = {
                     "id": row.id,
                     "titulo": row.titulo,
