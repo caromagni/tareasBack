@@ -217,9 +217,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
 
     if nombre and nombre != "":
         filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado==True or eliminado==False:
-        filters.append(Grupo.eliminado == eliminado)
-    if suspendido==True or suspendido==False:
+    if eliminado is not None:
+        filters.append(Grupo.eliminado == eliminado)    
+    if suspendido is not None:
         filters.append(Grupo.suspendido == suspendido)
 
     # Apply all filters at once
