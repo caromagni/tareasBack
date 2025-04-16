@@ -8,6 +8,7 @@ import requests
 import uuid
 from sqlalchemy import text
 from datetime import datetime
+from common.utils import verifica_username
 
 def generar_update(entity, campos, valid_attributes, db_session=None, sqlalchemy_obj=None):
     if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
@@ -77,6 +78,14 @@ def construct_update_query(entity, campos, valid_attributes):
     return query, values
 
 def construct_insert_query(entity, campos, valid_attributes):
+    if entity == 'usuario':
+        new_id = str(uuid.uuid4())  # nuevo UUID
+        original_id = valid_attributes.get('id')
+
+        valid_attributes['id'] = new_id  # nuevo UUID como id
+        valid_attributes['id_persona_ext'] = original_id  # original va en id_pers_ext
+
+
     # Filter campos to only include fields present in valid_attributes
     insert_fields = [field for field in campos if field in valid_attributes]
     
@@ -96,6 +105,7 @@ def construct_insert_query(entity, campos, valid_attributes):
 
 def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("Checking updates...")
+        print(datetime.now())
 
         res = db.session.query(Parametros).filter(Parametros.table == entity).first()
         if not res:
@@ -116,7 +126,8 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
             print("system_apikey: ", system_apikey)
             headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
-
+            id_user = verifica_username('pusher')
+            print("id user: ", id_user)
             try:
                 response = requests.get(url, params=params, headers=headers).json()
                 attributes_list = response['data']
@@ -131,7 +142,19 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                 """ valid_attributes = [{key: value for key, value in attributes.items() if key in campos}
                                     for attributes in attributes_list] """
                 
+                if 'fecha_actualizacion' in valid_attributes:
+                   #if not valid_attributes['fecha_actualizacion']:
+                        print(datetime.now())
+                        valid_attributes['fecha_actualizacion'] = datetime.now()
+
+                if 'id_user_actualizacion' in valid_attributes:
+                    if not valid_attributes['id_user_actualizacion']:
+                        valid_attributes['id_user_actualizacion'] = id_user
+                    else:
+                        valid_attributes['id_user_actualizacion'] = verifica_username(valid_attributes['id_user_actualizacion'])      
+
                 print("valid_attributes: ", valid_attributes)
+                print("entity_id: ", entity_id)
                 if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':

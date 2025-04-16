@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 #from sqlalchemy.ext.declarative import declarative_base
 
 import uuid
+from datetime import datetime
 
 # metadata = Base.metadata
 
@@ -346,19 +347,19 @@ class Inhabilidad(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
+    #id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
+    id_tipo_inhabilidad = Column(UUID)
     tipo = Column(String)
     id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
     id_juez =Column(UUID)
     fecha_desde = Column(Time)
     fecha_hasta = Column(DateTime)
-    fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     descripcion = Column(String)
 
     grupo = relationship('Grupo')
-    tipo_inhabilidad = relationship('TipoInhabilidad')
     organismo = relationship('Organismo')
 
 

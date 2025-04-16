@@ -1700,9 +1700,13 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+        #.date()
     else:
-        fecha_hasta=datetime.now().date()
+        fecha_hasta=datetime.now()
+        #.date()
+        
+    fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())    
 
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
@@ -1710,11 +1714,14 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("Estado:", estado)
 
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-    print("Total de tareas:", query.count())
+    print("Total de tareas 1:", query.count())
 
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
+        print("Filtro por fecha fin")
         fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%d/%m/%Y').date()
-        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%d/%m/%Y').date()
+        fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%d/%m/%Y')
+        fecha_fin_hasta = datetime.combine(fecha_fin_hasta, datetime.max.time())
+        #.date()
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
@@ -1728,7 +1735,11 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
-        query = query.join(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado, TareaAsignadaUsuario.eliminado == False)
+        print("ID usuario asignado:", id_usuario_asignado)
+        query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea
+                ).filter(TareaAsignadaUsuario.id_usuario== id_usuario_asignado, TareaAsignadaUsuario.eliminado==False
+                )
+        print("Total de tareas para el usr:", query.count())
     if prioridad and prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
     if estado  and estado > 0:
@@ -1753,7 +1764,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 
     # Get total count of tasks matching the filter
     total = query.count()
-    print("Total de tareas:", total)
+    print("Total de tareas 2:", total)
     
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
@@ -1855,9 +1866,13 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         
             
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+        #.date()
     else:
-        fecha_hasta=datetime.now().date() 
+        fecha_hasta=datetime.now()
+        #.date() 
+        
+    fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
 
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
 
