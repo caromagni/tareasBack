@@ -342,6 +342,7 @@ class UsuariosGroupIn(Schema):
     grupos = String(metadata={"description": "ids separados por comas. Ej: id1, id2, id3"})
         
 class UsuariosGroupOut(Schema):
+    id_grupo = String()
     nombre_grupo = String()
     id_usuario = String()
     nombre = String()
