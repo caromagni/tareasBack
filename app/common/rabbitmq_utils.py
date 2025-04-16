@@ -67,6 +67,9 @@ def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy
     
 
 def construct_update_query(entity, campos, valid_attributes):
+    if entity == 'usuario':
+        original_id = valid_attributes.get('id')
+        valid_attributes['id_persona_ext'] = original_id  # original va en id_pers_ext
     # Filter campos to only include fields present in valid_attributes
     update_fields = [field for field in campos if field in valid_attributes and field != 'id']
     
@@ -159,8 +162,8 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':
                     query = db.session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
-                    #if query is None:
-                    #    query = db.session.query(Usuario).filter(Usuario.username == valid_attributes['email']).first()
+                    if query is None:
+                        query = db.session.query(Usuario).filter(Usuario.username == valid_attributes['email']).first()
                 if entity == 'organismo':
                     query = db.session.query(Organismo).filter(Organismo.id == entity_id).first()
                 if entity == 'inhabilidad':
