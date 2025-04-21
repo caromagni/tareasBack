@@ -117,3 +117,4 @@ def verify_header():
         logger.info("Error en la verificacion de header")
         logger.error(err)
         raise UnauthorizedError(err)
+        

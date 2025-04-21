@@ -129,6 +129,8 @@ def get_grupo_detalle(query_data: dict):
 @groups_b.output(GroupIdOut())
 def get_grupo_id(id: str):
     try:
+        #can_pass=validar_rol(jwt,["leer-grupo"])
+
         print("id:",id)
         res = get_grupo_by_id(id)
         
