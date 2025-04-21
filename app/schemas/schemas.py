@@ -548,7 +548,7 @@ class TareaPatchIn(Schema):
     ))
 
 class TareaPatchV2In(Schema):
-    id = String(required=True)
+    id_tarea = String(required=True)
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String()
