@@ -51,12 +51,13 @@ def before_request():
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username
-        cu = 'consultar-tareas'
+        cu = ['consultar-tarea','eliminar-tarea']
         rol = 'administrador'
         accede = get_usr_cu(user_name, rol, cu)
 
         if accede is False:
-            raise UnauthorizedError(403, "No tiene permisos para acceder a la API")
+            logger.error("No tiene permisos para acceder a la API")
+            #raise UnauthorizedError(403, "No tiene permisos para acceder a la API")
         
         cant=0
         page=1
