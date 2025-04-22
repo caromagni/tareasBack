@@ -158,6 +158,8 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
 
                 print("valid_attributes: ", valid_attributes)
                 print("entity_id: ", entity_id)
+                print("entity: ", entity)
+                
                 if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':

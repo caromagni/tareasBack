@@ -10,7 +10,7 @@ from apiflask import APIBlueprint
 from flask import request, current_app, jsonify
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
-from common.usher import get_roles
+from common.usher import get_usr_cu
 from common.auth import verify_header
 from common.logger_config import logger
 import traceback
@@ -41,102 +41,6 @@ def before_request():
     g.type = type_origin
      
 
-######################Control de acceso######################
-def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
-    #session: scoped_session = current_app.session
-
-
-
-# .d8888. d888888b db      db    db d888888b  .d8b. 
-# 88'  YP   `88'   88      88    88   `88'   d8' `8b
-# `8bo.      88    88      Y8    8P    88    88ooo88
-#   `Y8b.    88    88      `8b  d8'    88    88~~~88
-# db   8D   .88.   88booo.  `8bd8'    .88.   88   88
-# `8888Y' Y888888P Y88888P    YP    Y888888P YP   YP
-
-#review the possibility of running two or more queries at once. for example session.query(Usuario).filter(Usuario.email == nombre_usuario).first() and session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all() in a SINGLE JOIN?
-#this is to save time and compensate for network latency
-    #tiempo_vencimiento = timedelta(minutes=30)
-    tiempo_vencimiento = timedelta(days=360)
-    query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
-    if query_usr is None:
-        logger.error("Usuario no encontrado")
-        return False
-    else:
-        id_usuario = query_usr.id
-        email = query_usr.email
-        query_rol = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
-        if len(query_rol)==0:
-            #######Consultar CU Api Usher##########
-            roles = get_roles(token)
-            for r in roles['lista_roles_cus']:
-                for cu in r['casos_de_uso']:
-                    match cu['descripcion_corta_cu']:
-                        case 'crear-tarea':
-                            urlCU='post/tarea'
-                        case 'borrar-tarea':
-                            urlCU='delete/tarea'
-                        case 'consulta-tarea':
-                            urlCU='get/tarea'
-                        case 'asignar-tarea':
-                            urlCU='post/tarea'
-                        case 'crear-grupo':
-                            urlCU='post/grupo'
-                        case 'crear-usuario':
-                            urlCU='post/usuario'
-                        case 'modificar-usuario':
-                            urlCU='patch/usuario'
-                        case 'eliminar-tipo-tarea':
-                            urlCU='delete/tipo_tarea'
-                        case 'consulta_usuarios_tarea':
-                            urlCU='get/usuario_tarea'
-                        case 'consulta_tarea_id':
-                            urlCU='get/tarea'
-                        case 'consulta_tareas_usuario':
-                            urlCU='get/tarea'
-                        case 'consulta_tareas_grupo':
-                            urlCU='get/tarea'
-                        case 'consulta_tareas_expediente':
-                            urlCU='get/tarea'
-                        case 'consulta_tareas_tipo':
-                            urlCU='get/tipo_tarea'
-                        case 'eliminar-datos':
-                            urlCU='delete/tarea'
-                        case 'modificar-datos':
-                            urlCU='patch/tarea'  
-
-                    nuevoIDRol=uuid.uuid4()
-                    nuevo_rol = Rol(
-                        id=nuevoIDRol, 
-                        email=email,
-                        id_usuario=id_usuario, 
-                        fecha_actualizacion=datetime.now(),
-                        rol=r['descripcion_rol'],
-                        id_rol_ext=r['id_usuario_sistema_rol'],
-                        descripcion_ext=cu['descripcion_corta_cu'],
-                        url_api=urlCU
-                    )
-                    db.session.add(nuevo_rol)
-                    db.session.commit()
-                    print("Nuevo Rol Guardado:",nuevo_rol.id)
-                
-            db.session.commit()
-            
-        query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
-        
-        if len(query_permisos)==0:
-            logger.error("No tiene permisos")
-            return False
-        else:
-            #print("#"*50)
-            #print("Roles de tareas:")
-            #for permiso in query_rol:
-            #    print(f" Email: {permiso.email}, URL API: {permiso.url_api}")
-            
-            #print("#"*50)
-            return True
-            
-    
 
     
 ####################TIPO DE TAREA######################
@@ -146,6 +50,15 @@ def control_rol_usuario(token='', nombre_usuario=None, rol='', url_api=''):
 @tarea_b.input(PageIn, location='query')
 def get_tipoTareas(query_data: dict):
     try:
+        user_name = g.username
+        cu = ['consultar-tarea','eliminar-tarea']
+        rol = 'administrador'
+        accede = get_usr_cu(user_name, rol, cu)
+
+        if accede is False:
+            logger.error("No tiene permisos para acceder a la API")
+            #raise UnauthorizedError(403, "No tiene permisos para acceder a la API")
+        
         cant=0
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
