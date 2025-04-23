@@ -1,9 +1,10 @@
 import requests
 import jwt
 from functools import wraps
-
+from common.usher import get_usr_cu
 from flask import request
-def require_role(roles):
+import time
+def require_role(use_cases):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -11,7 +12,11 @@ def require_role(roles):
             auth_header = request.headers.get("Authorization", "")
             token = auth_header.replace("Bearer ", "")       
             decoded=jwt.decode(token, options={"verify_signature": False})
-            print(decoded)
+            print(decoded['email'])
+            can_pass=get_usr_cu(decoded['email'],'',use_cases)
+            print("CAN PASS")
+            print(can_pass)
+            #get_roles()
             # array=get_user_roles(username)
             # for rol in roles:
             #     for sub_rol in array

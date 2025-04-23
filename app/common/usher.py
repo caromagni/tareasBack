@@ -7,9 +7,9 @@ from alchemy_db import db
 from sqlalchemy import or_
 import os
 
-def get_roles():
+def get_roles(nombre_usuario):
     print('get_roles')
-    url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=simperiale@mail.jus.mendoza.gov.ar'
+    url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta='+nombre_usuario
     #r=requests.get(url,headers={'Authorization': 'Bearer '+token})
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
@@ -33,7 +33,7 @@ def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
     query_rol = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
     if len(query_rol)==0:
         #######Consultar CU Api Usher##########
-        roles = get_roles()
+        roles = get_roles(nombre_usuario)
         for r in roles['lista_roles_cus']:
             ######ROL USHER##########
             print("rol:",r['descripcion_rol'])
@@ -61,7 +61,7 @@ def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
     #query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.descripcion_ext.like(f"%{cu}%")).all()
     query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
     # or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])
-    if query_permisos is None:
+    if len(query_permisos)==0:
         logger.error("No tiene permisos")
         return False
     else:

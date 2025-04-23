@@ -262,7 +262,7 @@ class RabbitMQHandler:
             print("No se puede consumir mensajes sin conexión.")
             raise Exception("No se puede consumir mensajes sin conexión.")
 
-        self.channel.basic_consume(queue='expte_params', auto_ack=True, on_message_callback=self.callback)
+        self.channel.basic_consume(queue='expte_params', auto_ack=False, on_message_callback=self.callback)
         print(' [*] Waiting for messages. To exit press CTRL+C')
         try:
             self.channel.start_consuming()
