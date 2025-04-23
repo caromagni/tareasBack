@@ -7,9 +7,10 @@ from alchemy_db import db
 from sqlalchemy import or_
 import os
 
-def get_roles():
+def get_roles(username):
     print('get_roles')
-    url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=simperiale@mail.jus.mendoza.gov.ar'
+    url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta='+username 
+    #simperiale@mail.jus.mendoza.gov.ar
     #r=requests.get(url,headers={'Authorization': 'Bearer '+token})
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
@@ -21,24 +22,42 @@ def get_roles():
 
 
 ######################Control de acceso######################
-def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
-    tiempo_vencimiento = timedelta(days=360)
-    query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
+def get_usr_cu(username=None, rol='Administrador', cu=[]):
+    pull_roles = True
+    tiempo_vencimiento = timedelta(days=1)
+    tiempo_vencimiento = timedelta(minutes=1)
+    query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
     if query_usr is None:
         logger.error("Usuario no encontrado")
         return False
     
     id_usuario = query_usr.id
     email = query_usr.email
-    query_rol = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now()).all()
-    if len(query_rol)==0:
-        #######Consultar CU Api Usher##########
-        roles = get_roles()
+    #Pregunto si el usuario tiene un rol
+    query_rol = db.session.query(Rol).filter(Rol.email == email).all()
+    if len(query_rol)>0:
+        pull_roles = False
+        #Pregunto si hay algún registro vencido
+        query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
+        if len(query_vencido)>0:
+            #Borro todos los registros del usuario
+            print("Borrando roles vencidos")
+            query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
+            """ for r in query_rol:
+                db.session.delete(r)
+                db.session.commit()
+                logger.info("Rol eliminado") """
+            pull_roles = True    
+
+    #######Consultar CU Api P-usher##########
+    if pull_roles:
+        print("Get roles desde p-usher")
+        roles = get_roles(username)
         for r in roles['lista_roles_cus']:
             ######ROL USHER##########
             print("rol:",r['descripcion_rol'])
             ######Casos de uso del rol##########
-            for cu in r['casos_de_uso']:
+            for caso_uso in r['casos_de_uso']:
                 nuevoIDRol=uuid.uuid4()
                 nuevo_rol = Rol(
                     id=nuevoIDRol, 
@@ -47,7 +66,7 @@ def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
                     fecha_actualizacion=datetime.now(),
                     rol=r['descripcion_rol'],
                     id_rol_ext=r['id_usuario_sistema_rol'],
-                    descripcion_ext=cu['descripcion_corta_cu']
+                    descripcion_ext=caso_uso['descripcion_corta_cu']
                 )
                 db.session.add(nuevo_rol)
                 db.session.commit()
@@ -59,8 +78,9 @@ def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
     print("cu:",cu)
     #query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.descripcion_ext.like(f"%{cu}%")).all()
     
-    ######AGREGAR CONTROL DE ROL DE USUARIO##########
-    query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
+    #Controlo si el usuario con el rol elegido tiene permisos
+    print("rol usuario:",rol)
+    query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.rol == rol, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
     if len(query_permisos)==0:
         logger.error("No tiene permisos")
         return False

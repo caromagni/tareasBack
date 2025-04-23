@@ -530,8 +530,6 @@ class Rol(Base):
     rol = Column(String, nullable=False)
     id_rol_ext= Column(UUID)
     id_organismo = Column(UUID)
-    url_api = Column(String)
-    tabla = Column(String)
     descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
 

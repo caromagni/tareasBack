@@ -51,8 +51,8 @@ def before_request():
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username
-        cu = ['cconsultar-tareass']
-        rol = 'administrador'
+        cu = ['consultar-tarea']
+        rol = 'Administrador'
         accede = get_usr_cu(user_name, rol, cu)
 
         if accede is False:
