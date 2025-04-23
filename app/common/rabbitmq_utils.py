@@ -77,7 +77,7 @@ def construct_update_query(entity, campos, valid_attributes):
     set_clause = ', '.join([f"{field} = :{field}" for field in update_fields])
     query = f'UPDATE tareas.{entity} SET {set_clause} WHERE id = :id'
     values = {field: valid_attributes[field] for field in update_fields}
-    values['id'] = valid_attributes['id']
+    values['id'] = valid_attributes['id']    
     return query, values
 
 def construct_insert_query(entity, campos, valid_attributes):
@@ -181,6 +181,7 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                                 db_session=db.session,
                                 sqlalchemy_obj=query  # el objeto ya cargado de la BD
                             )
+                    print("query_final: ", query_final)
                     
                 else:
                     #Inserts
