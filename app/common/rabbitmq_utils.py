@@ -244,16 +244,18 @@ class RabbitMQHandler:
                 return
             except pika.exceptions.ChannelClosedByBroker as e:
                 if e.reply_code == 404:
-                    self.channel.queue_declare(queue='expte_params', durable=True)
+                    #el canal se cierra cuando passive=True
+                    self.channel = self.connection.channel()
+                    self.channel.queue_declare(queue='tareas_params', durable=True)
                 else:
                     raise
-                
-            """ except Exception as e:
+            """      
+            except Exception as e:
                 retry_count += 1
                 print(f" Error conectando a RabbitMQ (intento {retry_count}): {e}")
                 print(f" Reintentando en 10 segundos...")
-                time.sleep(10)
- """
+                time.sleep(10) """
+
 
     def callback(self, ch, method, properties, body):
         print(f" [x] Received {body}")
@@ -263,8 +265,10 @@ class RabbitMQHandler:
                 self.process_message(db.session)
             ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
         except Exception as e:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
             print("Error procesando el mensaje:", e)
+            #reintentar o descartar el mensaje (requeue=False)
+            #ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
+            
             
 
     def process_message(self, session):
