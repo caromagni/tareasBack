@@ -11,115 +11,17 @@ from sqlalchemy import text
 from datetime import datetime
 from common.utils import verifica_username
 from flask import g
-
-def generar_update(entity, campos, valid_attributes, db_session=None, sqlalchemy_obj=None):
-    if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
-        if not sqlalchemy_obj or not db_session:
-            raise ValueError("Se necesita el objeto SQLAlchemy y la sesión para esta entidad especial.")
-        
-        print("Registro encontrado en", entity, ", actualizando... ID:", valid_attributes.get('id'))
-
-        for key, value in valid_attributes.items():
-            if key == 'id':
-                sqlalchemy_obj.id_ext = value
-            elif key == 'descripcion':
-                sqlalchemy_obj.nombre = value
-            elif key == 'descripcion_corta':
-                sqlalchemy_obj.codigo_humano = value
-            elif key == 'habilitado':
-                sqlalchemy_obj.eliminado = not value
-            else:
-                setattr(sqlalchemy_obj, key, value)
-
-        sqlalchemy_obj.fecha_actualizacion = datetime.now()
-        db_session.commit()
-
-        return None, None  # No hay query ni valores, ya se ejecutó el commit
-    
-    else:
-        return construct_update_query(entity, campos, valid_attributes)
-    
-def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy_model_class=None):
-    if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
-        if not sqlalchemy_model_class or not db_session:
-            raise ValueError("Se necesita el modelo SQLAlchemy y la sesión para esta entidad especial.")
-        
-        nuevo_obj = sqlalchemy_model_class()
-
-        nuevo_obj.id = str(uuid.uuid4()) 
-        for key, value in valid_attributes.items():
-            if key == 'id':
-                nuevo_obj.id_ext = value
-            elif key == 'descripcion':
-                nuevo_obj.nombre = value
-            elif key == 'descripcion_corta':
-                nuevo_obj.codigo_humano = value
-            elif key == 'habilitado':
-                nuevo_obj.eliminado = not value
-            elif key=='id':
-                nuevo_obj.id_ext = value    
-            else:
-                setattr(nuevo_obj, key, value)
-
-        nuevo_obj.fecha_actualizacion = datetime.now()
-        nuevo_obj.id_user_actualizacion = g.id_user
-        db_session.add(nuevo_obj)
-        db_session.commit()
-
-        return None, None  # No hay query ni valores, ya se insertó
-
-    else:
-        return construct_insert_query(entity, campos, valid_attributes)
-    
-
-def construct_update_query(entity, campos, valid_attributes):
-    #if entity == 'usuario':
-    #    original_id = valid_attributes.get('id')
-    valid_attributes['id_ext'] = valid_attributes.get('id')  # original va en id_pers_ext
-    # Filter campos to only include fields present in valid_attributes
-    update_fields = [field for field in campos if field in valid_attributes and field != 'id']
-    
-    # Construct the SET clause
-    set_clause = ', '.join([f"{field} = :{field}" for field in update_fields])
-    query = f'UPDATE tareas.{entity} SET {set_clause} WHERE id_ext = :id'
-    values = {field: valid_attributes[field] for field in update_fields}
-    values['id'] = valid_attributes['id']    
-    return query, values
-
-def construct_insert_query(entity, campos, valid_attributes):
-    if entity == 'usuario':
-        new_id = str(uuid.uuid4())  # nuevo UUID
-        original_id = valid_attributes.get('id')
-
-        valid_attributes['id'] = new_id  # nuevo UUID como id
-        valid_attributes['id_ext'] = original_id  # original va en id_pers_ext
+import common.sync  as sync
 
 
-    # Filter campos to only include fields present in valid_attributes
-    insert_fields = [field for field in campos if field in valid_attributes]
-    
-    # Construct the column names part of the query
-    columns = ', '.join(insert_fields)
-    
-    # Construct the placeholders for values
-    placeholders = ', '.join([f":{field}" for field in insert_fields])
-    
-    # Arma la consulta completa.
-    query = f'INSERT INTO tareas.{entity} ({columns}) VALUES ({placeholders})'
-    
-    # Crea el diccionario de valores en el mismo orden.
-    values = {field: valid_attributes[field] for field in insert_fields}
-    
-    return query, values
 
-def check_updates(session, entity='', action='', entity_id=None, url=''):
+def check_updates_new(session, entity='', action='', entity_id=None, url=''):
         print("Checking updates...")
         print(datetime.now())
         print("entity a buscar: ", entity)
         res = db.session.query(Parametros).filter(Parametros.table == entity).first()
         if not res:
             print(f"No se encontró la tabla {entity} en los parámetros.")
-            #raise Exception(f"No se encontró la tabla {entity} en los parámetros para actualizar.")
             return
 
         campos = res.columns
@@ -135,80 +37,27 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
             g.id_user = id_user
             print("id user: ", id_user)
             try:
-                response = requests.get(url, params=params, headers=headers).json()
-                attributes_list = response['data']
-                print("#"*50)
-                attributes = next((attr for attr in attributes_list if attr.get('id') == entity_id), None)
-
-                if not attributes:
-                    print(f"No se encontró un registro en 'data' con id: {entity_id}")
-                    return
-
-                valid_attributes = {key: value for key, value in attributes.items() if key in campos}
-                """ valid_attributes = [{key: value for key, value in attributes.items() if key in campos}
-                                    for attributes in attributes_list] """
-                
-                if 'fecha_actualizacion' in valid_attributes:
-                   #if not valid_attributes['fecha_actualizacion']:
-                        print(datetime.now())
-                        valid_attributes['fecha_actualizacion'] = datetime.now()
-
-                if 'id_user_actualizacion' in valid_attributes:
-                    if not valid_attributes['id_user_actualizacion']:
-                        valid_attributes['id_user_actualizacion'] = id_user
-                    else:
-                        valid_attributes['id_user_actualizacion'] = verifica_username(valid_attributes['id_user_actualizacion'])      
-
-                print("valid_attributes: ", valid_attributes)
-                print("entity_id: ", entity_id)
-                print("entity: ", entity)
-                
-                if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
-                    query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
-                if entity == 'usuario':
-                    query = db.session.query(Usuario).filter(Usuario.id_ext == entity_id).first()
-                    if query is None:
-                        query = db.session.query(Usuario).filter(Usuario.username == valid_attributes['email']).first()
-                if entity == 'organismo':
-                    query = db.session.query(Organismo).filter(Organismo.id_ext == entity_id).first()
-                if entity == 'inhabilidad':
-                    query = db.session.query(Inhabilidad).filter(Inhabilidad.id_ext == entity_id).first()    
-                
-                if query is not None:
-                    #Updates
-                    print("Registro encontrado en", entity, ", actualizando... ID:", entity_id)
-                    query_final, values = generar_update(
-                                entity,
-                                campos,
-                                valid_attributes,
-                                db_session=db.session,
-                                sqlalchemy_obj=query  # el objeto ya cargado de la BD
-                            )
-                    print("query_final: ", query_final)
-                    
-                else:
-                    #Inserts
-                    #Agregar entity=='tipo_act_juzgado' or entity=='tipo_act_parte'
-                    print("Registro no encontrado en", entity, ", insertando... ID:", entity_id)
-                    query_final, values = generar_insert(
-                                entity,
-                                campos,
-                                valid_attributes,
-                                db_session=db.session,
-                                sqlalchemy_model_class= TipoTarea  # el objeto ya cargado de la BD
-                            )
-
-                print("#"*50)
-                print("query_final: ", query_final)  
-                print("values: ", values) 
-                if query_final and values:
-                        db.session.execute(text(query_final), values)
-                        db.session.commit()
-                        print("Actualizaciones realizadas.")
-
+                match entity:
+                    case 'tipo_act_juzgado':
+                        #ejecutar insert o update para tipo_tarea
+                        res=sync.sync_tipo_tarea(entity_id, url, id_user)
+                    case 'tipo_act_parte':
+                        #ejecutar insert o update para tipo_tarea
+                        res=sync.sync_tipo_tarea(entity_id, url, id_user)
+                    case 'usuario':
+                        #ejecutar insert o update para usuario
+                        res=sync.sync_usuario(entity_id, url, id_user)
+                    case 'organismo':
+                        #ejecutar insert o update para organismo
+                        res=sync.sync_cu(entity_id, url, id_user)
+                    case 'inhabilidad':
+                        #ejecutar insert o update para inhabilidad
+                        res=sync.sync_cu(entity_id, url, id_user)
+                    case _:
+                        print(f"La entidad {entity} no está soportada para sincronización.")
+            
             except Exception as e:
-                print("Error en check_updates:", e)
-
+                     print("Error en check_updates:", e)                         
 
 class RabbitMQHandler:
     def __init__(self):
@@ -258,14 +107,18 @@ class RabbitMQHandler:
 
 
     def callback(self, ch, method, properties, body):
-        print(f" [x] Received {body}")
+        #ch.basic_ack(delivery_tag=method.delivery_tag)
+        #print(f" [x] Received {body}")
         try:
             self.objeto = json.loads(body.decode('utf-8'))
             with current_app.app_context():
                 self.process_message(db.session)
+           
             ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+            print(f" [x] Received {body}")
         except Exception as e:
             print("Error procesando el mensaje:", e)
+            #ch.basic_ack(delivery_tag=method.delivery_tag)
             #reintentar o descartar el mensaje (requeue=False)
             #ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
             
@@ -281,7 +134,8 @@ class RabbitMQHandler:
         entity_id = self.objeto.get('entity_id', '')
         url = self.objeto.get('url', '')
 
-        check_updates(session, entity, action, entity_id, url)
+        #check_updates(session, entity, action, entity_id, url)
+        check_updates_new(session, entity, action, entity_id, url)
 
 
     def start_consuming(self):
