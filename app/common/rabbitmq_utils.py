@@ -12,7 +12,7 @@ from datetime import datetime
 from common.utils import verifica_username
 from flask import g
 import common.sync  as sync
-
+from common.logger_config import logger
 
 
 def check_updates_new(session, entity='', action='', entity_id=None, url=''):

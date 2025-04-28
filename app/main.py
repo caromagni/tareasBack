@@ -193,11 +193,11 @@ def create_app():
     register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    """ if uwsgi.worker_id() == 1:
+    if uwsgi.worker_id() == 199999999: #if id is 1 then this thread should run. disabled for now with any long number
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
-        print("Hilo de recepción de mensajes iniciado.") """
+        print("Hilo de recepción de mensajes iniciado.")
         
 
     return app
