@@ -193,7 +193,7 @@ def create_app():
     register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    if uwsgi.worker_id() == 1:
+    if uwsgi.worker_id() == 100:
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
