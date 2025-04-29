@@ -23,8 +23,9 @@ def get_roles(username):
 
 ######################Control de acceso######################
 def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
+    logger.info("get_usr_cu")
     pull_roles = True
-    tiempo_vencimiento = timedelta(days=1)
+    #tiempo_vencimiento = timedelta(days=1)
     tiempo_vencimiento = timedelta(minutes=5)
     query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
     if query_usr is None:
@@ -38,9 +39,11 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
     if len(query_rol)>0:
         pull_roles = False
         #Pregunto si hay algún registro vencido
+        logger.info("Controla roles vencidos")
         query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
         if len(query_vencido)>0:
             #Borro todos los registros del usuario
+            logger.info("ROLES VENCIDOS")
             print("Borrando roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
             """ for r in query_rol:

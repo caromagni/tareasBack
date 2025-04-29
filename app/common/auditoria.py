@@ -51,10 +51,10 @@ def get_serializable_dict(instance):
 #@event.listens_for(scoped_session, 'after_flush')
 @event.listens_for(db.session, 'after_flush')
 def after_flush(session, flush_context):
-    print("entra a after_flush")
+    #print("entra a after_flush")
     ip = get_user_ip()
     #ip='172.17.0.1'
-    print("ip:", ip)
+    #print("ip:", ip)
     def get_nombre_tabla(modelo):
         print("modelo:", modelo)
         match modelo:
