@@ -165,15 +165,21 @@ def del_label(id: str):
         username = g.username
         res = delete_label(username, id)
         print("res:",res)
+        print(type(res))
         if res is None:
            raise DataNotFound("Label no encontrada")
         else:
-            print("Label eliminada:", res)
-            result={
-                    "Msg":"Registro eliminado",
-                    "Id label": id,
-                    "nombre": res.nombre
-                } 
+            if (res['status'] == 'error'):
+                result = {
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc": "Error en eliminar label",
+                    "ErrorMsg": res['message']
+                }
+                res = MsgErrorOut().dump(result)
+            else:
+                print("Label eliminada:", res)
+                result= res
         
         return result
     

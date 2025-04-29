@@ -2,12 +2,15 @@ import uuid
 from models.usuario_model import get_grupos_by_usuario
 from models.tarea_model import get_tarea_by_id
 from sqlalchemy.orm import scoped_session, joinedload
+from sqlalchemy.sql import func
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from common.utils import *
 from common.error_handling import ValidationError
 from common.logger_config  import logger
 from models.grupo_hierarchy import find_parent_id_recursive
+
+
 
 from flask import current_app
 from alchemy_db import db
@@ -157,7 +160,7 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_base=N
 
 def get_label_by_id(id):
     
-    res = db.session.query(Label).filter(Label.id == id).first()
+    res = db.session.query(Label).filter(Label.id_label == id).first()
 
     if res is not None:
         return res 
@@ -175,23 +178,34 @@ def delete_label(username=None, id_label=None):
     else:
             raise Exception("Usuario no ingresado")
     
-    label = db.session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
-    print('label id a borrar:', label)
+    label = db.session.query(Label).filter(Label.id_label == id_label, Label.eliminado==False).first()
+    print('label id a borrar:', label.id_label)
     if label is not None:
         if(label.id_user_creacion != id_user_actualizacion):
             return "Usuario no autorizado para eliminar la etiqueta" 
         else: 
-            labelTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_label != id_label, LabelXTarea.activa == True).all()       
-            if labelTarea is not None:
+            labelTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_label == id_label, LabelXTarea.activa == True).all()  
+            print('labelTarea:', labelTarea)     
+            if labelTarea is None:
                 result = { "status": "error", "message": "La etiqueta está asociada a una tarea activa"}
                 return result
             else:
+                
                 label.eliminado=True
                 label.fecha_eliminacion=datetime.now()
-                label.id_user_actualizacion=id_user_actualizacion
-                label.fecha_actualizacion=datetime.now()
+                label.fecha_actualizacion = datetime.now()
+
                 db.session.commit()
-                return label        
+                result = {
+                    "status": "success",
+                    "message": "Etiqueta eliminada correctamente",
+                    "id_label": label.id_label,
+                    "eliminado": label.eliminado,
+                    "fecha_eliminacion": label.fecha_eliminacion,
+                    "fecha_actualizacion": label.fecha_actualizacion,
+                    "nombre": label.nombre,
+                }
+                return result        
     else:
         print("Label no encontrada")
         return None
