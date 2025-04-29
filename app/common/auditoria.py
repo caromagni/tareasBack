@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, scoped_session
 from alchemy_db import db
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
-from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
+from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo, Inhabilidad 
 import uuid
 from common.functions import get_user_ip
 #from flask import request, has_request_context
@@ -13,7 +13,7 @@ from common.functions import get_user_ip
 
 
 ### modelos para los cuales se generará la auditoría ###
-modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo, TareaXGrupo, TareaAsignadaUsuario} 
+modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo, TareaXGrupo, TareaAsignadaUsuario, Inhabilidad} 
 #session = db.session
 """ tablas_auditoria = {
     'tarea': Auditoria_Tarea,
@@ -51,7 +51,7 @@ def get_serializable_dict(instance):
 #@event.listens_for(scoped_session, 'after_flush')
 @event.listens_for(db.session, 'after_flush')
 def after_flush(session, flush_context):
-    #print("entra a after_flush")
+    print("entra a after_flush")
     ip = get_user_ip()
     #ip='172.17.0.1'
     #print("ip:", ip)

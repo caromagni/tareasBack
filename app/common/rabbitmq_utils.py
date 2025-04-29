@@ -49,10 +49,11 @@ def check_updates_new(session, entity='', action='', entity_id=None, url=''):
                         res=sync.sync_usuario(entity_id, url, id_user)
                     case 'organismo':
                         #ejecutar insert o update para organismo
-                        res=sync.sync_cu(entity_id, url, id_user)
+                        res=sync.sync_organismo(entity_id, url, id_user)
                     case 'inhabilidad':
+                        logger.info("Inhabilidad")
                         #ejecutar insert o update para inhabilidad
-                        res=sync.sync_cu(entity_id, url, id_user)
+                        res=sync.sync_inhabilidad(entity_id, url, id_user)
                     case _:
                         print(f"La entidad {entity} no está soportada para sincronización.")
             
@@ -102,15 +103,34 @@ class RabbitMQHandler:
     def callback(self, ch, method, properties, body):
         try:
             logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
+            self.objeto = json.loads(body.decode('utf-8'))
+            with current_app.app_context():
+                self.process_message(db.session)
+           
+            ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+            print(f" [x] Received {body}")
+
             #ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
  
         except Exception as e:
             print("Error procesando el mensaje:", e)
-            #ch.basic_ack(delivery_tag=method.delivery_tag)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
             #reintentar o descartar el mensaje (requeue=False)
             #ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
             
-    
+    def process_message(self, session):
+        if not self.objeto:
+            print("No se recibió un objeto válido.")
+            return
+
+        entity = self.objeto.get('entity_type', '').lower()
+        action = self.objeto.get('action', '')
+        entity_id = self.objeto.get('entity_id', '')
+        url = self.objeto.get('url', '')
+
+        #check_updates(session, entity, action, entity_id, url)
+        check_updates_new(session, entity, action, entity_id, url)
+
 
     def start_consuming(self):
         if not self.channel:
