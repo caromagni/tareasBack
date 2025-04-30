@@ -119,7 +119,6 @@ class RabbitMQHandler:
     def callback(self, ch, method, properties, body):
         try:
             logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
-<<<<<<< HEAD
             self.objeto = json.loads(body.decode('utf-8'))
             with current_app.app_context():
                 self.process_message(db.session)
@@ -132,14 +131,6 @@ class RabbitMQHandler:
         except Exception as e:
             print("Error procesando el mensaje:", e)
             ch.basic_ack(delivery_tag=method.delivery_tag)
-=======
-            message = json.loads(body.decode('utf-8'))
-            check_updates_new(message)
-            ch.basic_ack(delivery_tag=method.delivery_tag) # consume message
- 
-        except Exception as e:
-            print("Error procesando el mensaje:", e)
->>>>>>> main
             #reintentar o descartar el mensaje (requeue=False)
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
             
