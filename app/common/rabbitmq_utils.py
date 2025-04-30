@@ -9,56 +9,72 @@ import requests
 import uuid
 from sqlalchemy import text
 from datetime import datetime
-from common.utils import verifica_username
+import common.utils as utils
+import traceback
 from flask import g
 import common.sync  as sync
 from common.logger_config import logger
 
 
-def check_updates_new(session, entity='', action='', entity_id=None, url=''):
-        print("Checking updates...")
-        print(datetime.now())
-        print("entity a buscar: ", entity)
-        res = db.session.query(Parametros).filter(Parametros.table == entity).first()
-        if not res:
-            print(f"No se encontró la tabla {entity} en los parámetros.")
+def check_updates_new( rabbit_message: dict):
+        
+        entity = rabbit_message.get('entity_type')
+        action = rabbit_message.get('action')
+        entity_id = rabbit_message.get('entity_id')
+        empty_stuff = rabbit_message.get('empty_stuff')
+        url = rabbit_message.get('url')
+        
+        if not entity:
+            print("error entity")
+            logger.info("No se ha especificado una entidad.")
             return
+        if not action:
+            logger.info("No se ha especificado una acción.")
+            return
+        if not entity_id:
+            logger.info("No se ha especificado un ID de entidad.")
+            return
+        if not url:
+            logger.info("No se ha especificado una URL.")
+            return
+        print("##################################################")
+        logger.info(f"entity: {entity}")
+        logger.info("Before query to Parametros")
+   
 
-        campos = res.columns
-
-        print("campos: ", campos)
         if action in ["POST", "PUT"]:
             print("action: ", action)
             usher_apikey = os.environ.get('USHER_API_KEY')
             system_apikey = os.environ.get('SYSTEM_NAME')
             headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
-            id_user = verifica_username('pusher')
+            id_user = utils.get_username_id('pusher')
             g.id_user = id_user
             print("id user: ", id_user)
             try:
                 match entity:
-                    case 'tipo_act_juzgado':
+                    case 'TIPO_ACT_JUZGADO':
                         #ejecutar insert o update para tipo_tarea
                         res=sync.sync_tipo_tarea(entity_id, url, id_user)
-                    case 'tipo_act_parte':
+                    case 'TIPO_ACT_PARTE':
                         #ejecutar insert o update para tipo_tarea
                         res=sync.sync_tipo_tarea(entity_id, url, id_user)
-                    case 'usuario':
+                    case 'USUARIO':
                         #ejecutar insert o update para usuario
                         res=sync.sync_usuario(entity_id, url, id_user)
-                    case 'organismo':
+                    case 'ORGANISMO':
                         #ejecutar insert o update para organismo
-                        res=sync.sync_organismo(entity_id, url, id_user)
-                    case 'inhabilidad':
-                        logger.info("Inhabilidad")
+                        res=sync.sync_cu(entity_id, url, id_user)
+                    case 'INHABILIDAD':
                         #ejecutar insert o update para inhabilidad
                         res=sync.sync_inhabilidad(entity_id, url, id_user)
                     case _:
-                        print(f"La entidad {entity} no está soportada para sincronización.")
+                       
+                        logger.info(f" {entity} is not subscribed")
             
             except Exception as e:
-                     print("Error en check_updates:", e)                         
+                print(traceback.format_exc())
+                print("Error en check_updates:", e)                         
 
 class RabbitMQHandler:
     def __init__(self):
@@ -103,6 +119,7 @@ class RabbitMQHandler:
     def callback(self, ch, method, properties, body):
         try:
             logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
+<<<<<<< HEAD
             self.objeto = json.loads(body.decode('utf-8'))
             with current_app.app_context():
                 self.process_message(db.session)
@@ -115,8 +132,16 @@ class RabbitMQHandler:
         except Exception as e:
             print("Error procesando el mensaje:", e)
             ch.basic_ack(delivery_tag=method.delivery_tag)
+=======
+            message = json.loads(body.decode('utf-8'))
+            check_updates_new(message)
+            ch.basic_ack(delivery_tag=method.delivery_tag) # consume message
+ 
+        except Exception as e:
+            print("Error procesando el mensaje:", e)
+>>>>>>> main
             #reintentar o descartar el mensaje (requeue=False)
-            #ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
             
     def process_message(self, session):
         if not self.objeto:

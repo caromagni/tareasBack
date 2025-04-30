@@ -4,7 +4,7 @@ from flask import current_app
 from alchemy_db import db
 from common.logger_config import logger
 
-def verifica_username(username):
+def get_username_id(username):
     
     #username = username.upper()
     usuario = db.session.query(Usuario).filter(Usuario.username == username, Usuario.eliminado==False).first()
