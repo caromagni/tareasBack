@@ -4,7 +4,6 @@ from datetime import date, timedelta, datetime
 from common.logger_config import logger
 import uuid
 from alchemy_db import db
-from sqlalchemy import or_
 import os
 
 def sync_request(url, entity_id):

@@ -16,8 +16,9 @@ import common.sync  as sync
 from common.logger_config import logger
 
 
-def check_updates_new( rabbit_message: dict):
-        
+def check_updates_new(rabbit_message: dict):
+#def check_updates_new(session, entity, action, entity_id, url):        
+        print("RabbitMQ message: ", rabbit_message)
         entity = rabbit_message.get('entity_type')
         action = rabbit_message.get('action')
         entity_id = rabbit_message.get('entity_id')
@@ -51,6 +52,7 @@ def check_updates_new( rabbit_message: dict):
             id_user = utils.get_username_id('pusher')
             g.id_user = id_user
             print("id user: ", id_user)
+            print("entity: ", entity)
             try:
                 match entity:
                     case 'TIPO_ACT_JUZGADO':
@@ -145,6 +147,7 @@ class RabbitMQHandler:
         url = self.objeto.get('url', '')
 
         #check_updates(session, entity, action, entity_id, url)
+        
         check_updates_new(session, entity, action, entity_id, url)
 
 
