@@ -19,9 +19,9 @@ from common.logger_config import logger
 def check_updates_new( rabbit_message: dict):
         
         entity = rabbit_message.get('entity_type').lower()
-        action = rabbit_message.get('action').lower()
-        entity_id = rabbit_message.get('entity_id').lower()
-        empty_stuff = rabbit_message.get('empty_stuff').lower()
+        action = rabbit_message.get('action')
+        entity_id = rabbit_message.get('entity_id')
+        empty_stuff = rabbit_message.get('empty_stuff')
         url = rabbit_message.get('url').lower()
         
         if not entity:
@@ -121,8 +121,8 @@ class RabbitMQHandler:
         try:
             logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
             self.objeto = json.loads(body.decode('utf-8'))
-            with current_app.app_context():
-                self.process_message(db.session)
+            #with current_app.app_context():
+            #    self.process_message(db.session)
           
             print(f" [x] Received {body}")
 
