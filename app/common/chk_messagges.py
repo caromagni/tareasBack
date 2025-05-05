@@ -12,7 +12,7 @@ def chk_messagges(app, session):
     while True:
         if handler.channel:
             with app.app_context():
-                session = db.session()
+                session = db.session() #init db for this thread so it can be used in the callback later
                 print("---- RUNNING CHECK MESSAGES ----")
                 try:
                     handler.start_consuming()

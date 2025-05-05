@@ -16,14 +16,13 @@ import common.sync  as sync
 from common.logger_config import logger
 
 
-def check_updates_new(rabbit_message: dict):
-#def check_updates_new(session, entity, action, entity_id, url):        
-        print("RabbitMQ message: ", rabbit_message)
-        entity = rabbit_message.get('entity_type')
-        action = rabbit_message.get('action')
-        entity_id = rabbit_message.get('entity_id')
-        empty_stuff = rabbit_message.get('empty_stuff')
-        url = rabbit_message.get('url')
+def check_updates_new( rabbit_message: dict):
+        
+        entity = rabbit_message.get('entity_type').lower()
+        action = rabbit_message.get('action').lower()
+        entity_id = rabbit_message.get('entity_id').lower()
+        empty_stuff = rabbit_message.get('empty_stuff').lower()
+        url = rabbit_message.get('url').lower()
         
         if not entity:
             print("error entity")
@@ -55,19 +54,19 @@ def check_updates_new(rabbit_message: dict):
             print("entity: ", entity)
             try:
                 match entity:
-                    case 'TIPO_ACT_JUZGADO':
+                    case 'tipo_act_juzgado':
                         #ejecutar insert o update para tipo_tarea
                         res=sync.sync_tipo_tarea(entity_id, url, id_user)
-                    case 'TIPO_ACT_PARTE':
+                    case 'tipo_act_parte':
                         #ejecutar insert o update para tipo_tarea
                         res=sync.sync_tipo_tarea(entity_id, url, id_user)
-                    case 'USUARIO':
+                    case 'usuario':
                         #ejecutar insert o update para usuario
                         res=sync.sync_usuario(entity_id, url, id_user)
-                    case 'ORGANISMO':
+                    case 'organismo':
                         #ejecutar insert o update para organismo
                         res=sync.sync_cu(entity_id, url, id_user)
-                    case 'INHABILIDAD':
+                    case 'inhabilidad':
                         #ejecutar insert o update para inhabilidad
                         res=sync.sync_inhabilidad(entity_id, url, id_user)
                     case _:
@@ -124,31 +123,34 @@ class RabbitMQHandler:
             self.objeto = json.loads(body.decode('utf-8'))
             with current_app.app_context():
                 self.process_message(db.session)
-           
-            ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+          
             print(f" [x] Received {body}")
 
             #ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+            message = json.loads(body.decode('utf-8'))
+            check_updates_new(message)
+            ch.basic_ack(delivery_tag=method.delivery_tag) # consume message
  
+
         except Exception as e:
             print("Error procesando el mensaje:", e)
             ch.basic_ack(delivery_tag=method.delivery_tag)
             #reintentar o descartar el mensaje (requeue=False)
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
             
-    def process_message(self, session):
-        if not self.objeto:
-            print("No se recibió un objeto válido.")
-            return
+    # def process_message(self, session):
+    #     if not self.objeto:
+    #         print("No se recibió un objeto válido.")
+    #         return
 
-        entity = self.objeto.get('entity_type', '').lower()
-        action = self.objeto.get('action', '')
-        entity_id = self.objeto.get('entity_id', '')
-        url = self.objeto.get('url', '')
+    #     entity = self.objeto.get('entity_type', '').lower()
+    #     action = self.objeto.get('action', '')
+    #     entity_id = self.objeto.get('entity_id', '')
+    #     url = self.objeto.get('url', '')
 
         #check_updates(session, entity, action, entity_id, url)
         
-        check_updates_new(session, entity, action, entity_id, url)
+        #check_updates_new(session, entity, action, entity_id, url)
 
 
     def start_consuming(self):

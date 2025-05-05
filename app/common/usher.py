@@ -9,7 +9,8 @@ import os
 
 def get_roles(username):
     print('get_roles')
-    url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta='+username 
+    url=os.environ.get('PUSHER_URL')+username
+    #url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta='+username 
     #simperiale@mail.jus.mendoza.gov.ar
     #r=requests.get(url,headers={'Authorization': 'Bearer '+token})
     x_api_key=os.environ.get('PUSHER_API_KEY')
