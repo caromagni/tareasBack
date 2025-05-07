@@ -7,6 +7,7 @@ from sqlalchemy.dialects import postgresql
 from apiflask.fields import Integer, String
 from flask import current_app
 from common.utils import *
+#import common.utils as utils
 from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 from cache import cache
@@ -651,7 +652,7 @@ def update_grupo(username=None,id='', **kwargs):
     #session: scoped_session = current_app.session
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -769,7 +770,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1105,7 +1106,7 @@ def delete_grupo(username=None, id='', todos=False):
     
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if username is None:
         id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
@@ -1158,7 +1159,7 @@ def delete_grupo(username=None, id='', todos=False):
 def undelete_grupo(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)

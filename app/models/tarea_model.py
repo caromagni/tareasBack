@@ -72,7 +72,7 @@ def calcular_dias_vencimiento(fecha_vencimiento):
 def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     total = 0
     if username is not None:
-        id_user = verifica_username(username)
+        id_user = get_username_id(username)
 
         if id_user is not None:
             verifica_usr_id(id_user)
@@ -127,14 +127,14 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if usr_header is not None:
         print("usr_header:", usr_header)
         print("verifying token username")
-        id_user_actualizacion = verifica_username(usr_header)
+        id_user_actualizacion = get_username_id(usr_header)
     else:
         #raise Exception("Error en el ingreso de Usuario. Usuario no existente")
     
         if username is not None:
             #print("verifying username: " + username)
             logger.info("verifying username: " + username)
-            id_user_actualizacion = verifica_username(username)
+            id_user_actualizacion = get_username_id(username)
         else:
             logger.error("Error en el ingreso de Usuario. Usuario no existente")
             raise Exception("Error en el ingreso de Usuario. Usuario no existente")  
@@ -409,7 +409,7 @@ def update_tarea(id_t='', username=None, **kwargs):
     tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==False).first()
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
         if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -665,7 +665,7 @@ def update_lote_tareas_v2(username=None, **kwargs):
     print("#"*50)
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
         if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
         else:
@@ -700,7 +700,7 @@ def update_lote_tareas_v22(username=None, **kwargs):
 
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
         if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
         else:
@@ -735,7 +735,7 @@ def update_lote_tareas(username=None, **kwargs):
 
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
         if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
         else:
@@ -958,7 +958,7 @@ def get_all_tipo_tarea(page=1, per_page=10):
 def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -986,7 +986,7 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
     
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1018,7 +1018,7 @@ def delete_tipo_tarea(username=None, id=None):
     
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1055,7 +1055,7 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
     
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1088,7 +1088,7 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1117,7 +1117,7 @@ def delete_subtipo_tarea(username=None, id=None):
     
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -1337,7 +1337,7 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
     
     
     if username is not None:
-        id_user = verifica_username(username)
+        id_user = get_username_id(username)
         if id_user is None:
             raise Exception("Usuario no encontrado")
     #id_user = 'f9799cd5-aad3-4339-ac6e-62544e3e64f1'
@@ -1553,7 +1553,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     results = []
 
     if username is not None:
-        id_user = verifica_username(username)
+        id_user = get_username_id(username)
         if id_user is None:
             raise Exception("Usuario no encontrado")
         
@@ -2002,7 +2002,7 @@ def usuarios_tarea(tarea_id=""):
 def delete_tarea(username=None, id_tarea=None):
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)

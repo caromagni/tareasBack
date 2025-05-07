@@ -239,7 +239,7 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_ex
     
 
     if user_actualizacion is not None:
-        id_user_actualizacion = verifica_username(user_actualizacion)
+        id_user_actualizacion = get_username_id(user_actualizacion)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -299,7 +299,7 @@ def update_usuario(id='',username=None, **kwargs):
     
     logger.info("Update usuario")
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -385,7 +385,7 @@ def update_usuario(id='',username=None, **kwargs):
 
 def get_rol_usuario(username=None):
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
         if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
         
@@ -397,7 +397,7 @@ def get_rol_usuario(username=None):
 def delete_usuario(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if username is None:
         id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'

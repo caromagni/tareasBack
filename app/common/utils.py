@@ -4,6 +4,7 @@ from flask import current_app
 from alchemy_db import db
 from common.logger_config import logger
 
+
 def get_username_id(username):
     
     #username = username.upper()

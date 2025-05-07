@@ -42,7 +42,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     ids_labels=[]
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -127,7 +127,7 @@ def update_label(id='', **kwargs):
 def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_base=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
        
     """ if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -171,7 +171,7 @@ def get_label_by_id(id):
 def delete_label(username=None, id_label=None):    
 
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -243,7 +243,7 @@ def get_active_labels(ids_grupos_base):
 ############################## LABELS x TAREA ########################################
 def insert_label_tarea(username=None, **kwargs):
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
@@ -409,7 +409,7 @@ def delete_label_tarea_model(username=None, id=None):
         raise Exception("Usuario no ingresado")
 
     # Verify the username and get the user ID
-    id_user_actualizacion = verifica_username(username)
+    id_user_actualizacion = get_username_id(username)
     if not id_user_actualizacion:
         raise Exception("Usuario no ingresado")
 
