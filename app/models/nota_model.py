@@ -22,7 +22,7 @@ def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', 
     
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -50,7 +50,7 @@ def delete_tipo_nota(username=None, id=None):
         raise ValidationError("ID de nota no ingresado")
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -84,7 +84,7 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
             if tareasnota is not None:
                 tareasnota.tiene_notas_desnz=True    """
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
 
     if id_user_actualizacion is not None:
             verifica_usr_id(id_user_actualizacion)
@@ -97,7 +97,7 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
         eliminado=False
         
     if username is not None:
-        id_user_creacion = verifica_username(username)
+        id_user_creacion = get_username_id(username)
 
     tarea_nota = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
 
@@ -254,7 +254,7 @@ def delete_nota(username=None, id_nota=None):
     
     
     if username is not None:
-        id_user_actualizacion = verifica_username(username)
+        id_user_actualizacion = get_username_id(username)
     else:
         raise ValidationError("Usuario no ingresado")  
     
