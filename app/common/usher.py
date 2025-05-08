@@ -76,13 +76,8 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
                 #print("Nuevo Rol Guardado:",nuevo_rol.id)
             
         db.session.commit()
-        
-    #print("email:",email)
-    #print("cu:",cu)
-    #query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.descripcion_ext.like(f"%{cu}%")).all()
     
     #Controlo si el usuario con el rol elegido tiene permisos
-    #print("rol usuario:",rol_usuario)
     query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.rol == rol_usuario, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
     if len(query_permisos)==0:
         logger.error("No tiene permisos")
