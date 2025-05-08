@@ -423,7 +423,9 @@ def get_all_base(id, usuarios=False):
                                         Usuario.id,
                                         Usuario.nombre,
                                         Usuario.apellido,
-                                        UsuarioGrupo.eliminado
+                                        Usuario.eliminado,
+                                        Usuario.suspendido,
+                                        UsuarioGrupo.eliminado.label("eliminado_grupo"),
                                         ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario
                                         ).filter(UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado==False).all()
                 
@@ -434,6 +436,8 @@ def get_all_base(id, usuarios=False):
                             "nombre": row.nombre,
                             "apellido": row.apellido,
                             "eliminado": row.eliminado,
+                            "suspendido": row.suspendido,
+                            "eliminado_grupo": row.eliminado_grupo,
                             "username": row.nombre
                         }
                         usuarios_g.append(usuario)
@@ -1108,9 +1112,6 @@ def delete_grupo(username=None, id='', todos=False):
     if username is not None:
         id_user_actualizacion = get_username_id(username)
 
-    if username is None:
-        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
-
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
     else:
@@ -1153,6 +1154,7 @@ def delete_grupo(username=None, id='', todos=False):
             
 
     db.session.commit()
+    
 
     return grupo
 

@@ -223,6 +223,7 @@ class GetGroupOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     id_user_asignado_default = String()
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
@@ -248,6 +249,7 @@ class GroupOut(Schema):
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     id_user_asignado_default = String()
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
@@ -258,6 +260,20 @@ class GroupOut(Schema):
     path_name = String()
     path = String()
     level = Integer()
+    base = Boolean()
+
+class GroupDelOut(Schema):
+    id_grupo = String()
+    nombre = String()
+    descripcion = String()
+    id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    id_user_asignado_default = String()
+    fecha_actualizacion = String()
+    fecha_creacion = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    eliminado = Boolean()
+    suspendido = Boolean()
     base = Boolean()
 
 class GroupTareaOut(Schema):
@@ -351,6 +367,7 @@ class UsuariosGroupOut(Schema):
     email = String()
     eliminado = Boolean()
     suspendido = Boolean()
+    eliminado_grupo = Boolean()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
     
     @post_dump

@@ -192,7 +192,8 @@ class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}
     id = Column(UUID, primary_key=True)
-    id_user_actualizacion = Column(UUID, nullable=False)
+    #id_user_actualizacion = Column(UUID, nullable=False)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     #id_user_asignado_default = Column(UUID)
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
@@ -205,7 +206,8 @@ class Grupo(Base):
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
-    user_asignado_default= relationship('Usuario')
+    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
 
 
 class HerarquiaGrupoGrupo(Base):

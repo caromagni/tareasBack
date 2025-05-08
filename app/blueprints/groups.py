@@ -4,7 +4,7 @@ from flask import request, current_app, make_response
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupDelOut,GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verify_header
 from common.logger_config   import logger
@@ -209,7 +209,7 @@ def post_grupo(json_data: dict):
 ##############DELETE####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
-#@groups_b.output(GroupOut)
+@groups_b.output(GroupOut)
 def del_grupo(id: str):
     try:
         username=g.username
@@ -221,14 +221,14 @@ def del_grupo(id: str):
         if res is None:
             raise DataNotFound("Grupo no encontrado")
             
-        else:
+        """  else:
             result={
                     "Msg":"Registro eliminado",
                     "Id grupo": id,
                     "grupo": res.nombre
-                } 
+                }  """
         
-        return result
+        return res
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)
