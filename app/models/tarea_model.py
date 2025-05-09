@@ -1713,6 +1713,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     print("Fecha hasta:", fecha_hasta)
     print("Prioridad:", prioridad)
     print("Estado:", estado)
+    print('grupos:', grupos)
+    print("Labels:", labels)
 
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     print("Total de tareas 1:", query.count())
@@ -1757,6 +1759,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
+        print("Grupos:", grupos)
         grupos = grupos.split(",")
         print("Grupos a filtrar:", grupos)
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
@@ -1852,6 +1855,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "reasignada_grupo": reasignada_grupo
         }
         results.append(result)
+
+        print("Resultado:", result)
 
     return results, total
 

@@ -24,6 +24,9 @@ def chat():
     try:
         # Get the message from request
         data = request.get_json()
+
+        print("data is")
+        print(data)
        
         if not data or 'message' not in data:
             return jsonify({
@@ -40,6 +43,11 @@ def chat():
         y un campo "text" con el contenido del mensaje.
 
         datos de tareas:
+        usuario_asignado: nombre_completo del usuario asignado a la tarea
+        fecha_asignacion: fecha de asignacion de la tarea
+        fecha_vencimiento: fecha de vencimiento de la tarea
+        fecha_recordatorio: fecha de recordatorio de la tarea
+        fecha_realizacion: fecha de realizacion de la tarea
         
 
         """
@@ -51,22 +59,23 @@ def chat():
             os.makedirs('ai_temp_data')
 
         #fetch all tasks related to the user and save it in a json file in the temp folder with the user id as filename
-        print('user group id is')
-        user_groups=[]
-        for grupo in loggedUser["grupo"]:
-            print("ID GRUPO FOR USER")
-            print(grupo['id_grupo'])
-            user_groups.append(grupo['id_grupo'])
-        print("group array is")
+        # user_groups=[]
+        # for grupo in loggedUser["grupo"]:
+        #     print("ID GRUPO FOR USER")
+        #     print(grupo['id_grupo'])
+        user_groups = ",".join([str(grupo['id_grupo']) for grupo in loggedUser["grupo"]])        
+        print("user groups")
         print(user_groups)
         res,cant=get_all_tarea_detalle(grupos=user_groups)
         print("got all user tasks")
-        print(res)    
+        print(res)  
+        print 
         date_now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(f'ai_temp_data/{loggedUser["id"]+"_"+date_now}.json', 'w') as f:
             json.dump(TareaAllOut().dump(res, many=True), f, default=str)
          
         # Initialize Bedrock Runtime client
+        print("Initializing Bedrock client")
         bedrock = boto3.client(
             service_name='bedrock-runtime',
             region_name=os.getenv('AWS_REGION', 'us-west-2'),
