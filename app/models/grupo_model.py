@@ -237,6 +237,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                 data = {
                     "id": reg.id_hijo,
                     "nombre": grupo.nombre,
+                    "base": grupo.base,
                     "path": reg.path,
                     "path_name": reg.path_name,
                     "fecha_actualizacion": grupo.fecha_actualizacion,
@@ -246,8 +247,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                     "codigo_nomenclador": grupo.codigo_nomenclador,
                     "fecha_creacion": grupo.fecha_creacion,
                     "id_user_actualizacion": grupo.id_user_actualizacion,
+                    "user_actualizacion": grupo.user_actualizacion,
                     "id_user_asignado_default": grupo.id_user_asignado_default,
-                    #"user_asignado_default": grupo.user_asignado_default,
+                    "user_asignado_default": grupo.user_asignado_default,
                     "eliminado": grupo.eliminado,
                     "suspendido": grupo.suspendido
                 }

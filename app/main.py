@@ -18,7 +18,7 @@ from blueprints.actuacion import actuacion_b
 from blueprints.expediente import expediente_b
 from blueprints.nota import nota_b
 from blueprints.label import label_b
-from blueprints.alertas import alerta_b
+from blueprints.alerta import alerta_b
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
 from models.alch_model import Base
