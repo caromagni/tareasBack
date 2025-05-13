@@ -1,19 +1,13 @@
-from datetime import date, timedelta
-from schemas.schemas import LabelXTareaPrueba, LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
-from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, get_active_labels, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
-from common.error_handling import DataError, DataNotFound, ValidationError
-from models.alch_model import Usuario, Rol, Label
-#from flask_jwt_extended import jwt_required
+import schemas.schemas as schema
+import models.label_model as label_model
+import common.error_handling as error_handling
+import common.auth as auth
+import decorators.role as rol
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
-from common.usher import get_roles
-from common.auth import verify_header
-import uuid
-import json
-from flask import jsonify, request
+from flask import request
 from flask import g
-from alchemy_db import db
 import traceback
 
 label_b = APIBlueprint('label_blueprint', __name__)
@@ -22,7 +16,7 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.before_request
 def before_request():
     
-    jsonHeader = verify_header()
+    jsonHeader = auth.verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
@@ -40,8 +34,9 @@ def before_request():
 ################################ ETIQUETAS ################################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label')
-@label_b.input(LabelGetIn, location='query')
-@label_b.output(LabelCountOut)
+@label_b.input(schema.LabelGetIn, location='query')
+@label_b.output(schema.LabelCountOut)
+@rol.require_role(["consultar-label"])
 def get_labels(query_data: dict):
     try:
         username = g.username
@@ -55,8 +50,6 @@ def get_labels(query_data: dict):
         id_user_creacion = None
         id_tarea = None
         id_grupo_base = None
-        #fecha_desde = "01/01/1900"
-        #fecha_hasta = datetime.now().strftime("%d/%m/%Y")
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
 
@@ -79,10 +72,10 @@ def get_labels(query_data: dict):
         if request.args.get('label_color') is not None:
             label_color = request.args.get('label_color')  
 
-        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_base, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+        res, cant = label_model.get_all_label(username, page, per_page, nombre, id_grupo_base, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
         data = {
             "count": cant,
-            "data": LabelAllOut().dump(res, many=True)
+            "data": schema.LabelAllOut().dump(res, many=True)
         }
         
         
@@ -90,39 +83,40 @@ def get_labels(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err) 
+        raise error_handling.ValidationError(err) 
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label/<string:id>')
-@label_b.output(LabelIdOut)
+@label_b.output(schema.LabelIdOut)
+@rol.require_role(["consultar-label"])
 def get_label(id:str):
     print('label.py')
     try:
-        res = get_label_by_id(id)
+        res = label_model.get_label_by_id(id)
         if res is None:
-            raise DataNotFound("Label no encontrada")
+            raise error_handling.DataNotFound("Label no encontrada")
 
-        result = LabelIdOut().dump(res)
+        result = schema.LabelIdOut().dump(res)
         
         return result
  
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err) 
+        raise error_handling.ValidationError(err) 
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
-@label_b.input(LabelIn)
-#@label_b.output(LabelOut)
+@label_b.input(schema.LabelIn)
+@rol.require_role(["crear-label"])
 def post_label(json_data: dict):
     try:
         print("#"*50)
         print(json_data)
         print("#"*50)
         username = g.username
-        res = insert_label(username, **json_data)
+        res = label_model.insert_label(username, **json_data)
         if res is None:
             result = {
                     "valido":"fail",
@@ -130,7 +124,7 @@ def post_label(json_data: dict):
                     "error": "Error en insert label",
                     "error_description": "No se pudo insertar la label"
                 }
-            res = MsgErrorOut().dump(result)
+            res = schema.MsgErrorOut().dump(result)
         
         labels = []
         """ for label in res:
@@ -140,34 +134,28 @@ def post_label(json_data: dict):
                 labels.append(LabelXTareaIdOut().dump(label)) """
 
         data = {
-                "data": LabelXTareaIdOut().dump(res, many=True)
+                "data": schema.LabelXTareaIdOut().dump(res, many=True)
             }
         
         
         return data
 
-        # Prepare the response data
-        data = {
-                "data": labels
-            }
-        print("result:", data)
-        return data
-    
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)    
+        raise error_handling.ValidationError(err)    
 
 #################DELETE########################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label/<string:id>')
+@rol.require_role(["eliminar-label"])
 def del_label(id: str):
     try:
         username = g.username
-        res = delete_label(username, id)
+        res = label_model.delete_label(username, id)
         print("res:",res)
         print(type(res))
         if res is None:
-           raise DataNotFound("Label no encontrada")
+           raise error_handling.DataNotFound("Label no encontrada")
         else:
             if (res['status'] == 'error'):
                 result = {
@@ -176,7 +164,7 @@ def del_label(id: str):
                     "ErrorDesc": "Error en eliminar label",
                     "ErrorMsg": res['message']
                 }
-                res = MsgErrorOut().dump(result)
+                res = schema.MsgErrorOut().dump(result)
             else:
                 print("Label eliminada:", res)
                 result= res
@@ -185,47 +173,42 @@ def del_label(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)
+        raise error_handling.ValidationError(err)
     
 ################################ LABELS X TAREAS ################################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_tarea/<string:id_tarea>')
-@label_b.output(LabelXTareaIdCountAllOut)
+@label_b.output(schema.LabelXTareaIdCountAllOut)
+@rol.require_role(["consultar-label"])
 def get_label_tarea(id_tarea:str):
     try:
-        res, cant = get_label_by_tarea(id_tarea)
+        res, cant = label_model.get_label_by_tarea(id_tarea)
         if res is None:
-            raise DataNotFound("Label no encontrada")
+            raise error_handling.DataNotFound("Label no encontrada")
 
         data = {
             "count": cant,            
-            "data": LabelXTareaIdOut().dump(res, many=True)
+            "data": schema.LabelXTareaIdOut().dump(res, many=True)
 
         }
-        print("result:",data) 
-        
         return data
-        #return jsonify({
-        #'status': 'success',
-        #'data': data
-    #})      
- 
+      
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err) 
+        raise error_handling.ValidationError(err) 
          
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
-@label_b.input(LabelXTareaIn)
-# @label_b.output(LabelXTareaOut)
+@label_b.input(schema.LabelXTareaIn)
+@rol.require_role(["crear-label"])
 def put_label_tarea(json_data: dict):
     try:
         print("#"*50)
         print(json_data)
         print("#"*50)
         username = g.username
-        res = insert_label_tarea(username, **json_data)
+        res = label_model.insert_label_tarea(username, **json_data)
         print("res:",res)   
         if res is None:
             result = {
@@ -235,12 +218,12 @@ def put_label_tarea(json_data: dict):
                     "ErrorMsg": "No se pudo insertar la label"
                 }
      
-            res = MsgErrorOut().dump(result)
+            res = schema.MsgErrorOut().dump(result)
 
         labels = []
         for label in res:
             if label != []: 
-                labels.append(LabelXTareaIdOut().dump(label))
+                labels.append(schema.LabelXTareaIdOut().dump(label))
 
         
 
@@ -248,31 +231,26 @@ def put_label_tarea(json_data: dict):
         data = {
                 "data": labels
             }
-        print("result:", data)
+
         return data
         
         # return LabelXTareaPrueba().dump(res)
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)    
+        raise error_handling.ValidationError(err)    
     
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label_tarea/<string:id>')
-# @label_b.input(LabelXTareaPatchIn)
-# @label_b.output(LabelXTareaIdOut)
+@rol.require_role(["eliminar-label"])
 def delete_label_tarea(id: str):
 
     try:
         username = g.username
-        print("##"*50)
-        print(id)
-        print("#"*50)
-        res = delete_label_tarea_model(username, id)
-        print("res:",res)   
+        res = label_model.delete_label_tarea_model(username, id) 
         if res is None:
-            raise DataNotFound("Tipo de tarea no encontrado")
+            raise error_handling.DataNotFound("Tipo de tarea no encontrado")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -283,17 +261,17 @@ def delete_label_tarea(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)    
+        raise error_handling.ValidationError(err)    
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
-# @label_b.output(LabelCountAllOut)
+@rol.require_role(["consultar-label"])
 def get_active_labels_grupo(ids_grupos_base: str):
     try:
         # Fetch active labels and count
-        res, cant = get_active_labels(ids_grupos_base)
-        print("res:", res)
+        res, cant = label_model.get_active_labels(ids_grupos_base)
+
         if res is None:
             result = {
                 "valido": "fail",
@@ -301,24 +279,22 @@ def get_active_labels_grupo(ids_grupos_base: str):
                 "error": "Error en obtener etiquetas",
                 "error_description": "No se encontraron etiquetas activas"
             }
-            return MsgErrorOut().dump(result)
+            return schema.MsgErrorOut().dump(result)
 
         # Serialize each label and append to the list
         labels = []
         for label in res:
             if label != []: 
-                labels.append(LabelAllOut().dump(label, many=True))
-
-        
+                labels.append(schema.LabelAllOut().dump(label, many=True))
 
         # Prepare the response data
         data = {
             "count": str(cant),
             "data": labels
         }
-        print("result:", data)
+
         return data
 
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)
+        raise error_handling.ValidationError(err)

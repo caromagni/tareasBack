@@ -1,29 +1,39 @@
 from apiflask import APIBlueprint
-from flask import current_app, jsonify, request
+from flask import g
+import decorators.role as rol
+import schemas.schemas as schemas
+import models.actuacion_model as actuacion_model
+import common.error_handling as error_handling
+import common.auth as auth
 
-from models.actuacion_model import get_all_actuaciones, get_all_tipoactuaciones
-from schemas.schemas import  ActuacionOut, TipoActuacionOut
-from common.error_handling import ValidationError
 
 actuacion_b = APIBlueprint('actuacion_blueprint', __name__)
 
-@actuacion_b.doc(description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#################Before requests ##################
+@actuacion_b.before_request
+def before_request():
+    print("************ingreso a before_request Usuarios************")
+    print("Before request user.py")
+
+    jsonHeader = auth.verify_header()
+    
+    if jsonHeader is None:
+            user_origin=None
+            type_origin=None
+    else:
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
+@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/actuacion')
-@actuacion_b.output(ActuacionOut(many=True))
+@actuacion_b.output(schemas.ActuacionOut(many=True))
+@rol.require_role(["consultar-actuacion"])
 def get_actuaciones():
-    """
-    Actuaciones.
-    ==============
-
-    **List Actuaciones**
-
-    :caption: This route returns a list of *actuaciones*.
-
-    :return: JSON object with actuaciones data or an error message.
-    :rtype: json
-    """
+    
     try:
-        res = get_all_actuaciones()
+        res = actuacion_model.get_all_actuaciones()
         if res is None:
             result={
                     "valido":"fail",
@@ -37,14 +47,15 @@ def get_actuaciones():
         return res
     
     except Exception as err:
-        raise ValidationError(err)  
+        raise error_handling.ValidationError(err)  
     
-@actuacion_b.doc(description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/tipo_actuaciones')
-@actuacion_b.output(TipoActuacionOut(many=True))
+@actuacion_b.output(schemas.TipoActuacionOut(many=True))
+@rol.require_role(["consultar-actuacion"])
 def get_tipoactuaciones():
     try:
-        res = get_all_tipoactuaciones()
+        res = actuacion_model.get_all_tipoactuaciones()
         if res is None:
             result={
                     "valido":"fail",
@@ -58,4 +69,4 @@ def get_tipoactuaciones():
         return res
     
     except Exception as err:
-        raise ValidationError(err)      
+        raise error_handling.ValidationError(err)      

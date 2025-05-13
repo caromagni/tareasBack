@@ -1751,13 +1751,25 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
    
     if labels:
-        labels = labels.split(",")
+        # Primero eliminás comillas dobles, simples y luego dividís por coma
+        labels = [
+            l.strip().replace('"', '').replace("'", '') 
+            for l in labels.split(',') if l.strip()
+        ]
+        #labels = labels.split(",")
         print("labels:", labels)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
-        grupos = grupos.split(",")
+        # Elimina comillas simples, dobles y espacios, luego separa por coma y limpia cada elemento
+        #grupos_limpios = [g.strip().replace('"', '').replace("'", '') for g in grupos.split(',') if g.strip()]
+        # Primero eliminás comillas dobles, simples y luego dividís por coma
+        grupos = [
+            g.strip().replace('"', '').replace("'", '') 
+            for g in grupos.split(',') if g.strip()
+        ]
+        #grupos = grupos.split(",")
         print("Grupos a filtrar:", grupos)
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False

@@ -1,19 +1,14 @@
-from apiflask import Schema, abort, APIBlueprint
-from apiflask.fields import Integer, String
-from apiflask.validators import Length, OneOf
-from flask import current_app, jsonify, request,make_response
-# from sqlalchemy.orm import scoped_session
+from apiflask import APIBlueprint
+from flask import current_app, request
 from alchemy_db import db
-from models.alch_model import  Grupo, Usuario
-from models.usuario_model import  get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario, get_rol_usuario
-from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioRolOut, UsuarioAllOut, UsuarioCountRolOut, MsgErrorOut
-from common.error_handling import ValidationError, DataError, DataNotFound
-from common.auth import verify_header
-from common.logger_config import logger
+import schemas.schemas as schema
+import models.usuario_model as usuario_model
+import models.grupo_hierarchy as grupo_hierarchy
+import common.error_handling as error_handling
+import decorators.role as rol
+import common.auth as auth
 import traceback
-from datetime import datetime
-from models.grupo_hierarchy import find_parent_id_recursive
-import requests
+import decorators.role as rol
 from flask import g
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
@@ -23,7 +18,7 @@ def before_request():
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 
-    jsonHeader = verify_header()
+    jsonHeader = auth.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -35,39 +30,37 @@ def before_request():
     g.username = user_origin
     g.type = type_origin
 
-
-
-
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
 #@usuario_b.output(GroupsUsuarioOut(many=True))
+@rol.require_role(["consultar-usuario"])
 def get_grupos_by_usr(id_usuario: str):
     try:
         print('***************ingreso a get grupos by usr**************')
-        res = get_grupos_by_usuario(id_usuario)
+        res = usuario_model.get_grupos_by_usuario(id_usuario)
         data = {
                 
-                "data":  GroupsUsuarioOut().dump(res, many=True)
+                "data":  schema.GroupsUsuarioOut().dump(res, many=True)
         }
-
+ 
       
         return data
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err) 
+        raise error_handling.ValidationError(err) 
     
 #####################POST#########################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
-@usuario_b.input(UsuarioIn)
-#@usuario_b.output(UsuarioOut)
+@usuario_b.input(schema.UsuarioIn)
+@rol.require_role(["agregar-usuario"])
 def post_usuario(json_data: dict):
     try:
         print('inserta usuario')
         user_actualizacion=g.username        
-        res = insert_usuario(user_actualizacion, **json_data)
+        res = usuario_model.insert_usuario(user_actualizacion, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -78,7 +71,7 @@ def post_usuario(json_data: dict):
             return result
         data = {
                 
-                "data": UsuarioOut().dump(res)
+                "data": schema.UsuarioOut().dump(res)
         }
 
         #return UsuarioOut().dump(res)
@@ -86,18 +79,18 @@ def post_usuario(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)
+        raise error_handling.ValidationError(err)
     
 #################UPDATE####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
-@usuario_b.input(UsuarioInPatch)
-#@usuario_b.output(UsuarioOut)
+@usuario_b.input(schema.UsuarioInPatch)
+@rol.require_role(["modificar-usuario"])
 def patch_usuario(usuario_id: str, json_data: dict):
     try:
         username=g.username
         print("Username usuario.py:",username)
-        res = update_usuario(usuario_id, username, **json_data)
+        res = usuario_model.update_usuario(usuario_id, username, **json_data)
         if res is None:
             print("No hay datos que modificar")  
             result={
@@ -110,7 +103,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
         
         data = {
                 
-                "data": UsuarioOut().dump(res)
+                "data": schema.UsuarioOut().dump(res)
         }
 
         #return UsuarioOut().dump(res)    
@@ -119,14 +112,14 @@ def patch_usuario(usuario_id: str, json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)
+        raise error_handling.ValidationError(err)
 
 ###############GET BY ID####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario/<string:id>')
-#@usuario_b.output(UsuarioIdOut(many=True))
+@rol.require_role(["consultar-usuario"])
 def get_usuario_id(id: str):
-        res = get_usuario_by_id(id)
+        res = usuario_model.get_usuario_by_id(id)
         if res is None or len(res)==0:
             print("Usuario no encontrado")  
             result={
@@ -138,10 +131,9 @@ def get_usuario_id(id: str):
             return result
         data = {
                 
-                "data":  UsuarioIdOut().dump(res, many=True)
+                "data":  schema.UsuarioIdOut().dump(res, many=True)
         }
         
-        #return UsuarioIdOut().dump(res, many=True)
         return data
         
 
@@ -150,8 +142,9 @@ def get_usuario_id(id: str):
 #######################################################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuarios', summary='Consulta simple de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario')
-@usuario_b.input(UsuarioGetIn, location='query')
-@usuario_b.output(UsuarioCountOut)
+@usuario_b.input(schema.UsuarioGetIn, location='query')
+@usuario_b.output(schema.UsuarioCountOut)
+@rol.require_role(["consultar-usuario"])
 def get_usuario(query_data: dict):
     try:
         page=1
@@ -172,11 +165,11 @@ def get_usuario(query_data: dict):
         eliminado=request.args.get('eliminado')
         suspendido=request.args.get('suspendido')    
 
-        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
+        res, cant=usuario_model.get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 
         data = {
                 "count": cant,
-                "data": UsuarioOut().dump(res, many=True)
+                "data": schema.UsuarioOut().dump(res, many=True)
             }
         
         
@@ -184,19 +177,18 @@ def get_usuario(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err) 
+        raise error_handling.ValidationError(err) 
     
 #####################DETALLE DE USUARIOS#######################   
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuarios con sus grupos y tareas', summary='Consulta detallada de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario_detalle')
-@usuario_b.input(UsuarioGetIn, location='query')
-@usuario_b.output(UsuarioCountAllOut)
+@usuario_b.input(schema.UsuarioGetIn, location='query')
+@usuario_b.output(schema.UsuarioCountAllOut)
+@rol.require_role(["consultar-usuario"])
 def get_usuarios_detalle(query_data: dict):
     try:
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        
-        print("query_data:",query_data)
         
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -210,11 +202,11 @@ def get_usuarios_detalle(query_data: dict):
         eliminado=request.args.get('eliminado')
         suspendido=request.args.get('suspendido')                
 
-        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
+        res, cant=usuario_model.get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
 
         data = {
                 "count": cant,
-                "data": UsuarioAllOut().dump(res, many=True)
+                "data": schema.UsuarioAllOut().dump(res, many=True)
             }
         
         
@@ -222,19 +214,19 @@ def get_usuarios_detalle(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)  
+        raise error_handling.ValidationError(err)  
     
 ######################DELETE######################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
-#@groups_b.output(GroupOut)
+@rol.require_role(["eliminar-usuario"])
 def del_usuario(id: str):
     try:
         username=g.username
         print("Username usuario.py:",username)
-        res = delete_usuario(username, id)
+        res = usuario_model.delete_usuario(username, id)
         if res is None:
-            raise DataNotFound("Usuario no encontrado")
+            raise error_handling.DataNotFound("Usuario no encontrado")
             
         else:
             data={
@@ -247,16 +239,15 @@ def del_usuario(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)
+        raise error_handling.ValidationError(err)
 
 ##########Prueba Roles################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-#@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Roles del usuario', summary='Roles del Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario_rol')
-@usuario_b.output(UsuarioCountRolOut)
+@usuario_b.output(schema.UsuarioCountRolOut)
 def get_rol_usr():
     username=g.username
-    res=get_rol_usuario(username)
+    res=usuario_model.get_rol_usuario(username)
 
     if res is None:
             result={
@@ -265,12 +256,12 @@ def get_rol_usr():
                     "error":"Error en insert de tipo de tarea",
                     "error_description":"No se pudo insertar el tipo de tarea"
                 }
-            res = MsgErrorOut().dump(result)
+            res = schema.MsgErrorOut().dump(result)
             return res
     
     data = {
                 "count": len(res),
-                "data": UsuarioRolOut().dump(res, many=True)
+                "data": schema.UsuarioRolOut().dump(res, many=True)
             }
         
         
@@ -278,8 +269,8 @@ def get_rol_usr():
 
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/groups_with_base')
-@usuario_b.input(UsuarioGetIn, location='query')
-# @usuario_b.output(GroupsBaseUsrOut)
+@usuario_b.input(schema.UsuarioGetIn, location='query')
+@rol.require_role(["consultar-usuario"])
 def get_groups_base_by_usr(query_data: dict):
     try:
         print('***************ingreso a get grupos by usr**************')
@@ -295,7 +286,6 @@ def get_groups_base_by_usr(query_data: dict):
         eliminado= None
         suspendido=None
         
-        #print("query_data:",query_data)
         
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -316,13 +306,11 @@ def get_groups_base_by_usr(query_data: dict):
         if(request.args.get('suspendido') is not None):
             suspendido=request.args.get('suspendido')                
 
-        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
+        res, cant=usuario_model.get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
         if res is not None or len(res)>0:
         
             for r in res[0]['grupo']:
-                #print("r:",r)
-                id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
-                #print("id_padre:",id_padre)
+                id_padre=grupo_hierarchy.find_parent_id_recursive(db.session, r['id_grupo'])
                 r['id_padre']=id_padre
                 print("r con id padre:",r)
 
@@ -330,5 +318,5 @@ def get_groups_base_by_usr(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise ValidationError(err)  
+        raise error_handling.ValidationError(err)  
     

@@ -313,9 +313,6 @@ class HerarquiaGroupOut(Schema):
 
 
 
-  
-
-
 class MsgErrorOut(Schema):
     valido = String()
     ErrorCode = Integer()

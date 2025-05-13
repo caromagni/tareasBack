@@ -2,7 +2,6 @@ import schemas.schemas as schema
 import models.tarea_model as tarea_model
 import common.error_handling as error_handling
 import decorators.role as rol
-import common.usher as usher
 import common.auth as auth
 import traceback
 from common.logger_config import logger
