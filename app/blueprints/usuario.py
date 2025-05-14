@@ -6,7 +6,7 @@ import models.usuario_model as usuario_model
 import models.grupo_hierarchy as grupo_hierarchy
 import common.error_handling as error_handling
 import decorators.role as rol
-import common.auth as auth
+import common.auth as auth_token
 import traceback
 import decorators.role as rol
 from flask import g
@@ -18,7 +18,7 @@ def before_request():
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None

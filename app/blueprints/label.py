@@ -1,7 +1,7 @@
 import schemas.schemas as schema
 import models.label_model as label_model
 import common.error_handling as error_handling
-import common.auth as auth
+import common.auth as auth_token
 import decorators.role as rol
 from apiflask import APIBlueprint
 from flask import request, current_app
@@ -16,7 +16,7 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.before_request
 def before_request():
     
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():

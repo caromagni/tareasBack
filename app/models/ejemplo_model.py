@@ -1,8 +1,3 @@
-import uuid
-from sqlalchemy.orm import scoped_session
-from datetime import datetime
-
-from flask import current_app
 from alchemy_db import db
 from models.alch_model import ActuacionExt, TipoActuacionExt
 

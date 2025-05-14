@@ -2,7 +2,7 @@ import schemas.schemas as schema
 import models.grupo_model as grupo_model
 import common.error_handling as error_handling
 import decorators.role as rol
-import common.auth as auth
+import common.auth as auth_token
 import traceback
 from flask import g
 from apiflask import APIBlueprint, HTTPTokenAuth
@@ -16,7 +16,7 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 @groups_b.before_request
 def before_request():
     print("************ingreso a before_request Usuarios************")
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -184,7 +184,7 @@ def get_usrsbygrupo(query_data: dict):
 def post_grupo(json_data: dict):
     try:
         username=g.username
-        res = insert_grupo(username, **json_data)
+        res = grupo_model.insert_grupo(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",

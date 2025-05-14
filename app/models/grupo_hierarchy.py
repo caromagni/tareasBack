@@ -1,8 +1,7 @@
-
 from sqlalchemy.exc import NoResultFound
 from models.alch_model import HerarquiaGrupoGrupo
 from flask import current_app
-from alchemy_db import db
+
 def find_parent_id(db, id_hijo: str):
     print("find parent id function")
     print('db.session:', db)

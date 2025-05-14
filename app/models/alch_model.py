@@ -2,15 +2,11 @@
 from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, Date, ForeignKey, Integer, String, Table, Time, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
-#from sqlalchemy.ext.declarative import declarative_base
-
-import uuid
 from datetime import datetime
-
+from sqlalchemy.orm import DeclarativeBase
 # metadata = Base.metadata
 
 
-from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
     pass

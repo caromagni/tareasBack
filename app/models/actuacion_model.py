@@ -1,11 +1,7 @@
-import uuid
-from sqlalchemy.orm import scoped_session
-from datetime import datetime
-
-from flask import current_app
 from alchemy_db import db
 from models.alch_model import ActuacionExt, TipoActuacionExt
 from cache import cache
+
 @cache.memoize(timeout=3600)
 def get_all_actuaciones():
     

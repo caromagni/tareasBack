@@ -4,7 +4,7 @@ import decorators.role as rol
 import schemas.schemas as schemas
 import models.expediente_model as expediente_model
 import common.error_handling as error_handling
-import common.auth as auth 
+import common.auth as auth_token 
 
 expediente_b = APIBlueprint('expediente_blueprint', __name__)
 
@@ -14,7 +14,7 @@ def before_request():
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None

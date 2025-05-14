@@ -2,7 +2,7 @@ import schemas.schemas as schema
 import models.tarea_model as tarea_model
 import common.error_handling as error_handling
 import decorators.role as rol
-import common.auth as auth
+import common.auth as auth_token
 import traceback
 from common.logger_config import logger
 from flask import g
@@ -19,7 +19,7 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
        
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=''

@@ -1,7 +1,7 @@
 import schemas.schemas as schema
 import models.nota_model as nota_model
 import common.error_handling as error_handling
-import common.auth as auth
+import common.auth as auth_token
 import decorators.role as rol
 import traceback
 from apiflask import APIBlueprint
@@ -14,7 +14,7 @@ nota_b = APIBlueprint('nota_blueprint', __name__)
 @nota_b.before_request
 def before_request():
     
-    jsonHeader = auth.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=''
