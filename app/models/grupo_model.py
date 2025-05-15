@@ -770,7 +770,89 @@ def update_grupo(username=None,id='', **kwargs):
                 
 
     db.session.commit()
-    return grupo
+
+    subquery = text("""
+            WITH RECURSIVE GroupTree AS (
+                        -- Anchor: empezar desde el grupo dado
+                        SELECT 
+                            g.id AS id_hijo,
+                            g.id AS id_padre,
+                            g.descripcion AS child_name,
+                            g.descripcion AS parent_name,
+                            g.id::text AS path,
+                            COALESCE(g.nombre, g.id::text) AS path_name,
+                            0 AS level,
+                            true AS is_childless,
+                            g.id AS group_id
+                        FROM 
+                            tareas.grupo g
+                        WHERE 
+                            g.id = :id_grupo
+
+                        UNION ALL
+
+                        -- Recursive: buscar padre del grupo actual
+                        SELECT 
+                            gpadre.id AS id_hijo,
+                            hgg.id_padre,
+                            ghijo.descripcion AS child_name,
+                            gpadre.descripcion AS parent_name,
+                            gpadre.id::text || ' -> ' || gt.path AS path,
+                            COALESCE(gpadre.nombre, gpadre.id::text) || ' -> ' || gt.path_name AS path_name,
+                            gt.level + 1 AS level,
+                            false AS is_childless,
+                            gpadre.id AS group_id
+                        FROM 
+                            tareas.herarquia_grupo_grupo hgg
+                        INNER JOIN 
+                            GroupTree gt ON gt.id_padre = hgg.id_hijo
+                        INNER JOIN 
+                            tareas.grupo ghijo ON hgg.id_hijo = ghijo.id
+                        INNER JOIN 
+                            tareas.grupo gpadre ON hgg.id_padre = gpadre.id
+                    )
+
+                    SELECT 
+                        gt.id_padre,
+                        gt.parent_name,
+                        gt.id_hijo,
+                        gt.child_name,
+                        gt.path,
+                        gt.path_name,
+                        gt.level,
+                        gt.is_childless,
+                        gt.group_id
+                    FROM 
+                        GroupTree gt
+                    ORDER BY 
+                        gt.level DESC;
+                    """)
+
+    cursor = db.session.execute(subquery, {"id_grupo": id}).fetchall()
+    if cursor:
+        print("Path posta:", cursor[0].path)
+
+    data={
+        "id": grupo.id,
+        "nombre": grupo.nombre,
+        "descripcion": grupo.descripcion,
+        "base": grupo.base,
+        "codigo_nomenclador": grupo.codigo_nomenclador,
+        "nomenclador": grupo.nomenclador,
+        "eliminado": grupo.eliminado,
+        "suspendido": grupo.suspendido,
+        "id_user_actualizacion": grupo.id_user_actualizacion,
+        "user_actualizacion": grupo.user_actualizacion,
+        "id_user_asignado_default": grupo.id_user_asignado_default,
+        "user_asignado_default": grupo.user_asignado_default,
+        "fecha_creacion": grupo.fecha_creacion,
+        "fecha_actualizacion": grupo.fecha_actualizacion,
+        "path": cursor[0].path if cursor else "",
+        "path_name": cursor[0].path_name if cursor else "",
+    }
+
+    return data
+#    return grupo
 
 def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
     #session: scoped_session = current_app.session
