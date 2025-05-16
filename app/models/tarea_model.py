@@ -2,8 +2,6 @@ import uuid
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from sqlalchemy import desc

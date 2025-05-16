@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, Rol
+from models.alch_model import Usuario, Rol, EP
 from datetime import date, timedelta, datetime
 from common.logger_config import logger
 import uuid
@@ -20,10 +20,26 @@ def get_roles(username=''):
     print("json roles:",resp)
     return resp
 
+######################Casos de uso de la api######################
+def get_api_cu(url=None):
+    cu=[]
+    if url is not None:
+        cu_query= db.session.query(EP).filter(EP.url == url).first()
+        if cu_query is not None:
+            #print("caso de uso:",cu_query.caso_uso)
+            cu=cu_query.caso_uso
+       
+    return cu
 
 ######################Control de acceso######################
-def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
+def get_usr_cu(username=None, rol_usuario='', cu=None):
     logger.info("get_usr_cu - username: %s", username)
+    logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
+    logger.info("get_usr_cu - cu: %s", cu)
+    if cu is None:
+        logger.error("No hay casos de uso")
+        return False
+    
     pull_roles = True
     tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(minutes=30)
@@ -46,10 +62,6 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
             logger.info("ROLES VENCIDOS")
             print("Borrando roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
-            """ for r in query_rol:
-                db.session.delete(r)
-                db.session.commit()
-                logger.info("Rol eliminado") """
             pull_roles = True    
 
     #######Consultar CU Api P-usher##########
