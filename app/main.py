@@ -19,6 +19,7 @@ from blueprints.expediente import expediente_b
 from blueprints.nota import nota_b
 from blueprints.label import label_b
 from blueprints.alerta import alerta_b
+from blueprints.endpoint import ep_b
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
 from models.alch_model import Base
@@ -135,6 +136,7 @@ def create_app():
     app.register_blueprint(label_b)
     app.register_blueprint(alerta_b)
     app.register_blueprint(ai_assistant)
+    app.register_blueprint(ep_b)
 
     from flask import request, make_response
 

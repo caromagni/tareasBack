@@ -36,7 +36,7 @@ def before_request():
 @alerta_b.get('/alertas')
 @alerta_b.input(schema.TareaAlertaIn, location='query')
 @alerta_b.output(schema.TareaCountAllOut)
-@rol.require_role(["consultar-alerta"])
+@rol.require_role("Operador")
 def get_alerta_tarea(query_data: dict):
     try:
         dias_aviso=15

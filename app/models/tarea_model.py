@@ -2,8 +2,6 @@ import uuid
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
 from sqlalchemy import desc
@@ -118,7 +116,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     return tareas_vencer, total
 
 
-def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     
     print("##############Validaciones Insert Tarea################")
     id_grupo=None
@@ -272,6 +270,8 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     print("datetime.now():", datetime.now())
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
+    if not eliminable:
+        eliminable = True 
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         prioridad=prioridad,
@@ -432,6 +432,8 @@ def update_tarea(id_t='', username=None, **kwargs):
         tarea.cuerpo = kwargs['cuerpo']
     if 'eliminable' in kwargs:
         tarea.eliminable = kwargs['eliminable']
+    else:
+        tarea.eliminable = True    
     if 'id_actuacion' in kwargs:
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
         if actuacion is None:

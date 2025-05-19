@@ -378,7 +378,7 @@ class Tarea(Base):
     caratula_expediente = Column(String)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'))
     id_subtipo_tarea = Column(ForeignKey('tareas.subtipo_tarea.id'))
-    eliminable = Column(Boolean)
+    eliminable = Column(Boolean, default=True)
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
@@ -541,5 +541,15 @@ class Parametros(Base):
     id = Column(UUID, primary_key=True)
     table = Column(String)
     columns = Column(ARRAY(String))
-    activo = Column(Boolean)    
-    
+    activo = Column(Boolean)  
+
+class EP(Base):
+    __tablename__ = 'endpoint'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    url = Column(String)
+    descripcion = Column(String)
+    caso_uso = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    id_user_actualizacion = Column(UUID)

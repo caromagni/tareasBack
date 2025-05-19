@@ -30,7 +30,7 @@ def before_request():
 @expediente_b.get('/expediente')
 @expediente_b.output(schemas.ExpedienteOut(many=True))
 @expediente_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Expedientes', summary='Listado de Expedientes del organismo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-@rol.require_role(["consultar-expediente"])
+@rol.require_role("Operador")
 def get_expedientes():
     try:
         res = expediente_model.get_all_expedientes()

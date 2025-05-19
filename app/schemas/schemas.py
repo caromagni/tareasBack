@@ -1427,3 +1427,41 @@ class LabelXTareaCountAllOut(Schema):
 class LabelXTareaCountOut(Schema):
     count = Integer()
     data = Nested(LabelXTareaOut, many=True)  
+
+class CUInput(Schema):
+    codigo = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
+    descripcion = String(required=True, validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    
+class CUOut(Schema):
+    id = String()
+    codigo = String()
+    descripcion = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    
+
+class CUCountOut(Schema):
+    count = Integer()
+    data = Nested(CUOut, many=True)    
+
+
+class ListCU(Schema):
+    codigo = String()
+
+class EPInput(Schema):
+    url = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
+    descripcion = String(required=True, validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    caso_uso = List(Nested(ListCU))
+
+
+class EPOut(Schema):
+    id = String()
+    url = String()
+    descripcion = String()
+    caso_uso = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+
+class EPCountOut(Schema):
+    count = Integer()
+    data = Nested(EPOut, many=True)

@@ -34,7 +34,7 @@ def before_request():
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
 #@usuario_b.output(GroupsUsuarioOut(many=True))
-@rol.require_role(["consultar-usuario"])
+@rol.require_role("Operador")
 def get_grupos_by_usr(id_usuario: str):
     try:
         print('***************ingreso a get grupos by usr**************')
@@ -55,7 +55,7 @@ def get_grupos_by_usr(id_usuario: str):
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(schema.UsuarioIn)
-@rol.require_role(["agregar-usuario"])
+@rol.require_role("Operador")
 def post_usuario(json_data: dict):
     try:
         print('inserta usuario')
@@ -85,7 +85,7 @@ def post_usuario(json_data: dict):
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
 @usuario_b.input(schema.UsuarioInPatch)
-@rol.require_role(["modificar-usuario"])
+@rol.require_role("Operador")
 def patch_usuario(usuario_id: str, json_data: dict):
     try:
         username=g.username
@@ -117,7 +117,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
 ###############GET BY ID####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario/<string:id>')
-@rol.require_role(["consultar-usuario"])
+@rol.require_role("Operador")
 def get_usuario_id(id: str):
         res = usuario_model.get_usuario_by_id(id)
         if res is None or len(res)==0:
@@ -144,7 +144,7 @@ def get_usuario_id(id: str):
 @usuario_b.get('/usuario')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
 @usuario_b.output(schema.UsuarioCountOut)
-@rol.require_role(["consultar-usuario"])
+@rol.require_role("Operador")
 def get_usuario(query_data: dict):
     try:
         page=1
@@ -184,7 +184,7 @@ def get_usuario(query_data: dict):
 @usuario_b.get('/usuario_detalle')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
 @usuario_b.output(schema.UsuarioCountAllOut)
-@rol.require_role(["consultar-usuario"])
+@rol.require_role("Operador")
 def get_usuarios_detalle(query_data: dict):
     try:
         page=1
@@ -219,7 +219,7 @@ def get_usuarios_detalle(query_data: dict):
 ######################DELETE######################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
-@rol.require_role(["eliminar-usuario"])
+@rol.require_role("Operador")
 def del_usuario(id: str):
     try:
         username=g.username
@@ -270,7 +270,7 @@ def get_rol_usr():
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/groups_with_base')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
-@rol.require_role(["consultar-usuario"])
+@rol.require_role("Operador")
 def get_groups_base_by_usr(query_data: dict):
     try:
         print('***************ingreso a get grupos by usr**************')

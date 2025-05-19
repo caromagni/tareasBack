@@ -1,11 +1,12 @@
 import requests
-from models.alch_model import Usuario, Rol
+from models.alch_model import Usuario, Rol, EP
 from datetime import date, timedelta, datetime
 from common.logger_config import logger
 import uuid
 from alchemy_db import db
 from sqlalchemy import or_
 import os
+import json
 
 def get_roles(username=''):
     url=os.environ.get('PUSHER_URL')+username
@@ -20,10 +21,45 @@ def get_roles(username=''):
     print("json roles:",resp)
     return resp
 
+######################Casos de uso de la api######################
+def get_api_cu_1(url=None):
+    cu=[]
+    if url is not None:
+        cu_query= db.session.query(EP).filter(EP.url == url).first()
+        if cu_query is not None:
+            #print("caso de uso:",cu_query.caso_uso)
+            cu=cu_query.caso_uso
+       
+    return cu
+
+def get_api_cu(url=None, archivo_json="ep_cu.json"):
+    logger.info("get_api_cu - url: %s", url)
+    cu = []
+    if url is None:
+        return cu
+
+    if not os.path.exists(archivo_json):
+        raise FileNotFoundError(f"El archivo {archivo_json} no existe.")
+
+    with open(archivo_json, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    for ep in data:
+        if ep.get("url") == url:
+            cu = [item["codigo"] for item in ep.get("caso_uso", [])]
+            break
+
+    return cu
 
 ######################Control de acceso######################
-def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
+def get_usr_cu(username=None, rol_usuario='', cu=None):
     logger.info("get_usr_cu - username: %s", username)
+    logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
+    logger.info("get_usr_cu - cu: %s", cu)
+    if cu is None:
+        logger.error("No hay casos de uso")
+        return False
+    
     pull_roles = True
     tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(minutes=30)
@@ -46,10 +82,6 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
             logger.info("ROLES VENCIDOS")
             print("Borrando roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
-            """ for r in query_rol:
-                db.session.delete(r)
-                db.session.commit()
-                logger.info("Rol eliminado") """
             pull_roles = True    
 
     #######Consultar CU Api P-usher##########
@@ -78,6 +110,7 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
         db.session.commit()
     
     #Controlo si el usuario con el rol elegido tiene permisos
+    print("ROL:",rol_usuario)
     query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.rol == rol_usuario, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
     if len(query_permisos)==0:
         logger.error("No tiene permisos")

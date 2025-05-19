@@ -1,0 +1,74 @@
+[
+    {
+        "url": "post/tarea",
+        "descripcion": "Post tarea",
+        "caso_uso": [
+            {
+                "codigo": "crear-tarea"
+            },
+            {
+                "codigo": "modificar-tarea"
+            },
+            {
+                "codigo": "eliminar-tarea"
+            }
+        ]
+    },
+    {
+        "url": "get/tarea",
+        "descripcion": "Get tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "url": "delete/tarea/{id}",
+        "descripcion": "Delete tarea",
+        "caso_uso": [
+            {
+                "codigo": "borrar-tarea"
+            }
+        ]
+    },
+    {
+        "url": "patch/tarea",
+        "descripcion": "Modificar tarea",
+        "caso_uso": [
+            {
+                "codigo": "modificar-tarea"
+            }
+        ]
+    },
+    {
+        "url": "get/subtipo_tarea",
+        "descripcion": "Consultar subtipo de tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tareas"
+            }
+        ]
+    },
+    {
+        "url": "patch/tipo_tarea",
+        "descripcion": "Patch tipo_tarea",
+        "caso_uso": [
+            {
+                "codigo": "modificar_tarea"
+            },
+            {
+                "codigo": "crear_tarea"
+            }
+        ]
+    },
+    {
+        "url": "get/tipo_tarea",
+        "descripcion": "Get tipo_tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar_tarea"
+            }
+        ]
+    }
+]
