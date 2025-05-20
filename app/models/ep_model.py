@@ -8,12 +8,29 @@ import os
 from datetime import datetime
 ##########################  TIPO NOTAS #############################################
 
-def get_all_EP(page=1, per_page=10):
+def get_all_EP_1(page=1, per_page=10):
     
     todo = db.session.query(EP).all()
     total= len(todo)
     res = db.session.query(EP).order_by(EP.url).all()
     return res, total
+
+def get_all_EP(username=None):
+    ruta_archivo = os.path.join(current_app.config.get("JSON_CU_PATH", "."), "ep_cu.json")
+
+    # Leemos el archivo
+    try:
+        with open(ruta_archivo, 'r', encoding='utf-8') as f:
+            datos = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        datos = []
+
+    total = len(datos)
+
+    # Ordenamos por 'url'
+    datos.sort(key=lambda x: x.get("url", ""))
+
+    return datos, total
 
 def insert_EP(username, **kwargs):
     if username is not None:

@@ -35,7 +35,7 @@ def before_request():
 @ep_b.get('/ep')
 @ep_b.output(schema.EPCountOut)
 @rol.require_role("Operador")
-def get_ep(query_data: dict):
+def get_ep():
     try:
         cant=0
         username=g.get('username')
