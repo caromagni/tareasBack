@@ -7,6 +7,7 @@ from alchemy_db import db
 from sqlalchemy import or_
 import os
 import json
+from cache import cache
 
 def get_roles(username=''):
     url=os.environ.get('PUSHER_URL')+username
@@ -52,6 +53,7 @@ def get_api_cu(url=None, archivo_json="ep_cu.json"):
     return cu
 
 ######################Control de acceso######################
+@cache.memoize(timeout=500)
 def get_usr_cu(username=None, rol_usuario='', cu=None):
     logger.info("get_usr_cu - username: %s", username)
     logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
