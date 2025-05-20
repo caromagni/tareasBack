@@ -45,11 +45,12 @@ class EPCache:
         logger.info(f"[EPCache] No se encontraron casos de uso para la URL: {url}")
         return []
     
-    def recargar_cache(self, nuevo_archivo_json=None):
-        if nuevo_archivo_json:
-            self._archivo_json = nuevo_archivo_json
-        logger.info(f"[EPCache] Recargando cache desde '{self._archivo_json}'...")
-        self._load_data()
+    #def recargar_cache(self, nuevo_archivo_json="ep_cu.json"):
+    def recargar_cache(cls, archivo_json=None):
+        if archivo_json:
+            cls._archivo_json = archivo_json
+        logger.info(f"[EPCache] Recargando cache desde '{cls._archivo_json}'...")
+        cls._load_data()
 
     
 

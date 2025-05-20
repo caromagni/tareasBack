@@ -70,5 +70,14 @@
                 "codigo": "consultar_tarea"
             }
         ]
+    },
+    {
+        "url": "get/label",
+        "descripcion": "Get labels",
+        "caso_uso": [
+            {
+                "codigo": "consultar_label"
+            }
+        ]
     }
 ]
