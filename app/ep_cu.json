@@ -1,6 +1,7 @@
 [
     {
-        "url": "post/tarea",
+        "metodo": "POST",
+        "url": "/tarea",
         "descripcion": "Post tarea",
         "caso_uso": [
             {
@@ -15,7 +16,8 @@
         ]
     },
     {
-        "url": "get/tarea",
+        "metodo": "GET",
+        "url": "/tarea",
         "descripcion": "Get tarea",
         "caso_uso": [
             {
@@ -24,7 +26,8 @@
         ]
     },
     {
-        "url": "delete/tarea/{id}",
+        "metodo": "DELETE",
+        "url": "/tarea",
         "descripcion": "Delete tarea",
         "caso_uso": [
             {
@@ -33,7 +36,8 @@
         ]
     },
     {
-        "url": "patch/tarea",
+        "metodo": "PATCH",
+        "url": "/tarea",
         "descripcion": "Modificar tarea",
         "caso_uso": [
             {
@@ -42,7 +46,8 @@
         ]
     },
     {
-        "url": "get/subtipo_tarea",
+        "metodo": "GET",
+        "url": "/subtipo_tarea",
         "descripcion": "Consultar subtipo de tarea",
         "caso_uso": [
             {
@@ -51,32 +56,75 @@
         ]
     },
     {
-        "url": "patch/tipo_tarea",
+        "metodo": "PATCH",
+        "url": "/tipo_tarea",
         "descripcion": "Patch tipo_tarea",
         "caso_uso": [
             {
                 "codigo": "modificar_tarea"
             },
             {
-                "codigo": "crear_tarea"
+                "codigo": "crear-tarea"
             }
         ]
     },
     {
-        "url": "get/tipo_tarea",
+        "metodo": "GET",
+        "url": "/tipo_tarea",
         "descripcion": "Get tipo_tarea",
         "caso_uso": [
             {
-                "codigo": "consultar_tarea"
+                "codigo": "consultar-tarea"
             }
         ]
     },
     {
-        "url": "get/label",
+        "metodo": "GET",
+        "url": "/label",
         "descripcion": "Get labels",
         "caso_uso": [
             {
-                "codigo": "consultar_label"
+                "codigo": "consultar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/actuacion",
+        "descripcion": "Get actuacion",
+        "caso_uso": [
+            {
+                "codigo": "consultar-actuacion"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/usuario",
+        "descripcion": "GET usuario",
+        "caso_uso": [
+            {
+                "codigo": "consultar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/usuario",
+        "descripcion": "PATCH usuario",
+        "caso_uso": [
+            {
+                "codigo": "modificar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/usuario",
+        "descripcion": "POST usuario",
+        "caso_uso": [
+            {
+                "codigo": "crear-usuario"
             }
         ]
     }

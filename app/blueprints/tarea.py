@@ -350,7 +350,6 @@ def get_tareas_detalle(query_data: dict):
         fecha_fin_desde=request.args.get('fecha_fin_desde')
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
         tiene_notas=request.args.get('tiene_notas')
-        print("right before the get_all_tarea_detalle call")
         res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
 
         data = {
@@ -559,12 +558,10 @@ def post_tarea(json_data: dict):
         print("#"*50)
         print("Inserta tarea")
         print(json_data)
-        #Modificado para el Migue - Agregar token
         print("**** G OBJECT *****")
         username = g.get('username')
         type_header = g.get('type')
         
-        #if username type is api_key then we must use the username that comes inside the body, with the key "username"
         
         if type_header == 'api_key':
             logger.info("API KEY ORIGIN")

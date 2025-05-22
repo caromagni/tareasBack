@@ -68,7 +68,7 @@ def post_ep(json_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)    
 
-@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Export Endpoints to json file', summary='Export Endpoints to json file', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+""" @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Export Endpoints to json file', summary='Export Endpoints to json file', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.get('/ep/export')
 @ep_b.output(schema.EPCountOut)
 def exportar_eps():
@@ -83,4 +83,4 @@ def exportar_eps():
         return data
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)         
+        raise error_handling.ValidationError(err)        """  

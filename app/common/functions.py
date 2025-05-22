@@ -11,7 +11,6 @@ def get_user_ip():
             ip = request.headers['X-Forwarded-For'].split(',')[0]
         else:
             ip = request.remote_addr
-        print("Funcion IP del usuario:", ip)
         return ip
     else:
         # Si no hay contexto de solicitud, retorna una IP por defecto o None

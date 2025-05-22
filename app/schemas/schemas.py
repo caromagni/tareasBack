@@ -179,6 +179,7 @@ class GroupIn(Schema):
     ])
 
 class GroupPatchIn(Schema):
+    base = Boolean(default=False)
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -874,10 +875,16 @@ class UsuarioCountOut(Schema):
     count = Integer()
     data = Nested(UsuarioOut, many=True)     
 
+class CasoUsoOut(Schema):
+    id = String()
+    descripcion_ext = String()
+
 class UsuarioRolOut(Schema):
     #id = String()
     email = String()
     rol= String()
+    usuario_cu = List(Nested(CasoUsoOut))
+
 
 class UsuarioCountRolOut(Schema):
     count = Integer()
@@ -1449,18 +1456,18 @@ class ListCU(Schema):
     codigo = String()
 
 class EPInput(Schema):
+    metodo = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
     url = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
     descripcion = String(required=True, validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     caso_uso = List(Nested(ListCU))
 
 
 class EPOut(Schema):
-    id = String()
+    metodo = String()
     url = String()
     descripcion = String()
     caso_uso = String()
     fecha_actualizacion = String()
-    id_user_actualizacion = String()
 
 class EPCountOut(Schema):
     count = Integer()

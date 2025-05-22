@@ -543,7 +543,7 @@ class Parametros(Base):
     columns = Column(ARRAY(String))
     activo = Column(Boolean)  
 
-class EP(Base):
+""" class EP(Base):
     __tablename__ = 'endpoint'
     __table_args__ = {'schema': 'tareas'}
 
@@ -552,4 +552,4 @@ class EP(Base):
     descripcion = Column(String)
     caso_uso = Column(JSONB)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(UUID) """

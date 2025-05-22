@@ -6,8 +6,9 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects import postgresql
 from apiflask.fields import Integer, String
 from flask import current_app
-from common.utils import *
-#import common.utils as utils
+#from common.utils import *
+import common.utils as utils
+import common.logger_config as logger_config
 from alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 from cache import cache
@@ -658,10 +659,10 @@ def update_grupo(username=None,id='', **kwargs):
     #session: scoped_session = current_app.session
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -689,14 +690,13 @@ def update_grupo(username=None,id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    """ if 'id_user_actualizacion' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
-        
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
-
-    #print("Antes del if")
+    
+    if 'base' in kwargs:
+        grupo.base = kwargs['base']  
+        if 'id_padre' in kwargs:
+            if kwargs['id_padre'] is not None and kwargs['id_padre'] != '':
+               grupo.base = False
+                      
 
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
@@ -858,10 +858,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -874,6 +874,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
+    
+    #Si tiene id_padre el grupo no es base
+    if id_padre is not '' and id_padre is not None: 
+        base = False
 
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -902,7 +906,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         )
         db.session.add(nuevo_usuario_grupo)
 
-    if id_padre is not '':        
+    if id_padre is not '' and id_padre is not None:        
         nueva_herarquia = HerarquiaGrupoGrupo(
             id=nuevoID,
             id_padre=id_padre,
@@ -1004,7 +1008,7 @@ def get_usuarios_by_grupo(grupos):
     #for id in ids:
     
     if grupos is None:
-        logger.error("No se han proporcionado grupos para conultar usuarios")
+        logger_config.logger.error("No se han proporcionado grupos para conultar usuarios")
         raise Exception("No se han proporcionado grupos para conultar usuarios") 
 
     usrs = db.session.query(Grupo.id.label("id_grupo"),
@@ -1275,12 +1279,12 @@ def delete_grupo(username=None, id='', todos=False):
     
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Id de usuario no ingresado")
+        logger_config.logger.error("Id de usuario no ingresado")
         #raise Exception("Usuario no ingresado")    
     
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
@@ -1326,10 +1330,10 @@ def delete_grupo(username=None, id='', todos=False):
 def undelete_grupo(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")
     

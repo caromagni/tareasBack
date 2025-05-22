@@ -1,19 +1,8 @@
 from common.utils import *
-from common.error_handling import ValidationError
-from alchemy_db import db
-from .alch_model import EP
-import uuid
 import json
 import os
 from datetime import datetime
 ##########################  TIPO NOTAS #############################################
-
-def get_all_EP_1(page=1, per_page=10):
-    
-    todo = db.session.query(EP).all()
-    total= len(todo)
-    res = db.session.query(EP).order_by(EP.url).all()
-    return res, total
 
 def get_all_EP(username=None):
     ruta_archivo = os.path.join(current_app.config.get("JSON_CU_PATH", "."), "ep_cu.json")
@@ -41,12 +30,14 @@ def insert_EP(username, **kwargs):
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
 
-    url = kwargs.get('url', '')
+    metodo = kwargs.get('metodo', '').upper()
+    url = kwargs.get('url', '').lower()
     descripcion = kwargs.get('descripcion', '')
 
     cu = kwargs.get("caso_uso", [])
 
     nuevo_registro_json = {
+        "metodo": metodo,
         "url": url,
         "descripcion": descripcion,
         "caso_uso": cu
@@ -73,7 +64,7 @@ def insert_EP(username, **kwargs):
     print("Datos guardados en el archivo JSON:", nuevo_registro_json)
     return nuevo_registro_json
 
-def exportar_eps_a_json():
+""" def exportar_eps_a_json():
     path_archivo = "ep_cu.json"
     eps = db.session.query(EP).all()
     resultado = []
@@ -88,5 +79,5 @@ def exportar_eps_a_json():
     with open(path_archivo, 'w', encoding='utf-8') as f:
         json.dump(resultado, f, ensure_ascii=False, indent=4)
     cant = len(resultado)
-    return resultado, cant    
+    return resultado, cant     """
     

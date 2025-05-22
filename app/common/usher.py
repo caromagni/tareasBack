@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, Rol, EP
+from models.alch_model import Usuario, Rol
 from datetime import date, timedelta, datetime
 from common.logger_config import logger
 import uuid
@@ -23,20 +23,13 @@ def get_roles(username=''):
     return resp
 
 ######################Casos de uso de la api######################
-def get_api_cu_1(url=None):
-    cu=[]
-    if url is not None:
-        cu_query= db.session.query(EP).filter(EP.url == url).first()
-        if cu_query is not None:
-            #print("caso de uso:",cu_query.caso_uso)
-            cu=cu_query.caso_uso
-       
-    return cu
+@cache.memoize(timeout=500)
 
-def get_api_cu(url=None, archivo_json="ep_cu.json"):
+def get_api_cu(metodo=None, url=None):
+    archivo_json="ep_cu.json"
     logger.info("get_api_cu - url: %s", url)
     cu = []
-    if url is None:
+    if metodo is None or url is None:
         return cu
 
     if not os.path.exists(archivo_json):
@@ -46,7 +39,7 @@ def get_api_cu(url=None, archivo_json="ep_cu.json"):
         data = json.load(f)
 
     for ep in data:
-        if ep.get("url") == url:
+        if ep.get("metodo") == metodo and ep.get("url") == url:
             cu = [item["codigo"] for item in ep.get("caso_uso", [])]
             break
 
@@ -58,13 +51,13 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
     logger.info("get_usr_cu - username: %s", username)
     logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
     logger.info("get_usr_cu - cu: %s", cu)
-    if cu is None:
+    if cu is None or len(cu) == 0:
         logger.error("No hay casos de uso")
         return False
     
     pull_roles = True
-    tiempo_vencimiento = timedelta(days=1)
-    #tiempo_vencimiento = timedelta(minutes=30)
+    #tiempo_vencimiento = timedelta(days=1)
+    tiempo_vencimiento = timedelta(minutes=10)
     query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
     if query_usr is None:
         logger.error("Usuario no encontrado")
