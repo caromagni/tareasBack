@@ -402,7 +402,7 @@ def get_rol_usuario(username=None):
         key = (r.email, r.rol)
         agrupado[key]["email"] = r.email
         agrupado[key]["rol"] = r.rol
-        agrupado[key]["usuario_cu"].append({"descripcion_ext": r.descripcion_ext})
+        agrupado[key]["usuario_cu"].append({"descripcion_ext": r.descripcion_ext, "id": r.id})
 
 # Convertir el resultado en lista para salida tipo JSON
     res = list(agrupado.values())

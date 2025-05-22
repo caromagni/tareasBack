@@ -179,6 +179,7 @@ class GroupIn(Schema):
     ])
 
 class GroupPatchIn(Schema):
+    base = Boolean(default=False)
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -875,6 +876,7 @@ class UsuarioCountOut(Schema):
     data = Nested(UsuarioOut, many=True)     
 
 class CasoUsoOut(Schema):
+    id = String()
     descripcion_ext = String()
 
 class UsuarioRolOut(Schema):

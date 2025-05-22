@@ -16,6 +16,7 @@ def require_role(rol=''):
             decoded=jwt.decode(token, options={"verify_signature": False})
             metodo = request.method
             url_cu = request.path
+            logger.info(f"metodo: {metodo}")
             logger.info(f"url_cu: {url_cu}")
             #funcion que devuelve los casos de uso según la url del request
             use_cases = usher_fnc.get_api_cu(metodo,url_cu)

@@ -43,7 +43,6 @@ def convert_to_serializable(value):
     except TypeError:
         # Si no puede ser convertido a string, deja el valor como None
         return None
-        #return value
 
 def get_serializable_dict(instance):
     return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
@@ -51,7 +50,6 @@ def get_serializable_dict(instance):
 #@event.listens_for(scoped_session, 'after_flush')
 @event.listens_for(db.session, 'after_flush')
 def after_flush(session, flush_context):
-    print("entra a after_flush")
     ip = get_user_ip()
     #ip='172.17.0.1'
     #print("ip:", ip)
@@ -65,7 +63,6 @@ def after_flush(session, flush_context):
             case 'tarea_asignada_usuario':
                 return 'Auditoria_TareaAsignadaUsuario'
             case 'tarea_x_grupo':
-                print("entra a tarea_x_grupo")
                 return 'Auditoria_TareaxGrupo'
             case _:
                 return 'Auditoria'

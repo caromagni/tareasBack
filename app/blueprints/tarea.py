@@ -558,12 +558,10 @@ def post_tarea(json_data: dict):
         print("#"*50)
         print("Inserta tarea")
         print(json_data)
-        #Modificado para el Migue - Agregar token
         print("**** G OBJECT *****")
         username = g.get('username')
         type_header = g.get('type')
         
-        #if username type is api_key then we must use the username that comes inside the body, with the key "username"
         
         if type_header == 'api_key':
             logger.info("API KEY ORIGIN")

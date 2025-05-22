@@ -226,6 +226,11 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         
     fecha_inicio = funciones.controla_fecha(fecha_inicio)
 
+    if fecha_fin is not None:
+        fecha_fin = funciones.controla_fecha(fecha_fin)
+        if fecha_fin < fecha_inicio:
+            raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
+
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
         if len(query_inhabilidad)>0:  
@@ -235,11 +240,14 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 for row in query_inhabilidad:
                     plazo=plazo+1
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
+
+
    
     tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
        msg = "Tipo de tarea no encontrado"
        return None, msg
+    
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
@@ -251,6 +259,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     print("fecha_fin:", fecha_fin)
     if not eliminable:
         eliminable = True 
+
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         prioridad=prioridad,
@@ -435,12 +444,20 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper() 
     if 'fecha_inicio' in kwargs:
+        fecha_inicio = funciones.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_inicio = fecha_inicio
     if 'fecha_fin' in kwargs:
+        fecha_fin = funciones.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_fin = fecha_fin        
     
+    if fecha_inicio is not None and fecha_fin is not None:
+        if fecha_inicio > fecha_fin:
+            raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
+        else:
+            tarea.fecha_inicio = fecha_inicio
+            tarea.fecha_fin = fecha_fin
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()

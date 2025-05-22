@@ -690,14 +690,13 @@ def update_grupo(username=None,id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    """ if 'id_user_actualizacion' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
-        
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
-
-    #print("Antes del if")
+    
+    if 'base' in kwargs:
+        grupo.base = kwargs['base']  
+        if 'id_padre' in kwargs:
+            if kwargs['id_padre'] is not None and kwargs['id_padre'] != '':
+               grupo.base = False
+                      
 
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
@@ -875,6 +874,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
+    
+    #Si tiene id_padre el grupo no es base
+    if id_padre is not '' and id_padre is not None: 
+        base = False
 
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -903,7 +906,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         )
         db.session.add(nuevo_usuario_grupo)
 
-    if id_padre is not '':        
+    if id_padre is not '' and id_padre is not None:        
         nueva_herarquia = HerarquiaGrupoGrupo(
             id=nuevoID,
             id_padre=id_padre,

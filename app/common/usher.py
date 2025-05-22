@@ -56,8 +56,8 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
         return False
     
     pull_roles = True
-    tiempo_vencimiento = timedelta(days=1)
-    #tiempo_vencimiento = timedelta(minutes=30)
+    #tiempo_vencimiento = timedelta(days=1)
+    tiempo_vencimiento = timedelta(minutes=10)
     query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
     if query_usr is None:
         logger.error("Usuario no encontrado")

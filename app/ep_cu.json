@@ -100,11 +100,31 @@
     },
     {
         "metodo": "GET",
-        "url": "/actuacion",
-        "descripcion": "Get actuacion",
+        "url": "/usuario",
+        "descripcion": "GET usuario",
         "caso_uso": [
             {
-                "codigo": "consultar-actuacion"
+                "codigo": "consultar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/usuario",
+        "descripcion": "PATCH usuario",
+        "caso_uso": [
+            {
+                "codigo": "modificar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/usuario",
+        "descripcion": "POST usuario",
+        "caso_uso": [
+            {
+                "codigo": "crear-usuario"
             }
         ]
     }
