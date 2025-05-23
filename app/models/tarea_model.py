@@ -7,8 +7,8 @@ from sqlalchemy import func, cast
 from sqlalchemy.types import Boolean, TIMESTAMP
 import uuid
 from datetime import datetime, timedelta
-from alchemy_db import db
-from cache import cache
+from db.alchemy_db import db
+from common.cache import cache
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions

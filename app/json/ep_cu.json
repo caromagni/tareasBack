@@ -127,5 +127,15 @@
                 "codigo": "crear-usuario"
             }
         ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/nota",
+        "descripcion": "GET nota",
+        "caso_uso": [
+            {
+                "codigo": "consultar-nota"
+            }
+        ]
     }
 ]

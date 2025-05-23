@@ -1,4 +1,4 @@
-from alchemy_db import db
+from db.alchemy_db import db
 from models.alch_model import ActuacionExt, TipoActuacionExt
 
 #ejemplo de lo que deberia tener el modelo, no hay que poner logica de negocios aca

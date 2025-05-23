@@ -6,7 +6,7 @@ from flask import current_app
 ##########################  TIPO NOTAS #############################################
 
 def get_all_EP(username=None):
-    ruta_archivo = os.path.join(current_app.config.get("JSON_CU_PATH", "."), "ep_cu.json")
+    ruta_archivo = os.path.join(current_app.config.get("JSON_CU_PATH", "."), "./json/ep_cu.json")
 
     # Leemos el archivo
     try:
@@ -45,7 +45,7 @@ def insert_EP(username, **kwargs):
     }        
     ##########################################
     #Guardo en el archivo json
-    ruta_archivo = 'ep_cu.json'
+    ruta_archivo = './json/ep_cu.json'
     datos = []
 
     # Leer archivo si existe

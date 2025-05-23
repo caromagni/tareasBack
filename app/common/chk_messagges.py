@@ -1,7 +1,7 @@
 from time import sleep
 import uwsgi
 from common.rabbitmq_utils import RabbitMQHandler
-from alchemy_db import db
+from db.alchemy_db import db
 import time
 # Consumir mensajes de la cola
 #def chk_messagges(app, session_factory):

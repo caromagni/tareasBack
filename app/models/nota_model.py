@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-from alchemy_db import db
+from db.alchemy_db import db
 from .alch_model import Nota, TipoNota, Tarea
 import traceback
 import common.utils as utils

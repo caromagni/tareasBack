@@ -4,9 +4,9 @@ from datetime import datetime
 from sqlalchemy import text
 import common.utils as utils
 import common.logger_config as logger_config
-from alchemy_db import db
+from db.alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
-from cache import cache
+from common.cache import cache
 
 
 @cache.memoize(timeout=500)

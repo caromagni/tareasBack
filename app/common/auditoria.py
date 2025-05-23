@@ -1,7 +1,7 @@
 # auditoria.py
 from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
-from alchemy_db import db
+from db.alchemy_db import db
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo, Inhabilidad 

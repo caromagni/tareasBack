@@ -3,7 +3,7 @@ from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
 from models.grupo_hierarchy import find_parent_id_recursive
-from alchemy_db import db
+from db.alchemy_db import db
 from .alch_model import Label, LabelXTarea, Tarea
 
 ########################## LABELS #############################################
