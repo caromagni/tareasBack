@@ -37,11 +37,11 @@ def before_request():
     
 ####################TIPO DE TAREA######################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@cache.cached(timeout=500, query_string=True)
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaCountOut)
 @tarea_b.input(schema.PageIn, location='query')
 @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500, query_string=True)
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username
@@ -334,6 +334,7 @@ def get_tareas(query_data: dict):
 @tarea_b.input(schema.TareaGetIn, location='query')
 @tarea_b.output(schema.TareaCountAllOut)
 @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500, query_string=True)
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")
@@ -396,6 +397,7 @@ def get_tareas_detalle(query_data: dict):
 @tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(schema.TareaIdOut(many=True))
 @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500, query_string=True)
 def get_tarea(id_tarea:str):
     try:
         res = tarea_model.get_tarea_by_id(id_tarea) 
@@ -413,6 +415,7 @@ def get_tarea(id_tarea:str):
 @tarea_b.get('/tarea_historia_usr/<string:id_tarea>')
 @tarea_b.output(schema.TareaHIstoriaUserIdOut(many=True))
 @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500, query_string=True)
 def get_tarea_historia_usr(id_tarea:str):
     try:
         res = tarea_model.get_tarea_historia_usr_by_id(id_tarea) 
@@ -430,6 +433,7 @@ def get_tarea_historia_usr(id_tarea:str):
 @tarea_b.get('/tarea_grupo')
 @tarea_b.output(schema.TareaCountAllOut)
 @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500, query_string=True)
 def get_tareas_grupo():    
     try:
         page=1

@@ -3,6 +3,9 @@ import os
 import json
 import time
 from flask import jsonify, current_app
+from schemas.schemas import ActuacionOut, TipoActuacionOut,TareaAllOut
+
+
 
 
 # Initialize Bedrock client once
@@ -17,10 +20,10 @@ def validate_bedrock_env():
     required_env_vars = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
     for var in required_env_vars:
         if not os.getenv(var):
-            raise EnvironmentError(f"Missing required environment variable: {var}")
+            raise EnvironmentError("Missing required environment variable: {var}")
 
 # Validate environment variables at startup
-validate_bedrock_env()
+# validate_bedrock_env()
 
 def invoke_bedrock_model(model_id, request_body):
     try:
