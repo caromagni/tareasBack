@@ -577,6 +577,7 @@ def update_tarea(id_t='', username=None, **kwargs):
         "fecha_fin": tarea.fecha_fin,
         "plazo": tarea.plazo,
         "prioridad": tarea.prioridad,
+        "estado": tarea.estado,
         "id_tipo_tarea": tarea.id_tipo_tarea,
         "id_subtipo_tarea": tarea.id_subtipo_tarea,
         "tipo_tarea": tarea.tipo_tarea,

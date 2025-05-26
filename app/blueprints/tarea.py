@@ -486,7 +486,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
                     "ErrorMsg":"No se encontró la tarea a modificar"
                 } 
             return result
-        return schema.TareaAllOut().dump(res)    
+        return schema.TareaPatchAllOut().dump(res)    
         
     
     except Exception as err:
