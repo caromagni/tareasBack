@@ -1,7 +1,7 @@
 Alertas
 =======
 
-* Indicadores que advierten sobre vencimientos
+* Indicadores que advierten sobre los vencimientos de tareas
 * Pueden ser recordatorios en fechas específicas
 * Alerta por prioridad o tipo de tarea 
 * Alerta/notificación en bandeja principal

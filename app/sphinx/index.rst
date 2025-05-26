@@ -5,8 +5,8 @@ Documentación de Tareas
    :maxdepth: 2
    :caption: Contenido:
 
-   introduccion
-   arquitectura
+   ./modulos/introduccion
+   ./modulos/arquitectura
    ./modulos/alertas
    ./modulos/roles
    ./modulos/grupos
