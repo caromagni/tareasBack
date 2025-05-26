@@ -21,6 +21,7 @@ def require_role(rol=''):
             logger_config.logger.info(f"USE CASES: {use_cases}")
             #funcion que devuelve los casos de uso según el operador
             can_pass=usher_fnc.get_usr_cu(decoded['email'], rol, use_cases)
+            #can_pass = usher_fnc.get_usr_cu('cristiandiaz@jus.mendoza.gov.ar', rol, use_cases)
             logger_config.logger.info(f"CAN PASS: {can_pass}")
             if not can_pass:
                 logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
