@@ -447,10 +447,15 @@ def update_tarea(id_t='', username=None, **kwargs):
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_inicio = fecha_inicio
+    else:
+        fecha_inicio = None
+
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        tarea.fecha_fin = fecha_fin        
+        tarea.fecha_fin = fecha_fin     
+    else:
+        fecha_fin = None       
     
     if fecha_inicio is not None and fecha_fin is not None:
         if fecha_inicio > fecha_fin:
