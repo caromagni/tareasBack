@@ -47,9 +47,11 @@
 <section id="descripcion">
 <h2>Descripción:<a class="headerlink" href="#descripcion" title="Link to this heading">¶</a></h2>
 <p>Un usuario deberá tener por lo menos un rol en el Sistema de Tareas. Si el mismo tiene más de un rol, al acceder al sistema seleccionará con que rol trabajará. Por ejemplo puede tener un rol Juez y Operador.
-Cada funcionalidad del Sistema corresponde a uno o más Casos de Uso.
-Cada rol de usuario está asociado a diferentes Casos de Uso, según los permisos que se le quieran configurar a ese rol.
-Entonces cada vez que el usuario accede a cualquier funcionalidad del sistema, se realiza un control por usuario y rol constatando que el mismo tenga acceso a dicha funcionalidad, por ejemplo: Crear Tarea, Crear Grupo, Consultar Tareas, etc</p>
+Cada funcionalidad del Sistema corresponde a uno o más Casos de Uso.</p>
+<p>Cada rol de usuario está asociado a diferentes Casos de Uso, según los permisos que se le quieran configurar a ese rol.</p>
+<p>Entonces cada vez que el usuario accede a cualquier funcionalidad del sistema, se realiza un control por usuario y rol constatando que  según el rol con el que ingresa al Sistema el mismo tenga acceso a cada funcionalidad, por ejemplo: Crear Tarea, Crear Grupo, Consultar Tareas, etc.</p>
+<p>Los Roles se administran en el sistema P-USHER y son importados al Sistema de Tareas en un primer inicio. En los ingresos siguientes de ese usuario se controla el rol y los caos de uso del usuario en el Sistema Tareas. Los mismos tienen una fecha de vencimiento para estar siempre alineados con los roles ingresados en P-USHER
+En caso que alguno de los registros de roles-casos de uso se encuentre vencido, se importara nuevamente desde P-USHER y se actualizará el registro del usuario en el Sistema de Tareas.</p>
 </section>
 </section>
 
@@ -81,8 +83,8 @@ Entonces cada vez que el usuario accede a cualquier funcionalidad del sistema, s
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
 <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduccion.html">Introducción</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../arquitectura.html">Arquitectura</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduccion.html">Introducción</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Roles y Casos de Uso</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#descripcion">Descripción:</a></li>

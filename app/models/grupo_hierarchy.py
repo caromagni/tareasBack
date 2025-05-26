@@ -41,15 +41,3 @@ def find_parent_id_recursive(db, id_hijo: str):
         else:
             # Continue up the tree
             return grandparent_id
-
-# Usage example:
-# from flask import current_app
-# 
-# def get_root_parent(id_hijo: str):
-#     with current_app.db.session() as db.session:
-#         try:
-#             root_parent_id = find_parent_id_recursive(db.session, id_hijo)
-#             return root_parent_id
-#         except Exception as e:
-#             current_app.logger.error(f"Error finding root parent for id_hijo {id_hijo}: {str(e)}")
-#             return None

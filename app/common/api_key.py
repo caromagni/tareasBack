@@ -1,15 +1,10 @@
-
-from traceback import print_exception
-#from fastapi import HTTPException
 from apiflask   import HTTPError
 import secrets
 import string
 import bcrypt
 import json
-#from utils import *
 from datetime import datetime, timedelta
 import base64
-import os
 
 ###########   CODE TO GENERATE API KEY ###########
 ###   THIS CAN BE RAN IN A SEPARATE PY FILE   ###
@@ -66,7 +61,7 @@ def verify_api_key(api_key_provided=None, authorized_system=None):
         #raise HTTPException(status_code=200, detail=searchError('err-auth-56'))
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
-    file_path = 'api_keys.json'
+    file_path = '../json/api_keys.json'
     with open(file_path, 'r') as f:
         data = json.load(f)
     print("DATA OF FILE")

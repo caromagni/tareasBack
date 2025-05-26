@@ -2,11 +2,10 @@ import uuid
 from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
-from flask import current_app
-from alchemy_db import db
+from db.alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
 from collections import defaultdict
-from cache import cache
+from common.cache import cache
 
 def get_usuario_by_id(id):
     

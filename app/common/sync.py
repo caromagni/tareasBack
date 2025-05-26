@@ -1,9 +1,9 @@
 import requests
 from models.alch_model import Usuario, TipoTarea, Inhabilidad, Organismo
-from datetime import date, timedelta, datetime
-from common.logger_config import logger
+from datetime import datetime
+import common.logger_config as logger_config
 import uuid
-from alchemy_db import db
+from db.alchemy_db import db
 import os
 
 def sync_request(url, entity_id):

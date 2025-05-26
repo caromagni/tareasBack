@@ -7,11 +7,11 @@ from sqlalchemy import func, cast
 from sqlalchemy.types import Boolean, TIMESTAMP
 import uuid
 from datetime import datetime, timedelta
-from alchemy_db import db
-from cache import cache
+from db.alchemy_db import db
+from common.cache import cache
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
-import common.functions as funciones
+import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
 
@@ -224,10 +224,10 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if fecha_inicio is None:
         fecha_inicio = datetime.now().date()
         
-    fecha_inicio = funciones.controla_fecha(fecha_inicio)
+    fecha_inicio = functions.controla_fecha(fecha_inicio)
 
     if fecha_fin is not None:
-        fecha_fin = funciones.controla_fecha(fecha_fin)
+        fecha_fin = functions.controla_fecha(fecha_fin)
         if fecha_fin < fecha_inicio:
             raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
 
@@ -444,11 +444,11 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper() 
     if 'fecha_inicio' in kwargs:
-        fecha_inicio = funciones.controla_fecha(kwargs['fecha_inicio'])
+        fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_inicio = fecha_inicio
     if 'fecha_fin' in kwargs:
-        fecha_fin = funciones.controla_fecha(kwargs['fecha_fin'])
+        fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_fin = fecha_fin        
     

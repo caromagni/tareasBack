@@ -1,13 +1,7 @@
-from os import link
-from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
 from enum import Enum
-#from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
 from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested, List
-from apiflask.validators import Length, OneOf
-#from flask_marshmallow import Marshmallow
-
 from models.alch_model import TipoTarea, Tarea
 import re
 from datetime import datetime

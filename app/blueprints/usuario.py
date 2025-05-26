@@ -1,6 +1,6 @@
 from apiflask import APIBlueprint
 from flask import current_app, request
-from alchemy_db import db
+from db.alchemy_db import db
 import schemas.schemas as schema
 import models.usuario_model as usuario_model
 import models.grupo_hierarchy as grupo_hierarchy

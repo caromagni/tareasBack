@@ -4,9 +4,6 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.orm import DeclarativeBase
-# metadata = Base.metadata
-
-
 
 class Base(DeclarativeBase):
     pass
