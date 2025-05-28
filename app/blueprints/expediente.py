@@ -14,7 +14,7 @@ def before_request():
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 
-    jsonHeader = auth_token.verify_header()
+    """ jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -25,7 +25,10 @@ def before_request():
     
     g.username = user_origin
     g.type = type_origin
-
+ """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 
 @expediente_b.get('/expediente')
 @expediente_b.output(schemas.ExpedienteOut(many=True))

@@ -16,7 +16,7 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.before_request
 def before_request():
     
-    jsonHeader = auth_token.verify_header()
+    """ jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
@@ -28,7 +28,10 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin
+    g.type = type_origin """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 # ####################################################
 
 ################################ ETIQUETAS ################################

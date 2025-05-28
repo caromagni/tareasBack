@@ -18,7 +18,7 @@ def before_request():
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 
-    jsonHeader = auth_token.verify_header()
+    """ jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -28,7 +28,10 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin
+    g.type = type_origin """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})

@@ -16,7 +16,7 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 @groups_b.before_request
 def before_request():
     print("************ingreso a before_request Usuarios************")
-    jsonHeader = auth_token.verify_header()
+    """ jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -26,7 +26,10 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin
+    g.type = type_origin """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 
 
 

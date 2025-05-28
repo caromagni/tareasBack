@@ -46,16 +46,16 @@ def get_api_cu(metodo=None, url=None):
 ######################Control de acceso######################
 @cache.memoize(timeout=500)
 def get_usr_cu(username=None, rol_usuario='', cu=None):
-    logger_config.logger.info("get_usr_cu - username: %s", username)
-    logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
-    logger_config.logger.info("get_usr_cu - cu: %s", cu)
+    #logger_config.logger.info("get_usr_cu - username: %s", username)
+    #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
+    #logger_config.logger.info("get_usr_cu - cu: %s", cu)
     if cu is None or len(cu) == 0:
         logger_config.logger.error("No hay casos de uso")
         return False
     
     pull_roles = True
     #tiempo_vencimiento = timedelta(days=1)
-    tiempo_vencimiento = timedelta(minutes=10)
+    tiempo_vencimiento = timedelta(minutes=3)
     try:
         query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
         if query_usr is None:
@@ -73,7 +73,9 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
             if len(query_vencido)>0:
                 #controlar si P-USHER no falla
+                logger_config.logger.info("REQUEST PUSHER")
                 roles = get_roles(username)
+                print("roles:", roles)
                 if 'lista_roles_cus' in roles:
                 #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                     logger_config.logger.info("ROLES VENCIDOS")
@@ -82,13 +84,13 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
                     pull_roles = True    
 
         #######Consultar CU Api P-USHER##########
-        pull_roles = False
+        #pull_roles = True
         if pull_roles:
             logger_config.logger.info("Get roles desde p-usher")
             #roles = get_roles(username)
             for r in roles['lista_roles_cus']:
                     ######ROL USHER##########
-                    #print("rol:",r['descripcion_rol'])
+                    print("rol:",r['descripcion_rol'])
                     ######Casos de uso del rol##########
                     for caso_uso in r['casos_de_uso']:
                         nuevoIDRol=uuid.uuid4()
@@ -106,7 +108,6 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
             db.session.commit()
         
         #Controlo si el usuario con el rol elegido tiene permisos
-        print("ROL:",rol_usuario)
         query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.rol == rol_usuario, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
         if len(query_permisos)==0:
             logger_config.logger.error("No tiene permisos")

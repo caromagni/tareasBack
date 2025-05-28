@@ -229,7 +229,6 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
         query = query.filter(Nota.eliminado == eliminado)
 
     #muestra datos
-    print("Query:", query.all())
     total= len(query.all()) 
 
     result = query.order_by(Nota.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()

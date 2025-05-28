@@ -4,6 +4,7 @@ import common.keycloak as keycloak
 
 os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')
+
 class Config:
     # General configuration
     SLEEP=30

@@ -137,5 +137,15 @@
                 "codigo": "consultar-nota"
             }
         ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/grupo",
+        "descripcion": "GET grupo",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
     }
 ]
