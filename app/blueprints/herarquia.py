@@ -1,10 +1,9 @@
 from apiflask import APIBlueprint
-from models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels, get_grupos_recursivo,get_grupos_all
-from typing import List
-from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
-from common.error_handling import ValidationError
-from common.auth import verify_header
-from flask import current_app, request, g, jsonify
+import models.grupo_model as grupo_model
+import schemas.schemas as schemas
+import common.error_handling as error_handling
+import common.auth as auth_token
+from flask import request, g
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
@@ -12,7 +11,7 @@ herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 @herarquia_b.before_request
 def before_request():
    
-    jsonHeader = verify_header()
+    """ jsonHeader = verify_header()
     
     if jsonHeader is None:
         #if not verificar_header():
@@ -24,7 +23,10 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin
+    g.type = type_origin """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 ####################################################
 
 @herarquia_b.doc(description='Listado de Grupos padres - Hijos', summary='Grupos padres - hijos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -33,7 +35,7 @@ def before_request():
 def get_gruposh():
     try:
         #res=get_grupos_herarquia()
-        res=get_grupos_herarquia_labels()
+        res=grupo_model.get_grupos_herarquia_labels()
         if res is None:
             
             result={
@@ -45,7 +47,7 @@ def get_gruposh():
             return result
 
         res = {
-                "data": GroupHOut().dump(res, many=True)
+                "data": schemas.GroupHOut().dump(res, many=True)
             }
         
         
@@ -53,7 +55,7 @@ def get_gruposh():
        
     
     except Exception as err:
-        raise ValidationError(err)   
+        raise error_handling.ValidationError(err)   
     
 @herarquia_b.doc(description='Listado de Grupos padres e hijos con niveles', summary='Grupos Padres - Hijos con Niveles', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})    
 @herarquia_b.get('/niveles_grupos')
@@ -61,7 +63,7 @@ def get_gruposh():
 def get_niveles():
     try:
         #res=get_grupos_herarquia()
-        res=get_grupos_recursivo()
+        res=grupo_model.get_grupos_recursivo()
         print(res)
         if res is None:
             
@@ -73,18 +75,18 @@ def get_niveles():
             
             return result
         res = {
-                "data": HerarquiaOut().dump(res, many=True)
+                "data": schemas.HerarquiaOut().dump(res, many=True)
             }
         
         return res 
  
     
     except Exception as err:
-        raise ValidationError(err)       
+        raise error_handling.ValidationError(err)       
 
 
 @herarquia_b.get('/herarquias_all')
-@herarquia_b.input(HerarquiaGroupGroupInput, location='query')
+@herarquia_b.input(schemas.HerarquiaGroupGroupInput, location='query')
 #@herarquia_b.output(HerarquiaAllOut(many=True))
 def herarquias_all_(query_data: dict):
     try:
@@ -93,7 +95,7 @@ def herarquias_all_(query_data: dict):
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
 
-        res=get_grupos_all(eliminado)
+        res=grupo_model.get_grupos_all(eliminado)
 
         if res is None:
             
@@ -104,14 +106,14 @@ def herarquias_all_(query_data: dict):
                 } 
             return result
         res = {
-                "data": HerarquiaAllOut().dump(res, many=True)
+                "data": schemas.HerarquiaAllOut().dump(res, many=True)
             }
         
         return res 
  
     
     except Exception as err:
-        raise ValidationError(err)       
+        raise error_handling.ValidationError(err)       
 
 
 

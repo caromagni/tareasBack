@@ -4,6 +4,9 @@ import sys
 # Agregar la carpeta de blueprints a sys.path
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('./../modulos'))
+#sys.path.insert(0, os.path.abspath('./sphinx'))
+#sys.path.insert(0, os.path.abspath('../modulos'))
+
 
 
 import sphinx_pdj_theme

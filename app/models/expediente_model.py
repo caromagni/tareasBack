@@ -1,5 +1,5 @@
-from alchemy_db import db
-from cache import cache
+from db.alchemy_db import db
+from common.cache import cache
 from models.alch_model import ExpedienteExt
 
 @cache.memoize(timeout=50)

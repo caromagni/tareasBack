@@ -4,7 +4,7 @@ from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaOut
 from common.error_handling import ValidationError
 from sqlalchemy.orm import scoped_session, aliased
-from alchemy_db import db
+from db.alchemy_db import db
 from flask import current_app
 from sqlalchemy import text
 

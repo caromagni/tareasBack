@@ -1,25 +1,21 @@
-import uuid
-from sqlalchemy import func, and_
+
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
-from sqlalchemy.orm import joinedload
-from sqlalchemy.orm import scoped_session
-from datetime import datetime, timedelta
-from common.functions import controla_fecha
 from sqlalchemy import desc
-from flask import current_app
-import traceback
-from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
-from models.alch_model import Auditoria_TareaAsignadaUsuario 
-from common.utils import *
-from common.logger_config import logger
-from alchemy_db import db
-from sqlalchemy import func, cast, Text
+from sqlalchemy import func, cast
 from sqlalchemy.types import Boolean, TIMESTAMP
-from sqlalchemy.dialects.postgresql import JSONB
-from cache import cache
+import uuid
+from datetime import datetime, timedelta
+from db.alchemy_db import db
+from common.cache import cache
+from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Auditoria_TareaAsignadaUsuario 
+import common.functions as functions
+import common.utils as utils
+import common.logger_config as logger_config
 
-# from cache import cache
+
 def nombre_estado(estado):
     if estado == 1:
         return "Pendiente"
@@ -44,7 +40,7 @@ def es_habil(fecha):
     return fecha.weekday() < 5  
     
 def calcular_fecha_vencimiento(fecha, plazo):
-    logger.info("calcula fecha vencimiento:" + str(fecha) + "-" + str(plazo))
+    logger_config.logger.info("calcula fecha vencimiento:" + str(fecha) + "-" + str(plazo))
     #fecha_vencimiento = datetime.strptime(fecha, '%d/%m/%Y')
     fecha_vencimiento=fecha
     dias_agregados = 0
@@ -68,21 +64,19 @@ def calcular_dias_vencimiento(fecha_vencimiento):
             dias_vencimiento += 1
         fecha_intermedia += timedelta(days=1)  # Pasar al siguiente día
     
-    logger.info("dias_vencimiento:" + str(dias_vencimiento) + "-" + str(fecha_vencimiento))
+    logger_config.logger.info("dias_vencimiento:" + str(dias_vencimiento) + "-" + str(fecha_vencimiento))
     return dias_vencimiento
 
 def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     total = 0
     if username is not None:
-        id_user = get_username_id(username)
+        id_user = utils.get_username_id(username)
 
         if id_user is not None:
-            verifica_usr_id(id_user)
+            utils.verifica_usr_id(id_user)
         else:
             raise Exception("Debe ingresar username o id_user_actualizacion")
     
-    print("id_user:", id_user)
-
     if dias_aviso is None:
         dias_aviso = 365  # Por defecto, 365 días de aviso
 
@@ -93,7 +87,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
                     Tarea.estado != 3))
 
     if grupos_usr is not None and grupos_usr=='true' or grupos_usr==True:
-        logger.info("tareas_a_vencer asignadas a los grupos del usuario")
+        logger_config.logger.info("tareas_a_vencer asignadas a los grupos del usuario")
         # Tareas asignadas a todos los grupos del usuario
         tareas = (query
                 .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
@@ -104,7 +98,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
                 .all())
     else:
         # Tareas asignadas directamente al usuario
-        logger.info("tareas_a_vencer asignadas al usuario")
+        logger_config.logger.info("tareas_a_vencer asignadas al usuario")
         tareas = (query
                 .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
                 .filter(TareaAsignadaUsuario.id_usuario == id_user,
@@ -113,47 +107,38 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
 
     if tareas is not None:
         total = len(tareas)
-        logger.info("Cantidad de tareas_a_vencer:" + str(total))    
+        logger_config.logger.info("Cantidad de tareas_a_vencer:" + str(total))    
 
     tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
     total = len(tareas_vencer)
     return tareas_vencer, total
 
 
-def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     
     print("##############Validaciones Insert Tarea################")
     id_grupo=None
     id_usuario_asignado=None
-    #if type_header is not "api_key":
     if usr_header is not None:
-        print("usr_header:", usr_header)
-        print("verifying token username")
-        id_user_actualizacion = get_username_id(usr_header)
+        id_user_actualizacion = utils.get_username_id(usr_header)
     else:
-        #raise Exception("Error en el ingreso de Usuario. Usuario no existente")
-    
         if username is not None:
-            #print("verifying username: " + username)
-            logger.info("verifying username: " + username)
-            id_user_actualizacion = get_username_id(username)
+            logger_config.logger.info("verifying username: " + username)
+            id_user_actualizacion = utils.get_username_id(username)
         else:
-            logger.error("Error en el ingreso de Usuario. Usuario no existente")
+            logger_config.logger.error("Error en el ingreso de Usuario. Usuario no existente")
             raise Exception("Error en el ingreso de Usuario. Usuario no existente")  
           
 
     if id_expediente is not None:
-        print("#"*50)
-        print("id_expediente:", id_expediente)
-        print("#"*50)
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
 
         if expediente is None:
             #Cuando viene del portal o de expedientes, se ingresa el id_ext
-            logger.info("Expediente no encontrado - Busca id_ext")
+            logger_config.logger.info("Expediente no encontrado - Busca id_ext")
             expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == id_expediente).first()
             if expediente is None:
-                logger.info("Expediente no encontrado - Inserta expediente")
+                logger_config.logger.info("Expediente no encontrado - Inserta expediente")
                 nuevoID_expte=uuid.uuid4()
                 insert_expte = ExpedienteExt(id=nuevoID_expte, 
                                             id_ext=id_expediente, 
@@ -164,13 +149,10 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 db.session.add(insert_expte)
                 id_expediente = nuevoID_expte
             else:
-                logger.info("Expediente encontrado - Update del expediente")
-                #id_expediente = expediente.id
+                logger_config.logger.info("Expediente encontrado - Update del expediente")
                 if caratula_expediente is not None and caratula_expediente.strip() != "":
-                    logger.info("Modifica caratula_expediente:" + caratula_expediente)
                     expediente.caratula = caratula_expediente
                 if nro_expte is not None and nro_expte.strip() != "":    
-                    logger.info("Modifica nro_expte:" + nro_expte)
                     expediente.nro_expte=nro_expte
                 expediente.fecha_actualizacion = datetime.now()
                 id_expediente = expediente.id
@@ -181,7 +163,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         if actuacion is None:
             actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id_ext == id_actuacion).first()
             if actuacion is None:
-                logger.info("Actuacion no encontrada - Inserta actuacion")
+                logger_config.logger.info("Actuacion no encontrada - Inserta actuacion")
                 nuevoID_actuacion=uuid.uuid4()
                 insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
                                                 id_ext=id_actuacion,
@@ -191,10 +173,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                                                 fecha_actualizacion=datetime.now())
                 db.session.add(insert_actuacion)
                 id_actuacion = nuevoID_actuacion
-                logger.info("actuacion insertada")
+                logger_config.logger.info("actuacion insertada")
             else:
-                #actuacion.id_actuacion = actuacion.id
-                logger.info("Actuacion encontrada - Update de actuacion")
+                logger_config.logger.info("Actuacion encontrada - Update de actuacion")
                 if nombre_actuacion is not None and nombre_actuacion.strip() != "":
                     actuacion.nombre = nombre_actuacion
                     actuacion.id_user_actualizacion = id_user_actualizacion
@@ -204,22 +185,22 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if id_tipo_tarea is not None:
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
-            logger.error("Tipo de tarea no encontrado")
+            logger_config.logger.error("Tipo de tarea no encontrado")
             raise Exception("Tipo de tarea no encontrado")
         nombre_tipo=tipo_tarea.nombre
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
-                logger.error("Subtipo de tarea no encontrado")
+                logger_config.logger.error("Subtipo de tarea no encontrado")
                 raise Exception("Subtipo de tarea no encontrado")
             nombre_subtipo = subtipo_tarea.nombre
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.id_tipo == id_tipo_tarea).first()
             if subtipo_tarea is None:
-                logger.error("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
+                logger_config.logger.error("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
     else:
         if id_subtipo_tarea is not None:
-            logger.error("Debe ingresar el tipo de tarea")
+            logger_config.logger.error("Debe ingresar el tipo de tarea")
             raise Exception("Debe ingresar el tipo de tarea")
             
 
@@ -243,13 +224,13 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if fecha_inicio is None:
         fecha_inicio = datetime.now().date()
         
+    fecha_inicio = functions.controla_fecha(fecha_inicio)
 
-   #format date from DD/MM/YYYY to DD-MM-YYYY
-    fecha_inicio = controla_fecha(fecha_inicio)
+    if fecha_fin is not None:
+        fecha_fin = functions.controla_fecha(fecha_fin)
+        if fecha_fin < fecha_inicio:
+            raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
 
-    #print("after format")
-    #print(fecha_inicio)
-    
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
         if len(query_inhabilidad)>0:  
@@ -258,13 +239,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
             if query_inhabilidad is not None:
                 for row in query_inhabilidad:
                     plazo=plazo+1
-        print("calcular fecha")
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
+
+
    
     tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
        msg = "Tipo de tarea no encontrado"
        return None, msg
+    
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
@@ -274,6 +257,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     print("datetime.now():", datetime.now())
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
+    if not eliminable:
+        eliminable = True 
+
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         prioridad=prioridad,
@@ -282,7 +268,6 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
-        #caratula_expediente=caratula_expediente,
         id_tipo_tarea=id_tipo_tarea,
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
@@ -326,45 +311,21 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
             db.session.add(tareaxgrupo) 
 
     else:
-        logger.error("Debe ingresar al menos un grupo")
+        logger_config.logger.error("Debe ingresar al menos un grupo")
         raise Exception ("Debe ingresar al menos un grupo")
         
     #Asigna el grupo del usuario que crea la tarea por defecto
-    
-        """ if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
-            id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
-            #usr_grupo = verifica_grupo_id(id_user_actualizacion)
-        else:
-            raise Exception("Debe ingresar username o id_user_actualizacion") 
-
-
-            if id_grupo is not None:
-                existe_grupo = db.session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
-                if existe_grupo is not None:
-                    nuevoID_tareaxgrupo=uuid.uuid4()
-                    tareaxgrupo= TareaXGrupo(
-                        id=nuevoID_tareaxgrupo,
-                        id_grupo=id_grupo,
-                        id_tarea=nuevoID_tarea,
-                        id_user_actualizacion=id_user_actualizacion,
-                        fecha_asignacion=datetime.now(),
-                        fecha_actualizacion=datetime.now()
-                    )
-                    db.session.add(tareaxgrupo) """
-
-                           
-
+ 
     if usuario is not None:
         for user in usuario:
             id_usuario = user['id_usuario']
             existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario, Usuario.eliminado==False).first()
             if existe_usuario is None:
-                logger.error("Error en el ingreso de Usuario. Usuario no existente")
+                logger_config.logger.error("Error en el ingreso de Usuario. Usuario no existente")
                 raise Exception("Error en el ingreso de Usuario. Usuario no existente")
             
             if existe_usuario.eliminado==True:
-                logger.error("Error en el ingreso de Usuario. Usuario eliminado")
+                logger_config.logger.error("Error en el ingreso de Usuario. Usuario eliminado")
                 raise Exception("Error en el ingreso de Usuarios. Usuario eliminado: " + existe_usuario.apelllido + '- id: ' + str(existe_usuario.id))
 
             if existe_usuario is not None:
@@ -403,37 +364,29 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
 def update_tarea(id_t='', username=None, **kwargs):
     ################################
-    controla_tipo=False
-    id_grupo=None
-    id_usuario_asignado=None
-    
-    print("update_tarea")
     tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==False).first()
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
         if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
-                verifica_usr_id(kwargs['id_user_actualizacion'])
+                utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
             else:
                 raise Exception("Debe ingresar username o id_user_actualizacion")
 
-    print("id_user_actualizacion:", id_user_actualizacion)        
-    
     if tarea is None:
         return None
-    
-    #if 'caratula_expediente' in kwargs:
-        #tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
     if 'cuerpo' in kwargs:
         tarea.cuerpo = kwargs['cuerpo']
     if 'eliminable' in kwargs:
         tarea.eliminable = kwargs['eliminable']
+    else:
+        tarea.eliminable = True    
     if 'id_actuacion' in kwargs:
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
         if actuacion is None:
@@ -456,7 +409,6 @@ def update_tarea(id_t='', username=None, **kwargs):
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
             nombre_subtipo = subtipo.nombre
-            #print("nombre_subtipo:",nombre_subtipo)
             subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea']).first()
             if subtipo is None:
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
@@ -492,19 +444,31 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper() 
     if 'fecha_inicio' in kwargs:
+        fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
         tarea.fecha_inicio = fecha_inicio
+    else:
+        fecha_inicio = None
+
     if 'fecha_fin' in kwargs:
+        fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        tarea.fecha_fin = fecha_fin        
+        tarea.fecha_fin = fecha_fin     
+    else:
+        fecha_fin = None       
     
+    if fecha_inicio is not None and fecha_fin is not None:
+        if fecha_inicio > fecha_fin:
+            raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
+        else:
+            tarea.fecha_inicio = fecha_inicio
+            tarea.fecha_fin = fecha_fin
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
     usuarios=[]
     grupos=[]
     if 'grupo' in kwargs:
-        print("Grupos:", kwargs['grupo'])
         #elimino los grupos existentes para esa tarea 
         grupo_tarea=db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id_t)
 
@@ -518,15 +482,15 @@ def update_tarea(id_t='', username=None, **kwargs):
         for group in kwargs['grupo']:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
-                print("Grupo no encontrado")
+                logger_config.logger.error("Grupo no encontrado")
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
-                print("Grupo eliminado")
+                logger_config.logger.error("Grupo eliminado")
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             if existe_grupo.suspendido==True:
-                print("Grupo suspendido")
+                logger_config.logger.error("Grupo suspendido")
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             nuevoID=uuid.uuid4()
@@ -543,22 +507,27 @@ def update_tarea(id_t='', username=None, **kwargs):
                 
                 db.session.add(nuevo_tarea_grupo)
             else:
-                print("Reactiva grupo")
+                #print("Reactiva grupo")
                 if tareaxgrupo.eliminado==True:
                     tareaxgrupo.eliminado=False
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
 
-            grupo = {
-                "id_grupo": existe_grupo.id,
-                "nombre": existe_grupo.nombre,
-                "asignado": 'True',
-                "fecha_asisgnacion": datetime.now()
-            }
-            grupos.append(grupo)
+    res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
+                                  ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== id_t).order_by(TareaXGrupo.eliminado).all()
 
-    print("Grupos asignados a la tarea:", grupos)
+
+    if res_grupos is not None:
+        for row in res_grupos:
+            grupo = {
+                "id_grupo": row.id,
+                "nombre": row.nombre,
+                "asignada": not(row.reasignada),
+                "fecha_asignacion": row.fecha_asignacion
+            }
+            
+            grupos.append(grupo)        
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
@@ -597,47 +566,32 @@ def update_tarea(id_t='', username=None, **kwargs):
                     asigna_usuario.fecha_actualizacion=datetime.now()
                     asigna_usuario.id_user_actualizacion=id_user_actualizacion
 
+    res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
+                                  ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== id_t).order_by(TareaAsignadaUsuario.eliminado).all()                
+                                  
+    if res_usuarios is not None:
+        for row in res_usuarios:
             usuario = {
-                "id_usuario": existe_usuario.id,
-                "nombre": existe_usuario.nombre,
-                "apellido": existe_usuario.apellido,
-                "asignado": 'True',
-                "fecha_asignacion": datetime.now()
+                "id_usuario": row.id,
+                "nombre": row.nombre,
+                "apellido": row.apellido,
+                "asignada": not(row.reasignada),
+                "fecha_asignacion": row.fecha_asignacion
             }
             usuarios.append(usuario)
-    """ else:
-        #Asigna el usuario que crea la tarea por defecto
-        if id_usuario_asignado is not None:
-            existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
-            if existe_usuario is not None:
-                nuevoID=uuid.uuid4()
-                asigna_usuario = TareaAsignadaUsuario(
-                    id=nuevoID,
-                    id_tarea=id,
-                    id_usuario=id_usuario_asignado,
-                    id_user_actualizacion= id_user_actualizacion,
-                    fecha_asignacion=datetime.now(),
-                    fecha_actualizacion=datetime.now()
-                )
-                db.session.add(asigna_usuario) 
-                
-                usuario = {
-                "id": existe_usuario.id,
-                "nombre": existe_usuario.nombre,
-                "apellido": existe_usuario.apellido,
-                "asignado": 'True',
-                "fecha_asignacion": datetime.now()
-                }
-                usuarios.append(usuario)  """
-    print ("Arma el resultado")
+
+
     ###################Formatear el resultado####################
+    prioridad = {"id": tarea.prioridad, "descripcion": nombre_prioridad(tarea.prioridad)}
+    estado = {"id": tarea.estado, "descripcion": nombre_estado(tarea.estado)}
     result = {
         "id": tarea.id,
         "titulo": tarea.titulo,
         "fecha_inicio": tarea.fecha_inicio,
         "fecha_fin": tarea.fecha_fin,
         "plazo": tarea.plazo,
-        "prioridad": tarea.prioridad,
+        "prioridad": prioridad,
+        "estado": estado,
         "id_tipo_tarea": tarea.id_tipo_tarea,
         "id_subtipo_tarea": tarea.id_subtipo_tarea,
         "tipo_tarea": tarea.tipo_tarea,
@@ -662,17 +616,14 @@ def update_tarea(id_t='', username=None, **kwargs):
     return result
 
 def update_lote_tareas_v2(username=None, **kwargs):
-    print("update_tarea_V2 --")
-    print(kwargs)
-    print("#"*50)
-
+    
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
         if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
-                verifica_usr_id(kwargs['id_user_actualizacion'])
+                utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
             else:
@@ -683,7 +634,6 @@ def update_lote_tareas_v2(username=None, **kwargs):
         datos = []
         datos_error = []
         for tareas_update in upd_tarea:
-           print("tareas_update:", tareas_update)
            resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
            if resp is None:
                 datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
@@ -698,16 +648,14 @@ def update_lote_tareas_v2(username=None, **kwargs):
     return result
 
 def update_lote_tareas_v22(username=None, **kwargs):
-    print("update_tarea_V2")
-
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
         if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
-                verifica_usr_id(kwargs['id_user_actualizacion'])
+                utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
             else:
@@ -733,16 +681,13 @@ def update_lote_tareas_v22(username=None, **kwargs):
 
 def update_lote_tareas(username=None, **kwargs):
     
-    print("update_tarea")
-
-    
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
         if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
-                verifica_usr_id(kwargs['id_user_actualizacion'])
+                utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
             else:
@@ -775,15 +720,15 @@ def update_lote_tareas(username=None, **kwargs):
         for group in kwargs['grupo']:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
-                print("Grupo no encontrado")
+                logger_config.logger.error("Grupo no encontrado")
                 raise Exception("Error en el ingreso de grupos. Grupo no existente: ") + group['id_grupo']
             
             if existe_grupo.eliminado==True:
-                print("Grupo eliminado")
+                logger_config.logger.error("Grupo eliminado")
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             if existe_grupo.suspendido==True:
-                print("Grupo suspendido")
+                logger_config.logger.error("Grupo suspendido")
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
     if 'usuario' in kwargs:
         for user in kwargs['usuario']:
@@ -810,31 +755,22 @@ def update_lote_tareas(username=None, **kwargs):
                     print("Tarea encontrada:", tarea.id)
                     if 'caratula_expediente' in kwargs:
                         tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
-                        print("Caratula:", tarea.caratula_expediente)
                     if 'cuerpo' in kwargs:
                         tarea.cuerpo = kwargs['cuerpo']
-                        print("Cuerpo:", tarea.cuerpo)
                     if 'eliminable' in kwargs:
                         tarea.eliminable = kwargs['eliminable']
-                        print("Eliminable:", tarea.eliminable)
                     if 'id_actuacion' in kwargs:
                         tarea.id_actuacion = kwargs['id_actuacion']
-                        print("Actuacion:", tarea.id_actuacion)
                     if 'id_expediente' in kwargs:
                         tarea.id_expediente = kwargs['id_expediente'] 
-                        print("Expediente:", tarea.id_expediente)   
                     if 'plazo' in kwargs:
                         tarea.plazo = kwargs['plazo']
-                        print("Plazo:", tarea.plazo)
                     if 'prioridad' in kwargs:
                         tarea.prioridad = kwargs['prioridad']
-                        print("Prioridad:", tarea.prioridad)
                     if 'estado' in kwargs:
                         tarea.estado = kwargs['estado']    
-                        print("Estado:", tarea.estado)
                     if 'titulo' in kwargs:
                         tarea.titulo = kwargs['titulo']
-                        print("Titulo:", tarea.titulo) 
                     #Validacion de tipo y subtipo de tarea
                     if 'id_tipo_tarea' in kwargs:
                         tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
@@ -843,7 +779,6 @@ def update_lote_tareas(username=None, **kwargs):
                  
                     tarea.id_user_actualizacion = id_user_actualizacion  
                     tarea.fecha_actualizacion = datetime.now()
-                    print("Tarea actualizada:", tarea.id)
                     usuarios=[]
                     grupos=[]
                     if 'grupo' in kwargs:
@@ -896,7 +831,6 @@ def update_lote_tareas(username=None, **kwargs):
 
                         #asocio el usuario a la tarea
                         for user in kwargs['usuario']:
-                            print("Asigna Usuario:", user['id_usuario'])
                             existe_usuario = db.session.query(Usuario).filter(Usuario.id == user['id_usuario']).first()
                             if existe_usuario is None:
                                 raise Exception("Error en el ingreso de usuarios. Usuario no existente")
@@ -963,10 +897,10 @@ def get_all_tipo_tarea(page=1, per_page=10):
 def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
            
@@ -986,13 +920,13 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
     return nuevo_tipo_tarea
 
 
-def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):    
+def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
 
@@ -1017,14 +951,12 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
 
 
 def delete_tipo_tarea(username=None, id=None):
-
-    
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -1041,8 +973,6 @@ def delete_tipo_tarea(username=None, id=None):
 #########################SUBTIPO TAREA############################################
 @cache.memoize(timeout=50)
 def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None):
-    #print("get_tipo_tareas - ", page, "-", per_page)
-    
 
     query = db.session.query(SubtipoTarea)
     if id_tipo_tarea is not None:
@@ -1056,13 +986,12 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     return res, total    
 
 def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False):
-    
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -1090,10 +1019,10 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
 def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
 
@@ -1116,12 +1045,12 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     return subtipo_tarea
 
 def delete_subtipo_tarea(username=None, id=None):
-
+    
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -1133,7 +1062,6 @@ def delete_subtipo_tarea(username=None, id=None):
         db.session.commit()
         return subtipo_tarea
     else:
-        #print("Subtipo de tarea no encontrado")
         return None
     
 ##########################TAREAS #############################################
@@ -1142,7 +1070,6 @@ def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', no
     
     tareas = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
     if tareas is None:
-        #print("Tarea no encontrada")
         msg = "Tarea no encontrada"
         asigna_usuario= None
         return asigna_usuario, msg
@@ -1150,7 +1077,6 @@ def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', no
     tarea_asignada = db.session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea==id_tarea, TareaAsignadaUsuario.id_usuario==id_usuario).first()
     
     if tarea_asignada is not None:
-        #print("Usuario ya asignado a la tarea")
         msg = "Usuario ya asignado a la tarea"
         asigna_usuario= None
         return asigna_usuario, msg
@@ -1213,7 +1139,6 @@ def get_tarea_historia_usr_by_id(id):
 
 # Ejecutar la consulta
     result = query.all()
-    print (result)
     return result
 
 @cache.memoize(timeout=50)
@@ -1233,14 +1158,13 @@ def get_tarea_by_id(id):
         
         res_notas = db.session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
 
-            
+        usuarios=[]
+        grupos=[]
+        notas=[]    
+        reasignada_usuario=False
+        reasignada_grupo=False
+        grupos_usr=[]
         if res_usuarios is not None:
-            usuarios=[]
-            grupos=[]
-            notas=[]
-            reasignada_usuario=False
-            reasignada_grupo=False
-            grupos_usr=[]
             for row in res_usuarios:
                 usuario_grupo = db.session.query(UsuarioGrupo.id_grupo, Grupo.nombre).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario==row.id, UsuarioGrupo.eliminado==False).all()
                 if usuario_grupo is not None:
@@ -1329,7 +1253,6 @@ def get_tarea_by_id(id):
         results.append(result)
    
     else:
-        #print("Tarea no encontrada")
         return None
     
     return results 
@@ -1338,10 +1261,9 @@ def get_tarea_by_id(id):
 def get_tarea_grupo(username=None, page=1, per_page=10):
         
     if username is not None:
-        id_user = get_username_id(username)
+        id_user = utils.get_username_id(username)
         if id_user is None:
             raise Exception("Usuario no encontrado")
-    #id_user = 'f9799cd5-aad3-4339-ac6e-62544e3e64f1'
     # Obtener los grupos del usuario
     query_grupo = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id_user, UsuarioGrupo.eliminado==False).all()
     ids_grupos = [row.id_grupo for row in query_grupo]
@@ -1373,9 +1295,7 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
             .filter(TareaAsignadaUsuario.id_usuario==id_user)
             .order_by(desc(Tarea.fecha_creacion))
         )
-        for row in query:
-            print(row)
-
+        
         total_query = (
             db.session.query(func.count(Tarea.id))
             .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
@@ -1418,12 +1338,6 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
             .filter(TareaXGrupo.id_grupo.in_(ids_grupos))
             .order_by(desc(Tarea.fecha_creacion))
         )
-
-        for row in query:
-            print(row)
-            print("asignada_grupo:", row.asignada_grupo)
-            print("asignada_usuario:", row.asignada_usuario)
-            print("-------------------------------------------------")
 
         # Calcular el total de tareas
         total_query = (
@@ -1513,39 +1427,6 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
     
     return results, total
 
-    
-
-    """ result = {
-            "id": tarea.id,
-            "titulo": tarea.titulo,
-            "fecha_inicio": tarea.fecha_inicio,
-            "fecha_fin": tarea.fecha_fin,
-            "plazo": tarea.plazo,
-            "prioridad": tarea.prioridad,
-            "estado": tarea.estado,
-            "id_tipo_tarea": tarea.id_tipo_tarea,
-            "id_subtipo_tarea": tarea.id_subtipo_tarea,
-            "tipo_tarea": tarea.tipo_tarea,
-            "subtipo_tarea": tarea.subtipo_tarea,
-            "id_expediente": tarea.id_expediente,
-            "expediente": tarea.expediente,
-            "caratula_expediente": tarea.caratula_expediente,
-            "id_actuacion": tarea.id_actuacion,
-            "actuacion": tarea.actuacion,
-            "cuerpo": tarea.cuerpo,
-            "eliminable": tarea.eliminable,
-            "eliminado": tarea.eliminado,
-            "fecha_eliminacion": tarea.fecha_eliminacion,
-            "fecha_actualizacion": tarea.fecha_actualizacion,
-            "fecha_creacion": tarea.fecha_creacion,
-            "grupos": grupos,
-            "usuarios": usuarios,
-            "id_user_actualizacion": tarea.id_user_actualizacion,
-            "user_actualizacion": tarea.user_actualizacion
-         }
-        results.append(result) """
-
-
 
 @cache.memoize(timeout=50)
 def get_tarea_grupo_by_id(username=None, page=1, per_page=10): 
@@ -1553,14 +1434,14 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     results = []
 
     if username is not None:
-        id_user = get_username_id(username)
+        id_user = utils.get_username_id(username)
         if id_user is None:
             raise Exception("Usuario no encontrado")
         
     query_grupo = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_user).all()    
         
     if not query_grupo:  # Si no pertenece a ningún grupo
-        print("Usuario no pertenece a ningún grupo")
+        #print("Usuario no pertenece a ningún grupo")
         reasignada_grupo=False
         query = (
             db.session.query(Tarea)
@@ -1571,7 +1452,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     else:
     # Recopilamos todos los IDs de grupos en una lista
         ids_grupos = [row.id_grupo for row in query_grupo]
-        print("IDs de grupos:", ids_grupos)
+        #print("IDs de grupos:", ids_grupos)
         
         # Consulta para obtener las tareas de los grupos
         query = (
@@ -1583,7 +1464,6 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
         )
 
     total= len(query.all())
-    print("total de tareas:", total)
     res_tareas = query.offset((page-1)*per_page).limit(per_page).all()
 
     results = []
@@ -1598,7 +1478,6 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
         reasignada_grupo=False
         res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                    ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.eliminado).all()
-        #print(str(res_grupos))
 
         for row in res_grupos:
             grupo = {
@@ -1616,9 +1495,6 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
                                      ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
        
 
-        #res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
-        #                          ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).order_by(TareaAsignadaUsuario.eliminado).all()
-        
         if res_usuarios is not None:
             for row in res_usuarios:
                 usuario = {
@@ -1771,18 +1647,10 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
         
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())    
 
-    print("Fecha desde:", fecha_desde)
-    print("Fecha hasta:", fecha_hasta)
-    print("Prioridad:", prioridad)
-    print("Estado:", estado)
-    print('grupos:', grupos)
-    print("Labels:", labels)
-
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-    print("Total de tareas 1:", query.count())
+    logger_config.logger.info(f"Total de tareas: {query.count()}")
 
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
-        print("Filtro por fecha fin")
         fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%d/%m/%Y').date()
         fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%d/%m/%Y')
         fecha_fin_hasta = datetime.combine(fecha_fin_hasta, datetime.max.time())
@@ -1800,11 +1668,11 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
-        print("ID usuario asignado:", id_usuario_asignado)
+        logger_config.logger.info(f"ID usuario asignado: {id_usuario_asignado}")
         query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea
                 ).filter(TareaAsignadaUsuario.id_usuario== id_usuario_asignado, TareaAsignadaUsuario.eliminado==False
                 )
-        print("Total de tareas para el usr:", query.count())
+        logger_config.logger.info(f"Total de tareas para el usr: {query.count()}")
     if prioridad and prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
     if estado  and estado > 0:
@@ -1821,32 +1689,26 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             for l in labels.split(',') if l.strip()
         ]
         #labels = labels.split(",")
-        print("labels:", labels)
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
         # Elimina comillas simples, dobles y espacios, luego separa por coma y limpia cada elemento
-        #grupos_limpios = [g.strip().replace('"', '').replace("'", '') for g in grupos.split(',') if g.strip()]
         # Primero eliminás comillas dobles, simples y luego dividís por coma
         grupos = [
             g.strip().replace('"', '').replace("'", '') 
             for g in grupos.split(',') if g.strip()
         ]
         #grupos = grupos.split(",")
-        print("Grupos a filtrar:", grupos)
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
                 ).distinct()         
 
     # Get total count of tasks matching the filter
     total = query.count()
-    print("Total de tareas 2:", total)
     
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
-    for tarea in res_tareas:
-        logger.info(f"Tarea: {tarea.id} - {tarea.titulo}")
 
     # Process each task in paginated results
     results = []
@@ -2079,17 +1941,16 @@ def usuarios_tarea(tarea_id=""):
                         .join(Tarea, TareaAsignadaUsuario.id_tarea == Tarea.id)\
                         .filter(Tarea.id == tarea_id, TareaAsignadaUsuario.eliminado==False)\
                         .all()
-    print("Usuarios por tarea:", usuarios)
     return usuarios
 
 
 def delete_tarea(username=None, id_tarea=None):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
 
@@ -2107,7 +1968,6 @@ def delete_tarea(username=None, id_tarea=None):
         return tarea
     
     else:
-        #print("Tarea no encontrada")
         return None
     
 

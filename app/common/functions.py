@@ -1,6 +1,5 @@
 from datetime import datetime
-
-from common.error_handling import ValidationError
+import common.error_handling as error_handling
 
 #import requests
 from flask import request, has_request_context
@@ -11,7 +10,6 @@ def get_user_ip():
             ip = request.headers['X-Forwarded-For'].split(',')[0]
         else:
             ip = request.remote_addr
-        print("Funcion IP del usuario:", ip)
         return ip
     else:
         # Si no hay contexto de solicitud, retorna una IP por defecto o None
@@ -26,7 +24,7 @@ def controla_fecha(fecha_in=''):
             
             return fecha
         except:
-            raise ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
+            raise error_handling.ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
    
 
 def formato_expte(expte):

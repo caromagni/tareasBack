@@ -1,13 +1,7 @@
-from os import link
-from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
 from enum import Enum
-#from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
 from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested, List
-from apiflask.validators import Length, OneOf
-#from flask_marshmallow import Marshmallow
-
 from models.alch_model import TipoTarea, Tarea
 import re
 from datetime import datetime
@@ -179,6 +173,7 @@ class GroupIn(Schema):
     ])
 
 class GroupPatchIn(Schema):
+    base = Boolean(default=False)
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -874,33 +869,70 @@ class UsuarioCountOut(Schema):
     count = Integer()
     data = Nested(UsuarioOut, many=True)     
 
+class CasoUsoOut(Schema):
+    id = String()
+    descripcion_ext = String()
+
 class UsuarioRolOut(Schema):
     #id = String()
     email = String()
     rol= String()
+    usuario_cu = List(Nested(CasoUsoOut))
+
 
 class UsuarioCountRolOut(Schema):
     count = Integer()
     data = Nested(UsuarioRolOut, many=True)
-
-class TareaAllOut(Schema):
+    
+class TareaPatchAllOut(Schema):
     id = String()
-    #id_grupo = String()
-    #prioridad = Integer()
     #estado = Integer()
-    prioridad = fields.Nested(PrioridadSchema, metadata={
-        "description": "1 (alta), 2 (media), 3 (baja)"
-    })
     #prioridad = Integer()
-    estado = fields.Nested(EstadoSchema, metadata={
-        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    })
-    #estado = Integer()
+    estado = Nested(EstadoSchema)
+    prioridad = Nested(PrioridadSchema)
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
     id_expediente = String()
-    #caratula_expediente = String()
+    expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
+    id_tipo_tarea = String()
+    id_subtipo_tarea = String()
+    eliminable = Boolean()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_inicio = String()
+    fecha_fin = String()
+    fecha_actualizacion = String()
+    fecha_creacion = String()
+    id_user_actualizacion = String()
+    user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
+    plazo = Integer()
+    fecha_creacion = String()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
+    grupo = List(Nested(GroupTareaOut))
+    usuario = List(Nested(UsuarioTareaOut))
+    reasignada_usuario = Boolean()
+    reasignada_grupo = Boolean()
+    tiene_notas = Boolean()
+
+class TareaAllOut(Schema):
+    id = String()
+    #estado = Integer()
+    #prioridad = fields.Nested(PrioridadSchema, metadata={
+    #    "description": "1 (alta), 2 (media), 3 (baja)"
+    #})
+    prioridad = fields.Nested(PrioridadSchema)
+    #prioridad = Integer()
+    #estado = fields.Nested(EstadoSchema, metadata={
+    #    "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    #})
+    estado = fields.Nested(EstadoSchema)
+    id_actuacion = String()
+    titulo = String()
+    cuerpo = String()
+    id_expediente = String()
     expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     id_tipo_tarea = String()
@@ -1427,3 +1459,41 @@ class LabelXTareaCountAllOut(Schema):
 class LabelXTareaCountOut(Schema):
     count = Integer()
     data = Nested(LabelXTareaOut, many=True)  
+
+class CUInput(Schema):
+    codigo = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
+    descripcion = String(required=True, validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    
+class CUOut(Schema):
+    id = String()
+    codigo = String()
+    descripcion = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    
+
+class CUCountOut(Schema):
+    count = Integer()
+    data = Nested(CUOut, many=True)    
+
+
+class ListCU(Schema):
+    codigo = String()
+
+class EPInput(Schema):
+    metodo = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
+    url = String(required=True, validate=validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"))
+    descripcion = String(required=True, validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    caso_uso = List(Nested(ListCU))
+
+
+class EPOut(Schema):
+    metodo = String()
+    url = String()
+    descripcion = String()
+    caso_uso = String()
+    fecha_actualizacion = String()
+
+class EPCountOut(Schema):
+    count = Integer()
+    data = Nested(EPOut, many=True)

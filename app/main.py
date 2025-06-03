@@ -19,20 +19,21 @@ from blueprints.expediente import expediente_b
 from blueprints.nota import nota_b
 from blueprints.label import label_b
 from blueprints.alerta import alerta_b
+from blueprints.endpoint import ep_b
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
 from models.alch_model import Base
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
-from config import Config
+from config.config import Config
 from common.error_handling import register_error_handlers
 from common.api_key import *
 from common.chk_messagges import *
 import sys
 from models.alch_model import Base
-from alchemy_db import db
+from db.alchemy_db import db
 from flask_caching import Cache
 sys.setrecursionlimit(100)
-from cache import cache  # Import the shared cache instance
+from common.cache import cache  # Import the shared cache instance
 import threading
 
 def create_app():
@@ -135,6 +136,7 @@ def create_app():
     app.register_blueprint(label_b)
     app.register_blueprint(alerta_b)
     app.register_blueprint(ai_assistant)
+    app.register_blueprint(ep_b)
 
     from flask import request, make_response
 

@@ -1,20 +1,12 @@
 import pika
 import json
-import time
 import os
-from flask import current_app
-from alchemy_db import db
-from models.alch_model import Parametros, Usuario, TipoTarea, SubtipoTarea, Organismo, Inhabilidad
-import requests
-import uuid
-from sqlalchemy import text
-from datetime import datetime
+from db.alchemy_db import db
+from flask import g
 import common.utils as utils
 import traceback
-from flask import g
 import common.sync  as sync
-from common.logger_config import logger
-
+import common.logger_config as logger_config
 
 def check_updates_new( rabbit_message: dict):
         
@@ -25,33 +17,31 @@ def check_updates_new( rabbit_message: dict):
         url = rabbit_message.get('url').lower()
         
         if not entity:
-            print("error entity")
-            logger.info("No se ha especificado una entidad.")
+            logger_config.logger.info("No se ha especificado una entidad.")
             return
         if not action:
-            logger.info("No se ha especificado una acción.")
+            logger_config.logger.info("No se ha especificado una acción.")
             return
         if not entity_id:
-            logger.info("No se ha especificado un ID de entidad.")
+            logger_config.logger.info("No se ha especificado un ID de entidad.")
             return
         if not url:
-            logger.info("No se ha especificado una URL.")
+            logger_config.logger.info("No se ha especificado una URL.")
             return
         print("##################################################")
-        logger.info(f"entity: {entity}")
-        logger.info("Before query to Parametros")
+        logger_config.logger.info(f"entity: {entity}")
+        logger_config.logger.info("Before query to Parametros")
    
 
         if action in ["POST", "PUT"]:
-            print("action: ", action)
             usher_apikey = os.environ.get('USHER_API_KEY')
             system_apikey = os.environ.get('SYSTEM_NAME')
             headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
             id_user = utils.get_username_id('pusher')
             g.id_user = id_user
-            print("id user: ", id_user)
-            print("entity: ", entity)
+            #print("id user: ", id_user)
+            #print("entity: ", entity)
             try:
                 match entity:
                     case 'tipo_act_juzgado':
@@ -71,11 +61,12 @@ def check_updates_new( rabbit_message: dict):
                         res=sync.sync_inhabilidad(entity_id, url, id_user)
                     case _:
                        
-                        logger.info(f" {entity} is not subscribed")
+                        logger_config.logger.info(f" {entity} is not subscribed")
             
             except Exception as e:
                 print(traceback.format_exc())
-                print("Error en check_updates:", e)                         
+                #print("Error en check_updates:", e)
+                logger_config.logger.info(f"Error en check_updates: {e}")                         
 
 class RabbitMQHandler:
     def __init__(self):
@@ -107,7 +98,7 @@ class RabbitMQHandler:
                 self.connection = pika.BlockingConnection(connection_params)
                 self.channel = self.connection.channel()
                 self.channel.queue_declare(queue='tareas_params', durable=True, passive=True)
-                print("RabbitMQ conectado.")
+                logger_config.logger.info("RabbitMQ conectado.")
                 return
             except pika.exceptions.ChannelClosedByBroker as e:
                 if e.reply_code == 404:
@@ -119,7 +110,7 @@ class RabbitMQHandler:
 
     def callback(self, ch, method, properties, body):
         try:
-            logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
+            logger_config.logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
             self.objeto = json.loads(body.decode('utf-8'))
             #with current_app.app_context():
             #    self.process_message(db.session)
@@ -133,7 +124,7 @@ class RabbitMQHandler:
  
 
         except Exception as e:
-            print("Error procesando el mensaje:", e)
+            logger_config.logger.error(f"Error procesando el mensaje: {e}")
             ch.basic_ack(delivery_tag=method.delivery_tag)
             #reintentar o descartar el mensaje (requeue=False)
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
@@ -155,19 +146,19 @@ class RabbitMQHandler:
 
     def start_consuming(self):
         if not self.channel:
-            print("No se puede consumir mensajes sin conexión.")
+            logger_config.logger.error("No se puede consumir mensajes sin conexión.")
             raise Exception("No se puede consumir mensajes sin conexión.")
 
         self.channel.basic_consume(queue='tareas_params', 
                                    auto_ack=False, 
                                    on_message_callback=self.callback
                 )
-        print(' [*] Waiting for messages. To exit press CTRL+C')
+        logger_config.logger.info("[*] Waiting for messages. To exit press CTRL+C")
         try:
             self.channel.start_consuming()
 
         except KeyboardInterrupt:
-            print("Consumo de mensajes detenido manualmente.")
+            logger_config.logger.info("Consumo de mensajes detenido manualmente.")
             raise Exception("Consumo de mensajes detenido manualmente.")
        
     

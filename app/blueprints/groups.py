@@ -7,7 +7,7 @@ import traceback
 from flask import g
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
-from cache import cache
+from common.cache import cache
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -17,7 +17,7 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 @groups_b.before_request
 def before_request():
     print("************ingreso a before_request Usuarios************")
-    jsonHeader = auth_token.verify_header()
+    """ jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=None
@@ -27,7 +27,10 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin
+    g.type = type_origin """
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
 
 
 
@@ -36,7 +39,7 @@ def before_request():
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(schema.GroupPatchIn) 
 @groups_b.output(schema.GetGroupOut)
-@rol.require_role(["modificar-grupo"])
+@rol.require_role("Operador")
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
         username=g.username
@@ -56,7 +59,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.get('/grupo')
 @groups_b.input(schema.GroupGetIn,  location='query')
 @groups_b.output(schema.GetGroupCountOut)
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def get_grupo(query_data: dict):
     try:
 
@@ -91,7 +94,7 @@ def get_grupo(query_data: dict):
 @groups_b.get('/grupo_detalle')
 @groups_b.input(schema.GroupGetIn, location='query')
 @groups_b.output(schema.GroupCountAllOut)
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def get_grupo_detalle(query_data: dict):
     try:
         page=1
@@ -122,7 +125,7 @@ def get_grupo_detalle(query_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(schema.GroupIdOut())
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def get_grupo_id(id: str):
     try:
         #can_pass=validar_rol(jwt,["leer-grupo"])
@@ -140,7 +143,7 @@ def get_grupo_id(id: str):
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut(many=True))
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def get_all_grupobase(query_data: dict):
     try:
         id=None
@@ -162,8 +165,7 @@ def get_all_grupobase(query_data: dict):
 @groups_b.get('/usuarios_grupo')
 @groups_b.input(schema.UsuariosGroupIn, location='query')
 @groups_b.output(schema.UsuariosGroupOut(many=True))
-# @rol.require_role(["consultar-grupo"])
-# @cache.cached(timeout=50, query_string=True)
+@rol.require_role("Operador")
 def get_usrsbygrupo(query_data: dict):
     try:
         grupos=None
@@ -183,7 +185,7 @@ def get_usrsbygrupo(query_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(schema.GroupIn)
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def post_grupo(json_data: dict):
     try:
         username=g.username
@@ -208,7 +210,7 @@ def post_grupo(json_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 @groups_b.output(schema.GroupOut)
-@rol.require_role(["eliminar-grupo"])
+@rol.require_role("Operador")
 def del_grupo(id: str):
     try:
         username=g.username
@@ -228,7 +230,7 @@ def del_grupo(id: str):
 ##################UNDELETE####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
 @groups_b.patch('/grupo_undelete/<string:id>')
-@rol.require_role(["modificar-grupo"])
+@rol.require_role("Operador")
 def restaura_grupo(id: str):
     try:
         username=g.username
@@ -253,7 +255,7 @@ def restaura_grupo(id: str):
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut)
 @groups_b.get('/grupo_base/<string:id>')
-@rol.require_role(["consultar-grupo"])
+@rol.require_role("Operador")
 def getGrupoBase(id: str):
     try:
         id_grupo=None

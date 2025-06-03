@@ -1,24 +1,10 @@
 import uuid
-from models.usuario_model import get_grupos_by_usuario
-from models.tarea_model import get_tarea_by_id
-from sqlalchemy.orm import scoped_session, joinedload
-from sqlalchemy.sql import func
-from datetime import datetime, timedelta
-from common.functions import controla_fecha
-from common.utils import *
-from common.error_handling import ValidationError
-from common.logger_config  import logger
+from datetime import datetime
+import common.utils as utils
+import common.logger_config as logger_config
 from models.grupo_hierarchy import find_parent_id_recursive
-from cache import cache
-
-
-
-from flask import current_app
-from alchemy_db import db
-from .alch_model import Label, Grupo, HerarquiaGrupoGrupo, LabelXTarea, Tarea
-from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
-
-    
+from db.alchemy_db import db
+from .alch_model import Label, LabelXTarea, Tarea
 
 ########################## LABELS #############################################
 # def buscar_grupo_padre_recursivo(id):
@@ -43,10 +29,10 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     ids_labels=[]
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")  
     
@@ -172,10 +158,10 @@ def get_label_by_id(id):
 def delete_label(username=None, id_label=None):    
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")
     
@@ -244,10 +230,10 @@ def get_active_labels(ids_grupos_base):
 ############################## LABELS x TAREA ########################################
 def insert_label_tarea(username=None, **kwargs):
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado") 
     
@@ -410,7 +396,7 @@ def delete_label_tarea_model(username=None, id=None):
         raise Exception("Usuario no ingresado")
 
     # Verify the username and get the user ID
-    id_user_actualizacion = get_username_id(username)
+    id_user_actualizacion = utils.get_username_id(username)
     if not id_user_actualizacion:
         raise Exception("Usuario no ingresado")
 

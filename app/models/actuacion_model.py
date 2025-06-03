@@ -1,6 +1,6 @@
-from alchemy_db import db
+from db.alchemy_db import db
 from models.alch_model import ActuacionExt, TipoActuacionExt
-from cache import cache
+from common.cache import cache
 
 @cache.memoize(timeout=50)
 def get_all_actuaciones():

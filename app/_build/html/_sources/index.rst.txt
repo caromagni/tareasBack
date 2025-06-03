@@ -5,20 +5,19 @@ Documentación de Tareas
    :maxdepth: 2
    :caption: Contenido:
 
-   introduccion
-   arquitectura
-   referencia_api
-   /modulos/alertas
-   /modulos/roles
-   /modulos/grupos
-   /modulos/calendario
-   /modulos/asignacion_usuarios_tareas
-   /modulos/tareas_asignacion_y_control
-   /modulos/etiquetas
-   /modulos/notas
-   /modulos/bandeja_principal
-   /modulos/estado_tareas
-   /modulos/referencia_api
+   ./modulos/introduccion
+   ./modulos/arquitectura
+   ./modulos/alertas
+   ./modulos/roles
+   ./modulos/grupos
+   ./modulos/calendario
+   ./modulos/asignacion_usuarios_tareas
+   ./modulos/tareas_asignacion_y_control
+   ./modulos/etiquetas
+   ./modulos/notas
+   ./modulos/bandeja_principal
+   ./modulos/estado_tareas
+   ./modulos/referencia_api
   
    .. /modulos/tareas_recurrentes
    .. /modulos/visibilidad_externa

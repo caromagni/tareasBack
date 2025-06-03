@@ -1,13 +1,11 @@
 import uuid
-from sqlalchemy.orm import scoped_session
 from datetime import datetime
-from common.utils import *
-from common.logger_config import logger
-from flask import current_app
-from alchemy_db import db
+import common.utils as utils
+import common.logger_config as logger_config
+from db.alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
-from cache import cache
-
+from collections import defaultdict
+from common.cache import cache
 
 @cache.memoize(timeout=50)
 def get_usuario_by_id(id):
@@ -243,21 +241,21 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_ex
     
 
     if user_actualizacion is not None:
-        id_user_actualizacion = get_username_id(user_actualizacion)
+        id_user_actualizacion = utils.get_username_id(user_actualizacion)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Usuario no ingresado")
+        logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")
 
     qry_username = db.session.query(Usuario).filter(Usuario.username == username).first()
     if qry_username is not None:
-        logger.error("Ya existe un usuario con el username ingresado")
+        logger_config.logger.error("Ya existe un usuario con el username ingresado")
         raise Exception("Ya existe un usuario con el username ingresado")
     qry_email = db.session.query(Usuario).filter(Usuario.email == email).first()
     if qry_email is not None:
-        logger.error("Ya existe un usuario con el email ingresado")
+        logger_config.logger.error("Ya existe un usuario con el email ingresado")
         raise Exception("Ya existe un usuario con el email ingresado")
     
     nuevoID_usuario=uuid.uuid4()
@@ -277,11 +275,11 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_ex
         for group in grupo:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
-                logger.error("Error en el ingreso de grupos. Grupo no existente")   
+                logger_config.logger.error("Error en el ingreso de grupos. Grupo no existente")   
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
 
             if existe_grupo.eliminado==True:
-                logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+                logger_config.logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
             nuevoID=uuid.uuid4()
@@ -301,14 +299,14 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_ex
 
 def update_usuario(id='',username=None, **kwargs):
     
-    logger.info("Update usuario")
+    logger_config.logger.info("Update usuario")
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Usuario no ingresado")
+        logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")
     
     usuario = db.session.query(Usuario).filter(Usuario.id == id).first()
@@ -352,11 +350,11 @@ def update_usuario(id='',username=None, **kwargs):
         for group in kwargs['grupo']:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
-                logger.error("Error en el ingreso de grupos. Grupo no existente")
+                logger_config.logger.error("Error en el ingreso de grupos. Grupo no existente")
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
-                logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+                logger_config.logger.error("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
             grupos_usuarios=db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == group['id_grupo'], UsuarioGrupo.id_usuario==id).first()
@@ -387,32 +385,46 @@ def update_usuario(id='',username=None, **kwargs):
     db.session.commit()
     return usuario
 
-
-@cache.cached(timeout=50)
+@cache.memoize(timeout=500)
 def get_rol_usuario(username=None):
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
         if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
+    else:
+        logger_config.logger.error("Usuario no ingresado")
+        raise Exception("Usuario no ingresado")        
         
-    res = db.session.query(Rol.email, Rol.rol).filter(Rol.email == username).distinct().all()
-    print("username:",username)
-    print("rol:",res)
+    #res = db.session.query(Rol.email, Rol.rol).filter(Rol.email == username).distinct().all()
+    res = db.session.query(Rol).filter(Rol.email == username).order_by(Rol.email, Rol.rol, Rol.descripcion_ext).all()
+
+    agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
+
+    for r in res:
+        key = (r.email, r.rol)
+        agrupado[key]["email"] = r.email
+        agrupado[key]["rol"] = r.rol
+        agrupado[key]["usuario_cu"].append({"descripcion_ext": r.descripcion_ext, "id": r.id})
+
+# Convertir el resultado en lista para salida tipo JSON
+    res = list(agrupado.values())
+    print("res: ", res)
+    
     return res
 
     
 def delete_usuario(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if username is None:
         id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Id de usuario no ingresado")
+        logger_config.logger.error("Id de usuario no ingresado")
         #raise Exception("Usuario no ingresado"
     
     usuario = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()

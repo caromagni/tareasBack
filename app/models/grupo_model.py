@@ -2,15 +2,11 @@ import uuid
 from sqlalchemy.orm import aliased
 from datetime import datetime
 from sqlalchemy import text
-from sqlalchemy.sql import func
-from sqlalchemy.dialects import postgresql
-from apiflask.fields import Integer, String
-from flask import current_app
-from common.utils import *
-#import common.utils as utils
-from alchemy_db import db
+import common.utils as utils
+import common.logger_config as logger_config
+from db.alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
-from cache import cache
+from common.cache import cache
 
 
 @cache.memoize(timeout=50)
@@ -662,10 +658,10 @@ def update_grupo(username=None,id='', **kwargs):
     #session: scoped_session = current_app.session
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -693,14 +689,13 @@ def update_grupo(username=None,id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    """ if 'id_user_actualizacion' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
-        
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
-
-    #print("Antes del if")
+    
+    if 'base' in kwargs:
+        grupo.base = kwargs['base']  
+        if 'id_padre' in kwargs:
+            if kwargs['id_padre'] is not None and kwargs['id_padre'] != '':
+               grupo.base = False
+                      
 
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
@@ -774,16 +769,98 @@ def update_grupo(username=None,id='', **kwargs):
                 
 
     db.session.commit()
-    return grupo
+
+    subquery = text("""
+            WITH RECURSIVE GroupTree AS (
+                        -- Anchor: empezar desde el grupo dado
+                        SELECT 
+                            g.id AS id_hijo,
+                            g.id AS id_padre,
+                            g.descripcion AS child_name,
+                            g.descripcion AS parent_name,
+                            g.id::text AS path,
+                            COALESCE(g.nombre, g.id::text) AS path_name,
+                            0 AS level,
+                            true AS is_childless,
+                            g.id AS group_id
+                        FROM 
+                            tareas.grupo g
+                        WHERE 
+                            g.id = :id_grupo
+
+                        UNION ALL
+
+                        -- Recursive: buscar padre del grupo actual
+                        SELECT 
+                            gpadre.id AS id_hijo,
+                            hgg.id_padre,
+                            ghijo.descripcion AS child_name,
+                            gpadre.descripcion AS parent_name,
+                            gpadre.id::text || ' -> ' || gt.path AS path,
+                            COALESCE(gpadre.nombre, gpadre.id::text) || ' -> ' || gt.path_name AS path_name,
+                            gt.level + 1 AS level,
+                            false AS is_childless,
+                            gpadre.id AS group_id
+                        FROM 
+                            tareas.herarquia_grupo_grupo hgg
+                        INNER JOIN 
+                            GroupTree gt ON gt.id_padre = hgg.id_hijo
+                        INNER JOIN 
+                            tareas.grupo ghijo ON hgg.id_hijo = ghijo.id
+                        INNER JOIN 
+                            tareas.grupo gpadre ON hgg.id_padre = gpadre.id
+                    )
+
+                    SELECT 
+                        gt.id_padre,
+                        gt.parent_name,
+                        gt.id_hijo,
+                        gt.child_name,
+                        gt.path,
+                        gt.path_name,
+                        gt.level,
+                        gt.is_childless,
+                        gt.group_id
+                    FROM 
+                        GroupTree gt
+                    ORDER BY 
+                        gt.level DESC;
+                    """)
+
+    cursor = db.session.execute(subquery, {"id_grupo": id}).fetchall()
+    if cursor:
+        print("Path posta:", cursor[0].path)
+
+    data={
+        "id": grupo.id,
+        "nombre": grupo.nombre,
+        "descripcion": grupo.descripcion,
+        "base": grupo.base,
+        "codigo_nomenclador": grupo.codigo_nomenclador,
+        "nomenclador": grupo.nomenclador,
+        "eliminado": grupo.eliminado,
+        "suspendido": grupo.suspendido,
+        "id_user_actualizacion": grupo.id_user_actualizacion,
+        "user_actualizacion": grupo.user_actualizacion,
+        "id_user_asignado_default": grupo.id_user_asignado_default,
+        "user_asignado_default": grupo.user_asignado_default,
+        "fecha_creacion": grupo.fecha_creacion,
+        "fecha_actualizacion": grupo.fecha_actualizacion,
+        "path": cursor[0].path if cursor else "",
+        "path_name": cursor[0].path_name if cursor else "",
+    }
+
+    return data
+#    return grupo
 
 def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -796,6 +873,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
+    
+    #Si tiene id_padre el grupo no es base
+    if id_padre is not '' and id_padre is not None: 
+        base = False
 
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -824,7 +905,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         )
         db.session.add(nuevo_usuario_grupo)
 
-    if id_padre is not '':        
+    if id_padre is not '' and id_padre is not None:        
         nueva_herarquia = HerarquiaGrupoGrupo(
             id=nuevoID,
             id_padre=id_padre,
@@ -926,7 +1007,7 @@ def get_usuarios_by_grupo(grupos):
     #for id in ids:
     
     if grupos is None:
-        logger.error("No se han proporcionado grupos para conultar usuarios")
+        logger_config.logger.error("No se han proporcionado grupos para conultar usuarios")
         raise Exception("No se han proporcionado grupos para conultar usuarios") 
 
     usrs = db.session.query(Grupo.id.label("id_grupo"),
@@ -1197,12 +1278,12 @@ def delete_grupo(username=None, id='', todos=False):
     
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Id de usuario no ingresado")
+        logger_config.logger.error("Id de usuario no ingresado")
         #raise Exception("Usuario no ingresado")    
     
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
@@ -1248,10 +1329,10 @@ def delete_grupo(username=None, id='', todos=False):
 def undelete_grupo(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")
     

@@ -1,15 +1,12 @@
 # auditoria.py
 from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
-from alchemy_db import db
+from db.alchemy_db import db
 from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo, Inhabilidad 
 import uuid
-from common.functions import get_user_ip
-#from flask import request, has_request_context
-
-
+import common.functions as functions
 
 
 ### modelos para los cuales se generará la auditoría ###
@@ -43,7 +40,6 @@ def convert_to_serializable(value):
     except TypeError:
         # Si no puede ser convertido a string, deja el valor como None
         return None
-        #return value
 
 def get_serializable_dict(instance):
     return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
@@ -51,8 +47,7 @@ def get_serializable_dict(instance):
 #@event.listens_for(scoped_session, 'after_flush')
 @event.listens_for(db.session, 'after_flush')
 def after_flush(session, flush_context):
-    print("entra a after_flush")
-    ip = get_user_ip()
+    ip = functions.get_user_ip()
     #ip='172.17.0.1'
     #print("ip:", ip)
     def get_nombre_tabla(modelo):
@@ -65,7 +60,6 @@ def after_flush(session, flush_context):
             case 'tarea_asignada_usuario':
                 return 'Auditoria_TareaAsignadaUsuario'
             case 'tarea_x_grupo':
-                print("entra a tarea_x_grupo")
                 return 'Auditoria_TareaxGrupo'
             case _:
                 return 'Auditoria'
