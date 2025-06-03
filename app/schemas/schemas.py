@@ -886,8 +886,10 @@ class UsuarioCountRolOut(Schema):
     
 class TareaPatchAllOut(Schema):
     id = String()
-    estado = Integer()
-    prioridad = Integer()
+    #estado = Integer()
+    #prioridad = Integer()
+    estado = Nested(EstadoSchema)
+    prioridad = Nested(PrioridadSchema)
     id_actuacion = String()
     titulo = String()
     cuerpo = String()

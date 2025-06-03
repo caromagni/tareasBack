@@ -6,12 +6,6 @@
         "caso_uso": [
             {
                 "codigo": "crear-tarea"
-            },
-            {
-                "codigo": "modificar-tarea"
-            },
-            {
-                "codigo": "eliminar-tarea"
             }
         ]
     },
@@ -31,7 +25,7 @@
         "descripcion": "Delete tarea",
         "caso_uso": [
             {
-                "codigo": "borrar-tarea"
+                "codigo": "eliminar-tarea"
             }
         ]
     },
@@ -46,12 +40,52 @@
         ]
     },
     {
+        "metodo": "PATCH",
+        "url": "/lote_tareas",
+        "descripcion": "Modificar tarea",
+        "caso_uso": [
+            {
+                "codigo": "modificar-tarea"
+            }
+        ]
+    },
+    {
         "metodo": "GET",
         "url": "/subtipo_tarea",
         "descripcion": "Consultar subtipo de tarea",
         "caso_uso": [
             {
-                "codigo": "consultar-tareas"
+                "codigo": "consultar-tipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/subtipo_tarea",
+        "descripcion": "Crear subtipo de tarea",
+        "caso_uso": [
+            {
+                "codigo": "crar-tipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/subtipo_tarea",
+        "descripcion": "Eliminar subtipo de tarea",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-subtipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/subtipo_tarea",
+        "descripcion": "Modificar subtipo de tarea",
+        "caso_uso": [
+            {
+                "codigo": "modificar-tipo-tarea"
             }
         ]
     },
@@ -61,10 +95,37 @@
         "descripcion": "Patch tipo_tarea",
         "caso_uso": [
             {
-                "codigo": "modificar_tarea"
-            },
+                "codigo": "modificar-tipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/tipo_tarea",
+        "descripcion": "POST tipo_tarea",
+        "caso_uso": [
             {
-                "codigo": "crear-tarea"
+                "codigo": "crear-tipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/tipo_tarea",
+        "descripcion": "DELETE tipo_tarea",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-tipo-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tipo_tarea",
+        "descripcion": "Get tipo_tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
             }
         ]
     },
@@ -89,6 +150,76 @@
         ]
     },
     {
+        "metodo": "POST",
+        "url": "/label",
+        "descripcion": "Post label",
+        "caso_uso": [
+            {
+                "codigo": "crear-label"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/label",
+        "descripcion": "Patch label",
+        "caso_uso": [
+            {
+                "codigo": "modificar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/label",
+        "descripcion": "Delete label",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/label_grupo",
+        "descripcion": "GET label_grupo",
+        "caso_uso": [
+            {
+                "codigo": "consultar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/label_tarea",
+        "descripcion": "GET label_tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/label_tarea",
+        "descripcion": "DELETE label_tarea",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-label"
+            }
+        ]
+    },
+    {
+        "metodo": "PUT",
+        "url": "/label_tarea",
+        "descripcion": "PUT label_tarea",
+        "caso_uso": [
+            {
+                "codigo": "crear-label"
+            }
+        ]
+    },
+    {
         "metodo": "GET",
         "url": "/actuacion",
         "descripcion": "Get actuacion",
@@ -100,8 +231,98 @@
     },
     {
         "metodo": "GET",
+        "url": "/tipo_actuaciones",
+        "descripcion": "GET tipo_actuaciones",
+        "caso_uso": [
+            {
+                "codigo": "consultar-actuacion"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tarea_detalle",
+        "descripcion": "GET tarea_detalle",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tarea_grupo",
+        "descripcion": "GET tarea_grupo",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tarea_historia_usr",
+        "descripcion": "GET tarea_historia_usr",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tarea_notas",
+        "descripcion": "GET tarea_notas",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/usuario_tarea",
+        "descripcion": "GET usuario_tarea",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/groups_with_base",
+        "descripcion": "GET groups_with_base",
+        "caso_uso": [
+            {
+                "codigo": "consultar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/grupo_usuario",
+        "descripcion": "GET grupo_usuario",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
         "url": "/usuario",
         "descripcion": "GET usuario",
+        "caso_uso": [
+            {
+                "codigo": "consultar-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/usuario_detalle",
+        "descripcion": "GET usuario_detalle",
         "caso_uso": [
             {
                 "codigo": "consultar-usuario"
@@ -119,12 +340,32 @@
         ]
     },
     {
+        "metodo": "DELETE",
+        "url": "/usuario",
+        "descripcion": "DELETE usuario",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-usuario"
+            }
+        ]
+    },
+    {
         "metodo": "POST",
         "url": "/usuario",
         "descripcion": "POST usuario",
         "caso_uso": [
             {
                 "codigo": "crear-usuario"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/usuario_rol",
+        "descripcion": "GET usuario_rol",
+        "caso_uso": [
+            {
+                "codigo": "consultar-usuario"
             }
         ]
     },
@@ -139,12 +380,172 @@
         ]
     },
     {
+        "metodo": "POST",
+        "url": "/nota",
+        "descripcion": "POST nota",
+        "caso_uso": [
+            {
+                "codigo": "crear-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/nota",
+        "descripcion": "PATCH nota",
+        "caso_uso": [
+            {
+                "codigo": "modificar-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/nota",
+        "descripcion": "DELETE nota",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/tipo_nota",
+        "descripcion": "GET tipo_nota",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tipo-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/tipo_nota",
+        "descripcion": "POST tipo_nota",
+        "caso_uso": [
+            {
+                "codigo": "crear-tipo-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/tipo_nota",
+        "descripcion": "PATCH tipo_nota",
+        "caso_uso": [
+            {
+                "codigo": "modificar-tipo-nota"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/tipo_nota",
+        "descripcion": "DELETE tipo_nota",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-tipo-nota"
+            }
+        ]
+    },
+    {
         "metodo": "GET",
         "url": "/grupo",
         "descripcion": "GET grupo",
         "caso_uso": [
             {
                 "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "POST",
+        "url": "/grupo",
+        "descripcion": "POST grupo",
+        "caso_uso": [
+            {
+                "codigo": "crear-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/grupo",
+        "descripcion": "PATCH grupo",
+        "caso_uso": [
+            {
+                "codigo": "modificar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "DELETE",
+        "url": "/grupo",
+        "descripcion": "DELETE grupo",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/grupo_base",
+        "descripcion": "GET grupo_base",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/grupo_detalle",
+        "descripcion": "GET grup_detalle",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "PATCH",
+        "url": "/grupo_undelete",
+        "descripcion": "PATCH grupo_undelete",
+        "caso_uso": [
+            {
+                "codigo": "eliminar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/grupos_grupobase",
+        "descripcion": "GET grupos_grupobase",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/usuarios_grupo",
+        "descripcion": "GET usuarios_grupo",
+        "caso_uso": [
+            {
+                "codigo": "consultar-grupo"
+            }
+        ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/alertas",
+        "descripcion": "GET alertas",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
             }
         ]
     }

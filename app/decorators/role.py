@@ -13,7 +13,9 @@ def require_role(rol=''):
             token = auth_header.replace("Bearer ", "")       
             decoded=jwt.decode(token, options={"verify_signature": False})
             metodo = request.method
-            url_cu = request.path
+            req_path = request.path
+            url_cu = "/" + req_path.strip('/').split('/')[0]  # Get the first segment of the path
+
             logger_config.logger.info(f"metodo: {metodo}")
             logger_config.logger.info(f"url_cu: {url_cu}")
             #funcion que devuelve los casos de uso según la url del request
