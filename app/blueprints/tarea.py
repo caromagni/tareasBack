@@ -335,7 +335,7 @@ def get_tareas(query_data: dict):
 @tarea_b.input(schema.TareaGetIn, location='query')
 @tarea_b.output(schema.TareaCountAllOut)
 # @rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500)
+# @cache.cached(timeout=500)
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")
