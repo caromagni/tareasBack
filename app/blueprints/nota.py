@@ -113,7 +113,6 @@ def del_tipo_nota(id: str):
 
 ################################ NOTAS ################################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@cache.cached(timeout=5000, query_string=True)
 @nota_b.get('/nota')
 @nota_b.input(schema.NotaGetIn, location='query')
 @nota_b.output(schema.NotaCountOut)

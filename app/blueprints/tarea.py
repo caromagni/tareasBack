@@ -387,8 +387,8 @@ def get_tareas_detalle(query_data: dict):
         print("right before the get_all_tarea_detalle call")
         print("right before the get_all_tarea_detalle call")
         print("right before the get_all_tarea_detalle call")
-        #res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
-        res,cant = tarea_model.get_all_tarea_detalle(page)    
+        res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        # res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {
                 "count": cant,

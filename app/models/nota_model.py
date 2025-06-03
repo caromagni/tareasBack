@@ -192,7 +192,7 @@ def update_nota(id='', **kwargs):
     db.session.commit()
     return result
 
-#@cache.cached(timeout=50, query_string=True)
+@cache.memoize(timeout=360)
 def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None):
 
     query = db.session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)

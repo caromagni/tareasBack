@@ -1713,8 +1713,20 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 # @cache.cached(timeout=50)
 
 # @memoize
+# @cache.memoize(timeout=500, make_cache_key=lambda: f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}")
+# def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+
 @cache.memoize(timeout=500)
-def get_all_tarea_detalle(page=1, per_page=10, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas):
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+    def make_cache_key():
+        # Generate a unique cache key based on the function arguments
+        return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
+
+    # Use the generated cache key
+    cache_key = make_cache_key()
+    cached_result = cache.get(cache_key)
+    if cached_result:
+        return cached_result
 
     print("**************************START TIME*****************************")
     print("**************************START TIME*****************************")
@@ -1919,7 +1931,10 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo, label, labels, id_expedie
     # print("time taken for this task:", datetime.now() - exec_time)
     #print("Resultado:", result)
 
-    return results, total
+    result = (results, total)
+    cache.set(cache_key, result, timeout=500)
+    return result
+    # return results, total
 
 
 
