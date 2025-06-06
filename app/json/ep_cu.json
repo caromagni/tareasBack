@@ -548,5 +548,15 @@
                 "codigo": "consultar-tarea"
             }
         ]
+    },
+    {
+        "metodo": "GET",
+        "url": "/ep",
+        "descripcion": "GET ep",
+        "caso_uso": [
+            {
+                "codigo": "consultar-tarea"
+            }
+        ]
     }
 ]

@@ -4,6 +4,9 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.orm import DeclarativeBase
+# metadata = Base.metadata
+
+
 
 class Base(DeclarativeBase):
     pass
@@ -548,7 +551,6 @@ class EP(Base):
     url = Column(String)
     descripcion = Column(String)
     caso_uso = Column(JSONB)
-    metodo = Column(String)
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(UUID)
 
@@ -560,4 +562,5 @@ class CU(Base):
     codigo = Column(String)
     descripcion = Column(String)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(UUID)      
+    

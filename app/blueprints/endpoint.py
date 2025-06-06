@@ -3,6 +3,7 @@ import models.ep_model as ep_model
 import common.error_handling as error_handling
 import decorators.role as rol
 import common.auth as auth_token
+import common.usher as usher
 import traceback
 from common.logger_config import logger
 from flask import g
@@ -19,7 +20,7 @@ ep_b = APIBlueprint('ep_blueprint', __name__)
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
        
-    """ jsonHeader = auth_token.verify_header()
+    jsonHeader = auth_token.verify_header()
     
     if jsonHeader is None:
             user_origin=''
@@ -29,11 +30,7 @@ def before_request():
             type_origin = jsonHeader['type']
     
     g.username = user_origin
-    g.type = type_origin """
-    
-    jsonHeader = auth_token.verify_header() or {}
-    g.username = jsonHeader.get('user_name', '')
-    g.type = jsonHeader.get('type', '')
+    g.type = type_origin
      
 @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.get('/ep')
@@ -49,14 +46,13 @@ def get_ep():
                 "data": schema.EPOut().dump(res, many=True)
             }
         
-        
         return data
     
     except Exception as err:
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)     
     
-@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Guardo los casos de uso para cada enpoint en un archivo json', summary='Escribo los endpoints en un archivo json ', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Endpoints', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.post('/ep')
 @ep_b.input(schema.EPInput)
 @rol.require_role("Operador")
@@ -70,21 +66,23 @@ def post_ep(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise error_handling.ValidationError(err)  
 
-""" @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Export Endpoints to json file', summary='Export Endpoints to json file', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@ep_b.get('/ep/export')
+@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Migrar cu a la base', summary='Migrar cu', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_b.post('/migra_ep')
 @ep_b.output(schema.EPCountOut)
-def exportar_eps():
+def post_migraep():
     try:
-        res, cant= ep_model.exportar_eps_a_json()
+        print("ENTRANDO A MIGRACION EP")
+        cant=0
+        username=g.get('username')
+        res = usher.migrar_cu(username)
         data = {
-                "count": cant,
+                "count": len(res),
                 "data": schema.EPOut().dump(res, many=True)
             }
-        
-        
         return data
+    
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)        """  
+        raise error_handling.ValidationError(err)            
