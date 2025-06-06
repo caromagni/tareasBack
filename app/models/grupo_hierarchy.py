@@ -25,7 +25,7 @@ def find_parent_id(db, id_hijo: str):
         current_app.logger.error(f"Error finding parent for id_hijo {id_hijo}: {str(e)}")
         raise
 
-@cache.cached(timeout=50)
+@cache.cached(timeout=360*6)
 def find_parent_id_recursive(db, id_hijo: str):
     print("find parent id recursive function")
     print('db.session:', db)

@@ -22,7 +22,7 @@ def get_roles(username=''):
     return resp
 
 ######################Casos de uso de la api######################
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=360*60)
 
 def get_api_cu(metodo=None, url=None):
     archivo_json="./json/ep_cu.json"
@@ -45,7 +45,7 @@ def get_api_cu(metodo=None, url=None):
     return cu
 
 ######################Control de acceso######################
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=360*60)
 def get_usr_cu(username=None, rol_usuario='', cu=None):
     #logger_config.logger.info("get_usr_cu - username: %s", username)
     #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)

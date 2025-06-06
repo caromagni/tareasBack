@@ -6,7 +6,7 @@ from common.error_handling import ValidationError
 from common.cache import cache
 from models.tarea_model import get_all_tarea_detalle
 from schemas.schemas import ActuacionOut, TipoActuacionOut,TareaAllOut
-from flask import g
+from datetime import datetime
 from decorators.role import require_role
 
 ai_assistant = APIBlueprint('ai_assistant_blueprint', __name__)
@@ -91,11 +91,14 @@ def chat():
         }
 
         # Call Bedrock
+        print("Request body for Bedrock:")
+        print(datetime.now())
         response_body = invoke_bedrock_model(
             model_id='anthropic.claude-3-sonnet-20240229-v1:0',
             request_body=request_body
         )
-
+        print("Response body from Bedrock:")
+        print(datetime.now())
         return jsonify({"response": response_body['content'][0]['text']})
 
     except Exception as err:
