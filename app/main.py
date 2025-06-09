@@ -36,12 +36,31 @@ sys.setrecursionlimit(100)
 from common.cache import *  # Import the shared cache instance
 import threading
 
+
 def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
-    app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Optional default timeout
+    # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
+    
+
+    # Configurar Redis como backend de caché
+    app.config['CACHE_TYPE'] = 'RedisCache'
+    app.config['CACHE_REDIS_HOST'] = redis_host
+    app.config['CACHE_REDIS_PORT'] = redis_port
+    app.config['CACHE_REDIS_DB'] = redis_db
+    app.config['CACHE_REDIS_USERNAME'] = redis_user
+    app.config['CACHE_REDIS_PASSWORD'] = redis_password
+    app.config['CACHE_KEY_PREFIX'] = redis_namespace  
+
+    # app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+    # app.config['CACHE_REDIS_HOST'] = redis_host  # Dirección del servidor Redis
+    # app.config['CACHE_REDIS_PORT'] = 6379  # Puerto de Redis
+    # app.config['CACHE_REDIS_DB'] = 0  # Base de datos de Redis
+    app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Tiempo de caché predeterminado (en segundos)
+
+    # app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
+    # app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Optional default timeout
 #      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
 # |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
 #  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   
@@ -55,7 +74,7 @@ def create_app():
 # | | | | |\___ \ / _ \ |  _ \| |   |  _|                               
 # | |_| | | ___) / ___ \| |_) | |___| |___                              
 # |____/___|____/_/   \_\____/|_____|_____|                             
-    app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
+    # app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
@@ -139,7 +158,6 @@ def create_app():
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_bj)
 
-    from flask import request, make_response
 
    # Alternatively, for more granular control
     # @app.after_request
