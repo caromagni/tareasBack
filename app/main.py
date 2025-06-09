@@ -33,7 +33,7 @@ from models.alch_model import Base
 from db.alchemy_db import db
 from flask_caching import Cache
 sys.setrecursionlimit(100)
-from common.cache import cache  # Import the shared cache instance
+from common.cache import *  # Import the shared cache instance
 import threading
 
 def create_app():
@@ -41,7 +41,7 @@ def create_app():
     print("Creating app..")
     app = APIFlask(__name__)
     app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
-    app.config['CACHE_DEFAULT_TIMEOUT'] = 500  # Optional default timeout
+    app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Optional default timeout
 #      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
 # |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
 #  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   

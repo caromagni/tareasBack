@@ -1,8 +1,8 @@
 from db.alchemy_db import db
-from common.cache import cache
+from common.cache import *
 from models.alch_model import ExpedienteExt
 
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_expedientes():
     
     return db.session.query(ExpedienteExt).all()

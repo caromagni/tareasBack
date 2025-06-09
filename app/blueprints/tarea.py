@@ -8,7 +8,7 @@ from common.logger_config import logger
 from flask import g
 from apiflask import APIBlueprint
 from flask import request, current_app
-from common.cache import cache
+from common.cache import *
 
 
 

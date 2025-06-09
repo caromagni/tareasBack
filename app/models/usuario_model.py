@@ -5,9 +5,9 @@ import common.logger_config as logger_config
 from db.alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
 from collections import defaultdict
-from common.cache import cache
+from common.cache import *
 
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_usuario_by_id(id):
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False, Usuario.suspendido==False).first()
@@ -77,7 +77,7 @@ def get_usuario_by_id(id):
     
     return results 
 
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
     print("eliminado: ", eliminado)
@@ -115,7 +115,7 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None,
     return query, total
 
 
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
     print("eliminado: ", eliminado)
@@ -210,7 +210,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     return results, total 
         
  
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_grupos_by_usuario(id):
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
@@ -385,7 +385,7 @@ def update_usuario(id='',username=None, **kwargs):
     db.session.commit()
     return usuario
 
-@cache.memoize(timeout=360*60)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_rol_usuario(username=None):
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
