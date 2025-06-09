@@ -8,7 +8,7 @@ from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from flask import g, request
-from common.cache import cache
+from common.cache import *
 from common.functions import controla_fecha
 
 

@@ -8,7 +8,7 @@ from sqlalchemy import or_
 import os
 import json
 import common.utils as utils
-from common.cache import cache
+from common.cache import *
 
 def migrar_cu(username):
     if username is not None:
@@ -60,7 +60,7 @@ def get_roles(username=''):
 
 ######################Casos de uso de cada url######################
 ############desde la base de datos############
-@cache.memoize(timeout=360*6)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_api_cu_bd(metodo=None, url=None):
     cu=[]
     if url is not None:
@@ -98,8 +98,8 @@ def get_api_cu(metodo=None, url=None):
     return cu
 
 ######################Control de acceso######################
-@cache.memoize(timeout=360*60)
-def get_usr_cu(username=None, rol_usuario='', cu=None):
+@cache.memoize(CACHE_TIMEOUT_LONG)
+def get_usr_cu(username=None, rol_usuario='', casos=None):
     #logger_config.logger.info("get_usr_cu - username: %s", username)
     #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
     #logger_config.logger.info("get_usr_cu - cu: %s", cu)

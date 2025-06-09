@@ -1,7 +1,7 @@
 from sqlalchemy.exc import NoResultFound
 from models.alch_model import HerarquiaGrupoGrupo
 from flask import current_app
-from common.cache import cache
+from common.cache import *
 
 
 @cache.memoize(timeout=60 * 60 * 24)  # Cache for 24 hours
@@ -25,7 +25,7 @@ def find_parent_id(db, id_hijo: str):
         current_app.logger.error(f"Error finding parent for id_hijo {id_hijo}: {str(e)}")
         raise
 
-@cache.cached(timeout=360*6)
+@cache.cached(CACHE_TIMEOUT_LONG)
 def find_parent_id_recursive(db, id_hijo: str):
     print("find parent id recursive function")
     print('db.session:', db)

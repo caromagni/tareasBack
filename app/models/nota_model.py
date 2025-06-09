@@ -4,7 +4,7 @@ from datetime import datetime
 from db.alchemy_db import db
 from .alch_model import Nota, TipoNota, Tarea
 import traceback
-from common.cache import cache
+from common.cache import *
 
 import common.utils as utils
 import common.error_handling as error_handling
