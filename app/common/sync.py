@@ -32,7 +32,8 @@ def sync_tipo_tarea(entity_id, url,id_user):
                                codigo_humano=resp['data']['descripcion_corta'], 
                                eliminado=not(resp['data']['habilitado']),
                                fecha_actualizacion=datetime.now(),
-                               id_user_actualizacion=id_user
+                               id_user_actualizacion=id_user,
+                               base = True
                             )
             db.session.add(nuevo_tipo_tarea)
         else:
@@ -43,6 +44,7 @@ def sync_tipo_tarea(entity_id, url,id_user):
             query_tipo_tarea.id_ext = resp['data']['id']
             query_tipo_tarea.fecha_actualizacion=datetime.now()
             query_tipo_tarea.id_user_actualizacion=id_user
+            query_tipo_tarea.base = True
 
         db.session.commit()
     return resp
