@@ -1,0 +1,19 @@
+# docker-compose.debug.yml
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command:
+      - "sh"
+      - "-c"
+      - |
+        pip install debugpy -t /tmp \
+        && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 \
+      - wsgi --wsgi-file main.py --ini ../uwsgi.dev-localhost.ini
+
+    ports:
+      - 5005:5000
+      - 5678:5678

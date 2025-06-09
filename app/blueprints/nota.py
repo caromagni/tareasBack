@@ -8,6 +8,10 @@ from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from flask import g, request
+from common.cache import cache
+from common.functions import controla_fecha
+
+
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
@@ -127,10 +131,17 @@ def get_notas(query_data: dict):
         id_user_creacion = None
         id_tarea = None
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
+        fecha_hastas=datetime.now()
+        formatted_date = fecha_hastas.strftime("%d/%m/%Y")
+        fecha_hasta=controla_fecha(formatted_date)
+        # fecha = datetime.strptime(fecha_hasta,"%d/%m/%Y").replace(hour=0, minute=0, second=0)   
+
+        print('BUSCANDO NOTAS RELACIONADAS A TAREAS ***********************************************************')
+        print('***************************************************************************************************')
+        print(fecha_hastas, fecha_hasta, fecha_desde)
+
 
         if request.args.get('page') is not None:
-            print("page:",request.args.get('page'))
             page = int(request.args.get('page'))
         if request.args.get('per_page') is not None:
             per_page = int(request.args.get('per_page'))

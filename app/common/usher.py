@@ -60,7 +60,7 @@ def get_roles(username=''):
 
 ######################Casos de uso de cada url######################
 ############desde la base de datos############
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=360*6)
 def get_api_cu_bd(metodo=None, url=None):
     cu=[]
     if url is not None:
@@ -97,9 +97,9 @@ def get_api_cu(metodo=None, url=None):
 
     return cu
 
-######################Control de acceso por usuario y rol######################
-@cache.memoize(timeout=500)
-def get_usr_cu(username=None, rol_usuario='', casos=None):
+######################Control de acceso######################
+@cache.memoize(timeout=360*60)
+def get_usr_cu(username=None, rol_usuario='', cu=None):
     #logger_config.logger.info("get_usr_cu - username: %s", username)
     #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
     #logger_config.logger.info("get_usr_cu - cu: %s", cu)

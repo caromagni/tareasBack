@@ -7,6 +7,7 @@ import traceback
 from flask import g
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
+from common.cache import cache
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -54,6 +55,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+#@cache.cached(timeout=360*6, query_string=True)
 @groups_b.get('/grupo')
 @groups_b.input(schema.GroupGetIn,  location='query')
 @groups_b.output(schema.GetGroupCountOut)
@@ -74,10 +76,9 @@ def get_grupo(query_data: dict):
         fecha_desde = request.args.get('fecha_desde')
         fecha_hasta = request.args.get('fecha_hasta')
 
-        res, cant = grupo_model.get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
-        
+        res = grupo_model.get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         data = {
-            "count": cant,
+            "count": len(res),
             "data": schema.GetGroupOut().dump(res, many=True)
         }
         

@@ -12,6 +12,6 @@ RUN pip install --progress-bar off -r requirements.txt
 #RUN pip install -r requirements.txt
 #ppp
 
-COPY code/ .
+COPY app/ .
 CMD ["uwsgi","--wsgi-file","main.py","--ini","uwsgi.ini"]
       

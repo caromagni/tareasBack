@@ -8,6 +8,8 @@ from common.logger_config import logger
 from flask import g
 from apiflask import APIBlueprint
 from flask import request, current_app
+from common.cache import cache
+
 
 
 
@@ -316,6 +318,7 @@ def get_tareas(query_data: dict):
         raise error_handling.ValidationError(err) 
 
 
+
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tareas', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.get('/tarea')
 @tarea_b.input(schema.TareaGetIn, location='query')
@@ -353,7 +356,15 @@ def get_tareas_detalle(query_data: dict):
         fecha_fin_desde=request.args.get('fecha_fin_desde')
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
         tiene_notas=request.args.get('tiene_notas')
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
         res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        # res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {
                 "count": cant,

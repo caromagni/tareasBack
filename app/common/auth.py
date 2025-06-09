@@ -9,9 +9,7 @@ import bcrypt
 
 def verify_jwt_in_header():
     token_encabezado = request.headers.get('authorization')
-    
-    print("###########Encabezado############")
-    print(request.headers.get('authorization'))
+  
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
@@ -27,7 +25,6 @@ def verify_jwt_in_header():
     
     if token_encabezado:
         try:
-            print("###########Token a decodificar############")
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
             #print("token:",token)

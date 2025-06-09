@@ -9,11 +9,14 @@ from datetime import datetime
 from flask import request
 from flask import g
 import traceback
+from common.cache import cache
+
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
 # ###############
 @label_b.before_request
+@cache.cached(timeout=360*6)  # Cache for 1 hour
 def before_request():
     
     """ jsonHeader = auth_token.verify_header()
@@ -270,6 +273,7 @@ def delete_label_tarea(id: str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
 @rol.require_role("Operador")
+@cache.cached(timeout=360*6)
 def get_active_labels_grupo(ids_grupos_base: str):
     try:
         # Fetch active labels and count

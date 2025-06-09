@@ -4,6 +4,8 @@ from datetime import datetime
 from db.alchemy_db import db
 from .alch_model import Nota, TipoNota, Tarea
 import traceback
+from common.cache import cache
+
 import common.utils as utils
 import common.error_handling as error_handling
 ##########################  TIPO NOTAS #############################################
@@ -189,29 +191,10 @@ def update_nota(id='', **kwargs):
     db.session.commit()
     return result
 
-def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None):
-   
-    
-    
-    print('consulta por fechas y id')
-    print(fecha_desde)
-    print(fecha_hasta)
-    # # Convert fecha_desde to datetime object
-    # if isinstance(fecha_desde, str):
-    #     fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
-    
-    # # Set fecha_hasta to current datetime if not provided
-    # if fecha_hasta is None:
-    #     fecha_hasta = datetime.now()
-
-    # elif isinstance(fecha_hasta, str):
-    #     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=None, eliminado=None):
 
     query = db.session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
-    # filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
-    print('consulta por parámetros de notas')
-    print("id tarea:",id_tarea)
-    
+
     print(query.count())
     if titulo != '':
         query = query.filter(Nota.titulo.ilike(f'%{titulo}%'))
@@ -233,14 +216,13 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
 
     result = query.order_by(Nota.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     
+    # return result
     return result, total
 
-def get_nota_by_id(id):
-    
-    res = db.session.query(Nota).options(joinedload(Nota.tipo_nota)).filter(Nota.id == id).first()
-    print('consulta notas por id')
-    print(res)
 
+def get_nota_by_id(id):    
+    res = db.session.query(Nota).options(joinedload(Nota.tipo_nota)).filter(Nota.id == id).first()
+   
     if res is not None:
         return res 
     else:
@@ -248,7 +230,6 @@ def get_nota_by_id(id):
         return None
 
 def delete_nota(username=None, id_nota=None):
-    
     
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -275,7 +256,6 @@ def delete_nota(username=None, id_nota=None):
     if len(tarea_nota)==0:
         tarea = db.session.query(Tarea).filter(Tarea.id==nota.id_tarea, Tarea.eliminado==False).first()
         tarea.tiene_notas_desnz=False
-
     
     db.session.commit()
     return nota    
