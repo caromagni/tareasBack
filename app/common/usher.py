@@ -99,7 +99,7 @@ def get_api_cu(metodo=None, url=None):
 
 ######################Control de acceso######################
 @cache.memoize(timeout=360*60)
-def get_usr_cu(username=None, rol_usuario='', cu=None):
+def get_usr_cu(username=None, rol_usuario='', casos=None):
     #logger_config.logger.info("get_usr_cu - username: %s", username)
     #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
     #logger_config.logger.info("get_usr_cu - cu: %s", cu)

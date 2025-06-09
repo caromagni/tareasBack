@@ -251,7 +251,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         for grupo in result_paginated
     ]
 
-    return result
+    return result, total
 
 @cache.memoize(timeout=360*6)
 def encontrar_grupo_base(res_grupos, id):
