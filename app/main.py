@@ -33,15 +33,35 @@ from models.alch_model import Base
 from db.alchemy_db import db
 from flask_caching import Cache
 sys.setrecursionlimit(100)
-from common.cache import *  # Import the shared cache instance
+import common.cache as cache_common
 import threading
+
 
 def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
-    app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Optional default timeout
+    # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
+    
+
+    # Configurar Redis como backend de caché
+    app.config['CACHE_TYPE'] = 'RedisCache'
+    app.config['CACHE_REDIS_HOST'] = cache_common.redis_host
+    app.config['CACHE_REDIS_PORT'] = cache_common.redis_port
+    app.config['CACHE_REDIS_DB'] = cache_common.redis_db
+    app.config['CACHE_REDIS_USERNAME'] = cache_common.redis_user
+    app.config['CACHE_REDIS_PASSWORD'] = cache_common.redis_password
+    app.config['CACHE_KEY_PREFIX'] = cache_common.redis_prefix  
+
+    # app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+    # app.config['CACHE_REDIS_HOST'] = redis_host  # Dirección del servidor Redis
+    # app.config['CACHE_REDIS_PORT'] = 6379  # Puerto de Redis
+    # app.config['CACHE_REDIS_DB'] = 0  # Base de datos de Redis
+    app.config['CACHE_DEFAULT_TIMEOUT'] = cache_common.CACHE_TIMEOUT_MEDIUM  # 
+    app.config['CACHE_DEFAULT_TIMEOUT'] = cache_common.CACHE_TIMEOUT_MEDIUM  # Tiempo de caché predeterminado (en segundos)
+
+    # app.config['CACHE_TYPE'] = 'SimpleCache'  # Ensure cache type is set
+    # app.config['CACHE_DEFAULT_TIMEOUT'] = CACHE_TIMEOUT_MEDIUM  # Optional default timeout
 #      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
 # |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
 #  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   
@@ -55,15 +75,15 @@ def create_app():
 # | | | | |\___ \ / _ \ |  _ \| |   |  _|                               
 # | |_| | | ___) / ___ \| |_) | |___| |___                              
 # |____/___|____/_/   \_\____/|_____|_____|                             
-    app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
+    # app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
     app.config['JWT_IDENTITY_CLAIM'] = Config.JWT_IDENTITY_CLAIM
      # Initialize cache with app
-    cache.init_app(app)
+    cache_common.cache.init_app(app)
     print("CACHE MODULE INITIALIZED")
-    print(cache)
+    print(cache_common.cache)
     app.security_schemes = {  # equals to use config SECURITY_SCHEMES
         'ApiKeyAuth': {
         'type': 'apiKey',
@@ -139,7 +159,6 @@ def create_app():
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_bj)
 
-    from flask import request, make_response
 
    # Alternatively, for more granular control
     # @app.after_request

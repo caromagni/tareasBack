@@ -1,0 +1,22 @@
+Roles y timeout=360*6 de Uso
+===================
+
+Se deberán configurar:
+
+* Usuarios del Sistema
+* Roles del Sistema
+* timeout=360*6 de Uso del Sistema 
+* timeout=360*6 de Uso asociados a cada Rol
+* Roles asociados al usuario
+
+Descripción:
+------------
+Un usuario deberá tener por lo menos un rol en el Sistema de Tareas. Si el mismo tiene más de un rol, al acceder al sistema seleccionará con que rol trabajará. Por ejemplo puede tener un rol Juez y Operador.
+Cada funcionalidad del Sistema corresponde a uno o más timeout=360*6 de Uso.
+
+Cada rol de usuario está asociado a diferentes timeout=360*6 de Uso, según los permisos que se le quieran configurar a ese rol.
+
+Entonces cada vez que el usuario accede a cualquier funcionalidad del sistema, se realiza un control por usuario y rol constatando que  según el rol con el que ingresa al Sistema el mismo tenga acceso a cada funcionalidad, por ejemplo: Crear Tarea, Crear Grupo, Consultar Tareas, etc.
+
+Los Roles se administran en el sistema P-USHER y son importados al Sistema de Tareas en un primer inicio. En los ingresos siguientes de ese usuario se controla el rol y los caos de uso del usuario en el Sistema Tareas. Los mismos tienen una fecha de vencimiento para estar siempre alineados con los roles ingresados en P-USHER
+En caso que alguno de los registros de roles-timeout=360*6 de uso se encuentre vencido, se importara nuevamente desde P-USHER y se actualizará el registro del usuario en el Sistema de Tareas.
