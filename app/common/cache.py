@@ -17,6 +17,7 @@ redis_port = int(os.getenv('REDIS_PORT', 6379))
 redis_db = int(os.getenv('REDIS_DB', 0))
 redis_user = os.getenv('REDIS_USER', 'default')
 print("REDIS CONFIGURATION:")
-print(f"Host: {redis_host}, Port: {redis_port}, DB: {redis_db}, User: {redis_user}")
+
 redis_password = os.getenv('REDIS_PASSWORD', None)
-redis_namespace = os.getenv('CACHE_KEY_PREFIX', None)  # Namespace for keys
+redis_prefix = os.getenv('CACHE_KEY_PREFIX', None)  # Namespace for keys
+print(f"Host: {redis_host}, Port: {redis_port}, DB: {redis_db}, User: {redis_user}, Password: {redis_password}, PREFIX: {redis_prefix}")
