@@ -397,7 +397,7 @@ def get_rol_usuario(username=None):
         
     #res = db.session.query(Rol.email, Rol.rol).filter(Rol.email == username).distinct().all()
     res = db.session.query(Rol).filter(Rol.email == username).order_by(Rol.email, Rol.rol, Rol.descripcion_ext).all()
-
+    print("encontrados: ", len(res))
     agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
 
     for r in res:

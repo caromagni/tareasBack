@@ -98,11 +98,12 @@ def get_api_cu(metodo=None, url=None):
     return cu
 
 ######################Control de acceso######################
-@cache.memoize(CACHE_TIMEOUT_LONG)
+#@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_usr_cu(username=None, rol_usuario='', casos=None):
-    #logger_config.logger.info("get_usr_cu - username: %s", username)
-    #logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
-    #logger_config.logger.info("get_usr_cu - cu: %s", cu)
+    """ logger_config.logger.info("get_usr_cu - Inicio")
+    logger_config.logger.info("get_usr_cu - username: %s", username)
+    logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
+    logger_config.logger.info("get_usr_cu - cu: %s", casos) """
     if casos is None or len(casos) == 0:
         logger_config.logger.error("No hay casos de uso")
         return False
@@ -126,17 +127,18 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
-            if len(query_vencido)>0:
-                #controlar si P-USHER no falla
-                logger_config.logger.info("REQUEST PUSHER")
-                roles = get_roles(username)
-                #print("roles:", roles)
-                if 'lista_roles_cus' in roles:
-                #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
-                    logger_config.logger.info("ROLES VENCIDOS")
-                    print("Borrando roles vencidos")
-                    query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
-                    pull_roles = True    
+        
+        if len(query_rol)==0 or len(query_vencido)>0:
+            #controlar si P-USHER no falla
+            logger_config.logger.info("REQUEST PUSHER")
+            roles = get_roles(username)
+            #print("roles:", roles)
+            if 'lista_roles_cus' in roles:
+            #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
+                logger_config.logger.info("ROLES VENCIDOS")
+                print("Borrando roles vencidos")
+                query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
+                pull_roles = True    
 
         #######Consultar CU Api P-USHER##########
         #pull_roles = True
