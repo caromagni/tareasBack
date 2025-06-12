@@ -651,10 +651,10 @@ def update_grupo(username=None,id='', **kwargs):
     #session: scoped_session = current_app.session
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -769,10 +769,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -915,7 +915,7 @@ def get_usuarios_by_grupo(grupos):
     #for id in ids:
     
     if grupos is None:
-        logger.error("No se han proporcionado grupos para conultar usuarios")
+        logger_config.logger.error("No se han proporcionado grupos para conultar usuarios")
         raise Exception("No se han proporcionado grupos para conultar usuarios") 
 
     usrs = db.session.query(Grupo.id.label("id_grupo"),
@@ -1186,12 +1186,12 @@ def delete_grupo(username=None, id='', todos=False):
     
 
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
-        logger.error("Id de usuario no ingresado")
+        logger_config.logger.error("Id de usuario no ingresado")
         #raise Exception("Usuario no ingresado")    
     
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
@@ -1237,10 +1237,10 @@ def delete_grupo(username=None, id='', todos=False):
 def undelete_grupo(username=None, id=None):
     
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
+            utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")
     
