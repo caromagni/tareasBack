@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, TipoTarea, Inhabilidad, Organismo
+from models.alch_model import Usuario, TipoTarea, SubtipoTarea, Inhabilidad, Organismo
 from datetime import datetime
 import common.logger_config as logger_config
 import uuid
@@ -11,6 +11,11 @@ def sync_request(url, entity_id):
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta=os.environ.get('PUSHER_USUARIO_CONSULTA')
     url=url+'?id='+entity_id+'&usuario_consulta='+usuario_consulta
+    print("###########################################")
+    print("url:",url)
+    print("usuario_consulta:",usuario_consulta)
+    print("entity id:",entity_id)
+    print("###########################################")
     r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
     
     resp=r.json()
@@ -160,6 +165,50 @@ def sync_organismo(entity_id, url,id_user):
 
         db.session.commit()
     return resp
+
+def sync_subtipo_tarea(entity_id, url,id_user):
+    resp = sync_request(url, entity_id)
+    print("json:",resp)
+    json = {'data': {'id': '701fee35-c87d-4157-85f0-6a2aacad1198', 'descripcion': 'Auto de Regulación de Honorarios', 'descripcion_corta': 'auto-reg-honorarios', 'observaciones': '.', 'id_tipo_act_juzgado': '901a84ee-86e1-497e-ba7f-72f4223d7565', 'descripcion_tipo_act_juzgado': 'Auto', 'habilitado_tipo_act_juzgado': True, 'username': 'simperiale@jus.mendoza.gov.ar', 'nombre_usuario': 'Silvia', 'apellido_usuario': 'Imperiale', 'fecha_creacion': '04-07-2024 12:21', 'fecha_actualizacion': '11-06-2025 11:48', 'habilitado': True}}
+    if resp and resp['data']['id'] is not None:
+        query_subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id_ext == resp['data']['id']).first()
+        if query_subtipo is None:
+            query_tipo= db.session.query(TipoTarea).filter(TipoTarea.id_ext == resp['data']['id_tipo_act_juzgado']).first()
+            if query_tipo is not None:
+            #hago insert del organismo
+                nuevo_subtipo = SubtipoTarea(id=uuid.uuid4(),
+                                id_ext=resp['data']['id'],
+                                id_tipo =query_tipo.id,
+                                nombre=resp['data']['descripcion'],
+                                nombre_corto=resp['data']['descripcion_corta'],
+                                eliminado=not(resp['data']['habilitado']),
+                                fecha_actualizacion=datetime.now(),
+                                id_user_actualizacion=id_user,
+                                base = True,
+                                origen_externo = True
+                                )
+                db.session.add(nuevo_subtipo)
+                db.session.commit()
+
+        else:
+            #hago update del subtipo
+            #busco el tipo de tarea asociado al subtipo
+            query_tipo= db.session.query(TipoTarea).filter(TipoTarea.id_ext == resp['data']['id_tipo_act_juzgado']).first()
+            if query_tipo is not None:
+                query_subtipo.nombre = resp['data']['descripcion']
+                query_subtipo.nombre_corto = resp['data']['descripcion_corta']
+                query_subtipo.id_ext = resp['data']['id']
+                query_subtipo.id_tipo =query_tipo.id
+                query_subtipo.eliminado = not(resp['data']['habilitado'])
+                query_subtipo.id_user_actualizacion = id_user
+                query_subtipo.fecha_actualizacion=datetime.now()
+                query_subtipo.base = True
+                query_subtipo.origen_externo = True
+
+                db.session.commit()
+
+    return resp
+
 
 def sync_cu(entity_id, url,id_user):
     x_api_key=os.environ.get('PUSHER_API_KEY')

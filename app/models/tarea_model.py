@@ -883,7 +883,7 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-@cache.cached(CACHE_TIMEOUT_LONG)
+#@cache.cached(CACHE_TIMEOUT_LONG)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
@@ -893,6 +893,7 @@ def get_all_tipo_tarea(page=1, per_page=10):
     todo = db.session.query(TipoTarea).all()
     total= len(todo)
     res = db.session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
+    
     if res is not None:
         tipo_list = []
         #Busco los subtipo de tarea asociados a cada tipo de tarea
@@ -904,7 +905,9 @@ def get_all_tipo_tarea(page=1, per_page=10):
                 for subtipo in query_subtipo:
                     subtipo = {
                         "id": subtipo.id,
+                        "id_ext": subtipo.id_ext,
                         "nombre": subtipo.nombre,
+                        "nombre_corto": subtipo.nombre_corto,
                         "base": subtipo.base,
                         "origen_externo": subtipo.origen_externo,
                     }
@@ -924,6 +927,8 @@ def get_all_tipo_tarea(page=1, per_page=10):
             tipo_list.append(tipo_tarea)
 
     print("Tipo de tareas obtenidos:", tipo_list)   
+    
+    #paginacion del resultado
 
     return tipo_list, total
 
@@ -1017,7 +1022,7 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False, origen_externo=False):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', base=False, origen_externo=False):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1039,6 +1044,7 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
         id=nuevoID,
         id_tipo=id_tipo,
         nombre=nombre,
+        nombre_corto=nombre_corto,
         base=False,
         origen_externo=False,
         id_user_actualizacion=id_user_actualizacion,
@@ -1066,6 +1072,9 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     
     if 'nombre' in kwargs:
         subtipo_tarea.nombre = kwargs['nombre']
+
+    if 'nombre_corto' in kwargs:
+        subtipo_tarea.nombre_corto = kwargs['nombre_corto']    
         
     subtipo_tarea.base = False
     subtipo_tarea.origen_externo = False

@@ -429,6 +429,10 @@ class SubtipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    nombre_corto = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
     id_user_actualizacion = String()
@@ -436,6 +440,10 @@ class SubtipoTareaIn(Schema):
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
     nombre = String(validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    nombre_corto = String(required=True, validate=[
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
@@ -452,9 +460,11 @@ class SubtipoTareaGetIn(Schema):
 
 class SubtipoTareaOut(Schema):
     id = String()
+    id_ext = String()
     id_tipo = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre"))
     nombre = String()
+    nombre_corto = String()
     eliminado = Boolean()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
@@ -464,6 +474,7 @@ class SubtipoTareaOut(Schema):
 class SubtipoTareaShortOut(Schema):
     id = String()
     nombre = String()
+    nombre_corto = String()
     eliminado = Boolean()
     base = Boolean()
     origen_Externo = Boolean()

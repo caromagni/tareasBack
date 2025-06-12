@@ -1,4 +1,5 @@
-from common.utils import *
+import common.utils as utils
+import common.logger_config as logger_config
 from db.alchemy_db import db
 from models.alch_model import EP
 import uuid
@@ -8,7 +9,7 @@ from datetime import datetime
 def get_all_EP(username=None):
     logger_config.logger.info("get_all_EP")
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
     else:
         raise Exception("Usuario no ingresado")
     
@@ -19,12 +20,12 @@ def get_all_EP(username=None):
 
 def insert_EP(username, **kwargs):
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
     else:
         raise Exception("Usuario no ingresado")
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
 
     url = kwargs.get('url', '')
     descripcion = kwargs.get('descripcion', '')

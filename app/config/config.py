@@ -66,3 +66,7 @@ class Config:
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
 
     
+
+
+
+    

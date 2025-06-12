@@ -41,7 +41,7 @@ def check_updates_new( rabbit_message: dict):
             id_user = utils.get_username_id('pusher')
             g.id_user = id_user
             #print("id user: ", id_user)
-            #print("entity: ", entity)
+            print("entity: ", entity)
             try:
                 match entity:
                     case 'tipo_act_juzgado':
@@ -59,6 +59,9 @@ def check_updates_new( rabbit_message: dict):
                     case 'inhabilidad':
                         #ejecutar insert o update para inhabilidad
                         res=sync.sync_inhabilidad(entity_id, url, id_user)
+                    case 'subtipo_act_juzgado':
+                        #ejecutar insert o update para subtipo_tarea
+                        res=sync.sync_subtipo_tarea(entity_id, url, id_user)    
                     case _:
                        
                         logger_config.logger.info(f" {entity} is not subscribed")
