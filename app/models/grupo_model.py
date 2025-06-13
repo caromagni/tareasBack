@@ -7,9 +7,10 @@ import common.logger_config as logger_config
 from db.alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
 from common.cache import *
+import common.cache as cache_common
+#import decorators.cache_error_wrapper as cache_error_wrapper
 
-
-@cache.memoize(CACHE_TIMEOUT_LONG)
+@cache_common.cache.memoize(CACHE_TIMEOUT_LONG)
 def get_grupo_by_id(id):
 
     res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
