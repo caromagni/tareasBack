@@ -158,7 +158,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
 
     # Subconsulta recursiva
     if path_name is True or path_name == 'true':
-        subquery1 = text("""
+        subquery_original = text("""
             WITH RECURSIVE GroupTree AS (
                 SELECT 
                     g.id AS id_padre,

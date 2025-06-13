@@ -14,6 +14,7 @@ redis_port = int(os.getenv('REDIS_PORT', 6379))
 redis_db = int(os.getenv('REDIS_DB', 0))
 redis_user = os.getenv('REDIS_USER', 'default')
 redis_uses_password = os.getenv('REDIS_USES_PASSWORD', 'false').lower() == 'true'
+redis_password = os.getenv('REDIS_PASSWORD', None) if redis_uses_password else None
 cache_enabled = os.getenv('CACHE_ENABLED', 'true').lower() == 'true'
 print("REDIS CONFIGURATION:")
 
