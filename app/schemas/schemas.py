@@ -231,6 +231,27 @@ class GetGroupOut(Schema):
     level = Integer()
     base = Boolean()
 
+class GetGroupRecursivoOut(Schema):
+    id_padre = String()
+    nombre_padre = String()
+    descripcion_padre = String()
+    eliminado_padre = Boolean()
+    suspendido_padre = Boolean()
+    fecha_actualizacion_padre = String()
+    base_padre = Boolean()
+    id = String()
+    nombre = String()
+    descripcion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    fecha_actualizacion = String()
+    base = Boolean()
+    path = String()
+    path_name = String()
+    level = Integer()
+    is_parentless = Boolean()
+    group_id = String()
+
 class GroupxUsrOut(Schema):
     id_grupo = String()
     nombre = String()
@@ -396,8 +417,7 @@ class TipoTareaIn(Schema):
         validate_char
     ])
     id_user_actualizacion = String()
-    base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
+    
 
 class TipoTareaPatchIn(Schema):
     codigo_humano = String(validate=[
@@ -411,6 +431,7 @@ class TipoTareaPatchIn(Schema):
     id_user_actualizacion = String()
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
+    inactivo = Boolean(default=False)
 
 class TipoTareaOut(Schema):
     id = String()
@@ -419,6 +440,7 @@ class TipoTareaOut(Schema):
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
+    inactivo = Boolean()
     base = Boolean()
     origen_externo = Boolean()
 
@@ -433,8 +455,6 @@ class SubtipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
     id_user_actualizacion = String()
 
 class SubtipoTareaPatchIn(Schema):
@@ -449,6 +469,7 @@ class SubtipoTareaPatchIn(Schema):
     ])
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
+    inactivo = Boolean(default=False)
     id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
@@ -466,6 +487,7 @@ class SubtipoTareaOut(Schema):
     nombre = String()
     nombre_corto = String()
     eliminado = Boolean()
+    inactivo = Boolean()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
@@ -476,6 +498,7 @@ class SubtipoTareaShortOut(Schema):
     nombre = String()
     nombre_corto = String()
     eliminado = Boolean()
+    inactivo = Boolean()
     base = Boolean()
     origen_Externo = Boolean()
 
@@ -486,6 +509,7 @@ class TipoTareaSubtipoOut(Schema):
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
+    inactivo = Boolean()
     base = Boolean()
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
@@ -801,6 +825,7 @@ class GroupCountOut(Schema):
 class GetGroupCountOut(Schema):
     count = Integer()
     data = Nested(GetGroupOut, many=True)
+    data_recursivo = Nested(GetGroupRecursivoOut, many=True)
 
 class GroupCountAllOut(Schema):
     count = Integer()

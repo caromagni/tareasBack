@@ -66,10 +66,17 @@ def get_grupo(query_data: dict):
         fecha_hasta = request.args.get('fecha_hasta')
 
         res, total = grupo_model.get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
-        data = {
-            "count": total,
-            "data": schema.GetGroupOut().dump(res, many=True)
-        }
+        if path_name is not None and path_name == 'true':
+            #return schema.GetGroupRecursivoOut().dump(res, many=True)
+            data = {
+                "count": total,
+                "data_recursivo": schema.GetGroupRecursivoOut().dump(res, many=True)
+            }
+        else:
+            data = {
+                "count": total,
+                "data": schema.GetGroupOut().dump(res, many=True)
+            }
         
         return data
     
