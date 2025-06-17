@@ -129,7 +129,7 @@ def exececuteSubquery(subquery):
         raise e
     
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
+#@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     """
     Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
@@ -158,7 +158,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
 
     # Subconsulta recursiva
     if path_name is True or path_name == 'true':
-        subquery1 = text("""
+        subquery_original = text("""
             WITH RECURSIVE GroupTree AS (
                 SELECT 
                     g.id AS id_padre,
@@ -213,87 +213,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
             ORDER BY 
                 gt.path;
         """)
-        subquery2 = text("""
-                        WITH RECURSIVE GroupTree AS (
-                -- Parte base
-                SELECT 
-                    g.id AS id_padre,
-                    g.id AS id_hijo,
-                    g.descripcion AS parent_name,
-                    g.descripcion AS child_name,
-                    g.id::text AS path,
-                    COALESCE(g.nombre, hgg1.id_hijo::text) AS path_name,
-                    0 AS level,
-                    true AS is_parentless,
-                    g.id AS group_id,
-                    g.eliminado AS eliminado_hijo,
-                    g.nombre AS nombre_hijo,
-                    g.descripcion AS descripcion_hijo,
-                    g.fecha_actualizacion AS fecha_actualizacion_hijo,
-                    NULL::boolean AS eliminado_padre,
-                    NULL::text AS nombre_padre,
-                    NULL::text AS descripcion_padre,
-                    NULL::timestamp AS fecha_actualizacion_padre
-                FROM 
-                    tareas.grupo g
-                LEFT JOIN 
-                    tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
-                WHERE 
-                    hgg1.id_hijo IS NULL
 
-                UNION ALL
-
-                -- Parte recursiva
-                SELECT 
-                    hgg.id_padre,
-                    hgg.id_hijo,
-                    gp_padre.descripcion AS parent_name,
-                    gp_hijo.descripcion AS child_name,
-                    gt.path || ' -> ' || hgg.id_hijo::text AS path,
-                    gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
-                    gt.level + 1 AS level,
-                    false AS is_parentless,
-                    gp_hijo.id AS group_id,
-                    gp_hijo.eliminado AS eliminado_hijo,
-                    gp_hijo.nombre AS nombre_hijo,
-                    gp_hijo.descripcion AS descripcion_hijo,
-                    gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
-                    gp_padre.eliminado AS eliminado_padre,
-                    gp_padre.nombre AS nombre_padre,
-                    gp_padre.descripcion AS descripcion_padre,
-                    gp_padre.fecha_actualizacion AS fecha_actualizacion_padre
-                FROM 
-                    tareas.herarquia_grupo_grupo hgg
-                INNER JOIN 
-                    GroupTree gt ON gt.id_hijo = hgg.id_padre
-                INNER JOIN 
-                    tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
-                INNER JOIN 
-                    tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
-            )
-            SELECT 
-                gt.id_padre,
-                gt.parent_name,
-                gt.nombre_padre,
-                gt.descripcion_padre,
-                gt.eliminado_padre,
-                gt.fecha_actualizacion_padre,
-                gt.id_hijo,
-                gt.child_name,
-                gt.nombre_hijo,
-                gt.descripcion_hijo,
-                gt.eliminado_hijo,
-                gt.fecha_actualizacion_hijo,
-                gt.path,
-                gt.path_name,
-                gt.level,
-                gt.is_parentless,
-                gt.group_id
-            FROM 
-                GroupTree gt
-            ORDER BY 
-                gt.path;
-        """)
+        
+        #COALESCE(g.nombre, g.id::text) AS path_name,
         subquery = text("""
             WITH RECURSIVE GroupTree AS (
                 -- Parte base: todos los grupos, incluso si no están en la jerarquía
@@ -353,7 +275,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
             )
 
             -- Selección final (puede incluir DISTINCT si lo deseás)
-            SELECT DISTINCT ON (gt.group_id)
+            SELECT DISTINCT ON (gt.group_id) 
                 gt.id_padre,
                 gt.parent_name,
                 gt.nombre_padre,
@@ -376,12 +298,15 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                 gt.is_parentless,
                 gt.group_id
             FROM GroupTree gt
-            ORDER BY gt.group_id, gt.level;
+            ORDER BY gt.group_id, gt.level DESC;
         
-        """)                
+        """)     
+
+
         # Execute the subquery and get serializable results
         result = exececuteSubquery(subquery)
         total = len(result)
+        print("result:", result)
 
         # Paginate the results
         start = (page - 1) * per_page
