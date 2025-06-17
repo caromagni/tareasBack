@@ -40,6 +40,7 @@ import redis
 def is_redis_available():
     """One-liner Redis availability check"""
     try:
+        print("testing redis connection")
         return redis.Redis(
             host=cache_common.redis_host,
             port=cache_common.redis_port,
@@ -48,7 +49,8 @@ def is_redis_available():
             password=cache_common.redis_password if cache_common.redis_uses_password else None,
             socket_connect_timeout=2
         ).ping()
-    except:
+    except redis.ConnectionError as e:
+        print("Redis connection error:", e)
         return False
 
 def create_app():
@@ -64,6 +66,7 @@ def create_app():
         if is_redis_available():
             print("Redis is available, using RedisCache")
             app.config['CACHE_TYPE'] = 'RedisCache'
+            app.config['CACHE_REDIS_URL'] = "redis://"+cache_common.redis_user+":"+cache_common.redis_password+"@"+cache_common.redis_host+":"+str(cache_common.redis_port)+"/"+str(cache_common.redis_db) 
         # ... Redis config
         else:
             print("Redis is not available, using SimpleCache")
@@ -72,13 +75,13 @@ def create_app():
     # Configurar Redis como backend de caché
    # app.config['CACHE_ENABLED'] = False  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
     
-    app.config['CACHE_REDIS_HOST'] = cache_common.redis_host
-    app.config['CACHE_REDIS_PORT'] = cache_common.redis_port
-    app.config['CACHE_REDIS_DB'] = cache_common.redis_db
+  #  app.config['CACHE_REDIS_HOST'] = cache_common.redis_host
+   # app.config['CACHE_REDIS_PORT'] = cache_common.redis_port
+   # app.config['CACHE_REDIS_DB'] = cache_common.redis_db
     if(cache_common.redis_uses_password==True):
         print("Using Redis with password")
-        app.config['CACHE_REDIS_USERNAME'] = cache_common.redis_user
-        app.config['CACHE_REDIS_PASSWORD'] = cache_common.redis_password
+    #    app.config['CACHE_REDIS_USERNAME'] = cache_common.redis_user
+     #   app.config['CACHE_REDIS_PASSWORD'] = cache_common.redis_password
     app.config['CACHE_KEY_PREFIX'] = cache_common.redis_prefix  
 
    
