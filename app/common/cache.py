@@ -17,7 +17,7 @@ redis_uses_password = os.getenv('REDIS_USES_PASSWORD', 'true').lower() == 'true'
 cache_enabled = os.getenv('CACHE_ENABLED', 'true').lower() == 'true'
 print("REDIS CONFIGURATION:")
 
-redis_password = os.getenv('REDIS_PASSWORD', None)
+redis_password = os.getenv('REDIS_PASSWORD', '')
 redis_prefix = os.getenv('CACHE_KEY_PREFIX', None)  # Namespace for keys
 print(f"Host: {redis_host}, Port: {redis_port}, DB: {redis_db}, User: {redis_user}, Password: {redis_password}, PREFIX: {redis_prefix}, Enabled: {cache_enabled}")
 

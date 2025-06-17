@@ -108,7 +108,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         logger_config.logger.error("No hay casos de uso")
         return False
     
-    pull_roles = True
+    pull_roles = False
+    pusher_ok = True
     #tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(hours=1)
     tiempo_vencimiento = timedelta(minutes=30)
@@ -123,21 +124,27 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         #Pregunto si el usuario tiene un rol
         query_rol = db.session.query(Rol).filter(Rol.email == email).all()
         if len(query_rol)>0:
-            pull_roles = False
+            #pull_roles = False
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
-        
+        print("len query:", len(query_rol))
+        print("len vencido:", len(query_vencido))
         #Traigo los roles del usuario desde P-USHER
         if len(query_rol)==0 or len(query_vencido)>0:
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
             roles = get_roles(username)
+            print("roles:", roles)
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
                 query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
-                pull_roles = True    
+                pull_roles = True
+            else:
+                logger_config.logger.error("Error al obtener roles desde P-USHER")
+                pusher_ok = False
+
 
         #######Consultar CU Api P-USHER##########
         #pull_roles = True
@@ -164,14 +171,22 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             db.session.commit()
         
         #Controlo si el usuario con el rol elegido tiene permisos
-       
-        query_permisos = db.session.query(Rol.descripcion_ext
+        if not pusher_ok:
+            query_permisos = db.session.query(Rol.descripcion_ext
+                    ).filter(
+                        Rol.email == email,
+                        Rol.rol == rol_usuario,
+                        Rol.descripcion_ext.in_(casos)
+                    ).all()
+        else:
+            #pusher falló, entonces no tengo en cuenta la fecha de vencimiento
+            query_permisos = db.session.query(Rol.descripcion_ext
                 ).filter(
                     Rol.email == email,
                     Rol.rol == rol_usuario,
                     Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(),
                     Rol.descripcion_ext.in_(casos)
-                ).all()
+                ).all()    
        
         if len(query_permisos)==0:
             logger_config.logger.error("No tiene permisos")

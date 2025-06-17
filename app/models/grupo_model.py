@@ -306,7 +306,6 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         # Execute the subquery and get serializable results
         result = exececuteSubquery(subquery)
         total = len(result)
-        print("result:", result)
 
         # Paginate the results
         start = (page - 1) * per_page

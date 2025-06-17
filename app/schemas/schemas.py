@@ -463,7 +463,7 @@ class SubtipoTareaPatchIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    nombre_corto = String(required=True, validate=[
+    nombre_corto = String(validate=[
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
