@@ -825,7 +825,7 @@ class GroupCountOut(Schema):
 class GetGroupCountOut(Schema):
     count = Integer()
     data = Nested(GetGroupOut, many=True)
-    data_recursivo = Nested(GetGroupRecursivoOut, many=True)
+  
 
 class GroupCountAllOut(Schema):
     count = Integer()
