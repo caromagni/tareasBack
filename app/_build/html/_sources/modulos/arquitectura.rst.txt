@@ -6,7 +6,7 @@ Visión General del Sistema
 
 El sistema back-end de Tareas está construido utilizando una arquitectura de microservicios, lo que permite escalabilidad y modularidad.
 
-.. image:: https://example.com/path/to/architecture_diagram.png
+.. image:: /_static/tareas_arquitecture_main.png
    :alt: Diagrama de Arquitectura del Back-end de Tareas
    :width: 600px
 
