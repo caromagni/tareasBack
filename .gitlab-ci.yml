@@ -48,7 +48,8 @@ include:
 
 build-image:
   stage: build-image
-  image: docker:stable-dind 
+  image: docker:latest
+  #image: docker:stable-dind 
   services:
   - name: docker:19.03.12-dind  
     command: ["--mtu=1300"]
