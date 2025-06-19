@@ -18,20 +18,6 @@ alerta_b = APIBlueprint('alerta_blueprint', __name__)
 #################Before requests ##################
 @alerta_b.before_request
 def before_request():
-    print("ENTRANDO A BEFORE REQUEST")
-       
-    """ jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin """
-
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
