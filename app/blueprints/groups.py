@@ -16,7 +16,6 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 @groups_b.before_request
 def before_request():
-    print("************ingreso a before_request Usuarios************")
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
