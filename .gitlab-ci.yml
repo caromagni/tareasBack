@@ -56,7 +56,7 @@ build-image:
   stage: build-image
   services:
     - docker:dind
-    |
+  
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
       when: never
