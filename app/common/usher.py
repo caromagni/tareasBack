@@ -60,7 +60,7 @@ def get_roles(username=''):
 
 ######################Casos de uso de cada url######################
 ############desde la base de datos############
-@cache.memoize(CACHE_TIMEOUT_LONG)
+#@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_api_cu_bd(metodo=None, url=None):
     cu=[]
     if url is not None:
@@ -69,8 +69,11 @@ def get_api_cu_bd(metodo=None, url=None):
     if cu_query is None or len(cu_query) == 0:
         logger_config.logger.error("No hay casos de uso para la url: %s", url)
         return cu  
-    
+    else:
+        print("casos de uso encontrados desde base de datos:", cu_query.caso_uso)
+
     for item in cu_query.caso_uso:
+            print("cu encontrado desde base de datos:", item['codigo'])
             cu.append(item['codigo'])
 
     return cu
@@ -100,10 +103,10 @@ def get_api_cu(metodo=None, url=None):
 ######################Control de acceso######################
 #@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_usr_cu(username=None, rol_usuario='', casos=None):
-    """ logger_config.logger.info("get_usr_cu - Inicio")
+    logger_config.logger.info("get_usr_cu - Inicio")
     logger_config.logger.info("get_usr_cu - username: %s", username)
     logger_config.logger.info("get_usr_cu - rol_usuario: %s", rol_usuario)
-    logger_config.logger.info("get_usr_cu - cu: %s", casos) """
+    logger_config.logger.info("get_usr_cu - cu: %s", casos)
     if casos is None or len(casos) == 0:
         logger_config.logger.error("No hay casos de uso")
         return False
@@ -112,7 +115,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
     pusher_ok = True
     #tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(hours=1)
-    tiempo_vencimiento = timedelta(minutes=30)
+    tiempo_vencimiento = timedelta(minutes=2)
     try:
         query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
         if query_usr is None:
@@ -124,18 +127,16 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         #Pregunto si el usuario tiene un rol
         query_rol = db.session.query(Rol).filter(Rol.email == email).all()
         if len(query_rol)>0:
-            #pull_roles = False
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
-        print("len query:", len(query_rol))
-        print("len vencido:", len(query_vencido))
         #Traigo los roles del usuario desde P-USHER
         if len(query_rol)==0 or len(query_vencido)>0:
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
+            #agregar un try y except para controlar si da error de conexion
             roles = get_roles(username)
-            print("roles:", roles)
+            #print("roles:", roles)
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
@@ -172,6 +173,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         
         #Controlo si el usuario con el rol elegido tiene permisos
         if not pusher_ok:
+            logger_config.logger.error("P-USHER no está disponible, utilizando roles vencidos de la base de datos")
             query_permisos = db.session.query(Rol.descripcion_ext
                     ).filter(
                         Rol.email == email,

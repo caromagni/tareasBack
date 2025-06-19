@@ -29,14 +29,15 @@ def before_request():
     
     g.username = user_origin
     g.type = type_origin
+    g.rol = jsonHeader.get('user_rol', '')
 
 
 ####################TIPO DE NOTA######################
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Notas', summary='Tipos de Notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de Tipos de Notas', summary='Tipos de Notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/tipo_nota')
 @nota_b.output(schema.TipoNotaCountOut)
 @nota_b.input(schema.PageIn, location='query')
-@rol.require_role("Operador")
+@rol.require_role()
 def get_tipoNotas(query_data: dict):
     try:
         cant=0
@@ -64,10 +65,10 @@ def get_tipoNotas(query_data: dict):
         raise error_handling.ValidationError(err)    
  
 
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.post('/tipo_nota')
 @nota_b.input(schema.TipoNotaIn)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_tipo_nota(json_data: dict):
     try:
         print('insertando nuevo tipo de notas')
@@ -90,10 +91,10 @@ def post_tipo_nota(json_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)  
 
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/tipo_nota/<string:id>')
 #@nota_b.output(MsgErrorOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def del_tipo_nota(id: str):
     try:
         username = g.username
@@ -115,11 +116,11 @@ def del_tipo_nota(id: str):
         raise error_handling.ValidationError(err)
 
 ################################ NOTAS ################################
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota')
 @nota_b.input(schema.NotaGetIn, location='query')
 @nota_b.output(schema.NotaCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_notas(query_data: dict):
     try:
         page = 1
@@ -178,10 +179,10 @@ def get_notas(query_data: dict):
         raise error_handling.ValidationError(err)
 
 
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota/<string:id>')
 @nota_b.output(schema.NotaIdOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_nota(id:str):
     print('nota.py')
     try:
@@ -201,11 +202,11 @@ def get_nota(id:str):
         raise error_handling.ValidationError(err) 
 
 
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.post('/nota')
 @nota_b.input(schema.NotaIn)
 @nota_b.output(schema.NotaOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_nota(json_data: dict):
     try:
         print("#"*50)
@@ -229,10 +230,10 @@ def post_nota(json_data: dict):
         raise error_handling.ValidationError(err)    
 
 #################DELETE########################
-@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
 # @nota_b.output(NotaIdOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def del_nota(id: str):
     try:
         username = g.username

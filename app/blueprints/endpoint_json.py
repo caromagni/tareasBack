@@ -18,27 +18,15 @@ ep_bj = APIBlueprint('ep_json_blueprint', __name__)
 @ep_bj.before_request
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
-       
-    """ jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin """
-    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
      
-@ep_bj.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_bj.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_bj.get('/epj')
 @ep_bj.output(schema.EPCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_epj():
     try:
         cant=0
@@ -56,10 +44,10 @@ def get_epj():
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)     
     
-@ep_bj.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Guardo los casos de uso para cada enpoint en un archivo json', summary='Escribo los endpoints en un archivo json ', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_bj.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Guardo los casos de uso para cada enpoint en un archivo json', summary='Escribo los endpoints en un archivo json ', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_bj.post('/epj')
 @ep_bj.input(schema.EPInput)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_epj(json_data: dict):
     try:
         print("ENTRANDO A POST EP-", json_data)
