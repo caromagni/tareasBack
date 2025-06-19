@@ -47,16 +47,16 @@ include:
   
 
 build-image:
+  stage: build-image
+  image: docker:latest
+  services:
+    - docker:dind
+  
   #stage: build-image
   #image: docker:stable-dind 
   #services:
   #- name: docker:19.03.12-dind  
   #  command: ["--mtu=1300"]
-
-  image: docker:latest
-  stage: build-image
-  services:
-    - docker:dind
   
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
