@@ -773,15 +773,7 @@ def update_grupo(username=None,id='', **kwargs):
     if 'codigo_nomenclador' in kwargs:
         grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
 
-    """ if 'id_user_actualizacion' in kwargs:
-        usuario= session.query(Usuario).filter(Usuario.id==kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
-        
-        grupo.id_user_actualizacion = kwargs['id_user_actualizacion'] """
-
-    #print("Antes del if")
-
+    
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
         if(kwargs['id_user_asignado_default']==None):

@@ -17,32 +17,19 @@ label_b = APIBlueprint('label_blueprint', __name__)
 # ###############
 @label_b.before_request
 @cache.cached(CACHE_TIMEOUT_LONG)  # Cache for 1 hour
-def before_request():
-    
-    """ jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-        #if not verificar_header():
-            #raise UnauthorizedError("Token o api-key no validos")   
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin """
+def before_request():  
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
 # ####################################################
 
 ################################ ETIQUETAS ################################
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label')
 @label_b.input(schema.LabelGetIn, location='query')
 @label_b.output(schema.LabelCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_labels(query_data: dict):
     try:
         username = g.username
@@ -92,10 +79,10 @@ def get_labels(query_data: dict):
         raise error_handling.ValidationError(err) 
 
 
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label/<string:id>')
 @label_b.output(schema.LabelIdOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_label(id:str):
     print('label.py')
     try:
@@ -112,10 +99,10 @@ def get_label(id:str):
         raise error_handling.ValidationError(err) 
 
 
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(schema.LabelIn)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_label(json_data: dict):
     try:
         print("#"*50)
@@ -132,13 +119,7 @@ def post_label(json_data: dict):
                 }
             res = schema.MsgErrorOut().dump(result)
         
-        labels = []
-        """ for label in res:
-            print("label:", label)
-            print("label:", label.id_label)
-            if label != []: 
-                labels.append(LabelXTareaIdOut().dump(label)) """
-
+      
         data = {
                 "data": schema.LabelXTareaIdOut().dump(res, many=True)
             }
@@ -151,9 +132,9 @@ def post_label(json_data: dict):
         raise error_handling.ValidationError(err)    
 
 #################DELETE########################
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def del_label(id: str):
     try:
         username = g.username
@@ -182,10 +163,10 @@ def del_label(id: str):
         raise error_handling.ValidationError(err)
     
 ################################ LABELS X TAREAS ################################
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_tarea/<string:id_tarea>')
 @label_b.output(schema.LabelXTareaIdCountAllOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_label_tarea(id_tarea:str):
     try:
         res, cant = label_model.get_label_by_tarea(id_tarea)
@@ -204,10 +185,10 @@ def get_label_tarea(id_tarea:str):
         raise error_handling.ValidationError(err) 
          
 
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
 @label_b.input(schema.LabelXTareaIn)
-@rol.require_role("Operador")
+@rol.require_role()
 def put_label_tarea(json_data: dict):
     try:
         print("#"*50)
@@ -246,10 +227,10 @@ def put_label_tarea(json_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)    
     
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label_tarea/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def delete_label_tarea(id: str):
 
     try:
@@ -270,9 +251,9 @@ def delete_label_tarea(id: str):
         raise error_handling.ValidationError(err)    
 
 
-@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
-@rol.require_role("Operador")
+@rol.require_role()
 @cache.cached(CACHE_TIMEOUT_LONG)
 def get_active_labels_grupo(ids_grupos_base: str):
     try:

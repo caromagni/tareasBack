@@ -88,8 +88,10 @@ def verify_header():
             token_payload = verify_jwt_in_header()
             x_api_key = request.headers.get('x-api-key')
             x_api_system = request.headers.get('x-api-system')
+            x_user_rol = request.headers.get('x-user-role')
             print("x_api_key:",x_api_key)
             print("x_api_system:",x_api_system)
+            print("x_user_rol:",x_user_rol)
             # Verificar si se proporciona el token o API key
             if token_payload is None and x_api_key is None:
                 logger_config.logger.info("Token o api key no validos")
@@ -98,7 +100,7 @@ def verify_header():
             if token_payload is not None:    
                 logger_config.logger.info("Token valido")        
                 email=token_payload['email']
-                return {"type":"JWT","user_name":email} 
+                return {"type":"JWT","user_name":email,"user_rol":x_user_rol} 
         
             if x_api_key is not None:
                 if x_api_system is None:
@@ -109,7 +111,7 @@ def verify_header():
                     raise error_handling.UnauthorizedError("api-key no valida")
                 else:
                     logger_config.logger.info("API Key valido", x_api_key,"-",x_api_system)
-                    return {"type":"api_key","user_name":x_api_system} 
+                    return {"type":"api_key","user_name":x_api_system, "user_rol":x_user_rol} 
             
     except Exception as err:
         logger_config.logger.info("Error en la verificacion de header")

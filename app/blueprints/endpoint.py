@@ -31,11 +31,12 @@ def before_request():
     
     g.username = user_origin
     g.type = type_origin
+    g.rol = jsonHeader.get('user_rol', '')
      
-@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.get('/ep')
 @ep_b.output(schema.EPCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_ep():
     try:
         cant=0
@@ -52,10 +53,10 @@ def get_ep():
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)     
     
-@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Endpoints', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Endpoints', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.post('/ep')
 @ep_b.input(schema.EPInput)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_ep(json_data: dict):
     try:
         print("ENTRANDO A POST EP-", json_data)
@@ -68,7 +69,7 @@ def post_ep(json_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)  
 
-@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Migrar cu a la base', summary='Migrar cu', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Migrar cu a la base', summary='Migrar cu', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.post('/migra_ep')
 @ep_b.output(schema.EPCountOut)
 def post_migraep():

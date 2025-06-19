@@ -11,29 +11,16 @@ expediente_b = APIBlueprint('expediente_blueprint', __name__)
 #################Before requests ##################
 @expediente_b.before_request
 def before_request():
-    print("************ingreso a before_request Usuarios************")
-    print("Before request user.py")
 
-    """ jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=None
-            type_origin=None
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin
- """
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
 
 @expediente_b.get('/expediente')
 @expediente_b.output(schemas.ExpedienteOut(many=True))
-@expediente_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Expedientes', summary='Listado de Expedientes del organismo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-@rol.require_role("Operador")
+@expediente_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Expedientes', summary='Listado de Expedientes del organismo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
+@rol.require_role()
 def get_expedientes():
     try:
         res = expediente_model.get_all_expedientes()

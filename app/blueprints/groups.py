@@ -20,15 +20,14 @@ def before_request():
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
 
 
-
-
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(schema.GroupPatchIn) 
 @groups_b.output(schema.GetGroupOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
         username=g.username
@@ -43,12 +42,12 @@ def patch_grupo(id_grupo: str, json_data: dict):
         raise error_handling.ValidationError(err)
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
 @cache.cached(CACHE_TIMEOUT_LONG, query_string=True)
 @groups_b.get('/grupo')
 @groups_b.input(schema.GroupGetIn,  location='query')
 @groups_b.output(schema.GetGroupCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_grupo(query_data: dict):
     try:
 
@@ -72,18 +71,6 @@ def get_grupo(query_data: dict):
                 "data": schema.GetGroupOut().dump(res, many=True)
             }
         
-        """ if path_name is not None and path_name == 'true':
-            #return schema.GetGroupRecursivoOut().dump(res, many=True)
-            data = {
-                "count": total,
-                "data_recursivo": schema.GetGroupRecursivoOut().dump(res, many=True)
-            }
-        else:
-            data = {
-                "count": total,
-                "data": schema.GetGroupOut().dump(res, many=True)
-            } """
-        
         return data
     
     except Exception as err:
@@ -91,11 +78,11 @@ def get_grupo(query_data: dict):
         raise error_handling.ValidationError(err)
     
 #############DETALLE DE GRUPOS###################    
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo_detalle')
 @groups_b.input(schema.GroupGetIn, location='query')
 @groups_b.output(schema.GroupCountAllOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_grupo_detalle(query_data: dict):
     try:
         page=1
@@ -123,10 +110,10 @@ def get_grupo_detalle(query_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)  
 
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(schema.GroupIdOut())
-@rol.require_role("Operador")
+@rol.require_role()
 def get_grupo_id(id: str):
     try:
         #can_pass=validar_rol(jwt,["leer-grupo"])
@@ -140,11 +127,11 @@ def get_grupo_id(id: str):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)
 
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut(many=True))
-@rol.require_role("Operador")
+@rol.require_role()
 def get_all_grupobase(query_data: dict):
     try:
         id=None
@@ -162,11 +149,11 @@ def get_all_grupobase(query_data: dict):
         print(traceback.format_exc())
         raise error_handling.ValidationError(err)        
 
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo')
 @groups_b.input(schema.UsuariosGroupIn, location='query')
 @groups_b.output(schema.UsuariosGroupOut(many=True))
-@rol.require_role("Operador")
+@rol.require_role()
 def get_usrsbygrupo(query_data: dict):
     try:
         grupos=None
@@ -183,10 +170,10 @@ def get_usrsbygrupo(query_data: dict):
         raise error_handling.ValidationError(err)  
     
 #################POST####################
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(schema.GroupIn)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_grupo(json_data: dict):
     try:
         username=g.username
@@ -208,10 +195,10 @@ def post_grupo(json_data: dict):
         raise error_handling.ValidationError(err)  
      
 ##############DELETE####################
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 @groups_b.output(schema.GroupOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def del_grupo(id: str):
     try:
         username=g.username
@@ -229,9 +216,9 @@ def del_grupo(id: str):
         raise error_handling.ValidationError(err)
     
 ##################UNDELETE####################
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
 @groups_b.patch('/grupo_undelete/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def restaura_grupo(id: str):
     try:
         username=g.username
@@ -252,11 +239,11 @@ def restaura_grupo(id: str):
         raise error_handling.ValidationError(err)
     
   
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut)
 @groups_b.get('/grupo_base/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def getGrupoBase(id: str):
     try:
         id_grupo=None

@@ -15,29 +15,16 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    print("************ingreso a before_request Usuarios************")
-    print("Before request user.py")
-
-    """ jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=None
-            type_origin=None
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin """
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
 
 #################GET GRUPOS POR USUARIO####################    
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
 #@usuario_b.output(GroupsUsuarioOut(many=True))
-@rol.require_role("Operador")
+@rol.require_role()
 def get_grupos_by_usr(id_usuario: str):
     try:
         print('***************ingreso a get grupos by usr**************')
@@ -55,10 +42,10 @@ def get_grupos_by_usr(id_usuario: str):
         raise error_handling.ValidationError(err) 
     
 #####################POST#########################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.post('/usuario')
 @usuario_b.input(schema.UsuarioIn)
-@rol.require_role("Operador")
+@rol.require_role()
 def post_usuario(json_data: dict):
     try:
         print('inserta usuario')
@@ -77,7 +64,6 @@ def post_usuario(json_data: dict):
                 "data": schema.UsuarioOut().dump(res)
         }
 
-        #return UsuarioOut().dump(res)
         return data
     
     except Exception as err:
@@ -85,10 +71,10 @@ def post_usuario(json_data: dict):
         raise error_handling.ValidationError(err)
     
 #################UPDATE####################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.patch('/usuario/<string:usuario_id>')
 @usuario_b.input(schema.UsuarioInPatch)
-@rol.require_role("Operador")
+@rol.require_role()
 def patch_usuario(usuario_id: str, json_data: dict):
     try:
         username=g.username
@@ -118,9 +104,9 @@ def patch_usuario(usuario_id: str, json_data: dict):
         raise error_handling.ValidationError(err)
 
 ###############GET BY ID####################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def get_usuario_id(id: str):
         res = usuario_model.get_usuario_by_id(id)
         if res is None or len(res)==0:
@@ -143,11 +129,11 @@ def get_usuario_id(id: str):
 #############GET CON PARAMETROS######################## 
 # CONSULTA SIMPLE
 #######################################################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuarios', summary='Consulta simple de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de usuarios', summary='Consulta simple de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
 @usuario_b.output(schema.UsuarioCountOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_usuario(query_data: dict):
     try:
         page=1
@@ -183,11 +169,11 @@ def get_usuario(query_data: dict):
         raise error_handling.ValidationError(err) 
     
 #####################DETALLE DE USUARIOS#######################   
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de usuarios con sus grupos y tareas', summary='Consulta detallada de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de usuarios con sus grupos y tareas', summary='Consulta detallada de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @usuario_b.get('/usuario_detalle')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
 @usuario_b.output(schema.UsuarioCountAllOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_usuarios_detalle(query_data: dict):
     try:
         page=1
@@ -220,9 +206,9 @@ def get_usuarios_detalle(query_data: dict):
         raise error_handling.ValidationError(err)  
     
 ######################DELETE######################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.delete('/usuario/<string:id>')
-@rol.require_role("Operador")
+@rol.require_role()
 def del_usuario(id: str):
     try:
         username=g.username
@@ -245,10 +231,10 @@ def del_usuario(id: str):
         raise error_handling.ValidationError(err)
 
 ##########Prueba Roles################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario_rol')
 @usuario_b.output(schema.UsuarioCountRolOut)
-@rol.require_role("Operador")
+@rol.require_role()
 def get_rol_usr():
     username=g.username
     res=usuario_model.get_rol_usuario(username)
@@ -271,10 +257,10 @@ def get_rol_usr():
         
     return data
 
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/groups_with_base')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
-@rol.require_role("Operador")
+@rol.require_role()
 def get_groups_base_by_usr(query_data: dict):
     try:
         print('***************ingreso a get grupos by usr**************')

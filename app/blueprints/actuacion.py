@@ -30,12 +30,13 @@ def before_request():
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
     
 
-@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/actuacion')
 @actuacion_b.output(schemas.ActuacionOut(many=True))
-@rol.require_role("Operador")
+@rol.require_role()
 def get_actuaciones():
     
     try:
@@ -55,10 +56,10 @@ def get_actuaciones():
     except Exception as err:
         raise error_handling.ValidationError(err)  
     
-@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/tipo_actuaciones')
 @actuacion_b.output(schemas.TipoActuacionOut(many=True))
-@rol.require_role("Operador")
+@rol.require_role()
 def get_tipoactuaciones():
     try:
         res = actuacion_model.get_all_tipoactuaciones()

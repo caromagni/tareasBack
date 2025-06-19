@@ -4,10 +4,6 @@ import threading
 from flask_cors import CORS
 
 from flask_sqlalchemy import SQLAlchemy
-# from sqlalchemy.orm import DeclarativeBase
-
-#from sqlalchemy import create_engine
-#from sqlalchemy.orm import sessionmaker, scoped_session
 
 from blueprints.groups import groups_b
 from blueprints.usuario import usuario_b
@@ -22,7 +18,6 @@ from blueprints.endpoint import ep_b
 from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
-from models.alch_model import Base
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config.config import Config
 from common.error_handling import register_error_handlers
@@ -36,6 +31,8 @@ sys.setrecursionlimit(100)
 import common.cache as cache_common
 import threading
 import redis
+import common.exceptions as exceptions
+
 
 def is_redis_available():
     """One-liner Redis availability check"""
@@ -73,11 +70,6 @@ def create_app():
             app.config['CACHE_TYPE'] = 'SimpleCache'
 
     # Configurar Redis como backend de caché
-   # app.config['CACHE_ENABLED'] = False  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
-    
-  #  app.config['CACHE_REDIS_HOST'] = cache_common.redis_host
-   # app.config['CACHE_REDIS_PORT'] = cache_common.redis_port
-   # app.config['CACHE_REDIS_DB'] = cache_common.redis_db
     if(cache_common.redis_uses_password==True):
         print("Using Redis with password")
     #    app.config['CACHE_REDIS_USERNAME'] = cache_common.redis_user
@@ -126,18 +118,35 @@ def create_app():
         'type': 'http',
         'scheme': 'bearer',
         'bearerFormat': 'JWT'
-        }
+        },
+        'UserRoleAuth': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'x-user-role'
+        }    
     }
    
     app.config['DEBUG'] = True
-   
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
     app.config['SHOW_SQLALCHEMY_LOG_MESSAGES'] = Config.SHOW_SQLALCHEMY_LOG_MESSAGES
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
-
+    #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
+    """ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_size': Config.SQLALCHEMY_POOL_SIZE,
+        'max_overflow': Config.SQLALCHEMY_MAX_OVERFLOW,
+        'pool_timeout': Config.SQLALCHEMY_POOL_TIMEOUT,
+        'pool_recycle': Config.SQLALCHEMY_POOL_RECYCLE
+    } """
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_size': 5,
+        'max_overflow': 10,
+        'pool_timeout': 30,
+        'pool_recycle': 1800  # 30 minutos
+    }   
     #################RabbitMQ#################
     app.config['RABBITMQ_USER'] = Config.RABBITMQ_USER
     app.config['RABBITMQ_PASSWORD'] = Config.RABBITMQ_PASSWORD
@@ -146,23 +155,18 @@ def create_app():
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
     
     # Initialize the SQLAlchemy engine and session
-   
-
+    print("#####################")
+    print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
+    print("#####################")
+      # Create tables based on the models defined in Base
     db.init_app(app)
-   
-   
-    #engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False, pool_pre_ping=True)
-    #Base.metadata.create_all(engine)
-    #Session = scoped_session(sessionmaker(bind=engine))
     
-    # Attach the session to the app instance
-    #app.session = Session
+    with app.app_context():
+        #db.create_all() 
+        Base.metadata.create_all(db.engine)
+   
 
-    # Enable CORS
-    #CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": "*"}})
-
-    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"]}})
-    #CORS(app)
+    CORS(app, resources={r"/": {"origins": "", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-user-role"]}})
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
@@ -176,7 +180,6 @@ def create_app():
     app.register_blueprint(herarquia_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
-    #app.register_blueprint(fix_b)
     app.register_blueprint(actuacion_b)
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
@@ -187,38 +190,7 @@ def create_app():
     app.register_blueprint(ep_bj)
 
 
-   # Alternatively, for more granular control
-    # @app.after_request
-    # def add_cors_headers(response):
-    #     response.headers['Access-Control-Allow-Credentials'] = 'true'
-    #     response.headers['Vary'] = 'Origin'
-    #     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:2500'
-    #     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    #     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
-    #     return response
-
-# # Handle OPTIONS preflight request explicitly
-#     @app.route("/<path:dummy>", methods=["OPTIONS"])
-#     def options_handler(dummy):
-#         # Ensure you've imported make_response and request
-#         response = make_response()
-#         allowed_origins = ["http://localhost:2500", "http://localhost:3000"]
-#         request_origin = request.headers.get("Origin")
-
-#         if request_origin in allowed_origins:
-#             response.headers["Access-Control-Allow-Origin"] = request_origin
-        
-#         # Add 'Access-Control-Allow-Credentials' if using cookies/authentication
-#         response.headers["Access-Control-Allow-Credentials"] = "true"
-
-#         response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
-#         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-#         response.headers["Access-Control-Expose-Headers"] = "Content-Range, X-Content-Range"
-        
-#         return response
-
-    
-    
+  
     ###Api Key
     print("#####################")
     print("Iniciando servidor...")
@@ -241,14 +213,14 @@ def create_app():
     print("5. SI SE DESEA VERIFICAR LA API KEY, USAR LA FUNCION verify_api_key() pasando 3 paramentros, el hash de la api key, la api key(que viene del request) y el nombre de la aplicacion") 
 
     # Register custom error handlers
-    register_error_handlers(app)
+    exceptions.register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
     if uwsgi.worker_id() == 1: #if id is 1 then this thread should run. disabled for now with any long number
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
-        print("Hilo de recepción de mensajes iniciado.")
+        print("Hilo de recepción de mensajes iniciado.") 
         
 
     return app
