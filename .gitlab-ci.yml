@@ -52,12 +52,12 @@ build-image:
   #services:
   #- name: docker:19.03.12-dind  
   #  command: ["--mtu=1300"]
-  
+
   image: docker:latest
   stage: build-image
   services:
     - docker:dind
-    
+  
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /notbuildimage/ || $CI_COMMIT_MESSAGE =~ /forceCLEAN/'
       when: never
