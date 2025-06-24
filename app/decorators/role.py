@@ -19,7 +19,7 @@ def require_role(rol=''):
                     return f(*args, **kwargs)
                 
                 # If no API key, proceed with JWT verification
-                logger_config.logger.info(f"ROL: {rol}")
+                
                 rol=g.rol
                 logger_config.logger.info(f"ROL: {rol}")
                 auth_header = request.headers.get("Authorization", "")

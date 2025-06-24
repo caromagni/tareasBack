@@ -18,7 +18,7 @@ modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo, 
     'tarea_x_grupo': Auditoria_TareaxGrupo,
     'tarea_asignada_usuario': Auditoria_TareaAsignadaUsuario,
     'auditoria': Auditoria
-    # Otros mapeos de tablas
+    # Otros mapeos de tablas 
 } """
 
 def convert_to_serializable(value):
