@@ -20,17 +20,9 @@ ep_b = APIBlueprint('ep_blueprint', __name__)
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
        
-    jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
     g.rol = jsonHeader.get('user_rol', '')
      
 @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})

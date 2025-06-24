@@ -6,10 +6,11 @@ import common.logger_config as logger_config
 import json
 import base64
 import bcrypt
+import os
 
 def verify_jwt_in_header():
+   
     token_encabezado = request.headers.get('authorization')
-  
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
@@ -21,15 +22,14 @@ def verify_jwt_in_header():
         logger_config.logger.error("No se proporciono token en el encabezado")
         #raise UnauthorizedError('No se proporciono token en el encabezado')
         return None
-   
-    
+       
     if token_encabezado:
         try:
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
-            #print("token:",token)
+            print("token:",token)
             payload = jwt.decode(jwt=token, key=jwt_pk, leeway=50, algorithms=jwt_alg, audience=jwt_aud)
-            
+            print("payload:",payload)
             return payload
             
         except jwt.ExpiredSignatureError:
@@ -51,11 +51,12 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
 
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
-    file_path = '../json/api_keys.json'
+    file_path = './json/api_keys.json'
+    if not os.path.exists(file_path):
+        logger_config.logger.error(f"El archivo {file_path} no existe.")
+        raise FileNotFoundError(f"El archivo {file_path} no existe.")
     with open(file_path, 'r') as f:
         data = json.load(f)
-    #print("DATA OF FILE")
-    #print(data)
     for api_key in data:
         if api_key['api_key_name'] == authorized_system:
             stored_hashed_api_key = api_key['api_key']
@@ -110,7 +111,7 @@ def verify_header():
                 if not result:
                     raise error_handling.UnauthorizedError("api-key no valida")
                 else:
-                    logger_config.logger.info("API Key valido", x_api_key,"-",x_api_system)
+                    logger_config.logger.info(f"API Key valido: {x_api_key} - x_api_system: {x_api_system}")
                     return {"type":"api_key","user_name":x_api_system, "user_rol":x_user_rol} 
             
     except Exception as err:

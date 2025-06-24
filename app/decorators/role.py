@@ -11,8 +11,16 @@ def require_role(rol=''):
         @wraps(f)
         def wrapped(*args, **kwargs):
             try:
-                rol=g.rol
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
+                x_api_key = request.headers.get('x-api-key')
+                if x_api_key:
+                    logger_config.logger.info("API Key detected in header")
+                    # If API key is present, skip JWT verification
+                    return f(*args, **kwargs)
+                
+                # If no API key, proceed with JWT verification
+                
+                rol=g.rol
                 logger_config.logger.info(f"ROL: {rol}")
                 auth_header = request.headers.get("Authorization", "")
                 token = auth_header.replace("Bearer ", "")       

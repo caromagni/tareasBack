@@ -16,7 +16,6 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 @groups_b.before_request
 def before_request():
-    print("************ingreso a before_request Usuarios************")
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
@@ -116,8 +115,6 @@ def get_grupo_detalle(query_data: dict):
 @rol.require_role()
 def get_grupo_id(id: str):
     try:
-        #can_pass=validar_rol(jwt,["leer-grupo"])
-
         print("id:",id)
         res = grupo_model.get_grupo_by_id(id)
         
