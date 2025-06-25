@@ -317,7 +317,9 @@ def get_tareas_detalle(query_data: dict):
         titulo=request.args.get('titulo')
         label=request.args.get('label')
         id_expediente=request.args.get('id_expediente')
+        id_expte_ext = request.args.get('id_expte_ext')
         id_actuacion=request.args.get('id_actuacion')
+        id_actuacion_ext = request.args.get('id_actuacion_ext')
         if(request.args.get('prioridad') is not None):
             prioridad=int(request.args.get('prioridad'))
         if(request.args.get('estado') is not None):
@@ -333,7 +335,7 @@ def get_tareas_detalle(query_data: dict):
         fecha_fin_desde=request.args.get('fecha_fin_desde')
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
         tiene_notas=request.args.get('tiene_notas')
-        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_expte_ext, id_actuacion, id_actuacion_ext, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
         # res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {

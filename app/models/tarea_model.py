@@ -1629,7 +1629,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     
     """logger_config.logger.info("username: %s", username)
     if username is not None:
@@ -1655,31 +1655,6 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     print("**************************START TIME*****************************")
     print("**************************START TIME*****************************")
     print(page, per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)
-# def get_all_tarea_detalle(page=1):
-#     print("**************************START TIME*****************************")
-#     exec_time = datetime.now()
-#     print(exec_time)
-#     per_page=10
-#     titulo=''
-#     label=''
-#     labels=''
-#     id_expediente=None
-#     id_actuacion=None
-#     id_tipo_tarea=None
-#     id_usuario_asignado="dca6564c-a5bc-2e90-8380-a3567b944418"
-#     grupos=None
-#     id_tarea=None
-#     fecha_desde=None
-#     fecha_hasta=None
-#     fecha_fin_desde=None
-#     fecha_fin_hasta=None
-#     prioridad=0
-#     estado=0
-#     eliminado=None
-#     tiene_notas=False
-#     print("*******************************************************")
- 
-#     print("*******************************************************")
     
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
@@ -1711,8 +1686,14 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
+    if id_expte_ext is not None:
+        query = query.join(ExpedienteExt, Tarea.id_expediente == ExpedienteExt.id
+                ).filter(ExpedienteExt.id_ext == id_expte_ext)
     if id_actuacion is not None:
         query = query.filter(Tarea.id_actuacion == id_actuacion)
+    if id_actuacion_ext is not None:
+        query = query.join(ActuacionExt, Tarea.id_actuacion == ActuacionExt.id
+                ).filter(ActuacionExt.id_ext == id_actuacion_ext)    
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
