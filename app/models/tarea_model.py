@@ -1212,6 +1212,8 @@ def get_tarea_by_id(id):
     res = db.session.query(Tarea).filter(Tarea.id == id).first()
     
     results = []
+    id_actuacion_ext=''
+    id_expte_ext=''
    
     if res is not None:
         res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
@@ -1751,7 +1753,8 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
 
     # Process each task in paginated results
     results = []
-    
+    id_actuacion_ext = ''
+    id_expte_ext = ''
     # Using aliased subqueries to reduce the number of queries for users and groups
     usuario_alias = aliased(Usuario)
     grupo_alias = aliased(Grupo)
