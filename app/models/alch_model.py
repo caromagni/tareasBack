@@ -317,6 +317,28 @@ class SubtipoTarea(Base):
 
     tipo_tarea = relationship('TipoTarea')
 
+class Dominio(Base):
+    __tablename__ = 'dominio'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre = Column(String, nullable=False)
+    fecha_creacion = Column(DateTime, nullable=False)
+    inactivo = Column(Boolean, default=False)
+
+class TipoTareaDominio(Base):
+    __tablename__ = 'tipo_tarea_x_dominio'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    inactivo = Column(Boolean, nullable=False, default=False)
+    fecha_creacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+
+    tipo_tarea = relationship('TipoTarea')
+    dominio = relationship('Dominio')
 
 
 

@@ -1223,6 +1223,13 @@ def get_tarea_by_id(id):
         
         res_notas = db.session.query(Nota).filter(Nota.id_tarea== res.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
 
+        res_expediente = db.session.query(Tarea, ExpedienteExt.id_ext).join(ExpedienteExt, Tarea.id_expediente==ExpedienteExt.id).filter(Tarea.id==res.id).first()
+        if res_expediente is not None:
+            id_expte_ext = res_expediente.id_ext
+        res_actuacion = db.session.query(Tarea, ActuacionExt.id_ext).join(ActuacionExt, Tarea.id_actuacion==ActuacionExt.id).filter(Tarea.id==res.id).first()
+        if res_actuacion is not None:
+            id_actuacion_ext = res_actuacion.id_ext
+
         usuarios=[]
         grupos=[]
         notas=[]    
@@ -1295,7 +1302,10 @@ def get_tarea_by_id(id):
             "id_subtipo_tarea": res.id_subtipo_tarea,
             "tipo_tarea": res.tipo_tarea,
             "subtipo_tarea": res.subtipo_tarea,
+            "id_actuacion": res.id_actuacion,
+            "id_actuacion_ext": id_actuacion_ext,
             "id_expediente": res.id_expediente,
+            "id_expediente_ext": id_expte_ext,
             "expediente": res.expediente,
             "caratula_expediente": res.caratula_expediente,
             "id_actuacion": res.id_actuacion,
@@ -1751,7 +1761,16 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         grupos = []
         reasignada_usuario = False
         reasignada_grupo = False
-        
+        if res.id_expediente is not None:
+            res_expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == res.id_expediente).first()
+            if res_expediente is not None:
+                id_expte_ext = res_expediente.id_ext
+
+        if res.id_actuacion is not None:
+            res_actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == res.id_actuacion).first()
+            if res_actuacion is not None:
+                id_actuacion_ext = res_actuacion.id_ext    
+
         # Fetch assigned users for the task
         res_usuarios = db.session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                      ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
@@ -1799,9 +1818,11 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             "id_subtipo_tarea": res.id_subtipo_tarea,
             "subtipo_tarea": res.subtipo_tarea,
             "id_expediente": res.id_expediente,
+            "id_expte_ext": id_expte_ext,
             "expediente": res.expediente,
             "caratula_expediente": res.caratula_expediente,
             "id_actuacion": res.id_actuacion,
+            "id_actuacion_ext": id_actuacion_ext,
             "actuacion": res.actuacion,
             "cuerpo": res.cuerpo,
             "eliminable": res.eliminable,
