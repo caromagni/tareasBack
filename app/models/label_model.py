@@ -207,6 +207,7 @@ def get_active_labels(ids_grupos_base):
     # print('*********************************************id_grupo_base:', id_grupo_base)
     print("##"*50)
     ids_list = ids_grupos_base.split(',')
+    # ids_list = [ids_grupos_base]
     print('ids_list:', ids_list)
     labels_group_array = []
     total = 0

@@ -257,7 +257,8 @@ def delete_label_tarea(id: str):
 @cache.cached(CACHE_TIMEOUT_LONG)
 def get_active_labels_grupo(ids_grupos_base: str):
     try:
-        # Fetch active labels and count
+        # Fetch active labels
+        print('ids_grupos_base:', ids_grupos_base)
         res, cant = label_model.get_active_labels(ids_grupos_base)
 
         if res is None:

@@ -37,9 +37,11 @@ def require_role(rol=''):
                 #funcion que devuelve los casos de uso según el operador
                 can_pass=usher_fnc.get_usr_cu(decoded['email'], rol, use_cases)
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
-                if not can_pass:
+                if not can_pass and rol != 'Superadmin':
                     logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
                     raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
+                elif not can_pass and rol == 'Superadmin':
+                    can_pass=True
             
             # Si tiene permisos, continuar con la función original
                 return f(*args, **kwargs)
