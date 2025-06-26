@@ -173,7 +173,7 @@ def get_usuario(query_data: dict):
 @usuario_b.get('/usuario_detalle')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
 @usuario_b.output(schema.UsuarioCountAllOut)
-@rol.require_role()
+#@rol.require_role()
 def get_usuarios_detalle(query_data: dict):
     try:
         page=1
@@ -260,7 +260,7 @@ def get_rol_usr():
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Grupos al que pertenece un Usuario con grupo padre', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/groups_with_base')
 @usuario_b.input(schema.UsuarioGetIn, location='query')
-@rol.require_role()
+#@rol.require_role()
 def get_groups_base_by_usr(query_data: dict):
     try:
         print('***************ingreso a get grupos by usr**************')

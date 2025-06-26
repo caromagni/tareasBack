@@ -15,24 +15,18 @@ from common.functions import controla_fecha
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
+
+
 @nota_b.before_request
 def before_request():
     
-    jsonHeader = auth_token.verify_header()
-    
-    if jsonHeader is None:
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-            g.rol = jsonHeader.get('user_rol', '')
-    
-    g.username = user_origin
-    g.type = type_origin
-    
+    jsonHeader = auth_token.verify_header() or {}
+    g.username = jsonHeader.get('user_name', '')
+    g.type = jsonHeader.get('type', '')
+    g.rol = jsonHeader.get('user_rol', '')
 
-
+  
+    
 ####################TIPO DE NOTA######################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de Tipos de Notas', summary='Tipos de Notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/tipo_nota')
