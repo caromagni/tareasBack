@@ -36,7 +36,7 @@ def before_request():
 @actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Actuaciones', summary='Actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/actuacion')
 @actuacion_b.output(schemas.ActuacionOut(many=True))
-@rol.require_role()
+#@rol.require_role()
 def get_actuaciones():
     
     try:
