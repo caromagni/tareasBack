@@ -74,7 +74,7 @@ def post_tipo_nota(json_data: dict):
             result={
                     "valido":"fail",
                     "code": 800,
-                    "error":"Error en insert grupo",
+                    "error":"Error en insert nota",
                     "error_description":"No se pudo insertar el tipo de nota"
                 }
             res = schema.MsgErrorOut().dump(result)
