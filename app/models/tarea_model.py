@@ -119,7 +119,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
 
 def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     
-    print("##############Validaciones Insert Tarea################")
+    print("##############Validaciones Insert de Tarea################")
     id_grupo=None
     id_usuario_asignado=None
     if usr_header is not None:
