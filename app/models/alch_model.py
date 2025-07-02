@@ -298,6 +298,7 @@ class TipoTarea(Base):
     id_ext = Column(UUID)
     nivel = Column(String)
     inactivo = Column(Boolean, default=False)
+    habilitado = Column(Boolean, default=True)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
 
 class SubtipoTarea(Base):
@@ -315,6 +316,7 @@ class SubtipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     inactivo = Column(Boolean, default=False)
+    habilitado = Column(Boolean, default=True)
 
     tipo_tarea = relationship('TipoTarea')
 

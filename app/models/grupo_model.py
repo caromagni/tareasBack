@@ -134,10 +134,18 @@ def exececuteSubquery(subquery):
     
 
 #@cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
+def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None, grupo_user=None):
     """
     Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
     """
+    if username is not None:
+        id_user = utils.get_username_id(username)
+
+    if id_user is not None:
+        utils.verifica_usr_id(id_user)
+    else:
+        logger_config.logger.error("Id de usuario no ingresado")
+
     # Parse and normalize date filters
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
@@ -328,6 +336,8 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         query = query.filter(Grupo.eliminado == eliminado)
     if suspendido is not None:
         query = query.filter(Grupo.suspendido == suspendido)
+    if grupo_user is not None:
+        query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user)    
 
     total = query.count()
     result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
