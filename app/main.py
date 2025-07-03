@@ -18,6 +18,7 @@ from blueprints.endpoint import ep_b
 from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
+from blueprints.URL import ep_url
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config.config import Config
 from common.error_handling import register_error_handlers
@@ -168,6 +169,7 @@ def create_app():
     app.register_blueprint(ai_assistant)
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_bj)
+    app.register_blueprint(ep_url)
 
 
   

@@ -1612,3 +1612,9 @@ class EPOut(Schema):
 class EPCountOut(Schema):
     count = Integer()
     data = Nested(EPOut, many=True)
+
+
+class URLTareaOut(Schema):
+    url = String()
+   
+   
