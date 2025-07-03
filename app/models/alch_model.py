@@ -594,3 +594,22 @@ class CU(Base):
     descripcion = Column(String)
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(UUID)
+
+
+
+
+class UsuarioGrupoRol(Base):
+    __tablename__ = 'usuario_grupo_rol'
+    __table_args__ = {'schema': 'tareas', 'comment': 'un usuario puede tener uno o mas roles en un grupo, esto determina que permisos tiene el usuario en el grupo, por ahora solo las entradas en id_grupo seran las de grupos base. pero podrian ser de otros grupos a futuro.'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
+    id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    eliminado = Column(Boolean, default=False)
+
+    usuario = relationship('Usuario')
+    grupo = relationship('Grupo')
+    rol = relationship('Rol')
