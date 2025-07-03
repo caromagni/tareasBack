@@ -54,8 +54,8 @@ def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-
-    
+    #manually disabling cache REMOVE THIS LINE TO ENABLE CACHING
+    cache_common.cache_enabled=False
     if cache_common.cache_enabled == False :
         print("Using NullCache, caching is disabled")
         app.config['CACHE_TYPE'] = 'NullCache'  # Tipo de caché
