@@ -202,7 +202,7 @@ class GroupGetIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
-    grupo_usr =Boolean(default=False)
+    todos =Boolean(default=False)
 
 class UsuarioDefaultOut(Schema):
     id = String()
@@ -633,11 +633,14 @@ class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String()
+    nombre_actuacion = String()
     titulo = String(validate=[
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    caratula_expediente = String()
+    nro_expte = String()
     id_expediente = String()
     #caratula_expediente = String(validate=[
     #    validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),

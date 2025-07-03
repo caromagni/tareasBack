@@ -41,6 +41,8 @@ def get_tipoTareas(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nivel=None
         origen_externo=None
+        habilitado=None
+        eliminado=None
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))

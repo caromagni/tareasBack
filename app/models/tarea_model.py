@@ -393,13 +393,29 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'id_actuacion' in kwargs:
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
         if actuacion is None:
-            raise Exception("Actuacion no encontrada")
+            actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id_ext == kwargs['id_actuacion']).first()
+            if actuacion is None:
+                raise Exception("Actuacion no encontrada")
+            if 'nombre_actuacion' in kwargs:
+                actuacion.nombre = kwargs['nombre_actuacion']
+
         tarea.id_actuacion = kwargs['id_actuacion']
+        
     if 'id_expediente' in kwargs:
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
         if expediente is None:
-            raise Exception("Expediente no encontrado")
-        tarea.id_expediente = kwargs['id_expediente']    
+            expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == kwargs['id_expediente']).first()
+            if expediente is None:
+                raise Exception("Expediente no encontrado")
+            else:
+                id_expediente = expediente.id
+         
+        if 'caratula_expediente' in kwargs:
+            expediente.caratula = kwargs['caratula_expediente']  
+        if 'nro_expte' in kwargs:
+            expediente.nro_expte = kwargs['nro_expte']
+
+        tarea.id_expediente = id_expediente     
     #Validacion de tipo y subtipo de tarea
     if 'id_tipo_tarea' in kwargs:
         tipo = db.session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
@@ -469,6 +485,7 @@ def update_tarea(id_t='', username=None, **kwargs):
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
+    
     usuarios=[]
     grupos=[]
     if 'grupo' in kwargs:

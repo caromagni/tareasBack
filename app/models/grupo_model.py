@@ -134,7 +134,7 @@ def exececuteSubquery(subquery):
     
 
 #@cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None, grupo_user=None):
+def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=False, suspendido=False, todos=True):
     """
     Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
     """
@@ -328,7 +328,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
 
     # Query for non-hierarchical groups
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-
+    print("todos:", todos)
     # Apply filters
     if nombre:
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
@@ -336,7 +336,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
         query = query.filter(Grupo.eliminado == eliminado)
     if suspendido is not None:
         query = query.filter(Grupo.suspendido == suspendido)
-    if grupo_user is not None:
+    if todos is None or todos== False:
         query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user)    
 
     total = query.count()

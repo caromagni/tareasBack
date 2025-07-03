@@ -55,7 +55,7 @@ def get_grupo(query_data: dict):
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         eliminado = request.args.get('eliminado')
         suspendido = request.args.get('suspendido')
-        grupo_usr = request.args.get('grupo_usr')
+        todos = request.args.get('todos')
         path_name = request.args.get('path_name')
         if(request.args.get('page') is not None):
             page = int(request.args.get('page'))
@@ -65,7 +65,7 @@ def get_grupo(query_data: dict):
         fecha_desde = request.args.get('fecha_desde')
         fecha_hasta = request.args.get('fecha_hasta')
 
-        res, total = grupo_model.get_all_grupos_nivel(username, page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido, grupo_usr)
+        res, total = grupo_model.get_all_grupos_nivel(username, page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido, todos)
         
         data = {
                 "count": total,
