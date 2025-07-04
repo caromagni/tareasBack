@@ -84,7 +84,6 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_ext = Column(UUID)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -92,6 +91,8 @@ class Organismo(Base):
     habilitado = Column(Boolean, nullable=False)
     id_tarea_grupo_base  = Column(UUID)
     instancia = Column(String)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
 
 
 class Nomenclador(Base):
@@ -185,12 +186,10 @@ class Grupo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    circunscripcion_judicial = Column(String, nullable=False)
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    nombre = Column(String, nullable=False) #sacarlo despues
+    nombre = Column(String, nullable=False)
     codigo_nomenclador = Column(String)
     descripcion = Column(String, nullable=False)
-    descripcion_corta = Column(String, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime, nullable=False)
@@ -201,28 +200,6 @@ class Grupo(Base):
     base = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
-
-""" class GrupoAnt(Base):
-    __tablename__ = 'grupo'
-    __table_args__ = {'schema': 'tareas'}
-    id = Column(UUID, primary_key=True)
-    #id_user_actualizacion = Column(UUID, nullable=False)
-    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
-    #id_user_asignado_default = Column(UUID)
-    id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
-    fecha_actualizacion = Column(DateTime)
-    nombre = Column(String, nullable=False)
-    descripcion = Column(String)
-    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
-    eliminado  = Column(Boolean, default=False)
-    suspendido = Column(Boolean, default=False)
-    fecha_creacion = Column(DateTime)
-    fecha_hasta = Column(DateTime)
-    base = Column(Boolean, default=False)
-    nomenclador = relationship('Nomenclador')
-    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
-    user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
- """
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'

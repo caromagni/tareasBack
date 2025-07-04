@@ -55,7 +55,7 @@ def check_updates_new( rabbit_message: dict):
                         res=sync.sync_usuario(entity_id, url, id_user)
                     case 'organismo':
                         #ejecutar insert o update para organismo
-                        res=sync.sync_cu(entity_id, url, id_user)
+                        res=sync.sync_organismo(entity_id, url, id_user)
                     case 'inhabilidad':
                         #ejecutar insert o update para inhabilidad
                         res=sync.sync_inhabilidad(entity_id, url, id_user)
