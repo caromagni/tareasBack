@@ -17,6 +17,7 @@ from blueprints.alerta import alerta_b
 from blueprints.endpoint import ep_b
 from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
+from blueprints.URL import ep_url
 from blueprints.ai_assistant import ai_assistant
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config.config import Config
@@ -79,20 +80,7 @@ def create_app():
    
 
     app.config['CACHE_DEFAULT_TIMEOUT'] = cache_common.CACHE_TIMEOUT_MEDIUM  # Tiempo de caché predeterminado (en segundos)
-
-#      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
-# |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
-#  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   
-#  | || |  | |  __/| |___| |___| |  | | |___| |\  | | |/ ___ \|  _ <    
-# |___|_|  |_|_| __|_____|_____|_|  |_|_____|_| \_| |_/_/   \_\_| \_\   
-#  / ___|  / \  / ___| | | | ____|  / ___| |   / _ \| __ )  / \  | |    
-# | |     / _ \| |   | |_| |  _|   | |  _| |  | | | |  _ \ / _ \ | |    
-# | |___ / ___ \ |___|  _  | |___  | |_| | |__| |_| | |_) / ___ \| |___ 
-#  \____/_/ __\_\____|_| |_|_____|  \____|_____\___/|____/_/   \_\_____|
-# |  _ \_ _/ ___|  / \  | __ )| |   | ____|                             
-# | | | | |\___ \ / _ \ |  _ \| |   |  _|                               
-# | |_| | | ___) / ___ \| |_) | |___| |___                              
-# |____/___|____/_/   \_\____/|_____|_____|                             
+                         
     
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
@@ -133,16 +121,10 @@ def create_app():
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
     app.config['SHOW_SQLALCHEMY_LOG_MESSAGES'] = Config.SHOW_SQLALCHEMY_LOG_MESSAGES
     #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
-    """ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_pre_ping': True,
-        'pool_size': Config.SQLALCHEMY_POOL_SIZE,
-        'max_overflow': Config.SQLALCHEMY_MAX_OVERFLOW,
-        'pool_timeout': Config.SQLALCHEMY_POOL_TIMEOUT,
-        'pool_recycle': Config.SQLALCHEMY_POOL_RECYCLE
-    } """
+   
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
-        'pool_size': 5,
+        'pool_size': 2,
         'max_overflow': 10,
         'pool_timeout': 30,
         'pool_recycle': 1800  # 30 minutos
@@ -166,11 +148,7 @@ def create_app():
         Base.metadata.create_all(db.engine, checkfirst=True)
    
 
-    # Enable CORS
-    #CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": "*"}})
-
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
-    #CORS(app)
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
@@ -192,6 +170,7 @@ def create_app():
     app.register_blueprint(ai_assistant)
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_bj)
+    app.register_blueprint(ep_url)
 
 
   
