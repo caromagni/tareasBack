@@ -122,7 +122,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
     #tiempo_vencimiento = timedelta(hours=1)
     tiempo_vencimiento = timedelta(minutes=2)
     try:
+        print("entro TRY usher")
         query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
+        print("after QUERY USR")
         if query_usr is None:
             logger_config.logger.error("Usuario no encontrado")
             return False
@@ -131,12 +133,14 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         email = query_usr.email
         #Pregunto si el usuario tiene un rol
         query_rol = db.session.query(Rol).filter(Rol.email == email).all()
+        print("after QUERY ROL")
         if len(query_rol)>0:
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
         #Traigo los roles del usuario desde P-USHER
         if len(query_rol)==0 or len(query_vencido)>0:
+       
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
             #agregar un try y except para controlar si da error de conexion
@@ -154,6 +158,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
 
         #######Consultar CU Api P-USHER##########
         #pull_roles = True
+        print("checking pull roles")
         if pull_roles:
             logger_config.logger.info("Get roles desde p-usher")
             #roles = get_roles(username)
