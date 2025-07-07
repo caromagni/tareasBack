@@ -18,7 +18,6 @@ from blueprints.endpoint import ep_b
 from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.ai_assistant import ai_assistant
-from blueprints.URL import ep_url
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config.config import Config
 from common.error_handling import register_error_handlers
@@ -36,7 +35,7 @@ import common.exceptions as exceptions
 
 
 def is_redis_available():
-
+    """One-liner Redis availability check"""
     try:
         print("testing redis connection")
         return redis.Redis(
@@ -55,8 +54,8 @@ def create_app():
 
     print("Creating app..")
     app = APIFlask(__name__)
-    #manually disabling cache REMOVE THIS LINE TO ENABLE CACHING
-    cache_common.cache_enabled=False
+    # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
+    
     if cache_common.cache_enabled == False :
         print("Using NullCache, caching is disabled")
         app.config['CACHE_TYPE'] = 'NullCache'  # Tipo de caché
@@ -65,6 +64,7 @@ def create_app():
             print("Redis is available, using RedisCache")
             app.config['CACHE_TYPE'] = 'RedisCache'
             app.config['CACHE_REDIS_URL'] = "redis://"+cache_common.redis_user+":"+cache_common.redis_password+"@"+cache_common.redis_host+":"+str(cache_common.redis_port)+"/"+str(cache_common.redis_db) 
+        # ... Redis config
         else:
             print("Redis is not available, using SimpleCache")
             app.config['CACHE_TYPE'] = 'SimpleCache'
@@ -80,6 +80,20 @@ def create_app():
 
     app.config['CACHE_DEFAULT_TIMEOUT'] = cache_common.CACHE_TIMEOUT_MEDIUM  # Tiempo de caché predeterminado (en segundos)
 
+#      ___ __  __ ____  _     _____ __  __ _____ _   _ _____  _    ____     
+# |_ _|  \/  |  _ \| |   | ____|  \/  | ____| \ | |_   _|/ \  |  _ \    
+#  | || |\/| | |_) | |   |  _| | |\/| |  _| |  \| | | | / _ \ | |_) |   
+#  | || |  | |  __/| |___| |___| |  | | |___| |\  | | |/ ___ \|  _ <    
+# |___|_|  |_|_| __|_____|_____|_|  |_|_____|_| \_| |_/_/   \_\_| \_\   
+#  / ___|  / \  / ___| | | | ____|  / ___| |   / _ \| __ )  / \  | |    
+# | |     / _ \| |   | |_| |  _|   | |  _| |  | | | |  _ \ / _ \ | |    
+# | |___ / ___ \ |___|  _  | |___  | |_| | |__| |_| | |_) / ___ \| |___ 
+#  \____/_/ __\_\____|_| |_|_____|  \____|_____\___/|____/_/   \_\_____|
+# |  _ \_ _/ ___|  / \  | __ )| |   | ____|                             
+# | | | | |\___ \ / _ \ |  _ \| |   |  _|                               
+# | |_| | | ___) / ___ \| |_) | |___| |___                              
+# |____/___|____/_/   \_\____/|_____|_____|                             
+    
     app.config['JWT_PUBLIC_KEY'] = Config.JWT_PUBLIC_KEY
     app.config['JWT_ALGORITHM'] = Config.JWT_ALGORITHM
     app.config['JWT_DECODE_AUDIENCE'] = Config.JWT_DECODE_AUDIENCE
@@ -119,14 +133,20 @@ def create_app():
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
     app.config['SHOW_SQLALCHEMY_LOG_MESSAGES'] = Config.SHOW_SQLALCHEMY_LOG_MESSAGES
     #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
- 
+    """ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_size': Config.SQLALCHEMY_POOL_SIZE,
+        'max_overflow': Config.SQLALCHEMY_MAX_OVERFLOW,
+        'pool_timeout': Config.SQLALCHEMY_POOL_TIMEOUT,
+        'pool_recycle': Config.SQLALCHEMY_POOL_RECYCLE
+    } """
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
-        'pool_size': 2, #testing if this works md
+        'pool_size': 5,
         'max_overflow': 10,
         'pool_timeout': 30,
         'pool_recycle': 1800  # 30 minutos
-    }   
+    }
     #################RabbitMQ#################
     app.config['RABBITMQ_USER'] = Config.RABBITMQ_USER
     app.config['RABBITMQ_PASSWORD'] = Config.RABBITMQ_PASSWORD
@@ -144,7 +164,10 @@ def create_app():
     with app.app_context():
         #db.create_all() 
         Base.metadata.create_all(db.engine, checkfirst=True)
+   
 
+    # Enable CORS
+    #CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": "*"}})
 
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     #CORS(app)
@@ -169,7 +192,6 @@ def create_app():
     app.register_blueprint(ai_assistant)
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_bj)
-    app.register_blueprint(ep_url)
 
 
   
@@ -198,11 +220,11 @@ def create_app():
     exceptions.register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    """  if uwsgi.worker_id() == 1: #if id is 1 then this thread should run. disabled for now with any long number
+    if uwsgi.worker_id() == 1: #if id is 1 then this thread should run. disabled for now with any long number
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
-        print("Hilo de recepción de mensajes iniciado.")  """
+        print("Hilo de recepción de mensajes iniciado.") 
         
 
     return app
