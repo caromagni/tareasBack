@@ -115,7 +115,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
     if casos is None or len(casos) == 0:
         logger_config.logger.error("No hay casos de uso")
         return False
-    
+    else:
+        logger_config.logger.info("Casos de uso encontrados: %s", casos)
+        
     pull_roles = False
     pusher_ok = True
     #tiempo_vencimiento = timedelta(days=1)
@@ -129,6 +131,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         
         id_usuario = query_usr.id
         email = query_usr.email
+        print("id_usuario:", id_usuario)
+        print("email:", email)
+
         #Pregunto si el usuario tiene un rol
         query_rol = db.session.query(Rol).filter(Rol.email == email).all()
         if len(query_rol)>0:
