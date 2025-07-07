@@ -84,7 +84,6 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_ext = Column(UUID)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -92,6 +91,8 @@ class Organismo(Base):
     habilitado = Column(Boolean, nullable=False)
     id_tarea_grupo_base  = Column(UUID)
     instancia = Column(String)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
 
 
 class Nomenclador(Base):
@@ -180,32 +181,29 @@ class ExpedienteExt(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
 
-
 class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}
+
     id = Column(UUID, primary_key=True)
-    #id_user_actualizacion = Column(UUID, nullable=False)
-    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
-    #id_user_asignado_default = Column(UUID)
-    id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
-    fecha_actualizacion = Column(DateTime)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
     nombre = Column(String, nullable=False)
-    descripcion = Column(String)
-    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
+    codigo_nomenclador = Column(String)
+    descripcion = Column(String, nullable=False)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
+    id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
+    fecha_actualizacion = Column(DateTime, nullable=False)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
-    fecha_creacion = Column(DateTime)
-    fecha_hasta = Column(DateTime)
+    fecha_creacion = Column(DateTime, nullable=False)
+    fecha_hasta = Column(DateTime, nullable=True)
     base = Column(Boolean, default=False)
-    nomenclador = relationship('Nomenclador')
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
 
-
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
-    __table_args__ = {'schema': 'tareas'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'relaciona grupos entre si, por ejemplo un grupo padre puede tener varios grupos hijos. esto permite crear una estructura de grupos jerarquica.'}
 
     id = Column(UUID, primary_key=True)
     #id_padre = Column(UUID)
@@ -322,16 +320,19 @@ class SubtipoTarea(Base):
 
 class Dominio(Base):
     __tablename__ = 'dominio'
-    __table_args__ = {'schema': 'tareas'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados.'}
 
     id = Column(UUID, primary_key=True)
-    nombre = Column(String, nullable=False)
-    fecha_creacion = Column(DateTime, nullable=False)
-    inactivo = Column(Boolean, default=False)
+    descripcion = Column(String, nullable=False)
+    descripcion_corta = Column(String, nullable=False)
+    prefijo = Column(String, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    habilitado = Column(Boolean, default=True)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 
 class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'
-    __table_args__ = {'schema': 'tareas'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'relaciona los tipos de tarea con los dominios, para que cada tipo de tarea y subtipo se pueda clasificar y puede existir para mas de un dominio(fuero) y grupo.'}
 
     id = Column(UUID, primary_key=True)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
@@ -389,6 +390,7 @@ class Inhabilidad(Base):
     id_user_actualizacion = Column(UUID)
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     descripcion = Column(String)
+    habilitado = Column(Boolean, default=True)
 
     grupo = relationship('Grupo')
     organismo = relationship('Organismo')
@@ -575,7 +577,7 @@ class Parametros(Base):
 
 class EP(Base):
     __tablename__ = 'endpoint'
-    __table_args__ = {'schema': 'tareas'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'endpoints de la api y casos de uso permitidos para ser consumidos'}
 
     id = Column(UUID, primary_key=True)
     url = Column(String)
@@ -584,18 +586,6 @@ class EP(Base):
     metodo = Column(String)
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(UUID)
-
-class CU(Base):
-    __tablename__ = 'caso_uso'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True)
-    codigo = Column(String)
-    descripcion = Column(String)
-    fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID)
-
-
 
 
 class UsuarioGrupoRol(Base):

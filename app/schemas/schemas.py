@@ -164,7 +164,6 @@ class GroupIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
     id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
@@ -183,7 +182,6 @@ class GroupPatchIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
     id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
     codigo_nomenclador = String(validate=[
@@ -423,7 +421,6 @@ class TipoTareaIn(Schema):
     habilitado = Boolean(default=True)
     nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
-    id_user_actualizacion = String()
     
 
 class TipoTareaPatchIn(Schema):
@@ -436,7 +433,6 @@ class TipoTareaPatchIn(Schema):
         validate_char
     ])
     eliminado = Boolean(default=False)
-    id_user_actualizacion = String()
     base = Boolean(default=False)
     habilitado = Boolean(default=False)
     origen_externo = Boolean(default=False)
@@ -476,7 +472,6 @@ class SubtipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
 
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
@@ -491,7 +486,6 @@ class SubtipoTareaPatchIn(Schema):
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
     habilitado = Boolean(default=False)
-    id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -627,7 +621,6 @@ class TareaIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ), default=1)
-    username = String()
 
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
@@ -649,7 +642,6 @@ class TareaPatchIn(Schema):
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -678,7 +670,6 @@ class TareaPatchV2In(Schema):
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -709,7 +700,6 @@ class TareaPatchLoteIn(Schema):
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -889,7 +879,6 @@ class UsuarioInPatch(Schema):
     ])
     suspendido = Boolean()
     eliminado = Boolean()
-    id_user_actualizacion = String()
     id_ext = String()
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
@@ -1297,7 +1286,6 @@ class TipoNotaIn(Schema):
         validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
     habilitado = Boolean()
     eliminado = Boolean()
 
@@ -1321,7 +1309,6 @@ class NotaIn(Schema):
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean(default=False)
-    # id_user_creacion = String(required=True)
     id_tarea = String()
 
 

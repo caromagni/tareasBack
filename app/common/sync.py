@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, TipoTarea, SubtipoTarea, Inhabilidad, Organismo
+from models.alch_model import Usuario, TipoTarea, SubtipoTarea, Inhabilidad, Organismo, Grupo,  Dominio
 from datetime import datetime
 import common.logger_config as logger_config
 import uuid
@@ -95,6 +95,37 @@ def sync_usuario(entity_id, url,id_user):
     db.session.commit()
     return resp
 
+def sync_fuero(entity_id, url,id_user):
+    resp = sync_request(url, entity_id)
+    print("json roles:",resp)    
+    if resp and resp['data']['id'] is not None:
+        #Buscar si existe la inhabilidad en la base de datos
+        query_fuero = db.session.query(Dominio).filter(Dominio.id == resp['data']['id']).first()
+        if query_fuero is None:
+            #hago insert de la inhabilidad
+            nuevo_fuero = Dominio(id=resp['data']['id'],
+                               descripcion=resp['data']['descripcion'],
+                               descripcion_corta=resp['data']['descripcion_corta'],
+                               fecha_actualizacion=datetime.now(),
+                               habilitado=resp['data']['habilitado'],
+                               prefijo=resp['data']['prefijo'],   
+                               id_user_actualizacion=id_user
+                            )
+            db.session.add(nuevo_fuero)
+
+        else:
+            print("existe el fuero en la base de datos:", resp['data']['id'])
+            #hago el update de fuero
+            query_fuero.descripcion = resp['data']['descripcion']
+            query_fuero.descripcion_corta = resp['data']['descripcion_corta']
+            query_fuero.fecha_actualizacion=datetime.now()
+            query_fuero.habilitado = resp['data']['habilitado']
+            query_fuero.prefijo = resp['data']['prefijo']
+            query_fuero.id_user_actualizacion=id_user
+        db.session.commit()
+
+    return resp
+
 def sync_inhabilidad(entity_id, url,id_user):
  
     resp = sync_request(url, entity_id)
@@ -134,23 +165,25 @@ def sync_inhabilidad(entity_id, url,id_user):
         db.session.commit()
     return resp
 
-def sync_organismo(entity_id, url,id_user):
+def sync_grupo(entity_id, url,id_user):
     resp = sync_request(url, entity_id)
     print("json roles:",resp)    
     if resp and resp['data']['id'] is not None:
         #Buscar si existe el organismo en la base de datos
-        query_organismo = db.session.query(Organismo).filter(Organismo.id_ext == resp['data']['id']).first()
+        query_organismo = db.session.query(Grupo).filter(Grupo.id == resp['data']['id']).first()
         if query_organismo is None:
             #hago insert del organismo
-            nuevo_organismo = Organismo(id=uuid.uuid4(),
-                               id_ext=resp['data']['id'], 
+            nuevo_organismo = Grupo(id=resp['data']['id'],
+                               nombre=resp['data']['descripcion'], 
+                               circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
                                descripcion=resp['data']['descripcion'],
                                descripcion_corta=resp['data']['descripcion_corta'],
-                               id_fuero=resp['data']['id_fuero'],
-                               instancia=resp['data']['instancia'],
-                               habilitado=resp['data']['habilitado'],
+                               id_dominio=resp['data']['id_fuero'],
+                               eliminado=not(resp['data']['habilitado']),
                                fecha_actualizacion=datetime.now(),
-                               id_user_actualizacion=id_user
+                               fecha_creacion=datetime.now(),
+                               id_user_actualizacion=id_user,
+                               base = True,
                             )
             db.session.add(nuevo_organismo)
 
@@ -158,14 +191,51 @@ def sync_organismo(entity_id, url,id_user):
             #hago update del organismo
             query_organismo.descricion = resp['data']['descripcion']
             query_organismo.descripcion_corta = resp['data']['descripcion_corta'] 
-            query_organismo.id_fuero = resp['data']['id_fuero']
-            query_organismo.instancia = resp['data']['instancia']
-            query_organismo.habilitado = resp['data']['habilitado']
-            query_organismo.id_ext = resp['data']['id']
+            query_organismo.circunscripcion_judicial = resp['data']['circunscripcion_judicial']
+            query_organismo.eliminado = not(resp['data']['habilitado'])
+            query_organismo.nombre = resp['data']['descripcion']
+            query_organismo.id_dominio = resp['data']['id_fuero']
             query_organismo.fecha_actualizacion=datetime.now()
+            query_organismo.fecha_creacion = datetime.now()
             query_organismo.id_user_actualizacion=id_user
+            query_organismo.base = True
 
         db.session.commit()
+    return resp
+
+def sync_organismo(entity_id, url,id_user):
+    resp = sync_request(url, entity_id)
+    print("json roles:",resp)    
+    if resp and resp['data']['id'] is not None:
+        #Buscar si existe el organismo en la base de datos
+        query_organismo = db.session.query(Organismo).filter(Organismo.id == resp['data']['id']).first()
+        if query_organismo is None:
+            #hago insert del organismo
+            nuevo_organismo = Organismo(id=resp['data']['id'],
+                               circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
+                               descripcion=resp['data']['descripcion'],
+                               descripcion_corta=resp['data']['descripcion_corta'],
+                               id_fuero=resp['data']['id_fuero'],
+                               habilitado=resp['data']['habilitado'],
+                               fecha_actualizacion=datetime.now(),
+                               id_user_actualizacion=id_user,
+                               id_tarea_grupo_base=resp['data']['id_tarea_grupo_base']
+                            )
+            db.session.add(nuevo_organismo)
+
+        else:
+            #hago update del organismo
+            query_organismo.descricion = resp['data']['descripcion']
+            query_organismo.descripcion_corta = resp['data']['descripcion_corta'] 
+            query_organismo.circunscripcion_judicial = resp['data']['circunscripcion_judicial']
+            query_organismo.habilitado = resp['data']['habilitado']
+            query_organismo.id_fuero = resp['data']['id_fuero']
+            query_organismo.fecha_actualizacion=datetime.now()
+            query_organismo.id_user_actualizacion=id_user
+            query_organismo.id_tarea_grupo_base = resp['data']['id_tarea_grupo_base']
+
+        db.session.commit()
+        print("Organismo sincronizado:", resp['data']['id'])
     return resp
 
 def sync_subtipo_tarea(entity_id, url,id_user):
@@ -210,6 +280,7 @@ def sync_subtipo_tarea(entity_id, url,id_user):
                 db.session.commit()
 
     return resp
+
 
 
 def sync_cu(entity_id, url,id_user):
