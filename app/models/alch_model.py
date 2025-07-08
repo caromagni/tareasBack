@@ -569,6 +569,36 @@ class Rol(Base):
     descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
 
+class RolExt(Base):
+    __tablename__ = 'rol_ext'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    email = Column(String)
+    rol = Column(String, nullable=False)
+    id_rol_ext= Column(UUID)
+    id_organismo = Column(UUID)
+    descripcion_ext = Column(String)
+    fecha_actualizacion = Column(DateTime)
+
+class UsuarioRol(Base):
+    __tablename__ = 'usuario_rol'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario_grupo = Column(ForeignKey('tareas.usuario_grupo.id'), nullable=False)
+    id_rol_ext = Column(ForeignKey('tareas.rol_ext.id'), nullable=False)
+    base_desnz = Column(Boolean, nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    eliminado = Column(Boolean, default=False)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+
+    usuario_grupo = relationship('UsuarioGrupo')
+    rol_ext = relationship('RolExt')
+    dominio = relationship('Dominio')
+
 class Parametros(Base):
     __tablename__ = 'parametros'
     __table_args__ = {'schema': 'tareas'}
