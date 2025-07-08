@@ -84,6 +84,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_organismo_ext = Column(UUID, nullable=False)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -325,6 +326,7 @@ class Dominio(Base):
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados.'}
 
     id = Column(UUID, primary_key=True)
+    id_dominio_ext = Column(UUID, nullable=False)
     descripcion = Column(String, nullable=False)
     descripcion_corta = Column(String, nullable=False)
     prefijo = Column(String, nullable=False)
@@ -446,23 +448,29 @@ class UsuarioGrupo(Base):
     grupo = relationship('Grupo')
     usuario = relationship('Usuario')
 
+""" class GrupoOrganismoDominio(Base):
+    __tablename__ = 'grupo_organismo_dominio'
+    __table_args__ = {'schema': 'tareas'}
 
-class UsuarioRol(Base):
-    __tablename__ = 'usuario_rol'
+    id = Column(UUID, primary_key=True, nullable=False)
+    id_grupo = Column(UUID, nullable=False)
+    id_organismo_ext = Column(UUID, nullable=False)
+    id_dominio_ext = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=True)
+    id_user_actualizacion = Column(UUID, nullable=True)
+ """
+class RolExt(Base):
+    __tablename__ = 'rol_ext'
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_usuario_grupo = Column(ForeignKey('tareas.usuario_grupo.id'), nullable=False)
-    id_rol_ext = Column(ForeignKey('tareas.rol_ext.id'), nullable=False)
-    base_desnz = Column(Boolean, nullable=False)
+    email = Column(String)
+    rol = Column(String, nullable=False)
+    id_rol_ext = Column(UUID)
+    id_organismo = Column(UUID)
+    descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
-    eliminado = Column(Boolean, default=False)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
 
-    usuario_grupo = relationship('UsuarioGrupo')
-    rol_ext = relationship('RolExt')
-    dominio = relationship('Dominio')
 
 
 class Agrupacion(Base):
@@ -573,20 +581,10 @@ class TareaXGrupo(Base):
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
 
-class RolExt(Base):
-    __tablename__ = 'rol_ext'
-    __table_args__ = {'schema': 'tareas'}
 
-    id = Column(UUID, primary_key=True)
-    email = Column(String)
-    rol = Column(String, nullable=False)
-    id_rol_ext = Column(UUID)
-    id_organismo = Column(UUID)
-    descripcion_ext = Column(String)
-    fecha_actualizacion = Column(DateTime)
 
-class RolExt(Base):
-    __tablename__ = 'rol_ext'
+""" class Rol(Base):
+    __tablename__ = 'rol'
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
@@ -596,9 +594,26 @@ class RolExt(Base):
     id_rol_ext= Column(UUID)
     id_organismo = Column(UUID)
     descripcion_ext = Column(String)
-    fecha_actualizacion = Column(DateTime)
+    fecha_actualizacion = Column(DateTime) """
 
 class UsuarioRol(Base):
+    __tablename__ = 'usuario_rol'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario_grupo = Column(ForeignKey('tareas.usuario_grupo.id'), nullable=False)
+    id_rol_ext = Column(ForeignKey('tareas.rol_ext.id'), nullable=False)
+    base_desnz = Column(Boolean, default=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    eliminado = Column(Boolean, default=False)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+
+    usuario_grupo = relationship('UsuarioGrupo')
+    rol_ext = relationship('RolExt')
+    dominio = relationship('Dominio')
+
+""" class UsuarioRol(Base):
     __tablename__ = 'usuario_rol'
     __table_args__ = {'schema': 'tareas'}
 
@@ -613,7 +628,7 @@ class UsuarioRol(Base):
 
     usuario_grupo = relationship('UsuarioGrupo')
     rol_ext = relationship('RolExt')
-    dominio = relationship('Dominio')
+    dominio = relationship('Dominio') """
 
 class Parametros(Base):
     __tablename__ = 'parametros'

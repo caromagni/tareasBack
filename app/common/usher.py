@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, Rol, EP
+from models.alch_model import Usuario, RolExt, EP, UsuarioRol
 from datetime import date, timedelta, datetime
 import common.logger_config as logger_config
 import uuid
@@ -137,12 +137,12 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         print("email:", email)
 
         #Pregunto si el usuario tiene un rol
-        query_rol = db.session.query(Rol).filter(Rol.email == email).all()
+        query_rol = db.session.query(RolExt).filter(RolExt.email == email).all()
         print("after QUERY ROL")
         if len(query_rol)>0:
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
-            query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
+            query_vencido = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
         #Traigo los roles del usuario desde P-USHER
         if len(query_rol)==0 or len(query_vencido)>0:
        
@@ -154,12 +154,13 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
-                query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
+                query_vencido = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
                 pull_roles = True
             else:
                 logger_config.logger.error("Error al obtener roles desde P-USHER")
                 pusher_ok = False
 
+            print ("pull_roles:", pull_roles)
 
         #######Consultar CU Api P-USHER##########
         #pull_roles = True
@@ -173,36 +174,47 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                     ######Casos de uso del rol##########
                     for caso_uso in r['casos_de_uso']:
                         nuevoIDRol=uuid.uuid4()
-                        nuevo_rol = Rol(
+                        nuevo_rol = RolExt(
                             id=nuevoIDRol, 
                             email=email,
-                            id_usuario=id_usuario, 
+                            #id_usuario=id_usuario, 
                             fecha_actualizacion=datetime.now(),
                             rol=r['descripcion_rol'],
                             id_rol_ext=r['id_usuario_sistema_rol'],
                             descripcion_ext=caso_uso['descripcion_corta_cu']
                         )
+                        nuevo_usuarioRol = UsuarioRol(
+                            id=uuid.uuid4(),
+                            id_usuario_grupo="01b9d255-4e46-402b-9285-ec0446809283",
+                            id_rol_ext=nuevoIDRol,
+                            fecha_actualizacion=datetime.now(),
+                            id_user_actualizacion=utils.get_username_id(username),
+                            eliminado=False,
+                            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80"
+                        )
+
                         db.session.add(nuevo_rol)
+                        db.session.add(nuevo_usuarioRol)
                 
             db.session.commit()
         
         #Controlo si el usuario con el rol elegido tiene permisos
         if not pusher_ok:
             logger_config.logger.error("P-USHER no está disponible, utilizando roles vencidos de la base de datos")
-            query_permisos = db.session.query(Rol.descripcion_ext
+            query_permisos = db.session.query(RolExt.descripcion_ext
                     ).filter(
-                        Rol.email == email,
-                        Rol.rol == rol_usuario,
-                        Rol.descripcion_ext.in_(casos)
+                        RolExt.email == email,
+                        RolExt.rol == rol_usuario,
+                        RolExt.descripcion_ext.in_(casos)
                     ).all()
         else:
             #pusher falló, entonces no tengo en cuenta la fecha de vencimiento
-            query_permisos = db.session.query(Rol.descripcion_ext
+            query_permisos = db.session.query(RolExt.descripcion_ext
                 ).filter(
-                    Rol.email == email,
-                    Rol.rol == rol_usuario,
-                    Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(),
-                    Rol.descripcion_ext.in_(casos)
+                    RolExt.email == email,
+                    RolExt.rol == rol_usuario,
+                    RolExt.fecha_actualizacion + tiempo_vencimiento >= datetime.now(),
+                    RolExt.descripcion_ext.in_(casos)
                 ).all()    
        
         if len(query_permisos)==0:
@@ -214,8 +226,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
     except requests.exceptions.RequestException as e:
         logger_config.logger.error(f"Error en get_roles desde P-USHER: {e}")
         return False    
-    except Exception as e:
+    """ except Exception as e:
         logger_config.logger.error(f"Error en get_usr_cu: {e}")
-        return False    
+        return False  """   
 
     

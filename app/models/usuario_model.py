@@ -3,7 +3,7 @@ from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
-from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
+from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, RolExt
 from collections import defaultdict
 from common.cache import *
 
@@ -408,8 +408,8 @@ def get_rol_usuario(username=None):
         logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")        
         
-    #res = db.session.query(Rol.email, Rol.rol).filter(Rol.email == username).distinct().all()
-    res = db.session.query(Rol).filter(Rol.email == username).order_by(Rol.email, Rol.rol, Rol.descripcion_ext).all()
+    #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
+    res = db.session.query(RolExt).filter(RolExt.email == username).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all()
     print("encontrados: ", len(res))
     agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
 
