@@ -55,7 +55,7 @@ def create_app():
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
-    
+    cache_common.cache_enabled=False
     if cache_common.cache_enabled == False :
         print("Using NullCache, caching is disabled")
         app.config['CACHE_TYPE'] = 'NullCache'  # Tipo de caché
@@ -142,7 +142,7 @@ def create_app():
     } """
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
-        'pool_size': 5,
+        'pool_size': 2,
         'max_overflow': 10,
         'pool_timeout': 30,
         'pool_recycle': 1800  # 30 minutos
