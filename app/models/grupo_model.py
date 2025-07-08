@@ -1,11 +1,11 @@
 import uuid
 from sqlalchemy.orm import aliased
 from datetime import datetime
-from sqlalchemy import text
+from sqlalchemy import text, desc
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
-from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea, Organismo
 from common.cache import *
 import common.cache as cache_common
 #import decorators.cache_error_wrapper as cache_error_wrapper
@@ -43,7 +43,7 @@ def get_grupo_by_id(id):
         res_tarea = db.session.query(Tarea
                                 ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id
                                 ).filter(TareaXGrupo.id_grupo==res.id and TareaXGrupo.eliminado==False
-                                ).order_by(Tarea.fecha_creacion.desc).all()
+                                ).order_by(desc(Tarea.fecha_creacion)).all()
         
         if res_hijos is not None:
             #print("tiene hijos")
@@ -108,6 +108,7 @@ def get_grupo_by_id(id):
             "usuarios": usuarios,
             "tareas": tareas,
             "nomenclador": res.nomenclador,
+            "organismo": res.organismo,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
             "fecha_actualizacion": res.fecha_actualizacion
@@ -170,62 +171,6 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
 
     # Subconsulta recursiva
     if path_name is True or path_name == 'true':
-        subquery_original = text("""
-            WITH RECURSIVE GroupTree AS (
-                SELECT 
-                    g.id AS id_padre,
-                    g.id AS id_hijo,
-                    g.descripcion AS parent_name,
-                    g.descripcion AS child_name,
-                    g.id::text AS path,
-                    COALESCE(g.nombre, hgg1.id_hijo::text) AS path_name,
-                    0 AS level,
-                    true AS is_parentless,
-                    g.id AS group_id
-                FROM 
-                    tareas.grupo g
-                LEFT JOIN 
-                    tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
-                WHERE 
-                    hgg1.id_hijo IS NULL
-
-                UNION ALL
-
-                SELECT 
-                    hgg.id_padre,
-                    hgg.id_hijo,
-                    gp_padre.descripcion AS parent_name,
-                    gp_hijo.descripcion AS child_name,
-                    gt.path || ' -> ' || hgg.id_hijo::text AS path,
-                    gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
-                    gt.level + 1 AS level,
-                    false AS is_parentless,
-                    gp_hijo.id AS group_id
-                FROM 
-                    tareas.herarquia_grupo_grupo hgg
-                INNER JOIN 
-                    GroupTree gt ON gt.id_hijo = hgg.id_padre
-                INNER JOIN 
-                    tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
-                INNER JOIN 
-                    tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
-            )
-            SELECT 
-                gt.id_padre,
-                gt.parent_name,
-                gt.id_hijo,
-                gt.child_name,
-                gt.path,
-                gt.path_name,
-                gt.level,
-                gt.is_parentless,
-                gt.group_id
-            FROM 
-                GroupTree gt
-            ORDER BY 
-                gt.path;
-        """)
-
         
         #COALESCE(g.nombre, g.id::text) AS path_name,
         subquery = text("""
@@ -693,6 +638,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                 "nombre": res.nombre,
                 "descripcion": res.descripcion,
                 "nomenclador": res.nomenclador,
+                "organismo": res.organismo,
                 "fecha_creacion": res.fecha_creacion,
                 "fecha_actualizacion": res.fecha_actualizacion,
                 "id_user_actualizacion": res.id_user_actualizacion,
@@ -1348,4 +1294,8 @@ def undelete_grupo(username=None, id=None):
     db.session.commit()
     return grupo
 
-
+def get_all_organismos():
+    #session: scoped_session = current_app.session
+    query = db.session.query(Organismo).order_by(Organismo.descripcion).all()
+    return query
+    

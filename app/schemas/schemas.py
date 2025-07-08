@@ -85,6 +85,18 @@ class NomencladorOut(Schema):
     desclarga = String()
     nroficin_corto = String()
 
+############Organismos####################
+class OrganismoOut(Schema):
+    id = String()
+    circunscripcion_judicial = String()
+    id_fuero = String()
+    descripcion = String()
+    habilitado= Boolean()
+    descripcion_corta = String()
+    id_tarea_grupo_base = String()
+    instancia = String()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
     id = String()
@@ -171,6 +183,7 @@ class GroupIn(Schema):
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
     ])
+    id_organismo = String()
 
 class GroupPatchIn(Schema):
     base = Boolean(default=False)
@@ -188,6 +201,7 @@ class GroupPatchIn(Schema):
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
         validate_num  
     ])
+    id_organismo = String()
     suspendido = Boolean()
     usuario = List(Nested(ListUsuario))
 
@@ -223,7 +237,9 @@ class GetGroupOut(Schema):
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
+    organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
+    id_organismo= String()
     eliminado = Boolean()
     suspendido = Boolean()
     path_name = String()
@@ -572,6 +588,7 @@ class GroupIdOut(Schema):
     id_user_actualizacion = String()
     id_user_asignado_default = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))

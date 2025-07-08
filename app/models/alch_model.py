@@ -187,8 +187,9 @@ class Grupo(Base):
 
     id = Column(UUID, primary_key=True)
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
     nombre = Column(String, nullable=False)
-    codigo_nomenclador = Column(String)
+    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     descripcion = Column(String, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
@@ -200,6 +201,8 @@ class Grupo(Base):
     base = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
+    nomenclador = relationship('Nomenclador', foreign_keys=[codigo_nomenclador])
+    organismo = relationship('Organismo', foreign_keys=[id_organismo])
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'

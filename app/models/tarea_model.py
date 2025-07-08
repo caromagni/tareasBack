@@ -428,7 +428,7 @@ def update_tarea(id_t='', username=None, **kwargs):
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
             nombre_subtipo = subtipo.nombre
-            subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea']).first()
+            subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea'], SubtipoTarea.eliminado==False).first()
             if subtipo is None:
                 raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
            
@@ -436,11 +436,14 @@ def update_tarea(id_t='', username=None, **kwargs):
             tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
         #no se ingreso subtipo de tarea, verifico con el subtipo actual
         else:
-            subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == tarea.id_subtipo_tarea, SubtipoTarea.id_tipo==kwargs['id_tipo_tarea']).first()
-            if subtipo is None:
-                raise Exception("El tipo de tarea '" + nombre_tipo + "' no se corresponde al subtipo de tarea actual")
-
-            tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
+            #Modifico tipo tarea, borro el subtipo que tenía antes
+            if tarea.subtipo_tarea is not None:
+                #verifico que el subtipo de tarea actual corresponda al tipo de tarea ingresado
+                #subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == tarea.id_subtipo_tarea, SubtipoTarea.id_tipo==kwargs['id_tipo_tarea'], SubtipoTarea.eliminado==False).first()
+                #if subtipo is None:
+                #    raise Exception("El tipo de tarea '" + nombre_tipo + "' no se corresponde al subtipo de tarea actual")
+                tarea.id_subtipo_tarea = None
+                tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
     else:
         #no se ingreso tipo de tarea , verifico con el tipo actual         
         if 'id_subtipo_tarea' in kwargs:
@@ -575,7 +578,8 @@ def update_tarea(id_t='', username=None, **kwargs):
                     id_usuario=user['id_usuario'],
                     id_user_actualizacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
-                    fecha_actualizacion=datetime.now()
+                    fecha_actualizacion=datetime.now(),
+                    eliminado = False
                 )
                 db.session.add(nuevo_asigna_usuario)
             else:
@@ -1755,6 +1759,8 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
+    
+            
     if tiene_notas is not None:
         query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
    

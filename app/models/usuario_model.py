@@ -164,7 +164,6 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
         
         for res in paginated_results:
             #Traigo los grupos del usuario
-            tareas=[]
             grupos=[]
             
             res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
@@ -183,7 +182,21 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
 
                     }
                     grupos.append(grupo)
-               
+            #Traigo las tareas del usuario
+            tareas=[]
+            res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado, Tarea.fecha_inicio, Tarea.fecha_fin).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
+            if res_tareas is not None:
+                for row in res_tareas:
+                    tarea = {
+                        "id": row.id,
+                        "titulo": row.titulo,
+                        "id_tipo_tarea": row.id_tipo_tarea,
+                        "eliminado": row.eliminado,
+                        "reasignada": row.asignada_usr_eliminado,
+                        "fecha_inicio": row.fecha_inicio,
+                        "fecha_fin":row.fecha_fin
+                    }
+                    tareas.append(tarea)   
 
             ###################Formatear el resultado####################
             result = {
@@ -198,8 +211,8 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "dni": res.dni,
                 "username": res.username,
                 "email": res.email,
-                "grupo": grupos
-                #"tareas": tareas
+                "grupo": grupos,
+                "tareas": tareas
             }
             results.append(result)
 
