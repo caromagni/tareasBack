@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, RolExt, EP, UsuarioRol
+from models.alch_model import Usuario, RolExt, EP, UsuarioRol, UsuarioGrupo
 from datetime import date, timedelta, datetime
 import common.logger_config as logger_config
 import uuid
@@ -120,6 +120,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         
     pull_roles = False
     pusher_ok = True
+    id_grupo = 'cb08f738-7590-4331-871e-26f0f09ff4ca'  # Organismo por defecto
+    id_dominio = '06737c52-5132-41bb-bf82-98af37a9ed80'  # Dominio por defecto
     #tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(hours=1)
     tiempo_vencimiento = timedelta(minutes=2)
@@ -167,7 +169,17 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         print("checking pull roles")
         if pull_roles:
             logger_config.logger.info("Get roles desde p-usher")
+            print ("id de usuario:", id_usuario)
+            #grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.id_grupo==id_grupo, UsuarioGrupo.eliminado==False).all()
+            grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.eliminado==False).all()
+            if len(grupo_usuario) == 0:
+                logger_config.logger.error("Usuario no pertenece a ningún grupo")
+                raise Exception("Usuario no pertenece a ningún grupo")
+            
+            for grupo in grupo_usuario:
+                print("grupo:", grupo.id_grupo, "usuario:", grupo.id_usuario)
             #roles = get_roles(username)
+            print ("roles:", roles)
             for r in roles['lista_roles_cus']:
                     ######ROL USHER##########
                     print("rol:",r['descripcion_rol'])
@@ -183,19 +195,20 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                             id_rol_ext=r['id_usuario_sistema_rol'],
                             descripcion_ext=caso_uso['descripcion_corta_cu']
                         )
-                        nuevo_usuarioRol = UsuarioRol(
-                            id=uuid.uuid4(),
-                            id_usuario_grupo="01b9d255-4e46-402b-9285-ec0446809283",
-                            id_rol_ext=nuevoIDRol,
-                            fecha_actualizacion=datetime.now(),
-                            id_user_actualizacion=utils.get_username_id(username),
-                            eliminado=False,
-                            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80"
-                        )
-
                         db.session.add(nuevo_rol)
-                        db.session.add(nuevo_usuarioRol)
-                
+
+                        for grupo in grupo_usuario:
+                            nuevo_usuarioRol = UsuarioRol(
+                                id=uuid.uuid4(),
+                                id_usuario_grupo=grupo.id,
+                                id_rol_ext=nuevoIDRol,
+                                fecha_actualizacion=datetime.now(),
+                                id_user_actualizacion=utils.get_username_id(username),
+                                eliminado=False,
+                                id_dominio=id_dominio
+                            )
+                            db.session.add(nuevo_usuarioRol)
+                        
             db.session.commit()
         
         #Controlo si el usuario con el rol elegido tiene permisos

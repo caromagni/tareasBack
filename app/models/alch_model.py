@@ -582,20 +582,6 @@ class TareaXGrupo(Base):
     tarea = relationship('Tarea')
 
 
-
-""" class Rol(Base):
-    __tablename__ = 'rol'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True)
-    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
-    email = Column(String)
-    rol = Column(String, nullable=False)
-    id_rol_ext= Column(UUID)
-    id_organismo = Column(UUID)
-    descripcion_ext = Column(String)
-    fecha_actualizacion = Column(DateTime) """
-
 class UsuarioRol(Base):
     __tablename__ = 'usuario_rol'
     __table_args__ = {'schema': 'tareas'}
