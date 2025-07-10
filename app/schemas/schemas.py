@@ -633,6 +633,7 @@ class TareaIn(Schema):
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
+    username = String()
     grupo = List(Nested(ListGrupo))
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
@@ -663,6 +664,7 @@ class TareaPatchIn(Schema):
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
+    username = String()
     grupo = List(Nested(ListGrupo))
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
