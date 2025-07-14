@@ -1,0 +1,173 @@
+# CODEOWNERS file for Tareas Backend Project
+# GitLab checks these locations in order: ./CODEOWNERS, ./docs/CODEOWNERS, ./.gitlab/CODEOWNERS
+
+# =============================================================================
+# GLOBAL OWNERSHIP RULES
+# =============================================================================
+
+# Default owners for everything in the repo
+# All team members can work on the project
+* @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# BACKEND DEVELOPMENT - TAREAS PROJECT
+# =============================================================================
+
+# Main backend application files
+app/ @cdmagni @cuajov6 @maurotbf @simperiale
+*.py @cdmagni @cuajov6 @maurotbf @simperiale
+
+# Database models and migrations
+models/ @cdmagni @cuajov6 @maurotbf @simperiale
+models/alch_model.py @cdmagni @cuajov6 @maurotbf @simperiale
+models/sql_temp.sql @cdmagni @cuajov6 @maurotbf @simperiale
+*.sql @cdmagni @cuajov6 @maurotbf @simperiale
+db/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# API blueprints and endpoints
+blueprints/ @cdmagni @cuajov6 @maurotbf @simperiale
+api/ @cdmagni @cuajov6 @maurotbf @simperiale
+endpoints/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# Core application files
+main.py @cdmagni @cuajov6 @maurotbf @simperiale
+app.py @cdmagni @cuajov6 @maurotbf @simperiale
+common/ @cdmagni @cuajov6 @maurotbf @simperiale
+config/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# INFRASTRUCTURE & DEVOPS
+# =============================================================================
+
+# Infrastructure files
+*.yml @cdmagni @cuajov6 @maurotbf @simperiale
+*.yaml @cdmagni @cuajov6 @maurotbf @simperiale
+Dockerfile* @cdmagni @cuajov6 @maurotbf @simperiale
+docker-compose* @cdmagni @cuajov6 @maurotbf @simperiale
+
+# CI/CD files
+.gitlab-ci.yml @cdmagni @cuajov6 @maurotbf @simperiale
+.github/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# SECURITY & CONFIGURATION
+# =============================================================================
+
+# Security sensitive files - require approval from @cuajov6
+*.key @cuajov6
+*.pem @cuajov6
+*.p12 @cuajov6
+*.pfx @cuajov6
+secrets/ @cuajov6
+keys/ @cuajov6
+credentials/ @cuajov6
+
+# Configuration files
+.env* @cdmagni @cuajov6 @maurotbf @simperiale
+config/ @cdmagni @cuajov6 @maurotbf @simperiale
+settings/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# DEPENDENCIES & PACKAGE MANAGEMENT
+# =============================================================================
+
+# Package management files
+requirements.txt @cdmagni @cuajov6 @maurotbf @simperiale
+package.json @cdmagni @cuajov6 @maurotbf @simperiale
+Pipfile @cdmagni @cuajov6 @maurotbf @simperiale
+poetry.lock @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+# Documentation files
+*.md @cdmagni @cuajov6 @maurotbf @simperiale
+docs/ @cdmagni @cuajov6 @maurotbf @simperiale
+README* @cdmagni @cuajov6 @maurotbf @simperiale
+CHANGELOG* @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# TESTING
+# =============================================================================
+
+# Test files
+*_test.py @cdmagni @cuajov6 @maurotbf @simperiale
+test_*.py @cdmagni @cuajov6 @maurotbf @simperiale
+tests/ @cdmagni @cuajov6 @maurotbf @simperiale
+
+# =============================================================================
+# MAIN BRANCH PROTECTION
+# =============================================================================
+
+# For main branch protection - only @cuajov6 can approve
+# This is handled in GitLab protected branch settings, not in CODEOWNERS
+# Set up protected branch rules:
+# - Branch: main
+# - Allowed to merge: @cuajov6
+# - Allowed to push: @cuajov6
+# - Code owner approval: Required
+# - Require approval from code owners: Yes
+
+# =============================================================================
+# EXCLUSIONS
+# =============================================================================
+
+# Generated files (no ownership needed)
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+*.tmp
+*.temp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# WORKFLOW INSTRUCTIONS
+# =============================================================================
+
+# Team Workflow:
+# 1. All team members (@cdmagni, @cuajov6, @maurotbf, @simperiale) can:
+#    - Create feature branches
+#    - Make changes to tareas_back/
+#    - Create merge requests
+#    - Review each other's code
+#
+# 2. Only @cuajov6 can:
+#    - Approve and merge to main branch
+#    - Modify security-sensitive files
+#    - Override protected branch rules
+#
+# 3. Protected Branch Setup:
+#    - Branch: main
+#    - Allowed to merge: @cuajov6
+#    - Allowed to push: @cuajov6
+#    - Require approval from code owners: Yes
+#    - Minimum number of approvals: 1 (from @cuajov6)
+#
+# 4. Merge Request Process:
+#    - Any team member creates MR
+#    - Other team members can review and comment
+#    - @cuajov6 must approve and merge
+#    - Code owner approval is required for main branch 
