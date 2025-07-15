@@ -8,6 +8,7 @@ from db.alchemy_db import db
 from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea, Organismo
 from common.cache import *
 import common.cache as cache_common
+from datetime import time
 #import decorators.cache_error_wrapper as cache_error_wrapper
 
 @cache_common.cache.memoize(CACHE_TIMEOUT_LONG)
@@ -133,6 +134,9 @@ def exececuteSubquery(subquery):
         logger_config.logger.error(f"Error executing subquery: {e}")
         raise e
     
+#################################################PRUEBA ######################################################
+#def get_all_grupos_nivel_prueba(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=False, suspendido=False, todos=True):
+
 
 #@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=False, suspendido=False, todos=True):
@@ -148,16 +152,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
         logger_config.logger.error("Id de usuario no ingresado")
 
     # Parse and normalize date filters
-    if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
-    else:
-        fecha_desde = datetime.strptime("30/01/1900", "%d/%m/%Y").date()
-
-    if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
-    else:
-        fecha_hasta = datetime.now()
-
+    fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date() if fecha_desde else datetime.strptime("30/01/1900", "%d/%m/%Y").date()
+    fecha_desde = datetime.combine(fecha_desde, time.min)
+    fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y') if fecha_hasta else datetime.now()
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
 
     print("TIMETRACK_INITIAL:", datetime.now())
@@ -166,14 +163,21 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
     print("Eliminado:", eliminado)
     print("Suspendido:", suspendido)
     print("Path name:", path_name)
-
+    print("Tipo de datos de fechas:",type(fecha_desde), "-",type(fecha_hasta))
     result = []
 
     # Subconsulta recursiva
     if path_name is True or path_name == 'true':
         
+        params = {
+            "nombre": nombre or None,
+            "eliminado": eliminado if eliminado is not None else None,
+            "suspendido": suspendido if suspendido is not None else None,
+            "fecha_desde": fecha_desde,
+            "fecha_hasta": fecha_hasta
+        }
         #COALESCE(g.nombre, g.id::text) AS path_name,
-        subquery = text("""
+        subquery1 = text("""
             WITH RECURSIVE GroupTree AS (
                 -- Parte base: todos los grupos, incluso si no están en la jerarquía
                 SELECT 
@@ -191,14 +195,22 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     g.nombre AS nombre_hijo,
                     g.descripcion AS descripcion_hijo,
                     g.fecha_actualizacion AS fecha_actualizacion_hijo,
+                    g.fecha_creacion AS fecha_creacion_hijo,    
                     g.base AS base_hijo,    
                     NULL::boolean AS eliminado_padre,
                     NULL::boolean AS suspendido_padre,    
                     NULL::text AS nombre_padre,
                     NULL::text AS descripcion_padre,
                     NULL::timestamp AS fecha_actualizacion_padre,
+                    NULL::timestamp AS fecha_creacion_padre,    
                     NULL::boolean AS base_padre     
                 FROM tareas.grupo g
+                WHERE 
+                    (:nombre IS NULL OR g.nombre ILIKE '%' || :nombre || '%')
+                    AND (:eliminado IS NULL OR g.eliminado = :eliminado)
+                    AND (:suspendido IS NULL OR g.suspendido = :suspendido)
+                    AND (:fecha_desde IS NULL OR g.fecha_actualizacion >= :fecha_desde)
+                    AND (:fecha_hasta IS NULL OR g.fecha_actualizacion <= :fecha_hasta)         
 
                 UNION ALL
 
@@ -218,17 +230,25 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_hijo.nombre AS nombre_hijo,
                     gp_hijo.descripcion AS descripcion_hijo,
                     gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
+                    gp_hijo.fecha_creacion AS fecha_creacion_hijo,
                     gp_hijo.base AS base_hijo,    
                     gp_padre.eliminado AS eliminado_padre,
                     gp_padre.suspendido AS suspendido_padre,    
                     gp_padre.nombre AS nombre_padre,
                     gp_padre.descripcion AS descripcion_padre,
                     gp_padre.fecha_actualizacion AS fecha_actualizacion_padre,
+                    gp_padre.fecha_creacion AS fecha_creacion_padre,    
                     gp_padre.base AS base_padre    
                 FROM tareas.herarquia_grupo_grupo hgg
                 INNER JOIN GroupTree gt ON gt.id_hijo = hgg.id_padre
                 INNER JOIN tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
                 INNER JOIN tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+                WHERE 
+                    (:nombre IS NULL OR gp_hijo.nombre ILIKE '%' || :nombre || '%')
+                    AND (:eliminado IS NULL OR gp_hijo.eliminado = :eliminado)
+                    AND (:suspendido IS NULL OR gp_hijo.suspendido = :suspendido)
+                    AND (:fecha_desde IS NULL OR gp_hijo.fecha_actualizacion >= :fecha_desde)
+                    AND (:fecha_hasta IS NULL OR gp_hijo.fecha_actualizacion <= :fecha_hasta)         
             )
 
             -- Selección final (puede incluir DISTINCT si lo deseás)
@@ -240,6 +260,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.eliminado_padre,
                 gt.suspendido_padre,        
                 gt.fecha_actualizacion_padre,
+                gt.fecha_creacion_padre,
                 gt.base_padre,        
                 gt.id_hijo as id,
                 gt.child_name as name,
@@ -248,6 +269,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.eliminado_hijo as eliminado,
                 gt.suspendido_hijo as suspendido,        
                 gt.fecha_actualizacion_hijo as fecha_actualizacion,
+                gt.fecha_creacion_hijo as fecha_creacion,        
                 gt.base_hijo as base,        
                 gt.path,
                 gt.path_name,
@@ -258,13 +280,138 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
             ORDER BY gt.group_id, gt.level DESC;
         
         """)     
+        subquery = text("""
+            WITH RECURSIVE GroupTree AS (
+                -- Parte base
+                SELECT 
+                    g.id AS id_padre,
+                    g.id AS id_hijo,
+                    g.descripcion AS parent_name,
+                    g.descripcion AS child_name,
+                    g.id::text AS path,
+                    COALESCE(g.nombre, g.id::text) AS path_name,
+                    0 AS level,
+                    NOT EXISTS (SELECT 1 FROM tareas.herarquia_grupo_grupo hgg WHERE hgg.id_hijo = g.id) AS is_parentless,
+                    g.id AS group_id,
+                    g.eliminado AS eliminado_hijo,
+                    g.suspendido AS suspendido_hijo,
+                    g.nombre AS nombre_hijo,
+                    g.descripcion AS descripcion_hijo,
+                    g.fecha_actualizacion AS fecha_actualizacion_hijo,
+                    g.fecha_creacion AS fecha_creacion_hijo,    
+                    g.base AS base_hijo,
+                    NULL::boolean AS eliminado_padre,
+                    NULL::boolean AS suspendido_padre,
+                    NULL::text AS nombre_padre,
+                    NULL::text AS descripcion_padre,
+                    NULL::timestamp AS fecha_actualizacion_padre,
+                    NULL::timestamp AS fecha_creacion_padre,
+                    NULL::boolean AS base_padre
+                FROM tareas.grupo g
+                
+                WHERE 
+                    (:nombre IS NULL OR g.nombre ILIKE '%' || :nombre || '%')
+                    AND (:eliminado IS NULL OR g.eliminado = :eliminado)
+                    AND (:suspendido IS NULL OR g.suspendido = :suspendido)
+                    AND (:fecha_desde IS NULL OR g.fecha_creacion >= :fecha_desde)
+                    AND (:fecha_hasta IS NULL OR g.fecha_creacion <= :fecha_hasta)
+                    
 
+                UNION ALL
 
-        # Execute the subquery and get serializable results
-        result = exececuteSubquery(subquery)
+                -- Parte recursiva
+                SELECT 
+                    hgg.id_padre,
+                    hgg.id_hijo,
+                    gp_padre.descripcion AS parent_name,
+                    gp_hijo.descripcion AS child_name,
+                    gt.path || ' -> ' || hgg.id_hijo::text AS path,
+                    gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
+                    gt.level + 1 AS level,
+                    false AS is_parentless,
+                    gp_hijo.id AS group_id,
+                    gp_hijo.eliminado AS eliminado_hijo,
+                    gp_hijo.suspendido AS suspendido_hijo,
+                    gp_hijo.nombre AS nombre_hijo,
+                    gp_hijo.descripcion AS descripcion_hijo,
+                    gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
+                    gp_hijo.fecha_creacion AS fecha_creacion_hijo,    
+                    gp_hijo.base AS base_hijo,
+                    gp_padre.eliminado AS eliminado_padre,
+                    gp_padre.suspendido AS suspendido_padre,
+                    gp_padre.nombre AS nombre_padre,
+                    gp_padre.descripcion AS descripcion_padre,
+                    gp_padre.fecha_actualizacion AS fecha_actualizacion_padre,
+                    gp_padre.fecha_creacion AS fecha_creacion_padre,    
+                    gp_padre.base AS base_padre
+                FROM tareas.herarquia_grupo_grupo hgg
+                INNER JOIN GroupTree gt ON gt.id_hijo = hgg.id_padre
+                INNER JOIN tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
+                INNER JOIN tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+                
+                WHERE 
+                    (:nombre IS NULL OR gp_hijo.nombre ILIKE '%' || :nombre || '%')
+                    AND (:eliminado IS NULL OR gp_hijo.eliminado = :eliminado)
+                    AND (:suspendido IS NULL OR gp_hijo.suspendido = :suspendido)
+                    AND (:fecha_desde IS NULL OR gp_hijo.fecha_creacion >= :fecha_desde)
+                    AND (:fecha_hasta IS NULL OR gp_hijo.fecha_creacion <= :fecha_hasta)
+                    
+            )
+            SELECT DISTINCT ON (gt.group_id) 
+                gt.id_padre,
+                gt.parent_name,
+                gt.nombre_padre,
+                gt.descripcion_padre,
+                gt.eliminado_padre,
+                gt.suspendido_padre,        
+                gt.fecha_actualizacion_padre,
+                gt.fecha_creacion_padre,
+                gt.base_padre,        
+                gt.id_hijo as id,
+                gt.child_name as name,
+                gt.nombre_hijo as nombre,
+                gt.descripcion_hijo as descripcion,
+                gt.eliminado_hijo as eliminado,
+                gt.suspendido_hijo as suspendido,        
+                gt.fecha_actualizacion_hijo as fecha_actualizacion,
+                gt.fecha_creacion_hijo as fecha_creacion,        
+                gt.base_hijo as base,        
+                gt.path,
+                gt.path_name,
+                gt.level,
+                gt.is_parentless,
+                gt.group_id
+            FROM GroupTree gt
+            {where_final}            
+            ORDER BY gt.group_id, gt.level DESC;
+        """)
+
+        # Armar cláusulas condicionales de JOIN y WHERE
+        join_usuario_base = ""
+        where_usuario_base = ""
+        join_usuario_rec = ""
+        where_usuario_rec = ""
+        where_final = ""
+        if (todos is None or todos==False or todos=='false') and id_user:
+            #join_usuario_base = "INNER JOIN tareas.usuario_grupo ug ON ug.id_grupo = g.id"
+            #where_usuario_base = "AND ug.id_usuario = :id_usuario"
+            #join_usuario_rec = "INNER JOIN tareas.usuario_grupo ug2 ON ug2.id_grupo = gp_hijo.id"
+            #where_usuario_rec = "AND ug2.id_usuario = :id_usuario"
+            where_final = "WHERE EXISTS (SELECT 1 FROM tareas.usuario_grupo ug WHERE ug.id_grupo = gt.group_id AND ug.id_usuario = :id_usuario)"
+            params["id_usuario"] = id_user
+
+        # Reemplazar placeholders en la consulta
+        final_query = subquery.text.replace("{where_final}", where_final)
+            
+            #.replace("{join_usuario_base}", join_usuario_base) \
+            #.replace("{where_usuario_base}", where_usuario_base) \
+            #.replace("{join_usuario_rec}", join_usuario_rec) \
+            #.replace("{where_usuario_rec}", where_usuario_rec)\
+
+        result = db.session.execute(text(final_query), params).mappings().all()
+        #result1 = db.session.execute((subquery1), params).mappings().all()
+        # Paginación
         total = len(result)
-
-        # Paginate the results
         start = (page - 1) * per_page
         end = start + per_page
         result_paginated = result[start:end]
@@ -281,7 +428,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
         query = query.filter(Grupo.eliminado == eliminado)
     if suspendido is not None:
         query = query.filter(Grupo.suspendido == suspendido)
-    if todos is None or todos== False:
+    if todos is None or todos== False or todos== 'false':
         query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user)    
 
     total = query.count()

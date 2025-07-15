@@ -906,13 +906,15 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, habilitado=None, eliminado=None):
+#@cache.cached(CACHE_TIMEOUT_LONG)
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, habilitado=None, eliminado=None, nombre=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
     print("habilitado:", habilitado)
     print("eliminado:", eliminado)
+    print("nivel:", nivel)
+    print("nombre:", nombre)
     query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
     
     if nivel is not None:
@@ -923,6 +925,9 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, hab
         query = query.filter(TipoTarea.habilitado == habilitado)
     if eliminado is not None:
         query = query.filter(TipoTarea.eliminado == eliminado)
+    if nombre:
+        print("Filtrando por nombre:", nombre)
+        query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))    
 
     total= query.count()
     res = query.offset((page-1)*per_page).limit(per_page).all()

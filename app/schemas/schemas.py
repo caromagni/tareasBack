@@ -477,6 +477,7 @@ class TipoTareaGetIn(Schema):
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
     eliminado = Boolean(default=False)
     habilitado = Boolean(default=False)
+    nombre = String(default="")
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)

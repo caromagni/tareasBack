@@ -43,6 +43,7 @@ def get_tipoTareas(query_data: dict):
         origen_externo=None
         habilitado=None
         eliminado=None
+        nombre=None
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -56,8 +57,10 @@ def get_tipoTareas(query_data: dict):
             habilitado = request.args.get('habilitado')
         if (request.args.get('eliminado') is not None):
             eliminado = request.args.get('eliminado')
+        if (request.args.get('nombre') is not None):
+            nombre = request.args.get('nombre')    
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, habilitado, eliminado)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, habilitado, eliminado, nombre)
     
         
         data = {
