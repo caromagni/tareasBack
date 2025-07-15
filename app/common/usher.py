@@ -9,7 +9,7 @@ import os
 import json
 import common.utils as utils
 from common.cache import *
-
+import traceback
 def migrar_cu(username):
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -50,16 +50,23 @@ def migrar_cu(username):
 def get_roles(username=''):
     print("get_roles")
     try:
+
         url=os.environ.get('PUSHER_URL')+username
-        print("url:", url)
+        logger_config.logger.info("url: %s", str(url))
         x_api_key=os.environ.get('PUSHER_API_KEY')
         x_api_system=os.environ.get('PUSHER_API_SYSTEM')
-        
+        logger_config.logger.info("getting roles from pusher")
+        logger_config.logger.info("url: %s", str(url))
+        logger_config.logger.info("USER TO RETRIEVE ROLES: %s", str(username))  
+        starting_time = datetime.now()
         r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
         resp=r.json()
+        ending_time = datetime.now()
+        logger_config.logger.info("time taken to get roles from pusher: %s", ending_time - starting_time)
         return resp
     #except requests.exceptions.RequestException as e:
     except Exception as err:
+        logger_config.logger.error(traceback.format_exc())
         logger_config.logger.error(f"Error al obtener roles desde P-USHER: {err}")
         raise Exception(f"Error al obtener roles desde P-USHER: {err}")
     
@@ -125,7 +132,10 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
     id_dominio = '06737c52-5132-41bb-bf82-98af37a9ed80'  # Dominio por defecto
     #tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(hours=1)
-    tiempo_vencimiento = timedelta(minutes=2)
+    roles_expiry_time = os.environ.get('ROLES_EXPIRY_TIME', 30)
+    #convert to float as required by timedelta
+
+    tiempo_vencimiento = timedelta(minutes=float(roles_expiry_time))
     try:
         query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
         if query_usr is None:
@@ -134,15 +144,19 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         
         id_usuario = query_usr.id
         email = query_usr.email
-
+        pull_roles = False
         #Pregunto si el usuario tiene un rol
-        query_rol = db.session.query(RolExt).filter(RolExt.email == email).all()
-        if len(query_rol)>0:
+        current_user_roles = db.session.query(RolExt).filter(RolExt.email == email).all()
+        print("current_user_roles:", len(current_user_roles))
+        print("**"*20)
+        if len(current_user_roles)>=0:
             #Pregunto si hay algún registro vencido
             logger_config.logger.info("Controla roles vencidos")
-            query_vencido = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
+            current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
+            print("current_user_expired_roles:", len(current_user_expired_roles))
+            print("**"*20)
         #Traigo los roles del usuario desde P-USHER
-        if len(query_rol)==0 or len(query_vencido)>0:
+        if len(current_user_roles)==0 or len(current_user_expired_roles)>0:
        
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
@@ -151,7 +165,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
-                query_vencido = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
+                current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
                 pull_roles = True
             else:
                 logger_config.logger.error("Error al obtener roles desde P-USHER")
@@ -179,6 +193,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                     print("rol:",r['descripcion_rol'])
                     ######Casos de uso del rol##########
                     for caso_uso in r['casos_de_uso']:
+                        print("caso de uso:", caso_uso['descripcion_corta_cu']) 
                         nuevoIDRol=uuid.uuid4()
                         nuevo_rol = RolExt(
                             id=nuevoIDRol, 
