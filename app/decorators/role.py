@@ -12,6 +12,7 @@ def require_role(rol=''):
         def wrapped(*args, **kwargs):
             #try:
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
+                logger_config.logger.info("CUSTOM ROLE DECORATOR")
                 x_api_key = request.headers.get('x-api-key')
                 if x_api_key:
                     logger_config.logger.info("API Key detected in header")
