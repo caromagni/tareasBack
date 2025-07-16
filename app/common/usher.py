@@ -115,7 +115,6 @@ def get_api_cu(metodo=None, url=None):
 ######################Control de acceso######################
 #@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_usr_cu(username=None, rol_usuario='', casos=None):
-    print("INGRESA A GET_USR_CU")
     logger = logger_config.logger
     logger.info("get_usr_cu - Inicio")
     logger.info(f"get_usr_cu - username: {username}, rol_usuario: {rol_usuario}, cu: {casos}")
