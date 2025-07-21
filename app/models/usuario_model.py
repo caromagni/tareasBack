@@ -19,7 +19,7 @@ def get_usuario_by_id(id):
 
     if res is not None:
         #Traigo los grupos del usuario
-        res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
+        res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido
                                   ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False).all()
         
         #Traigo los grupos hijos
@@ -46,8 +46,8 @@ def get_usuario_by_id(id):
                         "id_grupo": row.id,
                         "nombre": row.nombre,
                         "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
-                        "codigo_nomenclador": row.codigo_nomenclador
+                        "suspendido": row.suspendido
+                     
 
                 }
                 grupos.append(grupo)
@@ -166,7 +166,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
             #Traigo los grupos del usuario
             grupos=[]
             
-            res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
+            res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido
                                     ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False
                                     ).order_by(Grupo.nombre).all()
             
@@ -177,8 +177,8 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                         "id_grupo": row.id,
                         "nombre": row.nombre,
                         "eliminado": row.eliminado,
-                        "suspendido": row.suspendido,
-                        "codigo_nomenclador": row.codigo_nomenclador
+                        "suspendido": row.suspendido
+                      
 
                     }
                     grupos.append(grupo)
@@ -239,7 +239,6 @@ def get_grupos_by_usuario(id):
                   Grupo.eliminado.label("eliminado"),
                   Grupo.suspendido.label("suspendido"),
                   Grupo.descripcion.label("descripcion"),  
-                  Grupo.codigo_nomenclador.label("codigo_nomenclador"),
                   Grupo.fecha_creacion.label("fecha_creacion"),
                   Grupo.fecha_hasta.label("fecha_hasta"),
                   Grupo.fecha_actualizacion.label("fecha_actualizacion"),

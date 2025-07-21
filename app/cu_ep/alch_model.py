@@ -97,28 +97,6 @@ class Organismo(Base):
     instancia = Column(String)
 
 
-class Nomenclador(Base):
-    __tablename__ = 'nomenclador'
-    __table_args__ = {'schema': 'tareas'}
-
-    c_oficppal = Column(CHAR(1), nullable=False)
-    c_circun = Column(CHAR(1), nullable=False)
-    c_oficina = Column(CHAR(2), nullable=False)
-    c_nroficin = Column(CHAR(2), nullable=False)
-    nroficin = Column(String(100), nullable=False)
-    activo = Column(Boolean, nullable=False, server_default=text("true"))
-    nomenclador = Column(CHAR(6), primary_key=True)
-    desclarga = Column(String)
-    lista = Column(Boolean)
-    nroficin_corto = Column(String(20))
-    desccorta = Column(String(30))
-    codigo = Column(CHAR(6))
-    publica_penal = Column(Boolean)
-    tipo_oficina = Column(String(3))
-    turnos = Column(Boolean, server_default=text("false"))
-    turnos_pass = Column(String(100))
-    turnos_des = Column(String(25))
-
 class Usuario(Base):
     __tablename__ = 'usuario'
     __table_args__ = {'schema': 'tareas'}
@@ -195,13 +173,11 @@ class Grupo(Base):
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String, nullable=False)
     descripcion = Column(String)
-    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime)
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
-    nomenclador = relationship('Nomenclador')
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
 

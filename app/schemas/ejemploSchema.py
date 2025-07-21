@@ -25,10 +25,6 @@ class EjemploIn(Schema):
     id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
-    codigo_nomenclador = String(validate=[
-        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
-        validate_num  
-    ])
 
 
 #importar luego en controller
