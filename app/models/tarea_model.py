@@ -930,7 +930,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, hab
         query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))    
 
     total= query.count()
-    res = query.offset((page-1)*per_page).limit(per_page).all()
+    res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     #res = db.session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     
     if res is not None:
@@ -1956,7 +1956,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
 
     total = query.count()
 
-    result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
+    result = query.order_by(desc(Tarea.fecha_creacion)).offset((page-1)*per_page).limit(per_page).all()
     
     results = []
     if result is not None:

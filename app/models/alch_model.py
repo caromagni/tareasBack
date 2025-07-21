@@ -84,7 +84,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_organismo_ext = Column(UUID, nullable=False)
+    id_ext = Column(UUID, nullable=False)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -424,17 +424,6 @@ class UsuarioGrupo(Base):
     grupo = relationship('Grupo')
     usuario = relationship('Usuario')
 
-""" class GrupoOrganismoDominio(Base):
-    __tablename__ = 'grupo_organismo_dominio'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True, nullable=False)
-    id_grupo = Column(UUID, nullable=False)
-    id_organismo_ext = Column(UUID, nullable=False)
-    id_dominio_ext = Column(UUID, nullable=False)
-    fecha_actualizacion = Column(DateTime, nullable=True)
-    id_user_actualizacion = Column(UUID, nullable=True)
- """
 class RolExt(Base):
     __tablename__ = 'rol_ext'
     __table_args__ = {'schema': 'tareas'}

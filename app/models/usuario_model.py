@@ -245,7 +245,8 @@ def get_grupos_by_usuario(id):
                   Grupo.id_user_actualizacion.label("id_user_actualizacion"),
                   ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
                   ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
-                  ).filter(Usuario.id == id, UsuarioGrupo.eliminado==False).all()                                    
+                  ).filter(Usuario.id == id, UsuarioGrupo.eliminado==False
+                  ).order_by(Grupo.nombre).all()                                    
     return res
 
 

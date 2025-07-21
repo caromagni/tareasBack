@@ -25,12 +25,12 @@ def before_request():
     g.rol = jsonHeader.get('user_rol', '')
      
 @ep_url.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Returns a URL to see details of a given task ID', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@ep_url.get('/tarea/url//<string:id_tarea>')
+@ep_url.get('/tarea/url/<string:id_tarea>')
 @ep_url.output(schema.URLTareaOut)
 #@rol.require_role()
 def ep_url_(id_tarea:str):
     try:
-      
+        print(type(id_tarea))
         #validate id_tarea is a valid uuid
         if not uuid.UUID(id_tarea):
             raise exceptions.ValidationError("Invalid task ID")
@@ -39,7 +39,6 @@ def ep_url_(id_tarea:str):
         #add rest of url parts /tareas_grupos/d272173d-2c4c-4300-a1e7-96a01e2dfc2f/show_task_detail
         url_full = f"{url}/tareas_grupos/{id_tarea}/show_task_detail"
         res = {'url': url_full}
-        print(res)
         print(schema.URLTareaOut().dump(res))
         return schema.URLTareaOut().dump(res)
     

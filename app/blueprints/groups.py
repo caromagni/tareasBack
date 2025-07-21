@@ -262,7 +262,7 @@ def getGrupoBase(id: str):
 @groups_b.get('/organismos')
 @groups_b.output(schema.OrganismoOut(many=True))
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Organismo', summary='Listado de organismos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-def get_expedientes():
+def get_organismos():
     try:
         res = grupo_model.get_all_organismos()
         if res is None:

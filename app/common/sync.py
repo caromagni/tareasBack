@@ -211,7 +211,8 @@ def sync_organismo(entity_id, url,id_user):
         query_organismo = db.session.query(Organismo).filter(Organismo.id == resp['data']['id']).first()
         if query_organismo is None:
             #hago insert del organismo
-            nuevo_organismo = Organismo(id=resp['data']['id'],
+            nuevo_organismo = Organismo(id=uuid.uuid4(),
+                               id_ext=resp['data']['id'],
                                circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
                                descripcion=resp['data']['descripcion'],
                                descripcion_corta=resp['data']['descripcion_corta'],
