@@ -178,6 +178,19 @@ def create_app():
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_url)
 
+    # Kubernetes liveness probe
+    @app.route('/livez')
+    def livez():
+        return {'status': 'live'}, 200
+
+    # Kubernetes readiness probe
+    @app.route('/readyz')
+    def readyz():
+        try:
+            db.session.execute('SELECT 1')
+            return {'status': 'ready'}, 200
+        except Exception as e:
+            return {'status': 'unavailable', 'error': str(e)}, 503
 
   
     ###Api Key
