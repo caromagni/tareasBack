@@ -131,7 +131,7 @@ def create_app():
    
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
-        'pool_size': 2,
+        'pool_size': Config.SQLALCHEMY_POOL_SIZE,
         'max_overflow': 10,
         'pool_timeout': 30,
         'pool_recycle': 1800  # 30 minutos
