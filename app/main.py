@@ -55,7 +55,9 @@ def is_redis_available():
 def create_app():
     # Optionally run database setup before app starts
     if Config.RUN_DB_SETUP:
+        print("******************************************")
         print("Running DatabaseSetup before app starts...")
+        print("******************************************")
         setup = DatabaseSetup()
         # If you have a run() or setup() method, call it here:
         # setup.run()
