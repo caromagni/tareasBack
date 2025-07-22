@@ -33,6 +33,7 @@ import common.cache as cache_common
 import threading
 import redis
 import common.exceptions as exceptions
+from database_setup import DatabaseSetup
 
 
 def is_redis_available():
@@ -52,6 +53,13 @@ def is_redis_available():
         return False
 
 def create_app():
+    # Optionally run database setup before app starts
+    if Config.RUN_DB_SETUP:
+        print("Running DatabaseSetup before app starts...")
+        setup = DatabaseSetup()
+        # If you have a run() or setup() method, call it here:
+        # setup.run()
+        # For now, just instantiate as a placeholder
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
