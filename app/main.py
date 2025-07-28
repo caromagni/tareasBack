@@ -33,6 +33,7 @@ import common.cache as cache_common
 import threading
 import redis
 import common.exceptions as exceptions
+from database_setup import DatabaseSetup
 
 
 def is_redis_available():
@@ -52,6 +53,11 @@ def is_redis_available():
         return False
 
 def create_app():
+    # Optionally run database setup before app starts
+    
+        # If you have a run() or setup() method, call it here:
+        
+        # For now, just instantiate as a placeholder
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
@@ -123,7 +129,7 @@ def create_app():
    
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
-        'pool_size': 2,
+        'pool_size': Config.SQLALCHEMY_POOL_SIZE,
         'max_overflow': 10,
         'pool_timeout': 30,
         'pool_recycle': 1800  # 30 minutos
@@ -170,6 +176,19 @@ def create_app():
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_url)
 
+    # Kubernetes liveness probe
+    @app.route('/livez')
+    def livez():
+        return {'status': 'live'}, 200
+
+    # Kubernetes readiness probe
+    @app.route('/readyz')
+    def readyz():
+        try:
+            db.session.execute('SELECT 1')
+            return {'status': 'ready'}, 200
+        except Exception as e:
+            return {'status': 'unavailable', 'error': str(e)}, 503
 
   
     ###Api Key
@@ -206,11 +225,29 @@ def create_app():
 
     return app
 
+app = create_app()
+application = app
 
 if __name__ == "__main__":
-    app = create_app()
+   
+    with app.app_context():
+        print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        if Config.RUN_DB_SETUP:
+            print("******************************************")
+            print("Running DatabaseSetup before app starts...")
+            print("******************************************")
+            setup = DatabaseSetup()
+            setup.run()
     app.run()
 else:
-    app = create_app()
+    print("going to run the app in else block")
+    
+    with app.app_context():
+        print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        if Config.RUN_DB_SETUP:
+            print("******************************************")
+            print("Running DatabaseSetup before app starts...")
+            print("******************************************")
+            setup = DatabaseSetup()
+            setup.run()
    
-    application = app

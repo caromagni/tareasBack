@@ -108,7 +108,6 @@ def get_grupo_by_id(id):
             "hijos": hijos,
             "usuarios": usuarios,
             "tareas": tareas,
-            "nomenclador": res.nomenclador,
             "organismo": res.organismo,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
@@ -785,7 +784,6 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                 "id": res.id,
                 "nombre": res.nombre,
                 "descripcion": res.descripcion,
-                "nomenclador": res.nomenclador,
                 "organismo": res.organismo,
                 "fecha_creacion": res.fecha_creacion,
                 "fecha_actualizacion": res.fecha_actualizacion,
@@ -878,10 +876,6 @@ def update_grupo(username=None,id='', **kwargs):
             raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
         grupo.suspendido = kwargs['suspendido']
     
-    if 'codigo_nomenclador' in kwargs:
-        grupo.codigo_nomenclador = kwargs['codigo_nomenclador']  
-
-    
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
         if(kwargs['id_user_asignado_default']==None):
@@ -956,7 +950,7 @@ def update_grupo(username=None,id='', **kwargs):
     db.session.commit()
     return grupo
 
-def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomenclador='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
+def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
@@ -984,7 +978,6 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         nombre=nombre.upper(),
         descripcion=descripcion,
         base=base,
-        codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,
         id_user_asignado_default=id_user_asignado_default,
         fecha_actualizacion=datetime.now(),
@@ -1083,8 +1076,6 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
         "nombre": nuevo_grupo.nombre,
         "descripcion": nuevo_grupo.descripcion,
         "base": nuevo_grupo.base,
-        "codigo_nomenclador": nuevo_grupo.codigo_nomenclador,
-        "nomenclador": nuevo_grupo.nomenclador,
         "eliminado": nuevo_grupo.eliminado,
         "suspendido": nuevo_grupo.suspendido,
         "id_user_actualizacion": nuevo_grupo.id_user_actualizacion,

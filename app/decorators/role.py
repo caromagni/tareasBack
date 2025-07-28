@@ -5,7 +5,7 @@ import common.logger_config as logger_config
 from flask import request
 from flask import g
 import common.exceptions as exceptions
-
+import config.config as config
 def require_role(rol=''):
     def decorator(f):
         @wraps(f)
@@ -41,7 +41,7 @@ def require_role(rol=''):
                 if not can_pass and rol != 'Superadmin':
                     logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
                     raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
-                elif not can_pass and rol == 'Superadmin':
+                elif (not can_pass and rol == 'Superadmin') or (not can_pass and config.RUN_DB_SETUP):
                     can_pass=True
             
             # Si tiene permisos, continuar con la función original

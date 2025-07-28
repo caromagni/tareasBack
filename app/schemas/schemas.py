@@ -80,15 +80,11 @@ class PrioridadSchema(Schema):
     id = fields.Integer()
     descripcion = fields.String()    
 ###############Nomenclador####################
-class NomencladorOut(Schema):
-    nomenclador = String()
-    desclarga = String()
-    nroficin_corto = String()
 
 ############Organismos####################
 class OrganismoOut(Schema):
     id = String()
-    id_ext = String()
+    id_organismo_ext = String()
     circunscripcion_judicial = String()
     id_fuero = String()
     descripcion = String()
@@ -180,10 +176,6 @@ class GroupIn(Schema):
     id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
-    codigo_nomenclador = String(validate=[
-        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
-        validate_num  
-    ])
     id_organismo = String()
 
 class GroupPatchIn(Schema):
@@ -198,10 +190,6 @@ class GroupPatchIn(Schema):
     ])
     id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
-    codigo_nomenclador = String(validate=[
-        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
-        validate_num  
-    ])
     id_organismo = String()
     suspendido = Boolean()
     usuario = List(Nested(ListUsuario))
@@ -238,7 +226,6 @@ class GetGroupOut(Schema):
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
     id_organismo= String()
     eliminado = Boolean()
@@ -272,7 +259,6 @@ class GetGroupRecursivoOut(Schema):
 class GroupxUsrOut(Schema):
     id_grupo = String()
     nombre = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     eliminado = Boolean()
     grupo_eliminado = Boolean()
     grupo_suspendido = Boolean()
@@ -287,7 +273,7 @@ class GroupOut(Schema):
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
     eliminado = Boolean()
     suspendido = Boolean()
     path_name = String()
@@ -304,7 +290,7 @@ class GroupDelOut(Schema):
     id_user_asignado_default = String()
     fecha_actualizacion = String()
     fecha_creacion = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
     eliminado = Boolean()
     suspendido = Boolean()
     base = Boolean()
@@ -358,7 +344,6 @@ class GroupsUsuarioOut(Schema):
     #apellido = String()
     id_grupo = String()
     nombre_grupo = String()
-    codigo_nomenclador = String()
     descripcion = String()
     eliminado = Boolean()
     suspendido = Boolean()
@@ -393,7 +378,6 @@ class GroupsBaseUsrOut(Schema):
     id_padre = String()
     id_grupo = String()
     nombre_grupo = String()
-    codigo_nomenclador = String()
     descripcion = String()
     eliminado = Boolean()
     suspendido = Boolean()
@@ -589,7 +573,6 @@ class GroupIdOut(Schema):
     fecha_actualizacion = DateTime()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
@@ -852,8 +835,6 @@ class GroupAllOut(Schema):
     id_user_actualizacion = String()
     eliminado = Boolean()
     suspendido = Boolean()
-    codigo_nomenclador = String()
-    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     usuarios = List(Nested(UsuarioGroupIdOut))
     tareas = List(Nested(TareaxGrupoOut))
 
@@ -962,7 +943,7 @@ class UsuarioAllOut(Schema):
     id_ext = String()
     eliminado = Boolean()
     suspendido = Boolean()
-    grupo = List(Nested(GroupOut), only=("id_grupo", "nombre", "codigo_nomenclador", "nomenclador", "eliminado", "suspendido"))
+    grupo = List(Nested(GroupOut), only=("id_grupo", "nombre", "eliminado", "suspendido"))
     tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
     dni = String()
     email = String()

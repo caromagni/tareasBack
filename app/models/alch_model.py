@@ -84,7 +84,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_ext = Column(UUID, nullable=False)
+    id_organismo_ext = Column(UUID, nullable=False)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -95,28 +95,6 @@ class Organismo(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
 
-
-class Nomenclador(Base):
-    __tablename__ = 'nomenclador'
-    __table_args__ = {'schema': 'tareas'}
-
-    c_oficppal = Column(CHAR(1), nullable=False)
-    c_circun = Column(CHAR(1), nullable=False)
-    c_oficina = Column(CHAR(2), nullable=False)
-    c_nroficin = Column(CHAR(2), nullable=False)
-    nroficin = Column(String(100), nullable=False)
-    activo = Column(Boolean, nullable=False, server_default=text("true"))
-    nomenclador = Column(CHAR(6), primary_key=True)
-    desclarga = Column(String)
-    lista = Column(Boolean)
-    nroficin_corto = Column(String(20))
-    desccorta = Column(String(30))
-    codigo = Column(CHAR(6))
-    publica_penal = Column(Boolean)
-    tipo_oficina = Column(String(3))
-    turnos = Column(Boolean, server_default=text("false"))
-    turnos_pass = Column(String(100))
-    turnos_des = Column(String(25))
 
 class Usuario(Base):
     __tablename__ = 'usuario'
@@ -190,7 +168,6 @@ class Grupo(Base):
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
     id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
     nombre = Column(String, nullable=False)
-    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     descripcion = Column(String, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
@@ -202,7 +179,6 @@ class Grupo(Base):
     base = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
-    nomenclador = relationship('Nomenclador', foreign_keys=[codigo_nomenclador])
     organismo = relationship('Organismo', foreign_keys=[id_organismo])
 
 class HerarquiaGrupoGrupo(Base):

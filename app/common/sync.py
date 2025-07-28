@@ -212,7 +212,7 @@ def sync_organismo(entity_id, url,id_user):
         if query_organismo is None:
             #hago insert del organismo
             nuevo_organismo = Organismo(id=uuid.uuid4(),
-                               id_ext=resp['data']['id'],
+                               id_organismo_ext=resp['data']['id'],
                                circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
                                descripcion=resp['data']['descripcion'],
                                descripcion_corta=resp['data']['descripcion_corta'],
