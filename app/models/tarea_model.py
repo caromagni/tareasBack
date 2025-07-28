@@ -403,19 +403,22 @@ def update_tarea(id_t='', username=None, **kwargs):
         
     if 'id_expediente' in kwargs:
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
+        
         if expediente is None:
             expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == kwargs['id_expediente']).first()
             if expediente is None:
                 raise Exception("Expediente no encontrado")
-            else:
-                id_expediente = expediente.id
-         
+
+        # Siempre asigno el id una vez encontrado
+        id_expediente = expediente.id
+
         if 'caratula_expediente' in kwargs:
             expediente.caratula = kwargs['caratula_expediente']  
         if 'nro_expte' in kwargs:
             expediente.nro_expte = kwargs['nro_expte']
 
-        tarea.id_expediente = id_expediente     
+        tarea.id_expediente = id_expediente
+
     #Validacion de tipo y subtipo de tarea
     if 'id_tipo_tarea' in kwargs:
         tipo = db.session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
