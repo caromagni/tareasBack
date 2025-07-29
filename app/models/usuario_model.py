@@ -158,7 +158,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
 
     # Ejecutar la consulta paginada
     paginated_results = query.all()
-    
+    print("get all usuarios detalle first results: ", paginated_results)
     if paginated_results is not None:
         results = []
         

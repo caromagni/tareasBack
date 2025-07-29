@@ -63,6 +63,7 @@ def get_roles(username=''):
         resp=r.json()
         ending_time = datetime.now()
         logger_config.logger.info("time taken to get roles from pusher: %s", ending_time - starting_time)
+        logger_config.logger.info("user roles count from P-USHER: %s", str(len(resp['lista_roles_cus'])))
         return resp
     #except requests.exceptions.RequestException as e:
     except Exception as err:
@@ -165,6 +166,12 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
+               
+                logger_config.logger.info("before delete expired roles")
+                #needs to delete first the entry in usuario_rol as it has a foreign key to rol_ext
+                for role in current_user_expired_roles:
+                    db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
+                logger_config.logger.info("after delete expired roles")
                 current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
                 pull_roles = True
             else:
