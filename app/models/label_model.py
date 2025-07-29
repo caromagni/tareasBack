@@ -374,17 +374,10 @@ def get_label_by_tarea(id_tarea):
             ).join(
                 Label, Label.id_label == LabelXTarea.id_label
             ).filter(
-<<<<<<< HEAD
                 LabelXTarea.id_tarea == row.id_tarea,
                 Label.id_label == row.id_label,
                 Label.eliminado == False
             ).first()  
-=======
-                LabelXTarea.id_tarea == id_tarea,
-                Label.eliminado == False,
-            ).first()  # Use `.first()` instead of `.all()` to avoid unnecessary lists
-            print('Active label:', active_label)
->>>>>>> main
 
             if active_label:
                 label = {
