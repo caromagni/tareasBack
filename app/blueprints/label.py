@@ -170,6 +170,7 @@ def del_label(id: str):
 @rol.require_role()
 def get_label_tarea(id_tarea:str):
     try:
+        print(id_tarea)
         res, cant = label_model.get_label_by_tarea(id_tarea)
         if res is None:
             raise exceptions.DataNotFound("Label no encontrada")

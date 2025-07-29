@@ -359,10 +359,8 @@ def get_label_by_tarea(id_tarea):
         LabelXTarea.id_tarea == id_tarea,
         LabelXTarea.activa == True
     ).all()
-    print('Task labels:', tasks_labels)
 
     if tasks_labels:
-        # Fetch label details for each active label
         for row in tasks_labels:
             active_label = db.session.query(
                 LabelXTarea.id,
@@ -371,12 +369,12 @@ def get_label_by_tarea(id_tarea):
                 Label.nombre,
                 Label.color
             ).join(
-                Label, LabelXTarea.id_label == Label.id_label
+                Label, Label.id_label == LabelXTarea.id_label
             ).filter(
+                LabelXTarea.id_tarea == row.id_tarea,
                 Label.id_label == row.id_label,
                 Label.eliminado == False
-            ).first()  # Use `.first()` instead of `.all()` to avoid unnecessary lists
-            print('Active label:', active_label)
+            ).first()  
 
             if active_label:
                 label = {
