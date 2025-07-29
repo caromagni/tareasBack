@@ -298,6 +298,12 @@ def get_groups_base_by_usr(query_data: dict):
             suspendido=request.args.get('suspendido')                
 
         res, cant=usuario_model.get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
+
+        # Add check for empty results
+        if not res or len(res) == 0:
+            # Return empty result or appropriate response
+            return {"data": [], "count": 0}
+
         if res is not None or len(res)>0:
         
             for r in res[0]['grupo']:

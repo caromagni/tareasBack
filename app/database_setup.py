@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from models.alch_model import Base, EP, Usuario, Grupo, Dominio, Organismo, RolExt, UsuarioGrupo
+from models.alch_model import Base, EP, Usuario, Grupo, Dominio, Organismo, RolExt, UsuarioGrupo, UsuarioRol
 from config.config import Config
 from db.alchemy_db import db
 
@@ -9,33 +9,61 @@ class DatabaseSetup:
         pass
 
     def create_initial_user(self, session):
-        print("Creating initial admin user...")
-        existing_admin_user = session.query(Usuario).filter_by(email="admin@system.com").first()
-        if existing_admin_user:
-            print("Admin user 'admin' already exists")
-            return existing_admin_user
-        admin_user = Usuario(
-            id=uuid.uuid4(),
-            nombre="Admin",
-            apellido="System",
-            username="admin",
-            email="admin@system.com",
-            habilitado=True,
-            fecha_actualizacion=datetime.now()
-        )
-        session.add(admin_user)
+        print("Creating initial users...")
+        
+        # Array of hardcoded users that will match JWT tokens
+        initial_users = [
+            {
+                "nombre": "Martin",
+                "apellido": "Diaz",
+                "username": "cristiandiaz@jus.mendoza.gov.ar",
+                "email": "cristiandiaz@jus.mendoza.gov.ar",
+                "habilitado": True
+            }
+            # Add more users here as needed
+            # {
+            #     "nombre": "Another",
+            #     "apellido": "User",
+            #     "username": "anotheruser",
+            #     "email": "anotheruser@jus.mendoza.gov.ar",
+            #     "habilitado": True
+            # }
+        ]
+        
+        created_users = []
+        
+        for user_data in initial_users:
+            existing_user = session.query(Usuario).filter_by(email=user_data["email"]).first()
+            if existing_user:
+                print(f"User '{user_data['email']}' already exists")
+                created_users.append(existing_user)
+                continue
+                
+            user = Usuario(
+                id=uuid.uuid4(),
+                nombre=user_data["nombre"],
+                apellido=user_data["apellido"],
+                username=user_data["username"],
+                email=user_data["email"],
+                habilitado=user_data["habilitado"],
+                fecha_actualizacion=datetime.now()
+            )
+            session.add(user)
+            created_users.append(user)
+            print(f"Created user '{user_data['email']}' with ID: {user.id}")
+        
         session.commit()
-        print(f"Created admin user with ID: {admin_user.id}")
-        return admin_user
+        return created_users
 
     def create_initial_domain(self, session, admin_user):
+        dominio_id="06737c52-5132-41bb-bf82-98af37a9ed80" #must match harcoded id dominio from usher.py untill we have a proper domain setup
         print("Creating initial domain...")
         existing_domain = session.query(Dominio).filter_by(descripcion="General").first()
         if existing_domain:
             print("Domain 'General' already exists")
             return existing_domain 
         domain = Dominio(
-            id=uuid.uuid4(),
+            id=dominio_id,
             id_dominio_ext=uuid.uuid4(),
             descripcion="General",
             descripcion_corta="GEN",
@@ -235,6 +263,13 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-grupo"}],
                 'metodo': 'GET'
             },
+            {
+                'id': '1d158a1a-dcc1-425c-803b-c53733a31cc6',
+                'url': '/alertas',
+                'descripcion': 'GET alertas',
+                'caso_uso': [{"codigo": "consultar-usuario"}],
+                'metodo': 'GET'
+            }
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()
@@ -277,38 +312,115 @@ class DatabaseSetup:
         print(f"Created usuario_grupo relationship with ID: {usuario_grupo.id}")
         return usuario_grupo
 
-    def create_superadmin_role(self, session, admin_user):
-        print("Creating superadmin role for cristiandiaz@jus.mendoza.gov.ar...")
-        existing_role = session.query(RolExt).filter_by(
-            email="cristiandiaz@jus.mendoza.gov.ar",
-            rol="superadmin"
-        ).first()
-        if existing_role:
-            print("Superadmin role for cristiandiaz@jus.mendoza.gov.ar already exists")
-            return existing_role
+    def create_initial_usuario_rol(self, session, users, domain):
+        print("Creating initial usuario_rol relationships...")
+        created_usuario_roles = []
         
-        superadmin_role = RolExt(
-            id=uuid.uuid4(),
-            email="cristiandiaz@jus.mendoza.gov.ar",
-            rol="superadmin",
-            id_rol_ext=uuid.uuid4(),
-            id_organismo=None,  # Can be None for superadmin
-            descripcion_ext="Administrador",
-            fecha_actualizacion=datetime.now()
-        )
-        session.add(superadmin_role)
+        for user in users:
+            print(f"Creating usuario_rol for {user.email}...")
+            
+            # Get the usuario_grupo relationship for this user
+            usuario_grupo = session.query(UsuarioGrupo).filter_by(
+                id_usuario=user.id
+            ).first()
+            
+            if not usuario_grupo:
+                print(f"No usuario_grupo found for user {user.email}, skipping...")
+                continue
+                
+            # Get the rol_ext for this user
+            rol_ext = session.query(RolExt).filter_by(
+                email=user.email,
+                rol="superadmin"
+            ).first()
+            
+            if not rol_ext:
+                print(f"No rol_ext found for user {user.email}, skipping...")
+                continue
+                
+            # Check if usuario_rol already exists
+            existing_usuario_rol = session.query(UsuarioRol).filter_by(
+                id_usuario_grupo=usuario_grupo.id,
+                id_rol_ext=rol_ext.id,
+                id_dominio=domain.id
+            ).first()
+            
+            if existing_usuario_rol:
+                print(f"Usuario_rol relationship already exists for {user.email}")
+                created_usuario_roles.append(existing_usuario_rol)
+                continue
+                
+            # Create the usuario_rol relationship
+            usuario_rol = UsuarioRol(
+                id=uuid.uuid4(),
+                id_usuario_grupo=usuario_grupo.id,
+                id_rol_ext=rol_ext.id,
+                id_dominio=domain.id,
+                base_desnz=True,
+                fecha_actualizacion=datetime.now(),
+                id_user_actualizacion=user.id,
+                eliminado=False
+            )
+            session.add(usuario_rol)
+            created_usuario_roles.append(usuario_rol)
+            print(f"Created usuario_rol with ID: {usuario_rol.id} for {user.email}")
+        
         session.commit()
-        print(f"Created superadmin role with ID: {superadmin_role.id}")
-        return superadmin_role
+        return created_usuario_roles
+
+    def create_superadmin_role(self, session, users):
+        print("Creating superadmin roles for all users...")
+        created_roles = []
+        
+        for user in users:
+            print(f"Creating superadmin role for {user.email}...")
+            existing_role = session.query(RolExt).filter_by(
+                email=user.email,
+                rol="superadmin"
+            ).first()
+            if existing_role:
+                print(f"Superadmin role for {user.email} already exists")
+                created_roles.append(existing_role)
+                continue
+            
+            superadmin_role = RolExt(
+                id=uuid.uuid4(),
+                email=user.email,
+                rol="superadmin",
+                id_rol_ext=uuid.uuid4(),
+                id_organismo=None,  # Can be None for superadmin
+                descripcion_ext="Administrador",
+                fecha_actualizacion=datetime.now()
+            )
+            session.add(superadmin_role)
+            created_roles.append(superadmin_role)
+            print(f"Created superadmin role with ID: {superadmin_role.id} for {user.email}")
+        
+        session.commit()
+        return created_roles
 
     def run(self):
         print("Running full database setup...")
         session = db.session
-        admin_user = self.create_initial_user(session)
+        users = self.create_initial_user(session)
+        
+        # Use the first user as admin user for backward compatibility
+        if users:
+            admin_user = users[0]
+            print(f"Using '{admin_user.email}' as admin user")
+        else:
+            print("No users created, cannot proceed")
+            return
+            
         domain = self.create_initial_domain(session, admin_user)
         organismo = self.create_initial_organismo(session)
         group = self.create_initial_group(session, admin_user, domain, organismo)
-        self.create_initial_usuario_grupo(session, admin_user, group)
+        
+        # Create usuario_grupo relationships for all users
+        for user in users:
+            self.create_initial_usuario_grupo(session, user, group)
+            
         self.populate_endpoints(session, admin_user)
-        #self.create_superadmin_role(session, admin_user)
+        self.create_superadmin_role(session, users)
+        self.create_initial_usuario_rol(session, users, domain)
         print("Database setup complete.") 
