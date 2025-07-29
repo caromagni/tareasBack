@@ -225,9 +225,11 @@ def create_app():
 
     return app
 
+app = create_app()
+application = app
 
 if __name__ == "__main__":
-    app = create_app()
+   
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         if Config.RUN_DB_SETUP:
@@ -239,8 +241,7 @@ if __name__ == "__main__":
     app.run()
 else:
     print("going to run the app in else block")
-    app = create_app()
-    application = app
+    
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         if Config.RUN_DB_SETUP:
@@ -249,3 +250,4 @@ else:
             print("******************************************")
             setup = DatabaseSetup()
             setup.run()
+   

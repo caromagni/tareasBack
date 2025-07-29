@@ -85,7 +85,7 @@ def get_api_cu_bd(metodo=None, url=None):
         print("casos de uso encontrados desde base de datos:", cu_query.caso_uso)
 
     for item in cu_query.caso_uso:
-            print("cu encontrado desde base de datos:", item['codigo'])
+            print("cu encontrado desde base de datos:", str(item))
             cu.append(item['codigo'])
 
     return cu

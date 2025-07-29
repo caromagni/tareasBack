@@ -84,7 +84,7 @@ class PrioridadSchema(Schema):
 ############Organismos####################
 class OrganismoOut(Schema):
     id = String()
-    id_ext = String()
+    id_organismo_ext = String()
     circunscripcion_judicial = String()
     id_fuero = String()
     descripcion = String()

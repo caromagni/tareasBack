@@ -87,7 +87,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_ext = Column(UUID)
+    id_organismo_ext = Column(UUID)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
