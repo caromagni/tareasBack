@@ -419,7 +419,7 @@ class TipoTareaIn(Schema):
     ])
     eliminado = Boolean(default=False)
     base = Boolean(default=False)
-    habilitado = Boolean(default=True)
+    inactivo = Boolean(default=True)
     nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
     
@@ -438,7 +438,7 @@ class TipoTareaPatchIn(Schema):
     habilitado = Boolean(default=False)
     origen_externo = Boolean(default=False)
     id_ext = String()
-    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+    nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
 
 class TipoTareaOut(Schema):
@@ -461,7 +461,7 @@ class TipoTareaGetIn(Schema):
     origen_externo = Boolean(default=False)
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
     eliminado = Boolean(default=False)
-    habilitado = Boolean(default=False)
+    inactivo = Boolean(default=False)
     nombre = String(default="")
 
 class SubtipoTareaIn(Schema):
@@ -527,7 +527,7 @@ class TipoTareaSubtipoOut(Schema):
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
-    habilitado = Boolean()
+    inactivo = Boolean()
     base = Boolean()
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
@@ -1405,7 +1405,7 @@ class LabelIn(Schema):
     color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
     id_grupo = String(required=True)
     eliminado = Boolean()
-    id_user_creacion = String(required=True)
+    id_user_creacion = String()
     fecha_creacion = String(validate=validate_fecha)
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)
@@ -1540,6 +1540,7 @@ class LabelXTareaIdOut(Schema):
     color = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
+    id_grupo_base = String()
 
 class LabelXTareaIdCountAllOut(Schema):
     count = Integer()

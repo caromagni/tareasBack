@@ -910,11 +910,11 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, habilitado=None, eliminado=None, nombre=None):
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, inactivo=None, eliminado=None, nombre=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
-    print("habilitado:", habilitado)
+    print("inactivo:", inactivo)
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
@@ -924,8 +924,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, hab
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
         query = query.filter(TipoTarea.origen_externo == origen_externo)
-    if habilitado is not None:
-        query = query.filter(TipoTarea.habilitado == habilitado)
+    if inactivo is not None:
+        query = query.filter(TipoTarea.inactivo == inactivo )
     if eliminado is not None:
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
@@ -978,7 +978,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, hab
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, habilitado=True, eliminado=False):
+def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, inactivo=False, eliminado=False):
     
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -997,7 +997,7 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
         nivel=nivel,
         base=False,
         origen_externo=False,
-        habilitado=habilitado,
+        inactivo=inactivo,
         eliminado=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
@@ -1031,10 +1031,10 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.eliminado = kwargs['eliminado']
     else:
         tipo_tarea.eliminado = False
-    if 'habilitado' in kwargs:
-        tipo_tarea.habilitado = kwargs['habilitado']
+    if 'inactivo' in kwargs:
+        tipo_tarea.inactivo = kwargs['inactivo']
     else:
-        tipo_tarea.habilitado = True
+        tipo_tarea.inactivo = False
     if 'nivel' in kwargs:
         tipo_tarea.nivel = kwargs['nivel']
     if 'id_ext' in kwargs:

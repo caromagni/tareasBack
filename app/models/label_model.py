@@ -40,7 +40,6 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     id_tarea = id_tarea
     # tarea = get_tarea_by_id(id_tarea)
     # id_grupo = tarea[0]['grupos'][0]['id']
-    id_grupo = id_grupo
     # print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
     print('db.session:', db.session)
     id_grupo_base=find_parent_id_recursive(db.session, id_grupo)
@@ -51,7 +50,8 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
         eliminado=eliminado,
         fecha_eliminacion=fecha_eliminacion,
         fecha_creacion=datetime.now(),
-        id_user_creacion=id_user_creacion,
+        fecha_actualizacion=datetime.now(),
+        id_user_creacion=id_user_actualizacion,
         id_label=nuevoID_label,
         color=color,
         id_grupo_base=id_grupo_base,
@@ -318,7 +318,8 @@ def insert_label_tarea(username=None, **kwargs):
             "nombre": nombre,
             "color": color,
             "fecha_actualizacion": l.fecha_actualizacion,
-            "id_user_actualizacion": l.id_user_actualizacion
+            "id_user_actualizacion": l.id_user_actualizacion,
+            "id_grupo_base": labels.id_grupo_base
         })
     print('result:', result)
     print("#############################################")  
@@ -369,12 +370,14 @@ def get_label_by_tarea(id_tarea):
                 LabelXTarea.id_label,
                 LabelXTarea.id_tarea,
                 Label.nombre,
-                Label.color
+                Label.color,
+                Label.id_grupo_base,
+                LabelXTarea.activa
             ).join(
                 Label, LabelXTarea.id_label == Label.id_label
             ).filter(
-                Label.id_label == row.id_label,
-                Label.eliminado == False
+                LabelXTarea.id_tarea == id_tarea,
+                Label.eliminado == False,
             ).first()  # Use `.first()` instead of `.all()` to avoid unnecessary lists
             print('Active label:', active_label)
 
@@ -384,7 +387,9 @@ def get_label_by_tarea(id_tarea):
                     "id_label": active_label.id_label,
                     "id_tarea": active_label.id_tarea,
                     "nombre": active_label.nombre,
-                    "color": active_label.color
+                    "color": active_label.color,
+                    "activa": active_label.activa,
+                    "id_grupo_base": active_label.id_grupo_base
                 }
                 active_labels.append(label)
 

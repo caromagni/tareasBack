@@ -5,7 +5,7 @@ from sqlalchemy import text, desc
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
-from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea, Organismo
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, TareaXGrupo, Tarea, Organismo, Dominio
 from common.cache import *
 import common.cache as cache_common
 from datetime import time
@@ -875,7 +875,17 @@ def update_grupo(username=None,id='', **kwargs):
         if len(grupo_con_tarea)>0:
             raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
         grupo.suspendido = kwargs['suspendido']
-    
+    if 'id_organismo' in kwargs:
+        organismo = db.session.query(Organismo).filter(Organismo.id==kwargs['id_organismo'], Organismo.eliminado==False).first()
+        if organismo is None:
+            raise Exception("Organismo no encontrado")
+        grupo.id_organismo = kwargs['id_organismo']
+    if 'id_dominio' in kwargs:
+        dominio = db.session.query(Dominio).filter(Dominio.id==kwargs['id_dominio'], Dominio.eliminado==False).first()
+        if dominio is None:
+            raise Exception("Dominio no encontrado")
+        grupo.id_dominio = kwargs['id_dominio']
+        
     if 'id_user_asignado_default' in kwargs:
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
         if(kwargs['id_user_asignado_default']==None):
@@ -950,7 +960,7 @@ def update_grupo(username=None,id='', **kwargs):
     db.session.commit()
     return grupo
 
-def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None):
+def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None, id_organismo=None, id_dominio=None):
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
@@ -970,7 +980,15 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
-
+    if id_organismo is not None:
+        organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.eliminado==False).first()
+        if organismo is None: 
+            raise Exception("Organismo no encontrado")
+    if id_dominio is not None:
+        dominio = db.session.query(Dominio).filter(Dominio.id==id_dominio, Dominio.eliminado==False).first()
+        if dominio is None: 
+            raise Exception("Dominio no encontrado")
+            
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
     nuevo_grupo = Grupo(
@@ -978,6 +996,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         nombre=nombre.upper(),
         descripcion=descripcion,
         base=base,
+        id_organismo=id_organismo,
+        id_dominio=id_dominio,
+        eliminado=False,
+        suspendido=False,
         id_user_actualizacion=id_user_actualizacion,
         id_user_asignado_default=id_user_asignado_default,
         fecha_actualizacion=datetime.now(),
@@ -996,6 +1018,17 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
             id_user_actualizacion=id_user_actualizacion
         )
         db.session.add(nuevo_usuario_grupo)
+
+    if id_organismo is not None:
+        nuevoID_org_grp=uuid.uuid4()
+        nuevo_organismo_grupo = OrganismoGrupo(
+            id=nuevoID_org_grp,
+            id_grupo=nuevoID_grupo,
+            id_organismo=id_organismo,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+        db.session.add(nuevo_organismo_grupo)
 
     if id_padre is not '':        
         nueva_herarquia = HerarquiaGrupoGrupo(
