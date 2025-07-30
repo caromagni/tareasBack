@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Grupos &#8212; documentación de tareas - </title>
+    <title>Gestión de Grupos &#8212; documentación de tareas - </title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
@@ -34,136 +34,473 @@
 
           <div class="body" role="main">
             
-  <section id="grupos">
-<h1>Grupos<a class="headerlink" href="#grupos" title="Link to this heading">¶</a></h1>
-<p>El módulo de <strong>Grupos</strong> es una componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la organización, colaboración y gestión eficiente de equipos dentro del ámbito judicial o administrativo.</p>
-<p>Permite la creación y administración de estructuras jerárquicas de grupos, proporcionando una base sólida para la asignación de tareas, control de accesos y coordinación entre unidades o equipos de trabajo.</p>
-<p>Grupo Base: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.</p>
-<nav class="contents local" id="contenido">
+  <section id="gestion-de-grupos">
+<h1>Gestión de Grupos<a class="headerlink" href="#gestion-de-grupos" title="Link to this heading">¶</a></h1>
+<section id="que-es-y-para-que-sirve">
+<h2>¿Qué es y para qué sirve?<a class="headerlink" href="#que-es-y-para-que-sirve" title="Link to this heading">¶</a></h2>
+<p>El módulo de <strong>Grupos</strong> es la herramienta que te permite organizar tu institución judicial o administrativa de manera jerárquica. Es como crear un organigrama digital donde puedes:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#introduccion-general" id="id1">1. Introducción general</a></p></li>
-<li><p><a class="reference internal" href="#caracteristicas-principales" id="id2">2. Características principales</a></p></li>
-<li><p><a class="reference internal" href="#casos-de-uso-frecuentes" id="id3">3. Casos de uso frecuentes</a></p></li>
-<li><p><a class="reference internal" href="#uso-del-servicio" id="id4">4. Uso del servicio</a></p>
-<ul>
-<li><p><a class="reference internal" href="#flujos-funcionales-disponibles" id="id5">Flujos funcionales disponibles</a></p></li>
-<li><p><a class="reference internal" href="#beneficios-para-el-usuario-funcional" id="id6">Beneficios para el usuario funcional</a></p></li>
+<li><p>Crear áreas de trabajo (grupos)</p></li>
+<li><p>Organizar áreas dentro de cada grupo</p></li>
+<li><p>Asignar personas a cada grupo</p></li>
+<li><p>Gestionar quién hace qué en tu organización</p></li>
 </ul>
-</li>
-</ul>
-</nav>
-<section id="introduccion-general">
-<h2><a class="toc-backref" href="#id1" role="doc-backlink">1. Introducción general</a><a class="headerlink" href="#introduccion-general" title="Link to this heading">¶</a></h2>
-<p>El módulo de Grupos actúa como la <strong>columna vertebral organizativa</strong> del sistema. Permite representar la complejidad de las estructuras judiciales con precisión, mejorar la asignación de recursos, fortalecer la seguridad a través de permisos, y fomentar la colaboración entre unidades mediante herramientas internas.</p>
+<p><strong>Grupo Base</strong>: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.</p>
 </section>
-<section id="caracteristicas-principales">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">2. Características principales</a><a class="headerlink" href="#caracteristicas-principales" title="Link to this heading">¶</a></h2>
+<section id="componentes-principales">
+<h2>Componentes Principales<a class="headerlink" href="#componentes-principales" title="Link to this heading">¶</a></h2>
+<section id="tabla-principal-que-ves-aqui">
+<h3>Tabla Principal - ¿Qué ves aquí?<a class="headerlink" href="#tabla-principal-que-ves-aqui" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades que tienes disponibles:</strong></p>
 <ul class="simple">
-<li><p><strong>Creación flexible de grupos</strong>:
-- Estructuras jerárquicas de múltiples niveles (ej. áreas, departamentos, roles).
-- Plantillas preconfiguradas para crear grupos según modelos comunes.</p></li>
-<li><p><strong>Gestión de membresía</strong>:
-- Asignación de usuarios a grupos de forma intuitiva y predefinida.</p></li>
-<li><p><strong>Permisos y accesos</strong>:
-- Control granular por grupo o subgrupo.
-- Herencia de permisos con personalización opcional.</p></li>
-<li><p><strong>Asignación de tareas</strong>:
-- A nivel de grupo o individual.
-- Reglas de distribución automática según carga u orden.</p></li>
-<li><p><strong>Comunicación interna</strong>:
-- Notificaciones y mensajes internos segmentados por grupo.</p></li>
-<li><p><strong>Dashboards y visualización</strong>:
-- Paneles dinámicos con métricas, tareas pendientes y estado.</p></li>
-<li><p><strong>Reportes y auditoría</strong>:
-- Informes por grupo.
-- Registro detallado de cambios y acciones realizadas.</p></li>
-<li><p><strong>Integración con otros módulos</strong>:
-- Tareas y Usuarios.</p></li>
+<li><p>Ver todos los grupos de tu organización en una tabla organizada</p></li>
+<li><p>Navegar la jerarquía con breadcrumbs que muestran la ruta completa</p></li>
+<li><p>Filtrar y buscar grupos por nombre y estado</p></li>
+<li><p>Acciones rápidas con botones intuitivos:
+- Ver detalles - Información completa del grupo
+- Editar - Modificar datos del grupo
+- Suspender - Desactivar temporalmente
+- Eliminar - Marcar como eliminado
+- Restaurar - Recuperar grupos eliminados
+- Crear nuevo - Agregar nuevo grupo</p></li>
 </ul>
-</section>
-<section id="casos-de-uso-frecuentes">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">3. Casos de uso frecuentes</a><a class="headerlink" href="#casos-de-uso-frecuentes" title="Link to this heading">¶</a></h2>
+<p><strong>Información que se muestra:</strong></p>
 <ul class="simple">
-<li><p>Crear un grupo para una nueva unidad judicial.</p></li>
-<li><p>Reorganizar áreas o mover miembros entre grupos.</p></li>
-<li><p>Asignar tareas a todo un equipo o a un líder de grupo.</p></li>
-<li><p>Auditar actividad de un grupo en un periodo determinado.</p></li>
-<li><p>Reactivar un grupo eliminado accidentalmente.</p></li>
-<li><p>Suspender o activar grupos según necesidades operativas.</p></li>
+<li><p><strong>Niveles Grupo</strong> - Jerarquía completa con breadcrumbs usando path_name</p></li>
+<li><p><strong>Estado</strong> - Activo (verde), Suspendido (amarillo), Eliminado (rojo)</p></li>
+<li><p><strong>Nivel jerárquico</strong> - Posición en la estructura (0 = raíz, 1 = primer nivel, etc.)</p></li>
+<li><p><strong>Fecha de actualización</strong> - Cuándo se modificó por última vez</p></li>
+<li><p><strong>Usuario que actualizó</strong> - Quién hizo el último cambio</p></li>
+<li><p><strong>Usuario por defecto</strong> - Quién se asigna automáticamente</p></li>
+<li><p><strong>Descripción</strong> - Información adicional del grupo</p></li>
+</ul>
+<p><strong>Características técnicas que facilitan tu trabajo:</strong></p>
+<ul class="simple">
+<li><p>Paginación automática (10 grupos por página)</p></li>
+<li><p>Búsqueda en tiempo real</p></li>
+<li><p>Estados de carga con spinner</p></li>
+<li><p>Notificaciones de éxito/error</p></li>
+<li><p>Visualización jerárquica con breadcrumbs</p></li>
 </ul>
 </section>
-<section id="uso-del-servicio">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">4. Uso del servicio</a><a class="headerlink" href="#uso-del-servicio" title="Link to this heading">¶</a></h2>
-<p>El sistema cuenta con un conjunto de interfaces que permiten a los administradores gestionar completamente la estructura de grupos a través del servicio. Estas operaciones están integradas con validaciones visuales, formularios dinámicos y protección contra errores lógicos como la eliminación de grupos con hijos o asignaciones inválidas.</p>
-<p>Acciones habilitadas desde la interfaz:</p>
+<section id="crear-nuevo-grupo-como-hacerlo">
+<h3>Crear Nuevo Grupo - ¿Cómo hacerlo?<a class="headerlink" href="#crear-nuevo-grupo-como-hacerlo" title="Link to this heading">¶</a></h3>
+<p><strong>¿Qué puedes hacer aquí?</strong></p>
 <ul class="simple">
-<li><p>Crear un nuevo grupo.</p></li>
-<li><p>Modificar los datos de un grupo existente (nombre, estado, jerarquía).</p></li>
-<li><p>Eliminar un grupo (de forma lógica, puede recuperarse).</p></li>
-<li><p>Restaurar un grupo eliminado o suspendido.</p></li>
-<li><p>Consultar jerarquías y niveles organizativos.</p></li>
-<li><p>Buscar grupos por nombre, fechas o estado.</p></li>
-<li><p>Consultar los usuarios que pertenecen a un grupo específico.</p></li>
+<li><p>Crear grupo principal (sin padre) o dependiente (con padre)</p></li>
+<li><p>Seleccionar grupo padre para crear jerarquías</p></li>
+<li><p>Asignar usuario por defecto al grupo</p></li>
+<li><p>El sistema valida automáticamente la estructura</p></li>
 </ul>
-<section id="flujos-funcionales-disponibles">
-<h3><a class="toc-backref" href="#id5" role="doc-backlink">Flujos funcionales disponibles</a><a class="headerlink" href="#flujos-funcionales-disponibles" title="Link to this heading">¶</a></h3>
-<p><strong>Creación de grupos</strong></p>
+<p><strong>Proceso paso a paso:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Definir tipo de grupo:</strong>
+- Grupo principal - Si es una nueva área (ej: nueva sede)
+- Grupo dependiente - Si es un departamento dentro de un área existente</p></li>
+<li><p><strong>Completar información básica:</strong>
+- Nombre del grupo (obligatorio) - Ej: «Departamento Civil»
+- Descripción (opcional) - Ej: «Maneja casos civiles»
+- Grupo padre (si es dependiente) - Elige de qué grupo depende</p></li>
+<li><p><strong>Configurar usuario por defecto:</strong>
+- Selecciona quién será el responsable por defecto de ese grupo
+- Opcional para grupos dependientes</p></li>
+</ol>
+<p><strong>Campos del formulario:</strong></p>
 <ul class="simple">
-<li><p>Definición de grupo principal o dependiente.</p></li>
-<li><p>Validaciones: longitud mínima, sin símbolos ni números iniciales.</p></li>
-<li><p>Selección de grupo padre mediante lo que permite crear grupos y sub-grupos.</p></li>
+<li><p><strong>Nombre</strong> - Campo obligatorio (mínimo 6 caracteres)</p></li>
+<li><p><strong>Descripción</strong> - Campo opcional para detalles adicionales</p></li>
+<li><p><strong>Grupo padre</strong> - Para crear jerarquías (opcional)</p></li>
+<li><p><strong>Usuario por defecto</strong> - Se asigna automáticamente a nuevas tareas</p></li>
 </ul>
-<p><strong>Edición de grupos</strong></p>
+<p><strong>Validaciones que se protegen:</strong></p>
 <ul class="simple">
-<li><p>Modificación de nombre, descripción y usuario asignado por defecto.</p></li>
-<li><p>Visualización previa con avatar del grupo.</p></li>
-<li><p>Confirmación de cambios antes de guardar.</p></li>
-</ul>
-<p><strong>Eliminación de grupos</strong></p>
-<ul class="simple">
-<li><p>Eliminación lógica con validación previa de jerarquía (no debe tener hijos).</p></li>
-<li><p>Confirmación visual y feedback inmediato.</p></li>
-</ul>
-<p><strong>Suspensión y restauración</strong></p>
-<ul class="simple">
-<li><p>Permite suspender temporalmente o reactivar grupos.</p></li>
-<li><p>Restauración de grupos eliminados desde la misma tabla.</p></li>
-</ul>
-<p><strong>Visualización de detalles</strong></p>
-<ul class="simple">
-<li><p>Datos clave del grupo: nombre, descripción, fecha, usuarios asignados.</p></li>
-<li><p>Avatar representativo y estructura jerárquica visual.</p></li>
-</ul>
-<p><strong>Filtros y búsqueda avanzada</strong></p>
-<ul class="simple">
-<li><p>Filtros por nombre, descripción, estado, fechas.</p></li>
-<li><p><cite>Switch</cite> para incluir o excluir suspendidos y eliminados.</p></li>
-<li><p>Aplicación en tiempo real sobre la tabla.</p></li>
-</ul>
-<p><strong>Tabla de gestión</strong></p>
-<ul class="simple">
-<li><p>Vista general de grupos con acciones rápidas.</p></li>
-<li><p>Íconos para ver, editar, suspender, eliminar o restaurar.</p></li>
-<li><p>Integración con paneles laterales y diálogos contextuales.</p></li>
-</ul>
-<p><strong>Mensajes del sistema</strong></p>
-<ul class="simple">
-<li><p><cite>Snackbars</cite> informan al usuario de forma inmediata.</p></li>
-<li><p>Errores y validaciones claras, como:
-- «El grupo tiene hijos asociados.»
-- «El nombre debe tener al menos 6 caracteres.»
-- «Error al intentar restaurar el grupo.»</p></li>
+<li><p>Nombre obligatorio (mínimo 6 caracteres)</p></li>
+<li><p>Sin símbolos especiales al inicio</p></li>
+<li><p>Sin números al inicio</p></li>
+<li><p>Estructura jerárquica válida</p></li>
+<li><p>Usuario asignado por defecto (un grupo puede o no tener un responsable)</p></li>
 </ul>
 </section>
-<section id="beneficios-para-el-usuario-funcional">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">Beneficios para el usuario funcional</a><a class="headerlink" href="#beneficios-para-el-usuario-funcional" title="Link to this heading">¶</a></h3>
+<section id="editar-grupo-existente-que-puedes-cambiar">
+<h3>Editar Grupo Existente - ¿Qué puedes cambiar?<a class="headerlink" href="#editar-grupo-existente-que-puedes-cambiar" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades disponibles:</strong></p>
 <ul class="simple">
-<li><p>Previene errores comunes gracias a validaciones automatizadas.</p></li>
-<li><p>Facilita la gestión de estructuras complejas en pocos clics.</p></li>
-<li><p>Centraliza todas las acciones del módulo en una única vista operativa.</p></li>
-<li><p>Mejora la trazabilidad, seguridad y productividad del sistema judicial.</p></li>
+<li><p>Modificar nombre y descripción del grupo</p></li>
+<li><p>Cambiar usuario asignado por defecto</p></li>
+<li><p>Gestionar estado activo/inactivo</p></li>
+<li><p>El sistema valida en tiempo real</p></li>
 </ul>
-<p>—</p>
+<p><strong>Características avanzadas que facilitan tu trabajo:</strong></p>
+<ul class="simple">
+<li><p>Gestión de usuarios - Asignar/quitar usuarios del grupo</p></li>
+<li><p>Validación de cambios - Solo guarda si hay modificaciones reales</p></li>
+<li><p>Confirmación visual - Muestra avatar y datos del grupo</p></li>
+<li><p>Protección de integridad - Previene cambios que rompan la jerarquía</p></li>
+</ul>
+<p><strong>Campos que puedes editar:</strong></p>
+<ul class="simple">
+<li><p><strong>Nombre</strong> - Se puede modificar</p></li>
+<li><p><strong>Descripción</strong> - Se puede modificar</p></li>
+<li><p><strong>Usuario por defecto</strong> - Se puede cambiar</p></li>
+<li><p><strong>Estado</strong> - Activo/suspendido (no eliminado)</p></li>
+</ul>
+<p><strong>Proceso de edición:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Modificar información básica:</strong>
+- Nombre del grupo
+- Descripción
+- Usuario asignado por defecto</p></li>
+<li><p><strong>Gestionar usuarios:</strong>
+- Agregar usuarios al grupo
+- Quitar usuarios del grupo
+- Ver usuarios actuales</p></li>
+<li><p><strong>Guardar cambios:</strong>
+- Solo si hay modificaciones reales
+- Confirmación antes de guardar</p></li>
+</ol>
+</section>
+<section id="eliminar-grupo">
+<h3>Eliminar Grupo<a class="headerlink" href="#eliminar-grupo" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Validación de jerarquía - No permite eliminar grupos con hijos</p></li>
+<li><p>Confirmación visual - Muestra avatar y datos del grupo</p></li>
+<li><p>Mensajes informativos - Te explica restricciones y consecuencias</p></li>
+</ul>
+<p><strong>Restricciones importantes que te protegen:</strong></p>
+<ul class="simple">
+<li><p>No se puede eliminar si tiene grupos hijos</p></li>
+<li><p>No se puede eliminar si tiene tareas asignadas</p></li>
+<li><p>Eliminación temporal - Se puede restaurar más tarde</p></li>
+</ul>
+<p><strong>Proceso de eliminación:</strong></p>
+<ol class="arabic simple">
+<li><p>Seleccionar grupo a eliminar</p></li>
+<li><p>El sistema valida automáticamente las restricciones</p></li>
+<li><p>Confirmar acción en diálogo</p></li>
+<li><p>Grupo se marca como eliminado</p></li>
+<li><p>Desaparece de la lista principal (pero se puede restaurar)</p></li>
+</ol>
+</section>
+<section id="suspender-grupo-cuando-usar">
+<h3>Suspender Grupo - ¿Cuándo usar?<a class="headerlink" href="#suspender-grupo-cuando-usar" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Suspensión temporal - Desactiva el grupo sin eliminarlo</p></li>
+<li><p>Confirmación visual - Muestra información del grupo</p></li>
+<li><p>Reversibilidad - Se puede reactivar fácilmente</p></li>
+<li><p>Preservación de datos - Mantiene toda la información</p></li>
+</ul>
+<p><strong>¿Cuándo suspender un grupo?</strong></p>
+<ul class="simple">
+<li><p>Cuando un departamento está temporalmente cerrado</p></li>
+<li><p>Durante reorganizaciones</p></li>
+<li><p>Cuando no hay personal disponible</p></li>
+<li><p>Para mantenimiento del sistema</p></li>
+</ul>
+<p><strong>Proceso de suspensión:</strong></p>
+<ol class="arabic simple">
+<li><p>Seleccionar grupo a suspender</p></li>
+<li><p>Confirmar acción en diálogo</p></li>
+<li><p>Grupo se marca como suspendido</p></li>
+<li><p>Cambia de color en la tabla (amarillo)</p></li>
+<li><p>Se puede reactivar desde la misma tabla</p></li>
+</ol>
+</section>
+<section id="reactivar-grupo-suspendido">
+<h3>Reactivar Grupo Suspendido<a class="headerlink" href="#reactivar-grupo-suspendido" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Reactivación inmediata - Restaura el grupo a estado activo</p></li>
+<li><p>Confirmación visual - Muestra datos del grupo</p></li>
+<li><p>Notificaciones - Confirma éxito de la operación</p></li>
+</ul>
+<p><strong>Proceso de reactivación:</strong></p>
+<ol class="arabic simple">
+<li><p>Buscar grupo suspendido en la tabla (aparece en amarillo)</p></li>
+<li><p>Click en botón «Reactivar»</p></li>
+<li><p>Confirmar acción</p></li>
+<li><p>Grupo vuelve a estado activo</p></li>
+</ol>
+</section>
+<section id="restaurar-grupo-eliminado">
+<h3>Restaurar Grupo Eliminado<a class="headerlink" href="#restaurar-grupo-eliminado" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Recuperar grupos eliminados - Restaura grupos marcados como eliminados</p></li>
+<li><p>Confirmación visual - Muestra información del grupo</p></li>
+<li><p>Notificaciones - Confirma éxito o error de la operación</p></li>
+</ul>
+<p><strong>Proceso de restauración:</strong></p>
+<ol class="arabic simple">
+<li><p>Activar filtro «Ver eliminados»</p></li>
+<li><p>Buscar grupo eliminado</p></li>
+<li><p>Click en botón «Restaurar»</p></li>
+<li><p>Confirmar acción</p></li>
+<li><p>Grupo vuelve a estar activo</p></li>
+</ol>
+</section>
+<section id="ver-detalles-del-grupo-informacion-completa">
+<h3>Ver Detalles del Grupo - Información completa<a class="headerlink" href="#ver-detalles-del-grupo-informacion-completa" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Información completa - Nombre, descripción, fechas, usuarios</p></li>
+<li><p>Avatar visual - Representación gráfica del grupo</p></li>
+<li><p>Jerarquía completa - Muestra la estructura organizacional</p></li>
+<li><p>Usuarios asignados - Lista de miembros del grupo</p></li>
+</ul>
+<p><strong>Información que se muestra:</strong></p>
+<ul class="simple">
+<li><p>Nombre y descripción del grupo</p></li>
+<li><p>Nivel jerárquico - Posición en la estructura organizacional</p></li>
+<li><p>Organismo padre - A qué organismo pertenece</p></li>
+<li><p>Ruta completa - Path completo en la jerarquía</p></li>
+<li><p>Fecha de creación y última actualización</p></li>
+<li><p>Usuario que realizó la última actualización</p></li>
+<li><p>Usuario asignado por defecto - Quién se asigna automáticamente</p></li>
+<li><p>Usuarios asignados al grupo</p></li>
+</ul>
+</section>
+<section id="filtros-de-busqueda-encontrar-lo-que-necesitas">
+<h3>Filtros de Búsqueda - Encontrar lo que necesitas<a class="headerlink" href="#filtros-de-busqueda-encontrar-lo-que-necesitas" title="Link to this heading">¶</a></h3>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Filtro por nombre - Búsqueda textual</p></li>
+<li><p>Filtro por descripción - Búsqueda en descripciones</p></li>
+<li><p>Filtro por estado - Activos, suspendidos, eliminados</p></li>
+<li><p>Búsqueda avanzada - Combinar múltiples criterios</p></li>
+<li><p>Limpiar filtros - Resetear búsqueda</p></li>
+</ul>
+<p><strong>Opciones de filtrado básicas:</strong></p>
+<ul class="simple">
+<li><p><strong>Nombre</strong>: Búsqueda parcial por nombre</p></li>
+<li><p><strong>Descripción</strong>: Búsqueda en descripciones</p></li>
+<li><p><strong>Ver suspendidos</strong>: Incluir grupos suspendidos</p></li>
+<li><p><strong>Ver eliminados</strong>: Incluir grupos eliminados</p></li>
+<li><p><strong>Combinaciones</strong>: Nombre + estado + descripción</p></li>
+</ul>
+<p><strong>Opciones de filtrado avanzadas:</strong></p>
+<ul class="simple">
+<li><p><strong>Nivel jerárquico</strong> - Filtrar por nivel específico</p></li>
+<li><p><strong>Organismo</strong> - Filtrar por organismo padre</p></li>
+<li><p><strong>Usuario por defecto</strong> - Buscar por usuario asignado</p></li>
+<li><p><strong>Fecha de creación</strong> - Filtrar por rango de fechas</p></li>
+</ul>
+</section>
+<section id="mapa-de-grupos-vista-de-arbol">
+<h3>Mapa de Grupos - Vista de árbol<a class="headerlink" href="#mapa-de-grupos-vista-de-arbol" title="Link to this heading">¶</a></h3>
+<p><strong>¿Qué es y para qué sirve?</strong></p>
+<p>Es una vista de árbol que te muestra toda la estructura organizacional de tu institución de manera visual.</p>
+<p><strong>Funcionalidades:</strong></p>
+<ul class="simple">
+<li><p>Visualización gráfica de la estructura organizacional</p></li>
+<li><p>Navegación interactiva por niveles</p></li>
+<li><p>Acciones directas desde el árbol</p></li>
+<li><p>Filtros para mostrar/ocultar elementos</p></li>
+</ul>
+<p><strong>Características del árbol:</strong></p>
+<ul class="simple">
+<li><p><strong>Nodos expandibles</strong> - Mostrar/ocultar subgrupos</p></li>
+<li><p><strong>Colores semánticos</strong> - Verde (activo), Rojo (eliminado), Gris (suspendido)</p></li>
+<li><p><strong>Contador de tareas</strong> - Muestra cuántas tareas tiene cada grupo</p></li>
+<li><p><strong>Acciones rápidas</strong> - Agregar, editar, eliminar desde el árbol</p></li>
+</ul>
+<p><strong>Información que ves en el árbol:</strong></p>
+<ul class="simple">
+<li><p>Nivel jerárquico - Posición en la estructura</p></li>
+<li><p>Ruta completa - Path completo en tooltips</p></li>
+<li><p>Organismo - A qué organismo pertenece</p></li>
+<li><p>Usuario por defecto - Quién se asigna automáticamente</p></li>
+</ul>
+<p><strong>Opciones de visualización:</strong></p>
+<ul class="simple">
+<li><p>Mostrar eliminados - Switch para incluir grupos eliminados</p></li>
+<li><p>Zoom y navegación - Controles para explorar el árbol</p></li>
+<li><p>Responsive - Se adapta a diferentes tamaños de pantalla</p></li>
+</ul>
+<p><strong>Acciones disponibles:</strong></p>
+<ul class="simple">
+<li><p>Agregar subgrupo - Crear grupo hijo directamente</p></li>
+<li><p>Editar grupo - Modificar datos del grupo</p></li>
+<li><p>Eliminar grupo - Marcar como eliminado</p></li>
+<li><p>Ver detalles - Información completa del grupo</p></li>
+</ul>
+</section>
+</section>
+<section id="flujos-de-trabajo-tipicos">
+<h2>Flujos de Trabajo Típicos<a class="headerlink" href="#flujos-de-trabajo-tipicos" title="Link to this heading">¶</a></h2>
+<section id="crear-nueva-estructura-organizacional">
+<h3>Crear Nueva Estructura Organizacional<a class="headerlink" href="#crear-nueva-estructura-organizacional" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Crear grupo base (organismo principal)</p></li>
+<li><p>Agregar áreas principales como grupos hijos</p></li>
+<li><p>Crear sub grupos dentro de cada área</p></li>
+<li><p>Asignar usuarios a cada grupo según responsabilidades</p></li>
+<li><p>Configurar usuarios por defecto para asignación automática</p></li>
+</ol>
+</section>
+<section id="reorganizar-estructura-existente">
+<h3>Reorganizar Estructura Existente<a class="headerlink" href="#reorganizar-estructura-existente" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Analizar jerarquía actual usando el mapa de grupos</p></li>
+<li><p>Crear nuevos grupos donde sea necesario</p></li>
+<li><p>Mover grupos entre padres (si está permitido)</p></li>
+<li><p>Reasignar usuarios según nueva estructura</p></li>
+<li><p>Validar integridad de la jerarquía</p></li>
+</ol>
+</section>
+<section id="gestionar-estados-de-grupos">
+<h3>Gestionar Estados de Grupos<a class="headerlink" href="#gestionar-estados-de-grupos" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Suspender grupos temporalmente cuando no están operativos</p></li>
+<li><p>Reactivar grupos cuando vuelven a funcionar</p></li>
+<li><p>Eliminar grupos obsoletos (con validaciones)</p></li>
+<li><p>Restaurar grupos eliminados accidentalmente</p></li>
+</ol>
+</section>
+<section id="asignar-tareas-a-grupos">
+<h3>Asignar Tareas a Grupos<a class="headerlink" href="#asignar-tareas-a-grupos" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Seleccionar grupo apropiado para la tarea</p></li>
+<li><p>Verificar usuarios disponibles en el grupo</p></li>
+<li><p>Asignar tarea al grupo completo o usuario específico</p></li>
+<li><p>Monitorear distribución de carga de trabajo</p></li>
+</ol>
+</section>
+</section>
+<section id="consideraciones-importantes">
+<h2>Consideraciones Importantes<a class="headerlink" href="#consideraciones-importantes" title="Link to this heading">¶</a></h2>
+<section id="validaciones-de-seguridad-que-te-protegen">
+<h3>Validaciones de Seguridad que te protegen<a class="headerlink" href="#validaciones-de-seguridad-que-te-protegen" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Jerarquía coherente</strong> - No se pueden crear ciclos en la estructura</p></li>
+<li><p><strong>Integridad de datos</strong> - No se pueden eliminar grupos con dependencias</p></li>
+<li><p><strong>Permisos de usuario</strong> - Solo usuarios autorizados pueden modificar grupos</p></li>
+<li><p><strong>Auditoría completa</strong> - Se registra quién y cuándo realizó cambios</p></li>
+</ul>
+<p><strong>Validaciones adicionales:</strong></p>
+<ul class="simple">
+<li><p>Nivel máximo - No se pueden crear grupos más allá de cierto nivel</p></li>
+<li><p>Organismo único - Cada grupo pertenece a un solo organismo</p></li>
+<li><p>Usuario por defecto válido - Debe ser un usuario activo del sistema</p></li>
+</ul>
+</section>
+<section id="comportamiento-del-sistema-que-facilita-tu-trabajo">
+<h3>Comportamiento del Sistema que facilita tu trabajo<a class="headerlink" href="#comportamiento-del-sistema-que-facilita-tu-trabajo" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Eliminación lógica</strong> - Los grupos no se borran físicamente</p></li>
+<li><p><strong>Cascada de estados</strong> - Al suspender un grupo, se pueden afectar subgrupos</p></li>
+<li><p><strong>Herencia de permisos</strong> - Los subgrupos pueden heredar permisos del padre</p></li>
+<li><p><strong>Protección de datos</strong> - No se pueden eliminar grupos con tareas activas</p></li>
+</ul>
+<p><strong>Comportamiento adicional:</strong></p>
+<ul class="simple">
+<li><p>Cálculo automático de level - Se actualiza al cambiar la jerarquía</p></li>
+<li><p>Herencia de organismo - Los subgrupos heredan el organismo del padre</p></li>
+<li><p>Validación de usuario por defecto - Debe pertenecer al grupo o ser administrador</p></li>
+</ul>
+</section>
+<section id="rendimiento-optimizado-para-tu-comodidad">
+<h3>Rendimiento optimizado para tu comodidad<a class="headerlink" href="#rendimiento-optimizado-para-tu-comodidad" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Paginación inteligente</strong> - 10 grupos por página por defecto</p></li>
+<li><p><strong>Búsqueda optimizada</strong> - Filtros en tiempo real</p></li>
+<li><p><strong>Carga diferida</strong> - El árbol se expande bajo demanda</p></li>
+<li><p><strong>Cache jerárquico</strong> - Estructura organizacional en memoria</p></li>
+</ul>
+</section>
+</section>
+<section id="interfaz-de-usuario">
+<h2>Interfaz de Usuario<a class="headerlink" href="#interfaz-de-usuario" title="Link to this heading">¶</a></h2>
+<section id="elementos-visuales-que-facilitan-la-navegacion">
+<h3>Elementos Visuales que facilitan la navegación<a class="headerlink" href="#elementos-visuales-que-facilitan-la-navegacion" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Avatares</strong> - Representación gráfica de cada grupo</p></li>
+<li><p><strong>Breadcrumbs</strong> - Navegación jerárquica clara</p></li>
+<li><p><strong>Chips de estado</strong> - Indicadores visuales de estado</p></li>
+<li><p><strong>Colores semánticos</strong> - Verde (activo), Amarillo (suspendido), Rojo (eliminado)</p></li>
+<li><p><strong>Iconos intuitivos</strong> - Acciones claramente identificadas</p></li>
+</ul>
+</section>
+<section id="accesibilidad-para-todos-los-usuarios">
+<h3>Accesibilidad para todos los usuarios<a class="headerlink" href="#accesibilidad-para-todos-los-usuarios" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Navegación por teclado</strong> - Todas las acciones accesibles</p></li>
+<li><p><strong>Contraste adecuado</strong> - Cumple estándares WCAG</p></li>
+<li><p><strong>Textos descriptivos</strong> - Labels claros y comprensibles</p></li>
+<li><p><strong>Tooltips informativos</strong> - Ayuda contextual en hover</p></li>
+</ul>
+</section>
+</section>
+<section id="casos-de-uso-comunes">
+<h2>Casos de Uso Comunes<a class="headerlink" href="#casos-de-uso-comunes" title="Link to this heading">¶</a></h2>
+<section id="administrador-del-sistema">
+<h3>Administrador del Sistema<a class="headerlink" href="#administrador-del-sistema" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Crear estructura organizacional completa</p></li>
+<li><p>Gestionar jerarquías de grupos y subgrupos</p></li>
+<li><p>Asignar usuarios a grupos apropiados</p></li>
+<li><p>Monitorear estados de grupos y usuarios</p></li>
+<li><p>Auditar cambios en la estructura organizacional</p></li>
+</ul>
+</section>
+<section id="lider-de-equipo">
+<h3>Líder de Equipo<a class="headerlink" href="#lider-de-equipo" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Ver estructura de su área de responsabilidad</p></li>
+<li><p>Gestionar subgrupos bajo su control</p></li>
+<li><p>Asignar usuarios a grupos específicos</p></li>
+<li><p>Monitorear carga de trabajo por grupo</p></li>
+</ul>
+</section>
+<section id="usuario-final">
+<h3>Usuario Final<a class="headerlink" href="#usuario-final" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Ver grupos disponibles para asignación de tareas</p></li>
+<li><p>Entender jerarquía organizacional</p></li>
+<li><p>Identificar grupos activos vs suspendidos</p></li>
+<li><p>Comprender estructura de responsabilidades</p></li>
+</ul>
+</section>
+<section id="gestion-de-grupos-en-distintas-situaciones">
+<h3>Gestión de Grupos en distintas situaciones<a class="headerlink" href="#gestion-de-grupos-en-distintas-situaciones" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Suspender grupos temporalmente durante reorganizaciones</p></li>
+<li><p>Reactivar grupos cuando se resuelven problemas</p></li>
+<li><p>Restaurar estructura después de cambios accidentales</p></li>
+<li><p>Auditar impactos de cambios en la organización</p></li>
+</ul>
+</section>
+</section>
+<section id="consejos-utiles-para-el-usuario">
+<h2>Consejos útiles para el usuario<a class="headerlink" href="#consejos-utiles-para-el-usuario" title="Link to this heading">¶</a></h2>
+<p><strong>Antes de eliminar un grupo:</strong></p>
+<ul class="simple">
+<li><p>Verifica que no tenga subgrupos</p></li>
+<li><p>Verifica que no tenga tareas asignadas</p></li>
+<li><p>Considera suspender en lugar de eliminar</p></li>
+</ul>
+<p><strong>Al crear grupos:</strong></p>
+<ul class="simple">
+<li><p>Usa nombres descriptivos - «Departamento Civil» en lugar de «DC»</p></li>
+<li><p>Agrega descripciones para que otros entiendan su función</p></li>
+<li><p>Asigna responsables para que las tareas se asignen automáticamente</p></li>
+</ul>
+<p><strong>Al buscar grupos:</strong></p>
+<ul class="simple">
+<li><p>Usa filtros específicos para encontrar lo que necesitas</p></li>
+<li><p>Combina filtros para búsquedas más precisas</p></li>
+<li><p>Limpia los filtros cuando termines</p></li>
+</ul>
+<section id="necesitas-ayuda">
+<h3>¿Necesitas ayuda?<a class="headerlink" href="#necesitas-ayuda" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Los mensajes de error te explican qué está mal</p></li>
+<li><p>Las validaciones te previenen de cometer errores</p></li>
+<li><p>Los tooltips te dan información adicional</p></li>
+<li><p>Los colores te indican el estado de cada grupo</p></li>
+</ul>
+<p>Esta documentación proporciona una guía completa para entender y utilizar el módulo de Grupos de manera efectiva, combinando información técnica con orientación práctica para el usuario.</p>
 </section>
 </section>
 </section>
@@ -200,11 +537,14 @@
 <li class="toctree-l1"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alertas.html">Alertas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles y Casos de Uso</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Grupos</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#introduccion-general">1. Introducción general</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#caracteristicas-principales">2. Características principales</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#casos-de-uso-frecuentes">3. Casos de uso frecuentes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#uso-del-servicio">4. Uso del servicio</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gestión de Grupos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#que-es-y-para-que-sirve">¿Qué es y para qué sirve?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#componentes-principales">Componentes Principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flujos-de-trabajo-tipicos">Flujos de Trabajo Típicos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#consideraciones-importantes">Consideraciones Importantes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interfaz-de-usuario">Interfaz de Usuario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#casos-de-uso-comunes">Casos de Uso Comunes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#consejos-utiles-para-el-usuario">Consejos útiles para el usuario</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="asignacion_usuarios_tareas.html">Asignación de Tareas</a></li>
@@ -213,6 +553,16 @@
 <li class="toctree-l1"><a class="reference internal" href="notas.html">Lógica de las Notas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bandeja_principal.html">Lista de Tareas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="estado_tareas.html">Estado de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="creacion_tarea.html">Creación de Tarea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contenido_multimedia.html">Contenido de Multimedia Tarea/Expediente</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_anidadas.html">Tareas Anidadas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_automaticas.html">Tareas Automáticas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_fechas_intermedias.html">Tareas con Fechas Intermedias y Distintas Alertas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_personales.html">Vista de Tareas Personales</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_programadas.html">Tareas Programadas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_recurrentes.html">Tareas Recurrentes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visibilidad_externa.html">Visibilidad Externa Tarea</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tareas_tipo_subtipo.html">Tipos y Subtipos de Tareas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="referencia_api.html">Referencia de la API</a></li>
 </ul>
 
