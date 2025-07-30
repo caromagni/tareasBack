@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="es" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Roles y Casos de Uso &#8212; documentación de tareas - </title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=b20b3661" />
+    <script src="../_static/documentation_options.js?v=e2bb6099"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=d190bf04"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="next" title="Gestión de Organización" href="../organizacion.html" />
+    <link rel="prev" title="Arquitectura" href="arquitectura.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="roles-y-casos-de-uso">
+<h1>Roles y Casos de Uso<a class="headerlink" href="#roles-y-casos-de-uso" title="Link to this heading">¶</a></h1>
+<p>Se deberán configurar:</p>
+<ul class="simple">
+<li><p>Usuarios del Sistema</p></li>
+<li><p>Roles del Sistema</p></li>
+<li><p>Casos de Uso del Sistema</p></li>
+<li><p>Casos de Uso asociados a cada Rol</p></li>
+<li><p>Roles asociados al usuario</p></li>
+</ul>
+<section id="descripcion">
+<h2>Descripción:<a class="headerlink" href="#descripcion" title="Link to this heading">¶</a></h2>
+<p>Un usuario deberá tener por lo menos un rol en el Sistema de Tareas. Si el mismo tiene más de un rol, al acceder al sistema seleccionará con qué rol trabajará. Por ejemplo, puede tener un rol Juez y Operador.</p>
+<p>Cada funcionalidad del sistema corresponde a uno o más Casos de Uso.</p>
+<p>Cada rol de usuario está asociado a diferentes Casos de Uso, según los permisos que se le quieran configurar a ese rol.</p>
+<p>Entonces cada vez que el usuario accede a cualquier funcionalidad del sistema, se realiza un control por usuario y rol constatando que, según el rol con el que ingresa al sistema, tenga acceso a dicha funcionalidad. Por ejemplo: Crear Tarea, Crear Grupo, Consultar Tareas, etc.</p>
+<p>Los roles se administran en el sistema P-USHER y son importados al Sistema de Tareas en un primer inicio. En los ingresos siguientes de ese usuario se controla el rol y los casos de uso del usuario en el Sistema de Tareas. Los mismos tienen una fecha de vencimiento para estar siempre alineados con los roles ingresados en P-USHER.</p>
+<p>En caso que alguno de los registros de roles-casos de uso se encuentre vencido, se importará nuevamente desde P-USHER y se actualizará el registro del usuario en el Sistema de Tareas.</p>
+</section>
+<section id="roles-definidos">
+<h2>Roles definidos<a class="headerlink" href="#roles-definidos" title="Link to this heading">¶</a></h2>
+<p>El sistema de tareas define cuatro roles de usuario jerárquicos, cada uno con distintos niveles de permisos según su responsabilidad y el alcance asignado dentro del sistema.</p>
+<section id="superadministrador">
+<h3><strong>Superadministrador</strong><a class="headerlink" href="#superadministrador" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Tiene acceso completo a todo el sistema, sin restricciones.</p></li>
+<li><p>Puede gestionar cualquier entidad: tareas, usuarios, grupos, tipos, notas, etiquetas, etc.</p></li>
+<li><p>No está limitado por grupo o región.</p></li>
+</ul>
+</section>
+<section id="administrador">
+<h3><strong>Administrador</strong><a class="headerlink" href="#administrador" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Administrador regional, con acceso total pero limitado a una región específica.</p></li>
+<li><p>La región se define a través del <strong>grupo base</strong>, que actúa como raíz del árbol jerárquico de grupos.</p></li>
+<li><p>Puede gestionar todo lo que esté dentro del grupo base y sus grupos descendientes.</p></li>
+</ul>
+</section>
+<section id="operador">
+<h3><strong>Operador</strong><a class="headerlink" href="#operador" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Usuario común del sistema con permisos acotados.</p></li>
+<li><p>Puede realizar las siguientes acciones dentro del grupo al que pertenece y sus descendientes:
+- Leer tareas
+- Crear tareas
+- Editar tareas
+- Mover tareas entre grupos
+- Agregar notas a tareas
+- Cambiar estado de tareas</p></li>
+</ul>
+</section>
+<section id="lector">
+<h3><strong>Lector</strong><a class="headerlink" href="#lector" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Solo puede visualizar tareas dentro del grupo asignado y su jerarquía descendiente.</p></li>
+<li><p>No tiene permisos para modificar ni crear elementos.</p></li>
+</ul>
+</section>
+</section>
+<section id="casos-de-uso-del-sistema">
+<h2>Casos de Uso del Sistema<a class="headerlink" href="#casos-de-uso-del-sistema" title="Link to this heading">¶</a></h2>
+<p>A continuación, se listan todos los casos de uso que pueden asignarse a los distintos roles:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">USE_CASES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">VER_GRUPOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-grupo&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_ETIQUETAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-label&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_NOTAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_TAREAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_TIPOS_NOTA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-tipo-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_TIPOS_TAREA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-tipo-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">VER_USUARIOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;consultar-usuario&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_GRUPOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-grupo&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_ETIQUETAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-label&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_NOTAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_TAREAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_TIPOS_NOTA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-tipo-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_TIPOS_TAREA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-tipo-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CREAR_USUARIOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;crear-usuario&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_GRUPOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-grupo&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_ETIQUETAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-label&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_NOTAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_TAREAS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_TIPOS_NOTA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-tipo-nota&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_TIPOS_TAREA</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-tipo-tarea&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">MODIFICAR_USUARIOS</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;modificar-usuario&#39;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="asignacion-de-casos-de-uso-por-rol">
+<h2>Asignación de Casos de Uso por Rol<a class="headerlink" href="#asignacion-de-casos-de-uso-por-rol" title="Link to this heading">¶</a></h2>
+</section>
+<section id="notas-adicionales">
+<h2>Notas adicionales<a class="headerlink" href="#notas-adicionales" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>El acceso a tareas y grupos siempre se limita al grupo asignado y sus descendientes.</p></li>
+<li><p>Los permisos deben aplicarse respetando la jerarquía de grupos.</p></li>
+</ul>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Editado por M.D.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">tareas</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
+<p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../fundamentos.html">Fundamentos del Sistema</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduccion.html">Introducción</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arquitectura.html">Arquitectura</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Roles y Casos de Uso</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../organizacion.html">Gestión de Organización</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tareas.html">Gestión de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tipos.html">Tipos de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../soporte.html">Elementos de Soporte</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaz.html">Interfaz de Usuario</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../referencia.html">Referencia Técnica</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../fundamentos.html">Fundamentos del Sistema</a><ul>
+      <li>Previous: <a href="arquitectura.html" title="capítulo anterior">Arquitectura</a></li>
+      <li>Next: <a href="../organizacion.html" title="próximo capítulo">Gestión de Organización</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/modulos/roles.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

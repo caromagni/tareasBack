@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="es" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Referencia de la API &#8212; documentación de tareas - </title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=b20b3661" />
+    <script src="../_static/documentation_options.js?v=e2bb6099"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=d190bf04"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="prev" title="Referencia Técnica" href="../referencia.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="referencia-de-la-api">
+<h1>Referencia de la API<a class="headerlink" href="#referencia-de-la-api" title="Link to this heading">¶</a></h1>
+<p>Esta sección proporciona una descripción general de la API para el sistema backend de Tareas. La documentación detallada de la API, que incluye todos los endpoints disponibles, formatos de solicitud y respuesta, y requisitos de autenticación, está disponible a través de nuestra interfaz de Swagger.</p>
+<section id="documentacion-de-swagger">
+<h2>Documentación de Swagger<a class="headerlink" href="#documentacion-de-swagger" title="Link to this heading">¶</a></h2>
+<p>La referencia completa de la API es accesible a través de nuestra página de Swagger, donde puedes explorar y probar cada endpoint de manera interactiva. Swagger proporciona información actualizada sobre todos los endpoints, los parámetros requeridos y las estructuras de respuesta.</p>
+<ul class="simple">
+<li><p><strong>URL de Swagger en entorno de desarrollo:</strong>
+<code class="docutils literal notranslate"><span class="pre">https://dev-backend.tareas.pjm.gob.ar/docs</span></code></p></li>
+<li><p><strong>URL de Swagger en entorno productivo:</strong>
+<code class="docutils literal notranslate"><span class="pre">https://backend.tareas.pjm.gob.ar/docs</span></code></p></li>
+</ul>
+<p>Visita el enlace anterior para acceder a la información detallada de la API y probar los endpoints directamente.</p>
+</section>
+<section id="autenticacion">
+<h2>Autenticación<a class="headerlink" href="#autenticacion" title="Link to this heading">¶</a></h2>
+<p>La API ofrece <strong>dos</strong> métodos de autenticación:</p>
+<ol class="arabic">
+<li><p><strong>JWT (JSON Web Tokens)</strong>
+Todas las solicitudes de API pueden requerir autenticación usando JWT.
+Consulta la documentación de Swagger para obtener detalles sobre la autenticación JWT y ejemplos de solicitudes.</p></li>
+<li><p><strong>API Keys</strong>
+El backend también soporta autenticación mediante <strong>API Keys</strong>. Para utilizar este método se deben incluir <strong>dos encabezados</strong> (headers) en cada solicitud:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x-api-key</span></code>
+Debe contener la clave API provista oportunamente por un administrador del sistema <em>«pusher»</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x-api-system</span></code>
+Debe contener el nombre del servicio que realiza la llamada, también provisto por el administrador de <em>«pusher»</em>.</p></li>
+</ul>
+<p>Es responsabilidad del cliente que consume la API mantener seguras estas credenciales y renovarlas en caso necesario.</p>
+</li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">tareas</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
+<p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../fundamentos.html">Fundamentos del Sistema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../organizacion.html">Gestión de Organización</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tareas.html">Gestión de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tipos.html">Tipos de Tareas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../soporte.html">Elementos de Soporte</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaz.html">Interfaz de Usuario</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../referencia.html">Referencia Técnica</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Referencia de la API</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../referencia.html">Referencia Técnica</a><ul>
+      <li>Previous: <a href="../referencia.html" title="capítulo anterior">Referencia Técnica</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024 Direccion de Informatica SCJ - Martin Diaz, Silvia Imperiale, Mauro Bonadeo, Carolina Magni.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/modulos/referencia_api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
