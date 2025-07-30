@@ -142,3 +142,8 @@ start.sh
 #instala_sops.sh
 
 app/ai_temp_data/*
+
+_build/
+
+
+
