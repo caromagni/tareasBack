@@ -144,9 +144,9 @@ def create_app():
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
     
     # Initialize the SQLAlchemy engine and session
-    print("##############################")
+    print("#####################")
     print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
-    print("##############################")
+    print("######################")
       # Create tables based on the models defined in Base
     db.init_app(app)
     
