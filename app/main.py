@@ -118,7 +118,9 @@ def create_app():
             'name': 'x-user-role'
         }    
     }
-   
+    
+    app.config['LOG_LEVEL'] = Config.LOG_LEVEL
+
     app.config['DEBUG'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
@@ -142,9 +144,9 @@ def create_app():
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
     
     # Initialize the SQLAlchemy engine and session
-    print("#####################")
+    print("##############################")
     print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
-    print("#####################")
+    print("##############################")
       # Create tables based on the models defined in Base
     db.init_app(app)
     

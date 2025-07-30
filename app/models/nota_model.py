@@ -13,9 +13,15 @@ import common.error_handling as error_handling
 def get_all_tipo_nota(page=1, per_page=10):
     print("get_tipo_notas - ", page, "-", per_page)
     
-    todo = db.session.query(TipoNota).all()
-    total= len(todo)
-    res = db.session.query(TipoNota).order_by(TipoNota.nombre).offset((page-1)*per_page).limit(per_page).all()
+    # Create base query
+    query = db.session.query(TipoNota).filter(TipoNota.eliminado == False)
+    
+    # Get total count efficiently
+    total = query.count()
+    
+    # Get paginated results
+    res = query.order_by(TipoNota.nombre).offset((page-1)*per_page).limit(per_page).all()
+    
     return res, total
 
 def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', habilitado=True, eliminado=False):
@@ -193,9 +199,8 @@ def update_nota(id='', **kwargs):
 
 def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=None, eliminado=None):
 
-    query = db.session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
+    query = db.session.query(Nota).filter(Nota.eliminado==False)
 
-    print(query.count())
     if titulo != '':
         query = query.filter(Nota.titulo.ilike(f'%{titulo}%'))
 
@@ -203,6 +208,7 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
         query = query.filter(Nota.id_tipo_nota== id_tipo_nota)
 
     if id_tarea is not None:
+        print(f"Filtrando por id_tarea: {id_tarea}")
         query = query.filter(Nota.id_tarea== id_tarea)
 
     if id_user_creacion is not None:
@@ -218,6 +224,36 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
     
     # return result
     return result, total
+# def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=None, eliminado=None):
+
+#     query = db.session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
+
+#     print(query.count())
+#     if titulo != '':
+#         query = query.filter(Nota.titulo.ilike(f'%{titulo}%'))
+
+#     if id_tipo_nota is not None:
+#         query = query.filter(Nota.id_tipo_nota== id_tipo_nota)
+
+#     if id_tarea is not None:
+#         print(f"Filtrando por id_tarea: {id_tarea}")
+#         query = query.filter(Nota.id_tarea== id_tarea)
+
+#     if id_user_creacion is not None:
+#         query = query.filter(Nota.id_user_creacion == id_user_creacion)
+
+#     if eliminado is not None:
+#         query = query.filter(Nota.eliminado == eliminado)
+
+#     #muestra datos
+#     total= len(query.all()) 
+#     print("Total de notas encontradas:", total)
+#     print("Query:", query)
+
+#     result = query.order_by(Nota.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
+    
+#     # return result
+#     return result, total
 
 
 def get_nota_by_id(id):    
