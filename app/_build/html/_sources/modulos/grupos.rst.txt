@@ -22,19 +22,19 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 **Navegación Rápida:**
 
-- `Componentes Principales`_ - Tabla principal, crear, editar, eliminar grupos
-- `Flujos de Trabajo Típicos`_ - Casos de uso comunes
-- `Consideraciones Importantes`_ - Validaciones y comportamiento del sistema
-- `Interfaz de Usuario`_ - Elementos visuales y accesibilidad
-- `Casos de Uso Comunes`_ - Por tipo de usuario
-- `Consejos útiles`_ - Recomendaciones prácticas
-- `¿Necesitas ayuda?`_ - Soporte y mensajes del sistema
+1. `Componentes Principales`_ - Tabla principal, crear, editar, eliminar grupos
+2. `Flujos de Trabajo Típicos`_ - Casos de uso comunes
+3. `Consideraciones Importantes`_ - Validaciones y comportamiento del sistema
+4. `Interfaz de Usuario`_ - Elementos visuales y accesibilidad
+5. `Casos de Uso Comunes`_ - Por tipo de usuario
+6. `Consejos útiles`_ - Recomendaciones prácticas
+7. `¿Necesitas ayuda?`_ - Soporte y mensajes del sistema
 
-Componentes Principales
------------------------
+1. Componentes Principales
+--------------------------
 
-Tabla Principal - ¿Qué ves aquí?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.1. Tabla Principal - ¿Qué ves aquí?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades que tienes disponibles:**
 
@@ -67,8 +67,8 @@ Tabla Principal - ¿Qué ves aquí?
 - Notificaciones de éxito/error
 - Visualización jerárquica con breadcrumbs
 
-Crear Nuevo Grupo - ¿Cómo hacerlo?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.2. Crear Nuevo Grupo - ¿Cómo hacerlo?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **¿Qué puedes hacer aquí?**
 
@@ -107,8 +107,8 @@ Crear Nuevo Grupo - ¿Cómo hacerlo?
 - Estructura jerárquica válida
 - Usuario asignado por defecto (un grupo puede o no tener un responsable)
 
-Editar Grupo Existente - ¿Qué puedes cambiar?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.3. Editar Grupo Existente - ¿Qué puedes cambiar?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades disponibles:**
 
@@ -147,8 +147,8 @@ Editar Grupo Existente - ¿Qué puedes cambiar?
    - Solo si hay modificaciones reales
    - Confirmación antes de guardar
 
-Eliminar Grupo
-^^^^^^^^^^^^^
+1.4. Eliminar Grupo
+^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -170,8 +170,8 @@ Eliminar Grupo
 4. Grupo se marca como eliminado
 5. Desaparece de la lista principal (pero se puede restaurar)
 
-Suspender Grupo - ¿Cuándo usar?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.5. Suspender Grupo - ¿Cuándo usar?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -195,8 +195,8 @@ Suspender Grupo - ¿Cuándo usar?
 4. Cambia de color en la tabla (amarillo)
 5. Se puede reactivar desde la misma tabla
 
-Reactivar Grupo Suspendido
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.6. Reactivar Grupo Suspendido
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -211,8 +211,8 @@ Reactivar Grupo Suspendido
 3. Confirmar acción
 4. Grupo vuelve a estado activo
 
-Restaurar Grupo Eliminado
-^^^^^^^^^^^^^^^^^^^^^^^^^
+1.7. Restaurar Grupo Eliminado
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -228,8 +228,8 @@ Restaurar Grupo Eliminado
 4. Confirmar acción
 5. Grupo vuelve a estar activo
 
-Ver Detalles del Grupo - Información completa
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.8. Ver Detalles del Grupo - Información completa
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -249,8 +249,8 @@ Ver Detalles del Grupo - Información completa
 - Usuario asignado por defecto - Quién se asigna automáticamente
 - Usuarios asignados al grupo
 
-Filtros de Búsqueda - Encontrar lo que necesitas
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.9. Filtros de Búsqueda - Encontrar lo que necesitas
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
 
@@ -275,8 +275,8 @@ Filtros de Búsqueda - Encontrar lo que necesitas
 - **Usuario por defecto** - Buscar por usuario asignado
 - **Fecha de creación** - Filtrar por rango de fechas
 
-Mapa de Grupos - Vista de árbol
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.10. Mapa de Grupos - Vista de árbol
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **¿Qué es y para qué sirve?**
 
@@ -316,11 +316,11 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 - Eliminar grupo - Marcar como eliminado
 - Ver detalles - Información completa del grupo
 
-Flujos de Trabajo Típicos
--------------------------
+2. Flujos de Trabajo Típicos
+------------------------------
 
-Crear Nueva Estructura Organizacional
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.1. Crear Nueva Estructura Organizacional
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Crear grupo base (organismo principal)
 2. Agregar áreas principales como grupos hijos
@@ -328,8 +328,8 @@ Crear Nueva Estructura Organizacional
 4. Asignar usuarios a cada grupo según responsabilidades
 5. Configurar usuarios por defecto para asignación automática
 
-Reorganizar Estructura Existente
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.2. Reorganizar Estructura Existente
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Analizar jerarquía actual usando el mapa de grupos
 2. Crear nuevos grupos donde sea necesario
@@ -337,27 +337,27 @@ Reorganizar Estructura Existente
 4. Reasignar usuarios según nueva estructura
 5. Validar integridad de la jerarquía
 
-Gestionar Estados de Grupos
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.3. Gestionar Estados de Grupos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Suspender grupos temporalmente cuando no están operativos
 2. Reactivar grupos cuando vuelven a funcionar
 3. Eliminar grupos obsoletos (con validaciones)
 4. Restaurar grupos eliminados accidentalmente
 
-Asignar Tareas a Grupos
-^^^^^^^^^^^^^^^^^^^^^^^
+2.4. Asignar Tareas a Grupos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Seleccionar grupo apropiado para la tarea
 2. Verificar usuarios disponibles en el grupo
 3. Asignar tarea al grupo completo o usuario específico
 4. Monitorear distribución de carga de trabajo
 
-Consideraciones Importantes
---------------------------
+3. Consideraciones Importantes
+------------------------------
 
-Validaciones de Seguridad que te protegen
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.1. Validaciones de Seguridad que te protegen
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Jerarquía coherente** - No se pueden crear ciclos en la estructura
 - **Integridad de datos** - No se pueden eliminar grupos con dependencias
@@ -370,8 +370,8 @@ Validaciones de Seguridad que te protegen
 - Organismo único - Cada grupo pertenece a un solo organismo
 - Usuario por defecto válido - Debe ser un usuario activo del sistema
 
-Comportamiento del Sistema que facilita tu trabajo
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.2. Comportamiento del Sistema que facilita tu trabajo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Eliminación lógica** - Los grupos no se borran físicamente
 - **Cascada de estados** - Al suspender un grupo, se pueden afectar subgrupos
@@ -384,19 +384,19 @@ Comportamiento del Sistema que facilita tu trabajo
 - Herencia de organismo - Los subgrupos heredan el organismo del padre
 - Validación de usuario por defecto - Debe pertenecer al grupo o ser administrador
 
-Rendimiento optimizado para tu comodidad
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.3. Rendimiento optimizado para tu comodidad
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Paginación inteligente** - 10 grupos por página por defecto
 - **Búsqueda optimizada** - Filtros en tiempo real
 - **Carga diferida** - El árbol se expande bajo demanda
 - **Cache jerárquico** - Estructura organizacional en memoria
 
-Interfaz de Usuario
--------------------
+4. Interfaz de Usuario
+-----------------------
 
-Elementos Visuales que facilitan la navegación
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.1. Elementos Visuales que facilitan la navegación
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Avatares** - Representación gráfica de cada grupo
 - **Breadcrumbs** - Navegación jerárquica clara
@@ -404,19 +404,19 @@ Elementos Visuales que facilitan la navegación
 - **Colores semánticos** - Verde (activo), Amarillo (suspendido), Rojo (eliminado)
 - **Iconos intuitivos** - Acciones claramente identificadas
 
-Accesibilidad para todos los usuarios
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.2. Accesibilidad para todos los usuarios
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Navegación por teclado** - Todas las acciones accesibles
 - **Contraste adecuado** - Cumple estándares WCAG
 - **Textos descriptivos** - Labels claros y comprensibles
 - **Tooltips informativos** - Ayuda contextual en hover
 
-Casos de Uso Comunes
---------------------
+5. Casos de Uso Comunes
+------------------------
 
-Administrador del Sistema
-^^^^^^^^^^^^^^^^^^^^^^^^
+5.1. Administrador del Sistema
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Crear estructura organizacional completa
 - Gestionar jerarquías de grupos y subgrupos
@@ -424,32 +424,32 @@ Administrador del Sistema
 - Monitorear estados de grupos y usuarios
 - Auditar cambios en la estructura organizacional
 
-Líder de Equipo
-^^^^^^^^^^^^^^
+5.2. Líder de Equipo
+^^^^^^^^^^^^^^^^^^^^
 
 - Ver estructura de su área de responsabilidad
 - Gestionar subgrupos bajo su control
 - Asignar usuarios a grupos específicos
 - Monitorear carga de trabajo por grupo
 
-Usuario Final
-^^^^^^^^^^^^
+5.3. Usuario Final
+^^^^^^^^^^^^^^^^^
 
 - Ver grupos disponibles para asignación de tareas
 - Entender jerarquía organizacional
 - Identificar grupos activos vs suspendidos
 - Comprender estructura de responsabilidades
 
-Gestión de Grupos en distintas situaciones
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5.4. Gestión de Grupos en distintas situaciones
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Suspender grupos temporalmente durante reorganizaciones
 - Reactivar grupos cuando se resuelven problemas
 - Restaurar estructura después de cambios accidentales
 - Auditar impactos de cambios en la organización
 
-Consejos útiles para el usuario
-------------------------------
+6. Consejos útiles para el usuario
+----------------------------------
 
 **Antes de eliminar un grupo:**
 
@@ -469,8 +469,8 @@ Consejos útiles para el usuario
 - Combina filtros para búsquedas más precisas
 - Limpia los filtros cuando termines
 
-¿Necesitas ayuda?
-^^^^^^^^^^^^^^^^^
+7. ¿Necesitas ayuda?
+---------------------
 
 - Los mensajes de error te explican qué está mal
 - Las validaciones te previenen de cometer errores
