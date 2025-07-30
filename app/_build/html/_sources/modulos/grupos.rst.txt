@@ -13,9 +13,22 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 **Grupo Base**: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.
 
+Índice de Contenidos
+--------------------
+
 .. contents::
    :local:
    :depth: 2
+
+**Navegación Rápida:**
+
+- `Componentes Principales`_ - Tabla principal, crear, editar, eliminar grupos
+- `Flujos de Trabajo Típicos`_ - Casos de uso comunes
+- `Consideraciones Importantes`_ - Validaciones y comportamiento del sistema
+- `Interfaz de Usuario`_ - Elementos visuales y accesibilidad
+- `Casos de Uso Comunes`_ - Por tipo de usuario
+- `Consejos útiles`_ - Recomendaciones prácticas
+- `¿Necesitas ayuda?`_ - Soporte y mensajes del sistema
 
 Componentes Principales
 -----------------------
