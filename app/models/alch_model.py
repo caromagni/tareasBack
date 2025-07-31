@@ -160,6 +160,17 @@ class ExpedienteExt(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
 
+class URL(Base):
+    __tablename__ = 'url'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tarea = Column(UUID)
+    descripcion = Column(String)
+    url= Column(String, nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    
 class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}

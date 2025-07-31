@@ -633,6 +633,7 @@ class TareaIn(Schema):
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ), default=1)
     url = String()
+    url_descripcion = String()
 
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
