@@ -64,9 +64,11 @@ def get_grupo(query_data: dict):
         nombre = request.args.get('nombre')
         fecha_desde = request.args.get('fecha_desde')
         fecha_hasta = request.args.get('fecha_hasta')
+        id_dominio = request.args.get('id_dominio')
+        id_organismo = request.args.get('id_organismo')
 
-        res, total = grupo_model.get_all_grupos_nivel(username, page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido, todos)
-        
+        res, total = grupo_model.get_all_grupos_nivel(username, page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido, todos, id_dominio, id_organismo)
+
         data = {
                 "count": total,
                 "data": schema.GetGroupOut().dump(res, many=True)
@@ -97,9 +99,11 @@ def get_grupo_detalle(query_data: dict):
         suspendido = request.args.get('suspendido')
         fecha_desde=request.args.get('fecha_desde')
         fecha_hasta=request.args.get('fecha_hasta')
+        id_dominio = request.args.get('id_dominio')
+        id_organismo = request.args.get('id_organismo')
 
-        res, cant=grupo_model.get_all_grupos_detalle(page,per_page, nombre, eliminado, suspendido, fecha_desde, fecha_hasta)
-        
+        res, cant=grupo_model.get_all_grupos_detalle(page,per_page, nombre, eliminado, suspendido, fecha_desde, fecha_hasta, id_dominio, id_organismo)
+
         data = {
                 "count": cant,
                 "data": schema.GroupAllOut().dump(res, many=True)

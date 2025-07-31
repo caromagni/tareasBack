@@ -565,7 +565,6 @@ def post_tarea(json_data: dict):
         username = g.get('username')
         type_header = g.get('type')
         
-        
         if type_header == 'api_key':
             logger.info("API KEY ORIGIN")
             res = tarea_model.insert_tarea(**json_data)
@@ -576,7 +575,7 @@ def post_tarea(json_data: dict):
             else:
                 #Esto es para probar sin header - no debería pasar - sacarlo en produccion
                 logger.info("NO HEADER ORIGIN")
-                raise exceptions.ValidationError(800, "No tiene permisos para acceder a la API")
+                raise exceptions.ValidationError(800, "No tiene permisos  para acceder a la API")
                 #res = insert_tarea(**json_data)    
       
         if res is None:

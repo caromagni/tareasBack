@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
-from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions
 import common.utils as utils
@@ -117,7 +117,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     return tareas_vencer, total
 
 
-def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None):
     
     print("##############Validaciones Insert de Tarea################")
     id_grupo=None
@@ -284,6 +284,19 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     )
 
     db.session.add(nueva_tarea) 
+
+    if url is not None and url.strip() != "":
+      
+        nuevo_url = URL(
+            id=uuid.uuid4(),
+            id_tarea=nuevoID_tarea,
+            url=url,
+            descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+        
+        db.session.add(nuevo_url)
 
     usuariosxdefault = []
 
