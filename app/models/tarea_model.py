@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
-from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions
 import common.utils as utils
@@ -284,6 +284,19 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     )
 
     db.session.add(nueva_tarea) 
+
+    if url is not None and url.strip() != "":
+      
+        nuevo_url = URL(
+            id=uuid.uuid4(),
+            id_tarea=nuevoID_tarea,
+            url=url,
+            descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+        
+        db.session.add(nuevo_url)
 
     usuariosxdefault = []
 
