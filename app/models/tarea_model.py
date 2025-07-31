@@ -248,8 +248,13 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
    
     tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
-       msg = "Tipo de tarea no encontrado"
-       return None, msg
+       #Busco por id_ext
+       tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
+       if tipo_tarea is None:
+           logger_config.logger.error("Tipo de tarea no encontrado")
+           msg = "Tipo de tarea no encontrado"
+           return None, msg
+      
     
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
@@ -271,6 +276,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
+        caratula_expediente=caratula_expediente if caratula_expediente is not None and caratula_expediente.strip() != "" else None,
         id_tipo_tarea=id_tipo_tarea,
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
@@ -295,7 +301,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
             fecha_actualizacion=datetime.now(),
             id_user_actualizacion=id_user_actualizacion
         )
-        
+
         db.session.add(nuevo_url)
 
     usuariosxdefault = []
