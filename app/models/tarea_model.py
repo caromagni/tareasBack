@@ -191,8 +191,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
             #Busco por id_ext
             tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea, TipoTarea.eliminado==False).first()
             if tipo_tarea is None:
-                logger_config.logger.error("Tipo de tarea no encontrado")
+                logger_config.logger.error("Tipo de tarea no encontrado:%s" + id_tipo_tarea)
                 raise Exception("Tipo de tarea no encontrado")
+            
             
         nombre_tipo=tipo_tarea.nombre
         id_tipo_tarea = tipo_tarea.id
