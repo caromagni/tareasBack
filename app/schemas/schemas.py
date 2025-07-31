@@ -204,6 +204,8 @@ class GroupGetIn(Schema):
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
     todos =Boolean(default=False)
+    id_organismo = String()
+    id_dominio = String()
 
 class UsuarioDefaultOut(Schema):
     id = String()
@@ -228,6 +230,7 @@ class GetGroupOut(Schema):
     fecha_creacion = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
     id_organismo= String()
+    id_dominio= String()
     eliminado = Boolean()
     suspendido = Boolean()
     path_name = String()
@@ -562,6 +565,9 @@ class GroupsBaseOut(Schema):
     suspendido = Boolean()
     is_base = Boolean()
     usuarios = List(Nested(UsuariosGroupOut))
+    id_organismo = String()
+    id_dominio = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     
 class GroupIdOut(Schema):
     id = String()
@@ -573,6 +579,8 @@ class GroupIdOut(Schema):
     fecha_actualizacion = DateTime()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
+    id_dominio = String()
+    id_organismo = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
@@ -624,6 +632,7 @@ class TareaIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ), default=1)
+    url = String()
 
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
@@ -830,6 +839,9 @@ class GroupAllOut(Schema):
     descripcion = String()
     id_user_actualizacion = String()
     id_user_asignado_default = String(required=True)
+    id_dominio = String()
+    id_organismo = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()

@@ -108,6 +108,8 @@ def get_grupo_by_id(id):
             "hijos": hijos,
             "usuarios": usuarios,
             "tareas": tareas,
+            "id_dominio": res.id_dominio,
+            "id_organismo": res.id_organismo,
             "organismo": res.organismo,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
@@ -138,7 +140,7 @@ def exececuteSubquery(subquery):
 
 
 #@cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=False, suspendido=False, todos=True):
+def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=False, suspendido=False, todos=True, id_dominio=None, id_organismo=None):
     """
     Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
     """
@@ -173,7 +175,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
             "eliminado": eliminado if eliminado is not None else None,
             "suspendido": suspendido if suspendido is not None else None,
             "fecha_desde": fecha_desde,
-            "fecha_hasta": fecha_hasta
+            "fecha_hasta": fecha_hasta,
+            "id_dominio": id_dominio,
+            "id_organismo": id_organismo
         }
         #COALESCE(g.nombre, g.id::text) AS path_name,
         subquery1 = text("""
@@ -193,6 +197,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     g.suspendido AS suspendido_hijo,    
                     g.nombre AS nombre_hijo,
                     g.descripcion AS descripcion_hijo,
+                    g.id_dominio AS id_dominio_hijo,
+                    g.id_organismo AS id_organismo_hijo,
                     g.fecha_actualizacion AS fecha_actualizacion_hijo,
                     g.fecha_creacion AS fecha_creacion_hijo,    
                     g.base AS base_hijo,    
@@ -200,6 +206,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     NULL::boolean AS suspendido_padre,    
                     NULL::text AS nombre_padre,
                     NULL::text AS descripcion_padre,
+                    NULL::text AS id_dominio,
+                    NULL::text AS id_organismo,
                     NULL::timestamp AS fecha_actualizacion_padre,
                     NULL::timestamp AS fecha_creacion_padre,    
                     NULL::boolean AS base_padre     
@@ -208,6 +216,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR g.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR g.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR g.suspendido = :suspendido)
+                    AND (:id_dominio IS NULL OR g.id_dominio = :id_dominio)
+                    AND (:id_organismo IS NULL OR g.id_organismo = :id_organismo)
                     AND (:fecha_desde IS NULL OR g.fecha_actualizacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR g.fecha_actualizacion <= :fecha_hasta)         
 
@@ -228,6 +238,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_hijo.suspendido AS suspendido_hijo,    
                     gp_hijo.nombre AS nombre_hijo,
                     gp_hijo.descripcion AS descripcion_hijo,
+                    gp_hijo.id_dominio AS id_dominio_hijo,
+                    gp_hijo.id_organismo AS id_organismo_hijo,
                     gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
                     gp_hijo.fecha_creacion AS fecha_creacion_hijo,
                     gp_hijo.base AS base_hijo,    
@@ -235,6 +247,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_padre.suspendido AS suspendido_padre,    
                     gp_padre.nombre AS nombre_padre,
                     gp_padre.descripcion AS descripcion_padre,
+                    gp_padre.id_dominio AS id_dominio_padre,
+                    gp_padre.id_organismo AS id_organismo_padre,
                     gp_padre.fecha_actualizacion AS fecha_actualizacion_padre,
                     gp_padre.fecha_creacion AS fecha_creacion_padre,    
                     gp_padre.base AS base_padre    
@@ -246,6 +260,10 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR gp_hijo.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR gp_hijo.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR gp_hijo.suspendido = :suspendido)
+                    AND (:id_dominio IS NULL OR gp_hijo.id_dominio = :id_dominio)
+                    AND (:id_organismo IS NULL OR gp_hijo.id_organismo = :id_organismo)    
+                FROM tareas.herarquia_grupo_grupo hgg
+                INNER JOIN GroupTree gt ON gtL OR gp_hijo.id_organismo = :id_organismo)
                     AND (:fecha_desde IS NULL OR gp_hijo.fecha_actualizacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR gp_hijo.fecha_actualizacion <= :fecha_hasta)         
             )
@@ -257,7 +275,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.nombre_padre,
                 gt.descripcion_padre,
                 gt.eliminado_padre,
-                gt.suspendido_padre,        
+                gt.suspendido_padre,     
+                gt.id_dominio AS id_dominio_padre,
+                gt.id_organismo AS id_organismo_padre,   
                 gt.fecha_actualizacion_padre,
                 gt.fecha_creacion_padre,
                 gt.base_padre,        
@@ -266,7 +286,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.nombre_hijo as nombre,
                 gt.descripcion_hijo as descripcion,
                 gt.eliminado_hijo as eliminado,
-                gt.suspendido_hijo as suspendido,        
+                gt.suspendido_hijo as suspendido, 
+                gt.id_dominio AS id_dominio_hijo,
+                gt.id_organismo AS id_organismo_hijo,       
                 gt.fecha_actualizacion_hijo as fecha_actualizacion,
                 gt.fecha_creacion_hijo as fecha_creacion,        
                 gt.base_hijo as base,        
@@ -296,6 +318,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     g.suspendido AS suspendido_hijo,
                     g.nombre AS nombre_hijo,
                     g.descripcion AS descripcion_hijo,
+                    g.id_dominio AS id_dominio_hijo,
+                    g.id_organismo AS id_organismo_hijo,
                     g.fecha_actualizacion AS fecha_actualizacion_hijo,
                     g.fecha_creacion AS fecha_creacion_hijo,    
                     g.base AS base_hijo,
@@ -303,6 +327,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     NULL::boolean AS suspendido_padre,
                     NULL::text AS nombre_padre,
                     NULL::text AS descripcion_padre,
+                    NULL::uuid AS id_dominio_padre,
+                    NULL::uuid AS id_organismo_padre,
                     NULL::timestamp AS fecha_actualizacion_padre,
                     NULL::timestamp AS fecha_creacion_padre,
                     NULL::boolean AS base_padre
@@ -312,6 +338,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR g.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR g.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR g.suspendido = :suspendido)
+                    AND (:id_dominio IS NULL OR g.id_dominio = :id_dominio)
+                    AND (:id_organismo IS NULL OR g.id_organismo = :id_organismo)
                     AND (:fecha_desde IS NULL OR g.fecha_creacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR g.fecha_creacion <= :fecha_hasta)
                     
@@ -333,6 +361,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_hijo.suspendido AS suspendido_hijo,
                     gp_hijo.nombre AS nombre_hijo,
                     gp_hijo.descripcion AS descripcion_hijo,
+                    gp_hijo.id_dominio AS id_dominio_hijo,
+                    gp_hijo.id_organismo AS id_organismo_hijo,
                     gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
                     gp_hijo.fecha_creacion AS fecha_creacion_hijo,    
                     gp_hijo.base AS base_hijo,
@@ -340,6 +370,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_padre.suspendido AS suspendido_padre,
                     gp_padre.nombre AS nombre_padre,
                     gp_padre.descripcion AS descripcion_padre,
+                    gp_padre.id_dominio AS id_dominio_padre,
+                    gp_padre.id_organismo AS id_organismo_padre,
                     gp_padre.fecha_actualizacion AS fecha_actualizacion_padre,
                     gp_padre.fecha_creacion AS fecha_creacion_padre,    
                     gp_padre.base AS base_padre
@@ -352,6 +384,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR gp_hijo.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR gp_hijo.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR gp_hijo.suspendido = :suspendido)
+                    AND (:id_dominio IS NULL OR gp_hijo.id_dominio = :id_dominio)
+                    AND (:id_organismo IS NULL OR gp_hijo.id_organismo = :id_organismo)
                     AND (:fecha_desde IS NULL OR gp_hijo.fecha_creacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR gp_hijo.fecha_creacion <= :fecha_hasta)
                     
@@ -362,7 +396,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.nombre_padre,
                 gt.descripcion_padre,
                 gt.eliminado_padre,
-                gt.suspendido_padre,        
+                gt.suspendido_padre,     
+                gt.id_dominio_padre,
+                gt.id_organismo_padre, 
                 gt.fecha_actualizacion_padre,
                 gt.fecha_creacion_padre,
                 gt.base_padre,        
@@ -371,7 +407,9 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.nombre_hijo as nombre,
                 gt.descripcion_hijo as descripcion,
                 gt.eliminado_hijo as eliminado,
-                gt.suspendido_hijo as suspendido,        
+                gt.suspendido_hijo as suspendido,    
+                gt.id_dominio_hijo as id_dominio,
+                gt.id_organismo_hijo as id_organismo, 
                 gt.fecha_actualizacion_hijo as fecha_actualizacion,
                 gt.fecha_creacion_hijo as fecha_creacion,        
                 gt.base_hijo as base,        
@@ -429,6 +467,10 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
         query = query.filter(Grupo.suspendido == suspendido)
     if todos is None or todos== False or todos== 'false':
         query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user)    
+    if id_dominio:
+        query = query.filter(Grupo.id_dominio == id_dominio)
+    if id_organismo:
+        query = query.filter(Grupo.id_organismo == id_organismo)
 
     total = query.count()
     result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
@@ -443,7 +485,10 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
             "fecha_actualizacion": grupo.fecha_actualizacion,
             "eliminado": grupo.eliminado,
             "suspendido": grupo.suspendido,
-            "base": grupo.base
+            "base": grupo.base,
+            "id_dominio": grupo.id_dominio,
+            "id_organismo": grupo.id_organismo,
+            "organismo": grupo.organismo
         }
         for grupo in result_paginated
     ]
@@ -513,7 +558,9 @@ def get_all_base(id, usuarios=False):
                 g.id AS group_id,
                 g.base AS is_base,
                 g.eliminado AS eliminado,
-                g.suspendido AS suspendido        
+                g.suspendido AS suspendido,
+                g.id_dominio AS id_dominio,
+                g.id_organismo AS id_organismo
             FROM 
                 tareas.grupo g
             LEFT JOIN 
@@ -536,7 +583,9 @@ def get_all_base(id, usuarios=False):
                 gp_hijo.id AS group_id,
                 gp_padre.base AS is_base,
                 gp_hijo.eliminado AS eliminado,
-                gp_hijo.suspendido AS suspendido        
+                gp_hijo.suspendido AS suspendido,
+                gp_hijo.id_dominio AS id_dominio,
+                gp_hijo.id_organismo AS id_organismo
             FROM 
                 tareas.herarquia_grupo_grupo hgg
             INNER JOIN 
@@ -559,7 +608,9 @@ def get_all_base(id, usuarios=False):
             gt.is_parentless,
             gt.group_id,
             gt.eliminado,
-            gt.suspendido,        
+            gt.suspendido,
+            gt.id_dominio,
+            gt.id_organismo,
             gt.is_base
         FROM 
             GroupTree gt
@@ -586,6 +637,9 @@ def get_all_base(id, usuarios=False):
             "path_name": reg.path_name,
             "eliminado": reg.eliminado,
             "suspendido": reg.suspendido,
+            "id_dominio": reg.id_dominio,
+            "id_organismo": reg.id_organismo,
+            "organismo": reg.organismo if hasattr(reg, 'organismo') else None,
             "is_base": reg.is_base,
             "is_parentless": reg.is_parentless
         }    
@@ -684,7 +738,7 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
     return result, total
     
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None): 
+def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None, id_dominio=None, id_organismo=None): 
    
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
@@ -708,6 +762,10 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
         filters.append(Grupo.eliminado == eliminado)
     if suspendido:
         filters.append(Grupo.suspendido == suspendido)
+    if id_dominio:
+        filters.append(Grupo.id_dominio == id_dominio)
+    if id_organismo:
+        filters.append(Grupo.id_organismo == id_organismo)
 
     # Apply all filters at once
     if filters:
@@ -791,6 +849,8 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                 "id_user_asignado_default": res.id_user_asignado_default,
                 "eliminado": res.eliminado,
                 "suspendido": res.suspendido,
+                "id_dominio": res.id_dominio,
+                "id_organismo": res.id_organismo,
                 "usuarios": usuarios,
                 "tareas": tareas
             } 
