@@ -37,7 +37,7 @@ import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 
 
-def is_redis_available():
+def is_redis_available(): 
     """One-liner Redis availability check"""
     try:
         print("testing redis connection")
