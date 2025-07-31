@@ -258,6 +258,9 @@ configs-k8s-main:
     - if [[ "$DEPLOY_CONFIGS" ]]; then
         ls $KUSTOM_DIR && cat $KUSTOM_DIR/*;
         echo "KUSTOMIZING...";
+        echo "DEBUG BAD ENVS";
+        echo $SENSIBLE_SETTINGS_FILE;
+        echo "****************************";
         kubectl kustomize $KUSTOM_DIR;
         kubectl kustomize $KUSTOM_DIR | kubectl apply -f -;
       fi;
