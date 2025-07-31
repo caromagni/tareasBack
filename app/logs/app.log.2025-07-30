@@ -1,0 +1,9 @@
+2025-07-30 14:13:09,000 - common.logger_config - INFO - RabbitMQ conectado.
+2025-07-30 14:13:09,019 - common.logger_config - INFO - [*] Waiting for messages. To exit press CTRL+C
+2025-07-30 16:15:11,646 - common.logger_config - INFO - Logger configurado correctamente
+2025-07-30 16:15:11,646 - common.logger_config - INFO - Logger configurado correctamente
+2025-07-30 16:15:11,650 - common.logger_config - INFO - Logger configurado correctamente
+2025-07-30 16:15:11,654 - common.logger_config - INFO - Logger configurado correctamente
+2025-07-31 15:13:42,785 - common.logger_config - INFO - Logger configurado correctamente
+2025-07-31 15:14:02,589 - common.logger_config - INFO - RabbitMQ conectado.
+2025-07-31 15:14:02,612 - common.logger_config - INFO - [*] Waiting for messages. To exit press CTRL+C
