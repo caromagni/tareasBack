@@ -94,23 +94,12 @@ class OrganismoOut(Schema):
     instancia = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
-################Dominio####################
-class DominioOut1(Schema):
-    id = String()
-    descripcion = String()
-    habilitado = Boolean()
-    id_user_actualizacion = String()
-    fecha_actualizacion = String()
-    descripcion_corta = String()
-    prefijo = String()
-    id_dominio_ext = String()
 
 ################URL####################
 class URLOut(Schema):
     id = String()
     url = String()
     descripcion = String()
-
 
 ############Dominios####################
 class DominioOut(Schema):

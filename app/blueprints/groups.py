@@ -249,7 +249,6 @@ def restaura_grupo(id: str):
 @rol.require_role()
 def getGrupoBase(id: str):
     try:
-        id_grupo=None
         usuarios =False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
@@ -283,22 +282,4 @@ def get_organismos():
     except Exception as err:
         raise exceptions.ValidationError(err)    
     
-@groups_b.get('/dominio')
-@groups_b.output(schema.DominioOut(many=True))
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Dominios', summary='Listado de dominios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-def get_dominios():
-    try:
-        res = grupo_model.get_all_dominios()
-        if res is None:
-            result = {
-                "valido": "fail",
-                "ErrorCode": 800,
-                "ErrorDesc": "Dominios no encontrados",
-                "ErrorMsg": "No se encontraron datos de dominios"
-            }
-            return result
-            
-        return res
 
-    except Exception as err:
-        raise exceptions.ValidationError(err)     

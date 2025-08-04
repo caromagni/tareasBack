@@ -1525,9 +1525,6 @@ def get_all_organismos():
     query = db.session.query(Organismo).order_by(Organismo.descripcion).all()
     return query
 
-def get_all_dominios():
-    #session: scoped_session = current_app.session
-    query = db.session.query(Dominio).order_by(Dominio.descripcion).all()
-    return query
+
     
     
