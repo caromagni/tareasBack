@@ -191,6 +191,7 @@ class Grupo(Base):
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
     organismo = relationship('Organismo', foreign_keys=[id_organismo])
+    dominio = relationship('Dominio', foreign_keys=[id_dominio])
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
@@ -277,16 +278,13 @@ class TipoTarea(Base):
     id_ext = Column(UUID)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
-    # descripcion = Column(String, nullabe=False)
     eliminado = Column(Boolean, nullable=False, default=False)
-    #id_user_actualizacion = Column(UUID, nullable=False)
+    suspendido = Column(Boolean, default=False)
     id_user_actualizacion  = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    inactivo = Column(Boolean, default=False)
-    habilitado = Column(Boolean, default=True)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
 
 class SubtipoTarea(Base):
@@ -299,13 +297,11 @@ class SubtipoTarea(Base):
     nombre = Column(String)
     nombre_corto = Column(String)
     eliminado = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
-    inactivo = Column(Boolean, default=False)
-    habilitado = Column(Boolean, default=True)
-
     tipo_tarea = relationship('TipoTarea')
 
 class Dominio(Base):
@@ -328,7 +324,7 @@ class TipoTareaDominio(Base):
     id = Column(UUID, primary_key=True)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    inactivo = Column(Boolean, nullable=False, default=False)
+    eliminado = Column(Boolean, nullable=False, default=False)
     fecha_creacion = Column(DateTime, nullable=False)
     usuario_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 

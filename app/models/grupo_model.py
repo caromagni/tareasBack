@@ -111,6 +111,7 @@ def get_grupo_by_id(id):
             "id_dominio": res.id_dominio,
             "id_organismo": res.id_organismo,
             "organismo": res.organismo,
+            "dominio": res.dominio,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
             "fecha_actualizacion": res.fecha_actualizacion
@@ -488,7 +489,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
             "base": grupo.base,
             "id_dominio": grupo.id_dominio,
             "id_organismo": grupo.id_organismo,
-            "organismo": grupo.organismo
+            "organismo": grupo.organismo,
+            "dominio": grupo.dominio
         }
         for grupo in result_paginated
     ]
@@ -936,7 +938,7 @@ def update_grupo(username=None,id='', **kwargs):
             raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
         grupo.suspendido = kwargs['suspendido']
     if 'id_organismo' in kwargs:
-        organismo = db.session.query(Organismo).filter(Organismo.id==kwargs['id_organismo'], Organismo.eliminado==False).first()
+        organismo = db.session.query(Organismo).filter(Organismo.id==kwargs['id_organismo'], Organismo.habilitado==True).first()
         if organismo is None:
             raise Exception("Organismo no encontrado")
         grupo.id_organismo = kwargs['id_organismo']
@@ -1041,14 +1043,22 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
     if id_organismo is not None:
-        organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.eliminado==False).first()
+        organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.habilitado==True).first()
         if organismo is None: 
             raise Exception("Organismo no encontrado")
+        dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext==organismo.id_fuero, Dominio.habilitado==True).first()
+        if dominio is not None:
+            id_fuero = dominio.id
+    ##################### REVISAR ESTO ######################
     if id_dominio is not None:
-        dominio = db.session.query(Dominio).filter(Dominio.id==id_dominio, Dominio.eliminado==False).first()
-        if dominio is None: 
+        dominio = db.session.query(Dominio).filter(Dominio.id==id_dominio, Dominio.habilitado==True).first()
+        if dominio is None:
             raise Exception("Dominio no encontrado")
+    else:
+        if id_fuero is not None:
+            id_dominio = id_fuero
             
+
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
     nuevo_grupo = Grupo(
@@ -1079,16 +1089,16 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         )
         db.session.add(nuevo_usuario_grupo)
 
-    if id_organismo is not None:
+    """ if id_organismo is not None:
         nuevoID_org_grp=uuid.uuid4()
-        nuevo_organismo_grupo = OrganismoGrupo(
+        nuevo_organismo_grupo = Organismo(
             id=nuevoID_org_grp,
             id_grupo=nuevoID_grupo,
             id_organismo=id_organismo,
             fecha_actualizacion=datetime.now(),
             id_user_actualizacion=id_user_actualizacion
         )
-        db.session.add(nuevo_organismo_grupo)
+        db.session.add(nuevo_organismo_grupo) """
 
     if id_padre is not '':        
         nueva_herarquia = HerarquiaGrupoGrupo(
@@ -1179,6 +1189,10 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         "fecha_actualizacion": nuevo_grupo.fecha_actualizacion,
         "path": cursor[0].path if cursor else "",
         "path_name": cursor[0].path_name if cursor else "",
+        "id_dominio": nuevo_grupo.id_dominio,
+        "id_organismo": nuevo_grupo.id_organismo,
+        "organismo": nuevo_grupo.organismo,
+        "dominio": nuevo_grupo.dominio
     }
 
     return data
@@ -1510,4 +1524,7 @@ def get_all_organismos():
     #session: scoped_session = current_app.session
     query = db.session.query(Organismo).order_by(Organismo.descripcion).all()
     return query
+
+
+    
     

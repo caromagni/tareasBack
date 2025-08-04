@@ -249,7 +249,6 @@ def restaura_grupo(id: str):
 @rol.require_role()
 def getGrupoBase(id: str):
     try:
-        id_grupo=None
         usuarios =False
         if(request.args.get('id_grupo') is not None):
             id=request.args.get('id_grupo')
@@ -263,7 +262,7 @@ def getGrupoBase(id: str):
         raise exceptions.ValidationError(err)
     
 
-@groups_b.get('/organismos')
+@groups_b.get('/organismo')
 @groups_b.output(schema.OrganismoOut(many=True))
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Organismo', summary='Listado de organismos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
 def get_organismos():
@@ -282,3 +281,5 @@ def get_organismos():
 
     except Exception as err:
         raise exceptions.ValidationError(err)    
+    
+

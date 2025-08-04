@@ -41,7 +41,7 @@ def get_tipoTareas(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nivel=None
         origen_externo=None
-        inactivo=None
+        suspendido=None
         eliminado=None
         nombre=None
 
@@ -53,14 +53,14 @@ def get_tipoTareas(query_data: dict):
             nivel=request.args.get('nivel')
         if (request.args.get('origen_externo') is not None):
             origen_externo=request.args.get('origen_externo') 
-        if (request.args.get('inactivo') is not None):
-            inactivo = request.args.get('inactivo')
+        if (request.args.get('suspendido') is not None):
+            suspendido = request.args.get('suspendido')
         if (request.args.get('eliminado') is not None):
             eliminado = request.args.get('eliminado')
         if (request.args.get('nombre') is not None):
             nombre = request.args.get('nombre')    
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, inactivo, eliminado, nombre)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre)
     
         
         data = {
@@ -163,6 +163,7 @@ def get_subtipoTarea(query_data: dict):
         page=1
         id_tipo_tarea=None
         eliminado=None
+        suspendido=None
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
 
         if(request.args.get('page') is not None):
@@ -173,10 +174,12 @@ def get_subtipoTarea(query_data: dict):
             id_tipo_tarea=request.args.get('id_tipo_tarea')
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')
+        if(request.args.get('suspendido') is not None):
+            suspendido = request.args.get('suspendido')    
 
         #print("id_tipo_tarea:",id_tipo_tarea)
 
-        res, cant = tarea_model.get_all_subtipo_tarea(page,per_page,id_tipo_tarea, eliminado)
+        res, cant = tarea_model.get_all_subtipo_tarea(page, per_page, id_tipo_tarea, eliminado, suspendido)
         
         data = {
                 "count": cant,
