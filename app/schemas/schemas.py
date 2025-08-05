@@ -802,6 +802,8 @@ class TareaOut(Schema):
     reasignada_grupo = Boolean(default=False)
     notas = List(Nested(NotaTareaOut))
     tiene_notas = Boolean()
+    url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaxGrupoOut(Schema):
     id = String()
@@ -1055,6 +1057,8 @@ class TareaPatchAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
+    url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaAllOut(Schema):
     id = String()
@@ -1097,6 +1101,7 @@ class TareaAllOut(Schema):
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
     url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 
 class TareaPatchLoteV2Out(Schema):
@@ -1219,6 +1224,8 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
+    url= List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaHIstoriaUserIdOut(Schema):
     id_task = String()

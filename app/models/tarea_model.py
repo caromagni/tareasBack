@@ -251,17 +251,6 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
 
 
-   
-    """   tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
-    if tipo_tarea is None:
-       #Busco por id_ext
-       tipo_tarea_ext = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
-       if tipo_tarea_ext is None:
-           logger_config.logger.error("Tipo de tarea no encontrado")
-           msg = "Tipo de tarea no encontrado"
-           return None, msg """
-      
-    
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
@@ -631,7 +620,21 @@ def update_tarea(id_t='', username=None, **kwargs):
                 "fecha_asignacion": row.fecha_asignacion
             }
             usuarios.append(usuario)
+    url = []
+    res_url = db.session.query(URL).filter(URL.id_tarea == tarea.id).all()
+    if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
 
+    editable_externo = False
+    res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tarea.id_tipo_tarea).first()
+    if res_tipo_tarea is not None:
+        if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+            editable_externo = True
 
     ###################Formatear el resultado####################
     prioridad = {"id": tarea.prioridad, "descripcion": nombre_prioridad(tarea.prioridad)}
@@ -661,7 +664,9 @@ def update_tarea(id_t='', username=None, **kwargs):
         "fecha_creacion": tarea.fecha_creacion,
         "id_grupo": tarea.id_grupo,
         "grupo": grupos,
-        "usuario": usuarios
+        "usuario": usuarios,
+        "url": url,
+        "editable_externo": editable_externo
     }
 
     db.session.commit()
@@ -1311,6 +1316,22 @@ def get_tarea_by_id(id):
         if res_actuacion is not None:
             id_actuacion_ext = res_actuacion.id_ext
 
+        url = []
+        res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
+        if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
+
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == res.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+
         usuarios=[]
         grupos=[]
         notas=[]    
@@ -1403,7 +1424,9 @@ def get_tarea_by_id(id):
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
-            "reasignada_grupo": reasignada_grupo
+            "reasignada_grupo": reasignada_grupo,
+            "editable_externo": editable_externo,
+            "url": url 
         }
 
         results.append(result)
@@ -1517,6 +1540,22 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
         nota_id, nota, nota_tipo_id, nota_tipo, nota_titulo, nota_fecha_creacion, nota_user_creacion, nota_user_actualizacion,
         asignada_usuario, asignada_grupo
     ) in res_tareas:
+        url = []
+        res_url = db.session.query(URL).filter(URL.id_tarea == tarea.id).all()
+        if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
+
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tarea.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+
         # Agrupar información de la tarea
         if tarea.id not in tareas_agrupadas:
             tareas_agrupadas[tarea.id] = {
@@ -1548,7 +1587,9 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
                 "usuarios": [],
                 "notas": [],
                 "reasignada_usuario": False,
-                "reasignada_grupo": False
+                "reasignada_grupo": False,
+                "editable_externo": editable_externo,
+                "url": url
             }
         
         # Añadir información de grupos
@@ -1840,9 +1881,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     grupo_alias = aliased(Grupo)
     if res_tareas is None:
         return results, total
-    for res in res_tareas:
-        print("Tarea:", res.id, res.titulo, res.fecha_creacion, res.fecha_fin, res.plazo, res.prioridad, res.estado)
-
+    
     for res in res_tareas:
         usuarios = []
         grupos = []
@@ -1889,16 +1928,21 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 reasignada_grupo = True
             grupos.append(grupo)            
         
+        url = []
         res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
         if res_url is not None:
-            url = []
             for row in res_url:
                 url.append({
                     "id": row.id,
                     "url": row.url,
                     "descripcion": row.descripcion
                 })
-
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == res.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+         
         # Prepare result dictionary
         result = {
             "id": res.id,
@@ -1935,11 +1979,10 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
             "reasignada_grupo": reasignada_grupo,
-            "url": url  # Assuming URL is a field in Tarea
+            "url": url,  # Assuming URL is a field in Tarea
+            "editable_externo": editable_externo
         }
         results.append(result)
-    # print("time taken for this task:", datetime.now() - exec_time)
-    #print("Resultado:", result)
 
     result = (results, total)
     #cache.set(cache_key, result, CACHE_TIMEOUT_LONG)
@@ -2041,6 +2084,21 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                         "eliminado": row.eliminado
                     }
                     notas.append(nota)  
+            url = []
+            res_url = db.session.query(URL).filter(URL.id_tarea == reg.id).all()
+            if res_url is not None:
+                    for row in res_url:
+                        url.append({
+                            "id": row.id,
+                            "url": row.url,
+                            "descripcion": row.descripcion
+                        })
+
+            editable_externo = False
+            res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == reg.id_tipo_tarea).first()
+            if res_tipo_tarea is not None:
+                if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                    editable_externo = True
 
             result = {
                 "caratula_expediente": reg.caratula_expediente,
@@ -2070,7 +2128,9 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 "reasignada_usr": reasignada_usr,
                 "reasignada_grupo": reasignada_grupo,
                 "notas": notas,
-                "tiene_notas": reg.tiene_notas_desnz
+                "tiene_notas": reg.tiene_notas_desnz,
+                "url": url,
+                "editable_externo": editable_externo
             }
             results.append(result)
 
