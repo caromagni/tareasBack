@@ -217,6 +217,7 @@ class GroupPatchIn(Schema):
     id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
     id_organismo = String()
+    id_dominio = String()
     suspendido = Boolean()
     usuario = List(Nested(ListUsuario))
 
@@ -587,6 +588,10 @@ class GroupsBaseOut(Schema):
     id = String()
     id_padre = String()
     id_hijo = String()
+    id_organismo = String()
+    id_dominio = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     parent_name = String()
     child_name = String()
     path = String()
@@ -598,6 +603,7 @@ class GroupsBaseOut(Schema):
     usuarios = List(Nested(UsuariosGroupOut))
     id_organismo = String()
     id_dominio = String()
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     
 class GroupIdOut(Schema):
@@ -877,6 +883,7 @@ class GroupAllOut(Schema):
     id_dominio = String()
     id_organismo = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
