@@ -16,6 +16,7 @@ from blueprints.label import label_b
 from blueprints.alerta import alerta_b
 from blueprints.endpoint import ep_b
 from blueprints.dominio import dominio_b
+from blueprints.organismo import organismo_b
 # from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.URL import ep_url
@@ -180,6 +181,7 @@ def create_app():
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_url)
     app.register_blueprint(dominio_b)
+    app.register_blueprint(organismo_b)
 
     # Kubernetes liveness probe
     @app.route('/livez')

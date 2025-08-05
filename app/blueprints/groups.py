@@ -262,24 +262,5 @@ def getGrupoBase(id: str):
         raise exceptions.ValidationError(err)
     
 
-@groups_b.get('/organismo')
-@groups_b.output(schema.OrganismoOut(many=True))
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Organismo', summary='Listado de organismos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-def get_organismos():
-    try:
-        res = grupo_model.get_all_organismos()
-        if res is None:
-            result = {
-                "valido": "fail",
-                "ErrorCode": 800,
-                "ErrorDesc": "Organismos no encontrados",
-                "ErrorMsg": "No se encontraron datos de organismos"
-            }
-            return result
-            
-        return res
-
-    except Exception as err:
-        raise exceptions.ValidationError(err)    
     
 

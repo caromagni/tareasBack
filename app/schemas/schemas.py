@@ -95,6 +95,10 @@ class OrganismoOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
 
+class OrganismoCountOut(Schema):
+    count = Integer()
+    data = Nested(OrganismoOut, many=True)    
+
 ################URL####################
 class URLOut(Schema):
     id = String()

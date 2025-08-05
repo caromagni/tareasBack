@@ -1520,10 +1520,7 @@ def undelete_grupo(username=None, id=None):
     db.session.commit()
     return grupo
 
-def get_all_organismos():
-    #session: scoped_session = current_app.session
-    query = db.session.query(Organismo).order_by(Organismo.descripcion).all()
-    return query
+
 
 
     
