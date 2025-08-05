@@ -90,6 +90,7 @@ class Organismo(Base):
     descripcion = Column(String)
     descripcion_corta = Column(String)
     habilitado = Column(Boolean, nullable=False)
+    eliminado = Column(Boolean,  default=False)
     id_tarea_grupo_base  = Column(UUID)
     instancia = Column(String)
     fecha_actualizacion = Column(DateTime)
@@ -112,6 +113,7 @@ class Usuario(Base):
     email = Column(String)
     dni = Column(String)
     habilitado = Column(Boolean)
+    eliminado = Column(Boolean, default=False)
     id_persona_ext = Column(UUID)
 
 class TipoActuacionExt(Base):
@@ -146,6 +148,7 @@ class AutoReglaAsignacion(Base):
     nombre = Column(String, nullable=False)
     fecha_actualizacion = Column(DateTime)
     habilitado = Column(Boolean, nullable=False)
+    eliminado = Column(Boolean, default=False)
 
 
 class ExpedienteExt(Base):
@@ -246,6 +249,7 @@ class TipoAgrupacion(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
     habilitado = Column(Boolean, nullable=False)
+    eliminado = Column(Boolean, default=False)
 
 
 class TipoInhabilidad(Base):
@@ -253,6 +257,7 @@ class TipoInhabilidad(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_inhabilidad_ext = Column(UUID)
     tipo = Column(String, nullable=False)
     nombre = Column(String)
 
@@ -265,6 +270,7 @@ class TipoNota(Base):
     fecha_actualizacion = Column(DateTime)
     fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
+    eliminado = Column(Boolean, default=False)
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID)
     nombre = Column(String, nullable=False)
@@ -315,6 +321,7 @@ class Dominio(Base):
     prefijo = Column(String, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
     habilitado = Column(Boolean, default=True)
+    eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 
 class TipoTareaDominio(Base):
@@ -378,6 +385,7 @@ class Inhabilidad(Base):
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     descripcion = Column(String)
     habilitado = Column(Boolean, default=True)
+    eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')
     organismo = relationship('Organismo')
@@ -470,6 +478,7 @@ class FechaIntermedia(Base):
     mensaje = Column(String)
     apagada = Column(Boolean)
     habilitado = Column(Boolean)
+    eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)

@@ -103,11 +103,13 @@ def sync_fuero(entity_id, url,id_user):
         query_fuero = db.session.query(Dominio).filter(Dominio.id == resp['data']['id']).first()
         if query_fuero is None:
             #hago insert de la inhabilidad
-            nuevo_fuero = Dominio(id=resp['data']['id'],
+            nuevo_fuero = Dominio(id=uuid.uuid4(),
+                               id_dominio_ext=resp['data']['id'],   
                                descripcion=resp['data']['descripcion'],
                                descripcion_corta=resp['data']['descripcion_corta'],
                                fecha_actualizacion=datetime.now(),
                                habilitado=resp['data']['habilitado'],
+                               eliminado=not(resp['data']['habilitado']),
                                prefijo=resp['data']['prefijo'],   
                                id_user_actualizacion=id_user
                             )
@@ -116,10 +118,12 @@ def sync_fuero(entity_id, url,id_user):
         else:
             print("existe el fuero en la base de datos:", resp['data']['id'])
             #hago el update de fuero
+            query_fuero.id_dominio_ext = resp['data']['id']
             query_fuero.descripcion = resp['data']['descripcion']
             query_fuero.descripcion_corta = resp['data']['descripcion_corta']
             query_fuero.fecha_actualizacion=datetime.now()
             query_fuero.habilitado = resp['data']['habilitado']
+            query_fuero.eliminado = not(resp['data']['habilitado'])
             query_fuero.prefijo = resp['data']['prefijo']
             query_fuero.id_user_actualizacion=id_user
         db.session.commit()
@@ -136,7 +140,7 @@ def sync_inhabilidad(entity_id, url,id_user):
         if query_inhabilidad is None:
             #hago insert de la inhabilidad
             nuevo_inhabilidad = Inhabilidad(id=uuid.uuid4(),
-                               id_ext=resp['data']['id'], 
+                               id_inhabilidad_ext=resp['data']['id'], 
                                fecha_desde=resp['data']['fecha_desde'], 
                                fecha_hasta=resp['data']['fecha_hasta'], 
                                id_organismo=resp['data']['id_organismo'],
@@ -144,6 +148,7 @@ def sync_inhabilidad(entity_id, url,id_user):
                                tipo =resp['data']['tipo'],
                                descripcion=resp['data']['descripcion'],
                                habilitado=resp['data']['habilitado'],
+                               eliminado=not(resp['data']['habilitado']),
                                fecha_actualizacion=datetime.now(),
                                id_user_actualizacion=id_user
                             )
@@ -151,6 +156,7 @@ def sync_inhabilidad(entity_id, url,id_user):
 
         else:
             #hago update de la inhabilidad
+            query_inhabilidad.id_inhabilidad_ext = resp['data']['id']
             query_inhabilidad.fecha_desde = resp['data']['fecha_desde']
             query_inhabilidad.fecha_hasta = resp['data']['fecha_hasta']
             query_inhabilidad.id_organismo = resp['data']['id_organismo']
@@ -158,6 +164,7 @@ def sync_inhabilidad(entity_id, url,id_user):
             query_inhabilidad.tipo =resp['data']['tipo']
             query_inhabilidad.descripcion = resp['data']['descripcion']
             query_inhabilidad.habilitado = resp['data']['habilitado']
+            query_inhabilidad.eliminado = not(resp['data']['habilitado'])
             query_inhabilidad.id_ext = resp['data']['id']
             query_inhabilidad.fecha_actualizacion=datetime.now()
             query_inhabilidad.id_user_actualizacion=id_user
@@ -165,7 +172,7 @@ def sync_inhabilidad(entity_id, url,id_user):
         db.session.commit()
     return resp
 
-def sync_grupo(entity_id, url,id_user):
+""" def sync_grupo(entity_id, url,id_user):
     resp = sync_request(url, entity_id)
     print("json roles:",resp)    
     if resp and resp['data']['id'] is not None:
@@ -173,7 +180,8 @@ def sync_grupo(entity_id, url,id_user):
         query_organismo = db.session.query(Grupo).filter(Grupo.id == resp['data']['id']).first()
         if query_organismo is None:
             #hago insert del organismo
-            nuevo_organismo = Grupo(id=resp['data']['id'],
+            nuevo_organismo = Grupo(id=uuid.uuid4(),
+                               id_organismo=resp['data']['id'],
                                nombre=resp['data']['descripcion'], 
                                circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
                                descripcion=resp['data']['descripcion'],
@@ -201,7 +209,7 @@ def sync_grupo(entity_id, url,id_user):
             query_organismo.base = True
 
         db.session.commit()
-    return resp
+    return resp """
 
 def sync_organismo(entity_id, url,id_user):
     resp = sync_request(url, entity_id)
@@ -218,6 +226,7 @@ def sync_organismo(entity_id, url,id_user):
                                descripcion_corta=resp['data']['descripcion_corta'],
                                id_fuero=resp['data']['id_fuero'],
                                habilitado=resp['data']['habilitado'],
+                               eliminado=not(resp['data']['habilitado']),
                                fecha_actualizacion=datetime.now(),
                                id_user_actualizacion=id_user,
                                id_tarea_grupo_base=resp['data']['id_tarea_grupo_base']
@@ -226,10 +235,12 @@ def sync_organismo(entity_id, url,id_user):
 
         else:
             #hago update del organismo
+            query_organismo.id_organismo_ext = resp['data']['id']
             query_organismo.descricion = resp['data']['descripcion']
             query_organismo.descripcion_corta = resp['data']['descripcion_corta'] 
             query_organismo.circunscripcion_judicial = resp['data']['circunscripcion_judicial']
             query_organismo.habilitado = resp['data']['habilitado']
+            query_organismo.eliminado = not(resp['data']['habilitado'])
             query_organismo.id_fuero = resp['data']['id_fuero']
             query_organismo.fecha_actualizacion=datetime.now()
             query_organismo.id_user_actualizacion=id_user
