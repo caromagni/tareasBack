@@ -642,6 +642,7 @@ def get_all_base(id, usuarios=False):
             "id_dominio": reg.id_dominio,
             "id_organismo": reg.id_organismo,
             "organismo": reg.organismo if hasattr(reg, 'organismo') else None,
+            "dominio": reg.dominio if hasattr(reg, 'dominio') else None,
             "is_base": reg.is_base,
             "is_parentless": reg.is_parentless
         }    
@@ -845,6 +846,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                 "nombre": res.nombre,
                 "descripcion": res.descripcion,
                 "organismo": res.organismo,
+                "dominio": res.dominio,
                 "fecha_creacion": res.fecha_creacion,
                 "fecha_actualizacion": res.fecha_actualizacion,
                 "id_user_actualizacion": res.id_user_actualizacion,
@@ -943,7 +945,7 @@ def update_grupo(username=None,id='', **kwargs):
             raise Exception("Organismo no encontrado")
         grupo.id_organismo = kwargs['id_organismo']
     if 'id_dominio' in kwargs:
-        dominio = db.session.query(Dominio).filter(Dominio.id==kwargs['id_dominio'], Dominio.eliminado==False).first()
+        dominio = db.session.query(Dominio).filter(Dominio.id==kwargs['id_dominio'], Dominio.habilitado==True).first()
         if dominio is None:
             raise Exception("Dominio no encontrado")
         grupo.id_dominio = kwargs['id_dominio']
@@ -1520,10 +1522,7 @@ def undelete_grupo(username=None, id=None):
     db.session.commit()
     return grupo
 
-def get_all_organismos():
-    #session: scoped_session = current_app.session
-    query = db.session.query(Organismo).order_by(Organismo.descripcion).all()
-    return query
+
 
 
     

@@ -29,7 +29,7 @@ def before_request():
 @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado EP', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.get('/ep')
 @ep_b.output(schema.EPCountOut)
-@rol.require_role()
+#@rol.require_role()
 def get_ep():
     try:
         cant=0

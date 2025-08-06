@@ -269,11 +269,41 @@ class DatabaseSetup:
                 'descripcion': 'GET alertas',
                 'caso_uso': [{"codigo": "consultar-usuario"}],
                 'metodo': 'GET'
-            }
+            },
+            {
+                'id': '',
+                'url': '/endpoint',
+                'descripcion': 'POST ep',
+                'caso_uso': [{"codigo": "crear-tarea"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/dominio',
+                'descripcion': 'GET dominio',
+                'caso_uso': [{"codigo": "crear-tarea"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/ep',
+                'descripcion': 'GET ep',
+                'caso_uso': [{"codigo": "consultar-tarea"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/lote_tarea_v2',
+                'descripcion': 'PATCH lote_tareas_v2',
+                'caso_uso': [{"codigo": "modificar-tarea"}],
+                'metodo': 'PATCH'
+            },
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()
             if not exists:
+                if ep['id'] == '':
+                    ep['id'] = uuid.uuid4()
                 endpoint = EP(
                     id=ep['id'],
                     url=ep['url'],

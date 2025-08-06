@@ -18,7 +18,7 @@ def get_dominio():
             "descripcion_corta": dominio.descripcion_corta,
             "prefijo": dominio.prefijo,
             "fecha_actualizacion": dominio.fecha_actualizacion,
-            "habilitado": dominio.habilitado,
+            "eliminado": dominio.eliminado,
             "id_user_actualizacion": dominio.id_user_actualizacion
         }
         results.append(result)

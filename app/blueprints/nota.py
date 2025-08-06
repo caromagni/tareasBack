@@ -89,7 +89,6 @@ def post_tipo_nota(json_data: dict):
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/tipo_nota/<string:id>')
-#@nota_b.output(MsgErrorOut)
 @rol.require_role()
 def del_tipo_nota(id: str):
     try:

@@ -24,7 +24,7 @@ def get_all_tipo_nota(page=1, per_page=10):
     
     return res, total
 
-def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', habilitado=True, eliminado=False):
+def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', eliminado=False):
     
     
     if username is not None:
@@ -40,7 +40,6 @@ def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', 
         eliminado=False,
         fecha_actualizacion=datetime.now(),
         fecha_eliminacion=None,
-        habilitado=True, 
         id_user_actualizacion=id_user_actualizacion,
         id=nuevoID,
         nombre=nombre,
