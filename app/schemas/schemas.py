@@ -88,7 +88,7 @@ class OrganismoOut(Schema):
     circunscripcion_judicial = String()
     id_fuero = String()
     descripcion = String()
-    habilitado= Boolean()
+    eliminado = Boolean()
     descripcion_corta = String()
     id_tarea_grupo_base = String()
     instancia = String()
@@ -112,8 +112,8 @@ class DominioOut(Schema):
     descripcion = String()
     descripcion_corta = String()
     prefijo = String()
+    eliminado = String()
     fecha_actualizacion = String()
-    habilitado = Boolean()
     id_user_actualizacion = String()
 
 class DominioCountOut(Schema):
@@ -401,7 +401,8 @@ class UsuarioOut(Schema):
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
-    
+
+
 class GroupsBaseUsrOut(Schema):
     #id_usuario = String()
     #nombre = String()
@@ -494,6 +495,8 @@ class TipoTareaGetIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     nombre = String(default="")
+    id_dominio = String()
+    id_organismo = String()
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
@@ -625,24 +628,6 @@ class GroupIdOut(Schema):
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))
     tareas = List(Nested(TareaxGroupOut))     
 
-class UsuarioOut(Schema):
-    id = String()
-    fecha_actualizacion = String()
-    id_user_actualizacion = String()
-    nombre = String()
-    apellido = String()
-    id_ext = String()
-    nombre_completo = String(dump_only=True)  
-    username = String()
-    email = String()
-    dni = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
-
-    @post_dump
-    def add_nombre_completo(self, data, **kwargs):
-        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
-        return data
 
 class TareaIn(Schema):
     prioridad = Integer(required=True, metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
@@ -939,7 +924,6 @@ class UsuarioInPatch(Schema):
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    #username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
 
 class UsuarioGetIn(Schema):
@@ -947,7 +931,6 @@ class UsuarioGetIn(Schema):
     per_page = Integer(default=10)
     nombre = String(default="")
     apellido = String(default="")
-    #id_grupo = String()
     dni = String()  
     username = String()
     eliminado = Boolean()
@@ -1348,7 +1331,6 @@ class TipoNotaIn(Schema):
         validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
         validate_char
     ])
-    habilitado = Boolean()
     eliminado = Boolean()
 
 class TipoNotaOut(Schema):
@@ -1356,7 +1338,6 @@ class TipoNotaOut(Schema):
     nombre = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
-    habilitado = Boolean()
 
 class TipoNotaCountOut(Schema):
     count = Integer()

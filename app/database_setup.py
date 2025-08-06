@@ -291,6 +291,13 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-tarea"}],
                 'metodo': 'GET'
             },
+            {
+                'id': '',
+                'url': '/lote_tarea_v2',
+                'descripcion': 'PATCH lote_tareas_v2',
+                'caso_uso': [{"codigo": "modificar-tarea"}],
+                'metodo': 'PATCH'
+            },
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()

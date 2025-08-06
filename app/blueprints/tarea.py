@@ -25,8 +25,9 @@ def before_request():
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
     g.rol = jsonHeader.get('user_rol', '')
-     
-    
+    g.dominio = jsonHeader.get('dominio', '')
+    g.organismo = jsonHeader.get('organismo', '')
+
 ####################TIPO DE TAREA######################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tarea')
@@ -44,6 +45,10 @@ def get_tipoTareas(query_data: dict):
         suspendido=None
         eliminado=None
         nombre=None
+        id_dominio = None
+        id_organismo = None
+        dominio = g.dominio
+        organismo = g.organismo
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -59,8 +64,12 @@ def get_tipoTareas(query_data: dict):
             eliminado = request.args.get('eliminado')
         if (request.args.get('nombre') is not None):
             nombre = request.args.get('nombre')    
+        if (request.args.get('id_dominio') is not None):
+            id_dominio = request.args.get('id_dominio')
+        if (request.args.get('id_organismo') is not None):
+            id_organismo = request.args.get('id_organismo')    
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo, dominio, organismo)
     
         
         data = {
@@ -83,7 +92,9 @@ def get_tipoTareas(query_data: dict):
 def post_tipo_tarea(json_data: dict):
     try:
         username = g.username
-        res = tarea_model.insert_tipo_tarea(username, **json_data)
+        dominio = g.dominio
+        organismo = g.organismo
+        res = tarea_model.insert_tipo_tarea(username, dominio, organismo, **json_data)
         if res is None:
             result={
                     "valido":"fail",

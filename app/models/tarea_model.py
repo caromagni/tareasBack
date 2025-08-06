@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
-from models.alch_model import Auditoria_TareaAsignadaUsuario 
+from models.alch_model import Auditoria_TareaAsignadaUsuario, TipoTareaDominio 
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
@@ -940,15 +940,20 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None):
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
-    query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
-    
+    query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==False).order_by(TipoTarea.nombre)
+    #query = db.session.query(TipoTarea, TipoTareaDominio).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea).order_by(TipoTarea.nombre)
+    query = query.outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea)
+    if query is not None:
+        for q in query:
+            print("Tipo de tarea:", q.id, q.nombre)
+            #, "Dominio:", q.id_dominio, "Organismo:", q.id_organismo)
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
@@ -1007,8 +1012,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
-    
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
+
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
 
@@ -1033,6 +1038,20 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
     )
 
     db.session.add(nuevo_tipo_tarea)
+
+    nuevo_tipo_tareaxdominio = TipoTareaDominio(
+        id=uuid.uuid4(),
+        id_tipo_tarea=nuevoID,
+        id_dominio=dominio,
+        id_organismo=organismo,
+        suspendido=False,
+        eliminado=False,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_actualizacion=datetime.now()
+    )
+
+    db.session.add(nuevo_tipo_tareaxdominio)
+
     db.session.commit()
     return nuevo_tipo_tarea
 

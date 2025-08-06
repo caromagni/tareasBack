@@ -15,11 +15,10 @@ def get_organismo():
             "descripcion": organismo.descripcion,
             "id_fuero": organismo.id_fuero,
             "descripcion_corta": organismo.descripcion_corta,
-            "habilitado": organismo.habilitado,
+            "eliminado": organismo.eliminado,
             "id_tarea_grupo_base": organismo.id_tarea_grupo_base,
             "instancia": organismo.instancia,
             "fecha_actualizacion": organismo.fecha_actualizacion,
-            "habilitado": organismo.habilitado,
             "id_user_actualizacion": organismo.id_user_actualizacion
         }
         results.append(result)

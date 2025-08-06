@@ -91,6 +91,10 @@ def verify_header():
             x_api_key = request.headers.get('x-api-key')
             x_api_system = request.headers.get('x-api-system')
             x_user_rol = request.headers.get('x-user-role')
+            #id Fuero de Paz de la tabla dominio
+            x_dominio = '06737c52-5132-41bb-bf82-98af37a9ed80'
+            #id Juzgado de Paz de Lavalle de la tabla organismo
+            x_organismo = 'cb08f738-7590-4331-871e-26f0f09ff4ca'
             print("x_api_key:",x_api_key)
             print("x_api_system:",x_api_system)
             print("x_user_rol:",x_user_rol)
@@ -102,7 +106,7 @@ def verify_header():
             if token_payload is not None:    
                 logger_config.logger.info("Token valido")        
                 email=token_payload['email']
-                return {"type":"JWT","user_name":email,"user_rol":x_user_rol} 
+                return {"type":"JWT","user_name":email,"user_rol":x_user_rol, "dominio":x_dominio, "organismo":x_organismo} 
         
             if x_api_key is not None:
                 if x_api_system is None:
@@ -114,7 +118,7 @@ def verify_header():
                     raise Exception("api-key no valida")
                 else:
                     logger_config.logger.info(f"API Key valido: {x_api_key} - x_api_system: {x_api_system}")
-                    return {"type":"api_key","user_name":x_api_system, "user_rol":x_user_rol} 
+                    return {"type":"api_key","user_name":x_api_system, "user_rol":x_user_rol, "dominio":x_dominio, "organismo":x_organismo} 
             
     except Exception as err:
         logger_config.logger.info("Error en la verificacion de header")
