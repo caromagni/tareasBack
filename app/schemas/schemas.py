@@ -570,6 +570,8 @@ class TipoTareaSubtipoOut(Schema):
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
     nivel = String()
+    id_dominio = String()
+    id_organismo = String()
 
 class TareaxGroupOut(Schema):
     id = String()    

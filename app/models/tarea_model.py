@@ -947,13 +947,26 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
-    query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==False).order_by(TipoTarea.nombre)
-    #query = db.session.query(TipoTarea, TipoTareaDominio).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea).order_by(TipoTarea.nombre)
-    query = query.outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea)
+    #query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==False).order_by(TipoTarea.nombre)
+    query = db.session.query(TipoTarea.base,
+                            TipoTarea.id,
+                            TipoTarea.codigo_humano,
+                            TipoTarea.nombre,
+                            TipoTarea.nivel,
+                            TipoTarea.origen_externo,
+                            TipoTarea.suspendido,
+                            TipoTarea.eliminado,
+                            TipoTarea.id_ext,
+                            TipoTarea.id_user_actualizacion,
+                            TipoTarea.fecha_actualizacion,
+                            TipoTareaDominio.id_dominio.label('id_dominio'),
+                            TipoTareaDominio.id_organismo.label('id_organismo')                           
+                            ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
+                            ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
+    #query = query.outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea)
     if query is not None:
         for q in query:
-            print("Tipo de tarea:", q.id, q.nombre)
-            #, "Dominio:", q.id_dominio, "Organismo:", q.id_organismo)
+            print("Tipo de tarea:", q.id, q.nombre, "Dominio:", q.id_dominio, "Organismo:", q.id_organismo)
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
@@ -999,7 +1012,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                 "base": tipo.base,
                 "origen_externo": tipo.origen_externo,
                 "subtipo_tarea": subtipo_list,
-                "user_actualizacion": tipo.user_actualizacion,
+                "id_user_actualizacion": tipo.id_user_actualizacion,
+                #"user_actualizacion": tipo.user_actualizacion,
                 "fecha_actualizacion": tipo.fecha_actualizacion,
                 "suspendido": tipo.suspendido,
                 "eliminado": tipo.eliminado,

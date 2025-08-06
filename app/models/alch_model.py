@@ -288,7 +288,7 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    user_actualizacion = relationship('Usuario')
 
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'
