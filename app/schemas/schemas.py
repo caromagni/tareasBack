@@ -200,9 +200,9 @@ class GroupIn(Schema):
     ])
     id_user_asignado_default= String()
     id_padre = String() 
-    base = Boolean(default=False)
-    id_organismo = String()
-    id_dominio = String()
+    #base = Boolean(default=False)
+    #id_organismo = String()
+    #id_dominio = String()
 
 class GroupPatchIn(Schema):
     base = Boolean(default=False)
@@ -452,8 +452,10 @@ class TipoTareaIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
-    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
-                   validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    id_organismo = String()
+    """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
+                    default ='int') """
     
 
 class TipoTareaPatchIn(Schema):
@@ -472,6 +474,8 @@ class TipoTareaPatchIn(Schema):
     id_ext = String()
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    id_dominio = String()
+    id_organismo = String()
 
 class TipoTareaOut(Schema):
     id = String()
@@ -486,6 +490,10 @@ class TipoTareaOut(Schema):
     suspendido = Boolean()
     base = Boolean()
     origen_externo = Boolean()
+    id_dominio = String()
+    id_organismo = String()
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
 
 class TipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -570,6 +578,10 @@ class TipoTareaSubtipoOut(Schema):
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
     nivel = String()
+    id_dominio = String()
+    id_organismo = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
 
 class TareaxGroupOut(Schema):
     id = String()    

@@ -1024,7 +1024,7 @@ def update_grupo(username=None,id='', **kwargs):
     db.session.commit()
     return grupo
 
-def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actualizacion=None, id_padre=None, base=False, id_user_asignado_default=None, id_organismo=None, id_dominio=None):
+def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descripcion='', id_user_actualizacion=None, id_padre=None, id_user_asignado_default=None):
     #session: scoped_session = current_app.session
     #Validaciones
     if username is not None:
@@ -1044,7 +1044,8 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         usuario = db.session.query(Usuario).filter(Usuario.id==id_user_actualizacion, Usuario.eliminado==False).first()
         if usuario is None: 
             raise Exception("Usuario de actualización no encontrado")
-    if id_organismo is not None:
+        
+    """ if id_organismo is not None:
         organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.habilitado==True).first()
         if organismo is None: 
             raise Exception("Organismo no encontrado")
@@ -1058,8 +1059,35 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
             raise Exception("Dominio no encontrado")
     else:
         if id_fuero is not None:
-            id_dominio = id_fuero
-            
+            id_dominio = id_fuero """
+    id_dominio = None
+    id_organismo = None
+    if id_padre is not None and id_padre is not '':
+        grupos_padres = get_all_base(id_padre, usuarios=False)   
+        print("Grupos padres:", grupos_padres)
+
+        if len(grupos_padres) > 0:
+            #busco en grupos padres si alguno tiene el atributo is_parentless=True
+            id_base = None
+            for grupo in grupos_padres:
+                if grupo['is_parentless']== True:
+                    id_base = grupo['id']
+                    print("#"* 30)
+                    print("Grupo base encontrado:", id_base)
+                    #print("DOminio:", grupo['id_dominio'])
+                    #print("Organismo:", grupo['id_organismo'])
+                    print("#"* 30)
+                    break
+            query_base = db.session.query(Grupo).filter(Grupo.id==id_base).first()
+
+            if query_base is not None:
+                id_dominio = query_base.id_dominio
+                id_organismo = query_base.id_organismo
+    
+    """ if id_dominio is None:
+        id_dominio = dominio
+    if id_organismo is None:
+        id_organismo = organismo """
 
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -1067,7 +1095,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         id=nuevoID_grupo,
         nombre=nombre.upper(),
         descripcion=descripcion,
-        base=base,
+        base=False,
         id_organismo=id_organismo,
         id_dominio=id_dominio,
         eliminado=False,

@@ -288,8 +288,13 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
 
+    user_actualizacion = relationship('Usuario')
+    dominio = relationship('Dominio')
+    organismo = relationship('Organismo')
+    
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'
     __table_args__ = {'schema': 'tareas'}
@@ -321,7 +326,7 @@ class Dominio(Base):
     eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 
-class TipoTareaDominio(Base):
+""" class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'relaciona los tipos de tarea con los dominios, para que cada tipo de tarea y subtipo se pueda clasificar y puede existir para mas de un dominio(fuero) y grupo.'}
 
@@ -335,7 +340,7 @@ class TipoTareaDominio(Base):
 
     tipo_tarea = relationship('TipoTarea')
     dominio = relationship('Dominio')
-    organismo = relationship('Organismo')
+    organismo = relationship('Organismo') """
 
 
 

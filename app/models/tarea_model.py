@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
-from models.alch_model import Auditoria_TareaAsignadaUsuario, TipoTareaDominio 
+from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
@@ -947,13 +947,25 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
-    query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==False).order_by(TipoTarea.nombre)
-    #query = db.session.query(TipoTarea, TipoTareaDominio).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea).order_by(TipoTarea.nombre)
-    query = query.outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea)
-    if query is not None:
-        for q in query:
-            print("Tipo de tarea:", q.id, q.nombre)
-            #, "Dominio:", q.id_dominio, "Organismo:", q.id_organismo)
+    
+    """  query = db.session.query(TipoTarea.base,
+                            TipoTarea.id,
+                            TipoTarea.codigo_humano,
+                            TipoTarea.nombre,
+                            TipoTarea.nivel,
+                            TipoTarea.origen_externo,
+                            TipoTarea.suspendido,
+                            TipoTarea.eliminado,
+                            TipoTarea.id_ext,
+                            TipoTarea.id_user_actualizacion,
+                            TipoTarea.fecha_actualizacion,
+                            TipoTareaDominio.id_dominio.label('id_dominio'),
+                            TipoTareaDominio.id_organismo.label('id_organismo')                           
+                            ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
+                            ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
+     """
+    query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
+                            
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
@@ -963,8 +975,15 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
     if eliminado is not None:
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
-        print("Filtrando por nombre:", nombre)
-        query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))    
+        query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))
+    #if dominio is not None:
+    #    query = query.filter(TipoTarea.id_dominio == dominio)
+    #if organismo is not None:
+    #    query = query.filter(TipoTarea.id_organismo == organismo)
+    if id_dominio is not None:
+        query = query.filter(TipoTarea.id_dominio == id_dominio)
+    if id_organismo is not None:
+        query = query.filter(TipoTarea.id_organismo == id_organismo)     
 
     total= query.count()
     res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
@@ -988,6 +1007,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                         "origen_externo": subtipo.origen_externo,
                         "suspendido": subtipo.suspendido,
                         "eliminado": subtipo.eliminado
+                      
                     }
                     subtipo_list.append(subtipo)
 
@@ -999,12 +1019,17 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                 "base": tipo.base,
                 "origen_externo": tipo.origen_externo,
                 "subtipo_tarea": subtipo_list,
-                "user_actualizacion": tipo.user_actualizacion,
+                "id_user_actualizacion": tipo.id_user_actualizacion,
+                #"user_actualizacion": tipo.user_actualizacion,
                 "fecha_actualizacion": tipo.fecha_actualizacion,
                 "suspendido": tipo.suspendido,
                 "eliminado": tipo.eliminado,
                 "nivel": tipo.nivel,
-                "id_ext": tipo.id_ext
+                "id_ext": tipo.id_ext,
+                "id_dominio": tipo.id_dominio,
+                "id_organismo": tipo.id_organismo,
+                "dominio": tipo.dominio,
+                "organismo": tipo.organismo
             }
             tipo_list.append(tipo_tarea)
 
@@ -1012,7 +1037,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1022,35 +1047,42 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     else:
         raise Exception("Usuario no ingresado")
            
+    if id_organismo is None:
+       id_organismo_tipo = organismo
+    else:
+        id_organismo_tipo = id_organismo    
+
+
     nuevoID=uuid.uuid4()
 
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
-        nivel=nivel,
-        base=False,
+        nivel='int',
+        base= base,
         origen_externo=False,
         suspendido=suspendido,
         eliminado=eliminado,
+        id_dominio=dominio,
+        id_organismo=id_organismo_tipo,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
 
     db.session.add(nuevo_tipo_tarea)
 
-    nuevo_tipo_tareaxdominio = TipoTareaDominio(
+    """ nuevo_tipo_tareaxdominio = TipoTareaDominio(
         id=uuid.uuid4(),
         id_tipo_tarea=nuevoID,
         id_dominio=dominio,
         id_organismo=organismo,
-        suspendido=False,
         eliminado=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
 
-    db.session.add(nuevo_tipo_tareaxdominio)
+    db.session.add(nuevo_tipo_tareaxdominio) """
 
     db.session.commit()
     return nuevo_tipo_tarea
@@ -1066,27 +1098,29 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
     else:
         raise Exception("Usuario no ingresado")
 
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False, TipoTarea.suspendido == False).first()
+    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False).first()
     
     if tipo_tarea is None:
         raise Exception("Tipo de tarea no encontrado")
     
+    if tipo_tarea.suspendido == True:
+        if 'suspendido' in kwargs:
+            tipo_tarea.suspendido = kwargs['suspendido']
+        else:
+            raise Exception("Tipo de tarea suspendido, no se puede modificar")    
+
     if 'codigo_humano' in kwargs:
         tipo_tarea.codigo_humano = kwargs['codigo_humano']
     if 'nombre' in kwargs:
         tipo_tarea.nombre = kwargs['nombre']
-    if 'eliminado' in kwargs:
-        tipo_tarea.eliminado = kwargs['eliminado']
-    else:
-        tipo_tarea.eliminado = False
-    if 'suspendido' in kwargs:
-        tipo_tarea.suspendido = kwargs['suspendido']
-    else:
-        tipo_tarea.suspendido = False
     if 'nivel' in kwargs:
         tipo_tarea.nivel = kwargs['nivel']
     if 'id_ext' in kwargs:
-        tipo_tarea.id_ext = kwargs['id_ext']          
+        tipo_tarea.id_ext = kwargs['id_ext'] 
+    if 'suspendido' in kwargs:
+        tipo_tarea.suspendido = kwargs['suspendido'] 
+    if 'eliminado' in kwargs:
+        tipo_tarea.eliminado = kwargs['eliminado']            
     #if 'base' in kwargs:
     tipo_tarea.base =False
     tipo_tarea.origen_externo = False

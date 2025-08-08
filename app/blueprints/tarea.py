@@ -67,7 +67,7 @@ def get_tipoTareas(query_data: dict):
         if (request.args.get('id_dominio') is not None):
             id_dominio = request.args.get('id_dominio')
         if (request.args.get('id_organismo') is not None):
-            id_organismo = request.args.get('id_organismo')    
+            id_organismo = request.args.get('id_organismo') 
 
         res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo, dominio, organismo)
     
