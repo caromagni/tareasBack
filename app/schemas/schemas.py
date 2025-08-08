@@ -452,8 +452,9 @@ class TipoTareaIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
-    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
-                   validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
+                    default ='int') """
     
 
 class TipoTareaPatchIn(Schema):
@@ -472,6 +473,8 @@ class TipoTareaPatchIn(Schema):
     id_ext = String()
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    id_dominio = String()
+    id_organismo = String()
 
 class TipoTareaOut(Schema):
     id = String()
@@ -486,6 +489,10 @@ class TipoTareaOut(Schema):
     suspendido = Boolean()
     base = Boolean()
     origen_externo = Boolean()
+    id_dominio = String()
+    id_organismo = String()
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
 
 class TipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -497,6 +504,7 @@ class TipoTareaGetIn(Schema):
     nombre = String(default="")
     id_dominio = String()
     id_organismo = String()
+    dominio_propio = Boolean(default = True)
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
@@ -572,6 +580,8 @@ class TipoTareaSubtipoOut(Schema):
     nivel = String()
     id_dominio = String()
     id_organismo = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
 
 class TareaxGroupOut(Schema):
     id = String()    

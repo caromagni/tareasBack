@@ -49,6 +49,7 @@ def get_tipoTareas(query_data: dict):
         id_organismo = None
         dominio = g.dominio
         organismo = g.organismo
+        dominio_propio = False
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -67,9 +68,11 @@ def get_tipoTareas(query_data: dict):
         if (request.args.get('id_dominio') is not None):
             id_dominio = request.args.get('id_dominio')
         if (request.args.get('id_organismo') is not None):
-            id_organismo = request.args.get('id_organismo')    
+            id_organismo = request.args.get('id_organismo') 
+        if (request.args.get('dominio_propio') is not None):
+            dominio_propio = request.args.get('dominio_propio')       
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo, dominio, organismo)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo, dominio, organismo, dominio_propio)
     
         
         data = {

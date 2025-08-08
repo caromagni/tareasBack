@@ -288,8 +288,13 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    user_actualizacion = relationship('Usuario')
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
 
+    user_actualizacion = relationship('Usuario')
+    dominio = relationship('Dominio')
+    organismo = relationship('Organismo')
+    
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'
     __table_args__ = {'schema': 'tareas'}
