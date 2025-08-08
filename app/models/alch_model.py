@@ -326,7 +326,7 @@ class Dominio(Base):
     eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 
-class TipoTareaDominio(Base):
+""" class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'relaciona los tipos de tarea con los dominios, para que cada tipo de tarea y subtipo se pueda clasificar y puede existir para mas de un dominio(fuero) y grupo.'}
 
@@ -340,7 +340,7 @@ class TipoTareaDominio(Base):
 
     tipo_tarea = relationship('TipoTarea')
     dominio = relationship('Dominio')
-    organismo = relationship('Organismo')
+    organismo = relationship('Organismo') """
 
 
 

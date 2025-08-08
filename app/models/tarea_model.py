@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
-from models.alch_model import Auditoria_TareaAsignadaUsuario, TipoTareaDominio 
+from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
