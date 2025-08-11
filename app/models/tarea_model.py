@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
-from models.alch_model import Auditoria_TareaAsignadaUsuario 
+from models.alch_model import Auditoria_TareaAsignadaUsuario, Organismo, Dominio 
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
@@ -1050,6 +1050,15 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     if id_organismo is None:
        id_organismo_tipo = organismo
     else:
+        query_organismo = db.session.query(Organismo).filter(Organismo.id == id_organismo, Organismo.eliminado==False).first()
+        if query_organismo is None:
+            raise Exception("Organismo no encontrado")
+        query_dominio = db.session.query(Dominio).filter(Dominio.id == dominio, Dominio.eliminado==False).first()
+        if query_dominio is None:
+            raise Exception("Dominio no encontrado")
+        if query_organismo.id_fuero != query_dominio.id_dominio_ext:
+            raise Exception("El organismo ingresado no corresponde al dominio actual")
+        
         id_organismo_tipo = id_organismo    
 
 
@@ -1098,11 +1107,63 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
     else:
         raise Exception("Usuario no ingresado")
 
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False).first()
-    
-    if tipo_tarea is None:
+    tipo_tarea = db.session.query(TipoTarea).filter(
+        TipoTarea.id == tipo_tarea_id,
+        TipoTarea.eliminado == False
+        ).first()
+
+    if not tipo_tarea:
         raise Exception("Tipo de tarea no encontrado")
-    
+
+    # Validar que organismo y dominio se correspondan
+    # Determinar valores finales de dominio y organismo (ingresados o actuales)
+    id_dominio_final = kwargs.get('id_dominio', tipo_tarea.id_dominio)
+    id_organismo_final = kwargs.get('id_organismo', tipo_tarea.id_organismo)
+
+    # Validar dominio si existe
+    dominio = None
+    if id_dominio_final is not None:
+        dominio = db.session.query(Dominio).filter(
+            Dominio.id == id_dominio_final,
+            Dominio.eliminado == False
+        ).first()
+        if dominio is None:
+            raise Exception("Dominio no encontrado")
+
+    # Validar organismo si existe
+    organismo = None
+    if id_organismo_final is not None:
+        organismo = db.session.query(Organismo).filter(
+            Organismo.id == id_organismo_final,
+            Organismo.eliminado == False
+        ).first()
+        if organismo is None:
+            raise Exception("Organismo no encontrado")
+
+    # Validar relación solo si tenemos ambos
+    if dominio and organismo:
+        if organismo.id_fuero != dominio.id_dominio_ext:
+            raise Exception("Dominio y Organismo no corresponden")
+
+    # Asignar cambios
+    if 'id_dominio' in kwargs:
+        tipo_tarea.id_dominio = kwargs['id_dominio']
+
+    if 'id_organismo' in kwargs:
+        tipo_tarea.id_organismo = kwargs['id_organismo']
+        if id_dominio_final is None:
+            query_organismo = db.session.query(Organismo).filter(
+                Organismo.id == kwargs['id_organismo'],
+                Organismo.eliminado == False
+            ).first()
+            if query_organismo:
+                query_dominio = db.session.query(Dominio).filter(
+                    Dominio.id_dominio_ext == query_organismo.id_fuero,
+                    Dominio.eliminado == False
+                ).first()
+                if query_dominio is not None:
+                    tipo_tarea.id_dominio = query_dominio.id
+
     if tipo_tarea.suspendido == True:
         if 'suspendido' in kwargs:
             tipo_tarea.suspendido = kwargs['suspendido']
@@ -1121,8 +1182,8 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.suspendido = kwargs['suspendido'] 
     if 'eliminado' in kwargs:
         tipo_tarea.eliminado = kwargs['eliminado']            
-    #if 'base' in kwargs:
-    tipo_tarea.base =False
+    if 'base' in kwargs:
+        tipo_tarea.base =kwargs['base']
     tipo_tarea.origen_externo = False
     tipo_tarea.id_user_actualizacion = id_user_actualizacion
     tipo_tarea.fecha_actualizacion = datetime.now()
