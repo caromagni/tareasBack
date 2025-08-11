@@ -1,7 +1,7 @@
 from datetime import datetime
 import common.error_handling as error_handling
 import common.exceptions as exceptions
-
+import uuid
 #import requests
 from flask import request, has_request_context
 
@@ -27,6 +27,12 @@ def controla_fecha(fecha_in=''):
         except:
             raise exceptions.ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
    
+def es_uuid(valor):
+    try:
+        uuid.UUID(str(valor))
+        return True
+    except ValueError:
+        return False
 
 def formato_expte(expte):
     l = len(expte)

@@ -680,6 +680,8 @@ def update_lote_tareas_v2(username=None, **kwargs):
             utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
+                if not(functions.es_uuid(kwargs['id_user_actualizacion'])):
+                    raise Exception("El id_user_actualizacion debe ser un UUID: " + kwargs['id_user_actualizacion'])
                 utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
@@ -691,6 +693,8 @@ def update_lote_tareas_v2(username=None, **kwargs):
         datos = []
         datos_error = []
         for tareas_update in upd_tarea:
+           if not(functions.es_uuid(tareas_update['id_tarea'])):
+               raise Exception("El id de la tarea debe ser un UUID: " + tareas_update['id_tarea'])
            resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
            if resp is None:
                 datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
@@ -744,6 +748,8 @@ def update_lote_tareas(username=None, **kwargs):
             utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
+                if not(functions.es_uuid(kwargs['id_user_actualizacion'])):
+                    raise Exception("El id_user_actualizacion debe ser un UUID")
                 utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
@@ -751,21 +757,29 @@ def update_lote_tareas(username=None, **kwargs):
                 raise Exception("Debe ingresar username o id_user_actualizacion")
             
     if 'id_actuacion' in kwargs:
+        if not(functions.es_uuid(kwargs['id_actuacion'])):
+            raise Exception("El id_actuacion debe ser un UUID")
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
         if actuacion is None:
             raise Exception("Actuacion no encontrada")
         
     if 'id_expediente' in kwargs:
+        if not(functions.es_uuid(kwargs['id_expediente'])):
+            raise Exception("El id_expediente debe ser un UUID")
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
         if expediente is None:
             raise Exception("Expediente no encontrado")
         
     if 'id_tipo_tarea' in kwargs:
+        if not(functions.es_uuid(kwargs['id_tipo_tarea'])):
+            raise Exception("El id_tipo_tarea debe ser un UUID")
         tipo = db.session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
         if tipo is  None:
             raise Exception("Tipo de tarea no encontrado")
                      
         if 'id_subtipo_tarea' in kwargs:
+            if not(functions.es_uuid(kwargs['id_subtipo_tarea'])):
+                raise Exception("El id_subtipo_tarea debe ser un UUID")
             subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
@@ -775,6 +789,8 @@ def update_lote_tareas(username=None, **kwargs):
                     raise Exception("El tipo de tarea y el subtipo de tarea no se corresponden")
     if 'grupo' in kwargs:
         for group in kwargs['grupo']:
+            if not(functions.es_uuid(group['id_grupo'])):
+                raise Exception("El id_grupo debe ser un UUID:" + group['id_grupo'])
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
                 logger_config.logger.error("Grupo no encontrado")
@@ -789,6 +805,8 @@ def update_lote_tareas(username=None, **kwargs):
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
     if 'usuario' in kwargs:
         for user in kwargs['usuario']:
+            if not(functions.es_uuid(user['id_usuario'])):
+                raise Exception("El id_usuario debe ser un UUID: " + user['id_usuario'])
             existe_usuario = db.session.query(Usuario).filter(Usuario.id == user['id_usuario']).first()
             if existe_usuario is None:
                 raise Exception("Error en el ingreso de usuarios. Usuario no existente: ") +  user['id_usuario']
@@ -802,6 +820,8 @@ def update_lote_tareas(username=None, **kwargs):
     if 'tareas' in kwargs:
         for tareas_update in kwargs['tareas']:
             if 'id' in tareas_update:
+                if not(functions.es_uuid(tareas_update['id'])):
+                    raise Exception("El id de la tarea debe ser un UUID: " + tareas_update['id'])
                 id_tarea=tareas_update['id']
                 tarea = db.session.query(Tarea).filter(Tarea.id == id_tarea).first()
                 if tarea is None:
@@ -981,8 +1001,12 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
     #if organismo is not None:
     #    query = query.filter(TipoTarea.id_organismo == organismo)
     if id_dominio is not None:
+        if(not(functions.es_uuid(id_dominio))):
+            raise Exception("El id_dominio debe ser un UUID")
         query = query.filter(TipoTarea.id_dominio == id_dominio)
     if id_organismo is not None:
+        if(not(functions.es_uuid(id_organismo))):
+            raise Exception("El id_organismo debe ser un UUID")
         query = query.filter(TipoTarea.id_organismo == id_organismo)     
 
     total= query.count()
@@ -1048,8 +1072,12 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
         raise Exception("Usuario no ingresado")
            
     if id_organismo is None:
+       
        id_organismo_tipo = organismo
     else:
+        if not(functions.es_uuid(id_organismo)):
+            raise Exception("El id_organismo debe ser un UUID")
+        
         query_organismo = db.session.query(Organismo).filter(Organismo.id == id_organismo, Organismo.eliminado==False).first()
         if query_organismo is None:
             raise Exception("Organismo no encontrado")
@@ -1117,6 +1145,13 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
 
     # Validar que organismo y dominio se correspondan
     # Determinar valores finales de dominio y organismo (ingresados o actuales)
+    if 'id_dominio' in kwargs:
+        if not(functions.es_uuid(kwargs['id_dominio'])):
+            raise Exception("El id_dominio debe ser un UUID")
+    if 'id_organismo' in kwargs:
+        if not(functions.es_uuid(kwargs['id_organismo'])):
+            raise Exception("El id_organismo debe ser un UUID")
+
     id_dominio_final = kwargs.get('id_dominio', tipo_tarea.id_dominio)
     id_organismo_final = kwargs.get('id_organismo', tipo_tarea.id_organismo)
 
@@ -1217,6 +1252,8 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
 
     query = db.session.query(SubtipoTarea)
     if id_tipo_tarea is not None:
+        if not(functions.es_uuid(id_tipo_tarea)):
+            raise Exception("El id_tipo_tarea debe ser un UUID: " + id_tipo_tarea)
         query = query.filter(SubtipoTarea.id_tipo==id_tipo_tarea)
     if eliminado is not None:
         query = query.filter(SubtipoTarea.eliminado==eliminado)
