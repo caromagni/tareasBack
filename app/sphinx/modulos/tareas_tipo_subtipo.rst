@@ -98,6 +98,14 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - **Tipos de origen interno** - Completamente editables
 - **Subtipos de origen externo** - No se pueden modificar individualmente
 
+**Regla importante:** Si el tipo de tarea es de origen externo, NO se puede:
+- Modificar el tipo (nombre, estado)
+- Agregar nuevos subtipos
+- Editar subtipos existentes
+- Eliminar subtipos existentes
+
+Esta regla protege la integridad de los datos que provienen de sistemas externos.
+
 **Características avanzadas:**
 
 - Gestión individual de subtipos - Cada subtipo se puede editar/eliminar por separado mientras no sean de origen externo
@@ -205,7 +213,9 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - **Caracteres especiales** - Solo letras, números y espacios
 - **Longitud mínima** - 4 caracteres mínimo
 - **Estados coherentes** - Subtipos activos solo en tipos activos
-- **Protección de origen** - Tipos externos no se pueden modificar
+- **Protección de origen externo** - Los tipos de origen externo son de solo lectura
+- **Inmutabilidad de subtipos externos** - Los subtipos de origen externo no se pueden modificar
+- **Prohibición de agregar subtipos** - No se pueden agregar subtipos a tipos de origen externo
 
 3.3. Comportamiento del Sistema
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -303,3 +313,5 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - Historial de integraciones
 
 Esta documentación proporciona una guía completa para entender y utilizar el módulo de Tipos y Subtipos de Tarea de manera efectiva, combinando información técnica con orientación práctica para el usuario.
+MB 
+
