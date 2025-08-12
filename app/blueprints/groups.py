@@ -3,6 +3,7 @@ import models.grupo_model as grupo_model
 import common.error_handling as error_handling
 import common.exceptions as exceptions
 import decorators.role as rol
+import decorators.verify as verify
 import common.auth as auth_token
 import traceback
 from flask import g
@@ -29,6 +30,7 @@ def before_request():
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(schema.GroupPatchIn) 
 @groups_b.output(schema.GetGroupOut)
+@verify.check_fields()
 @rol.require_role()
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
@@ -49,6 +51,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 @groups_b.get('/grupo')
 @groups_b.input(schema.GroupGetIn,  location='query')
 @groups_b.output(schema.GetGroupCountOut)
+@verify.check_fields()
 @rol.require_role()
 def get_grupo(query_data: dict):
     try:
@@ -87,6 +90,7 @@ def get_grupo(query_data: dict):
 @groups_b.get('/grupo_detalle')
 @groups_b.input(schema.GroupGetIn, location='query')
 @groups_b.output(schema.GroupCountAllOut)
+@verify.check_fields()
 @rol.require_role()
 def get_grupo_detalle(query_data: dict):
     try:
@@ -120,6 +124,7 @@ def get_grupo_detalle(query_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(schema.GroupIdOut())
+@verify.check_fields()
 @rol.require_role()
 def get_grupo_id(id: str):
     try:
@@ -136,6 +141,7 @@ def get_grupo_id(id: str):
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut(many=True))
+@verify.check_fields()
 @rol.require_role()
 def get_all_grupobase(query_data: dict):
     try:
@@ -158,6 +164,7 @@ def get_all_grupobase(query_data: dict):
 @groups_b.get('/usuarios_grupo')
 @groups_b.input(schema.UsuariosGroupIn, location='query')
 @groups_b.output(schema.UsuariosGroupOut(many=True))
+@verify.check_fields()
 @rol.require_role()
 def get_usrsbygrupo(query_data: dict):
     try:
@@ -178,6 +185,7 @@ def get_usrsbygrupo(query_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.post('/grupo')
 @groups_b.input(schema.GroupIn)
+@verify.check_fields()
 @rol.require_role()
 def post_grupo(json_data: dict):
     try:
@@ -206,6 +214,7 @@ def post_grupo(json_data: dict):
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 @groups_b.output(schema.GroupOut)
+@verify.check_fields()
 @rol.require_role()
 def del_grupo(id: str):
     try:
@@ -226,6 +235,7 @@ def del_grupo(id: str):
 ##################UNDELETE####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
 @groups_b.patch('/grupo_undelete/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 def restaura_grupo(id: str):
     try:
@@ -252,6 +262,7 @@ def restaura_grupo(id: str):
 @groups_b.output(schema.GroupsBaseOut)
 @groups_b.get('/grupo_base/<string:id>')
 #@rol.require_role()
+@verify.check_fields()
 def getGrupoBase(id: str):
     try:
         usuarios =False

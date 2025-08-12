@@ -9,6 +9,7 @@ from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Tarea
 from common.cache import *
 import common.cache as cache_common
 from datetime import time
+import common.functions as functions
 #import decorators.cache_error_wrapper as cache_error_wrapper
 
 @cache_common.cache.memoize(CACHE_TIMEOUT_LONG)
@@ -908,17 +909,24 @@ def get_grupos_herarquia_labels():
     return res                                                                 
 
 
-def update_grupo(username=None,id='', **kwargs):
+def update_grupo(username=None,id=None, **kwargs):
     #session: scoped_session = current_app.session
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
+
 
     if id_user_actualizacion is not None:
         utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
+    if id is None:
+        raise Exception("ID de grupo no ingresado")
+    if id is not None:  
+        if not(functions.es_uuid(id)):
+            raise Exception("El id del grupo debe ser un UUID: " + id)  
+
     grupo = db.session.query(Grupo).filter(Grupo.id == id).first()
     if grupo is None:
         return None
@@ -940,17 +948,23 @@ def update_grupo(username=None,id='', **kwargs):
             raise Exception("No se puede suspender el grupo. El grupo tiene tareas sin cerrar")
         grupo.suspendido = kwargs['suspendido']
     if 'id_organismo' in kwargs:
+        if not(functions.es_uuid(kwargs['id_organismo'])):
+            raise Exception("El id del organismo debe ser un UUID: " + kwargs['id_organismo'])
         organismo = db.session.query(Organismo).filter(Organismo.id==kwargs['id_organismo'], Organismo.habilitado==True).first()
         if organismo is None:
             raise Exception("Organismo no encontrado")
         grupo.id_organismo = kwargs['id_organismo']
     if 'id_dominio' in kwargs:
+        if not(functions.es_uuid(kwargs['id_dominio'])):
+            raise Exception("El id del dominio debe ser un UUID: " + kwargs['id_dominio'])
         dominio = db.session.query(Dominio).filter(Dominio.id==kwargs['id_dominio'], Dominio.habilitado==True).first()
         if dominio is None:
             raise Exception("Dominio no encontrado")
         grupo.id_dominio = kwargs['id_dominio']
         
     if 'id_user_asignado_default' in kwargs:
+        if not(functions.es_uuid(kwargs['id_user_asignado_default'])):
+            raise Exception("El id del usuario asignado default debe ser un UUID: " + kwargs['id_user_asignado_default'])
         print("--Id user asignado default:", kwargs['id_user_asignado_default'])
         if(kwargs['id_user_asignado_default']==None):
              grupo.id_user_asignado_default = None
@@ -969,6 +983,8 @@ def update_grupo(username=None,id='', **kwargs):
     grupo.fecha_actualizacion = datetime.now()
     
     if 'id_padre' in kwargs:
+        if not(functions.es_uuid(kwargs['id_padre'])):
+            raise Exception("El id del grupo padre debe ser un UUID: " + kwargs['id_padre'])
         herarquia = db.session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo==id).first()      
         if herarquia is None:
             nueva_herarquia = HerarquiaGrupoGrupo(
@@ -996,6 +1012,8 @@ def update_grupo(username=None,id='', **kwargs):
             usr.id_user_actualizacion=id_user_actualizacion
             
         for usuario in kwargs['usuario']:
+            if not(functions.es_uuid(usuario['id_usuario'])):
+                raise Exception("El id del usuario debe ser un UUID: " + usuario['id_usuario'])
             encuentra_usuario = db.session.query(Usuario).filter(Usuario.id==usuario['id_usuario']).first()
             if encuentra_usuario is None:
                 raise Exception("Usuario no encontrado:" + usuario['id_usuario'])

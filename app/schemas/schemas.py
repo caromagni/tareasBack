@@ -530,7 +530,6 @@ class SubtipoTareaPatchIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
 
@@ -554,7 +553,6 @@ class SubtipoTareaOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
-    origen_externo = Boolean()
 
 class SubtipoTareaShortOut(Schema):
     id = String()
@@ -1499,12 +1497,14 @@ class LabelAllOut(Schema):
     fecha_eliminacion = String()
     fecha_creacion = String()
     fecha_actualizacion = String()
+    id_label = String()
     id_user_creacion = String()
     id_grupo_base = String()
 
 
 class LabelIdOut(Schema):
     id = String()
+    id_label = String()
     nombre = String()
     color = String()
     eliminado = Boolean()
