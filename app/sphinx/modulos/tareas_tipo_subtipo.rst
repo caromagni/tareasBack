@@ -4,7 +4,11 @@ Tipos y Subtipos de Tarea
 Descripción General
 ------------------
 
-El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de tareas que se pueden crear en el sistema o venir de sistemas externos como el Sistema Expediente. Cada tipo de tarea puede tener subtipos asociados para mayor especificidad.
+El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de tareas que se pueden crear en el sistema o venir de sistemas externos como el **Sistema P-usher** y otros sistemas de expedientes. Cada tipo de tarea puede tener subtipos asociados para mayor especificidad.
+
+**Fuentes de tipos de tarea:**
+- **Internos**: Creados directamente en el sistema de tareas
+- **Externos**: Importados desde sistemas como P-usher (marcados como no editables)
 
 Índice de Contenidos
 --------------------
@@ -97,6 +101,14 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - **Tipos de origen externo** - No se pueden editar (nombre, estado, subtipos)
 - **Tipos de origen interno** - Completamente editables
 - **Subtipos de origen externo** - No se pueden modificar individualmente
+
+**Regla importante:** Si el tipo de tarea es de origen externo, NO se puede:
+- Modificar el tipo (nombre, estado)
+- Agregar nuevos subtipos
+- Editar subtipos existentes
+- Eliminar subtipos existentes
+
+Esta regla protege la integridad de los datos que provienen de sistemas externos.
 
 **Características avanzadas:**
 
@@ -194,9 +206,14 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Origen Interno** - Tipos creados dentro del sistema, completamente editables
-- **Origen Externo** - Tipos importados de sistemas externos, no editables
+- **Origen Externo** - Tipos importados de sistemas externos (como **P-usher**), no editables
 - **Indicadores visuales** - La tabla muestra claramente el origen de cada tipo
 - **Restricciones automáticas** - Los tipos externos no se pueden modificar
+
+**Sistema P-usher:**
+- Los tipos de tarea y subtipos que provienen del sistema **P-usher** se marcan como "origen externo"
+- Estos tipos mantienen su integridad y no pueden ser modificados para preservar la compatibilidad
+- El sistema identifica automáticamente cuando un tipo proviene de P-usher
 
 3.2. Validaciones de Seguridad
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -205,7 +222,9 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - **Caracteres especiales** - Solo letras, números y espacios
 - **Longitud mínima** - 4 caracteres mínimo
 - **Estados coherentes** - Subtipos activos solo en tipos activos
-- **Protección de origen** - Tipos externos no se pueden modificar
+- **Protección de origen externo** - Los tipos de origen externo son de solo lectura
+- **Inmutabilidad de subtipos externos** - Los subtipos de origen externo no se pueden modificar
+- **Prohibición de agregar subtipos** - No se pueden agregar subtipos a tipos de origen externo
 
 3.3. Comportamiento del Sistema
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -303,3 +322,5 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - Historial de integraciones
 
 Esta documentación proporciona una guía completa para entender y utilizar el módulo de Tipos y Subtipos de Tarea de manera efectiva, combinando información técnica con orientación práctica para el usuario.
+MB 
+

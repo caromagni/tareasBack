@@ -18,7 +18,8 @@ class DatabaseSetup:
                 "apellido": "Diaz",
                 "username": "cristiandiaz@jus.mendoza.gov.ar",
                 "email": "cristiandiaz@jus.mendoza.gov.ar",
-                "habilitado": True
+                "eliminado": False,
+                "suspendido": False
             }
             # Add more users here as needed
             # {
@@ -45,7 +46,8 @@ class DatabaseSetup:
                 apellido=user_data["apellido"],
                 username=user_data["username"],
                 email=user_data["email"],
-                habilitado=user_data["habilitado"],
+                eliminado=user_data["eliminado"],
+                suspendido=user_data["suspendido"],
                 fecha_actualizacion=datetime.now()
             )
             session.add(user)
@@ -169,6 +171,14 @@ class DatabaseSetup:
                 'id': '32957337-799f-4d01-b4e3-0d40fcfe952b',
                 'url': '/tipo_tarea',
                 'descripcion': 'Get tipo_tarea',
+                'caso_uso': [{"codigo": "consultar-tarea"}],
+                'metodo': 'GET'
+            },
+            
+            {
+                'id': 'd1b1b706-506b-44c6-bc07-8c458accc6fc',
+                'url': '/tarea',
+                'descripcion': 'Get tarea',
                 'caso_uso': [{"codigo": "consultar-tarea"}],
                 'metodo': 'GET'
             },

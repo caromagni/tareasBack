@@ -13,6 +13,12 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 **Grupo Base**: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.
 
+**Importante sobre Grupos Base:**
+- Los **grupos base** se generan y modifican desde el sistema **P-usher**
+- Pertenecen a un **dominio** que se gestiona desde P-usher
+- Desde el sistema de tareas se puede modificar **todo lo que está por debajo** del grupo base
+- El grupo base actúa como raíz organizacional que viene desde P-usher
+
 Índice de Contenidos
 --------------------
 
@@ -370,6 +376,13 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 - Organismo único - Cada grupo pertenece a un solo organismo
 - Usuario por defecto válido - Debe ser un usuario activo del sistema
 
+**Validaciones específicas para Grupos Base:**
+
+- **Protección del grupo base** - Los grupos base provienen de P-usher y tienen restricciones especiales
+- **Dominio de P-usher** - Cada grupo base pertenece a un dominio gestionado desde P-usher
+- **Modificaciones permitidas** - Solo se pueden modificar los grupos que están por debajo del grupo base
+- **Integridad del dominio** - Se mantiene la coherencia con la estructura de P-usher
+
 3.2. Comportamiento del Sistema que facilita tu trabajo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -418,11 +431,12 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 5.1. Administrador del Sistema
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Crear estructura organizacional completa
+- Crear estructura organizacional completa **por debajo del grupo base**
 - Gestionar jerarquías de grupos y subgrupos
 - Asignar usuarios a grupos apropiados
 - Monitorear estados de grupos y usuarios
 - Auditar cambios en la estructura organizacional
+- **Importante**: Los grupos base se gestionan desde P-usher, no desde el sistema de tareas
 
 5.2. Líder de Equipo
 ^^^^^^^^^^^^^^^^^^^^
@@ -478,3 +492,4 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 - Los colores te indican el estado de cada grupo
 
 Esta documentación proporciona una guía completa para entender y utilizar el módulo de Grupos de manera efectiva, combinando información técnica con orientación práctica para el usuario.
+MB.
