@@ -233,7 +233,7 @@ def create_app():
     return app
 
 app = create_app()
-application = app
+application = app 
 
 if __name__ == "__main__":
    
