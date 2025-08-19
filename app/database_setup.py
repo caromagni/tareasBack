@@ -256,7 +256,7 @@ class DatabaseSetup:
             },
             
             {
-                'id': '5c984baf-75b8-425c-8271-c9de803582f8',
+                'id': 'c60fd41c-3962-418d-b898-ef8595bd44f5',
                 'url': '/usuario',
                 'descripcion': 'DELETE usuario',
                 'caso_uso': [{"codigo": "eliminar-usuario"}],
