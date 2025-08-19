@@ -15,10 +15,12 @@ from common.cache import *
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
-# ###############
+#################Before requests ##################
 @label_b.before_request
-@cache.cached(CACHE_TIMEOUT_LONG)  # Cache for 1 hour
-def before_request():  
+def before_request():
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

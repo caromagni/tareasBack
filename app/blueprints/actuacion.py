@@ -6,13 +6,15 @@ import models.actuacion_model as actuacion_model
 import common.error_handling as error_handling
 import common.exceptions as exceptions
 import common.auth as auth_token
-
+from flask import request
 
 actuacion_b = APIBlueprint('actuacion_blueprint', __name__)
 
 #################Before requests ##################
 @actuacion_b.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        return # Skip custom logic for OPTIONS requests
     print("************ingreso a before_request Usuarios************")
     print("Before request user.py")
 

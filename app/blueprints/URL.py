@@ -18,7 +18,9 @@ ep_url = APIBlueprint('url_blueprint', __name__)
 #################Before requests ##################
 @ep_url.before_request
 def before_request():
-    print("ENTRANDO A BEFORE REQUEST")
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

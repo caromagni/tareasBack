@@ -11,20 +11,9 @@ herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
-   
-    """ jsonHeader = verify_header()
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
     
-    if jsonHeader is None:
-        #if not verificar_header():
-            #raise UnauthorizedError("Token o api-key no validos")   
-            user_origin=''
-            type_origin=''
-    else:
-            user_origin = jsonHeader['user_name']
-            type_origin = jsonHeader['type']
-    
-    g.username = user_origin
-    g.type = type_origin """
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

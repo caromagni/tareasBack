@@ -7,7 +7,7 @@ import traceback
 from common.logger_config import logger
 from flask import g
 from apiflask import APIBlueprint
-
+from flask import request
 
 
 organismo_b = APIBlueprint('organismo_blueprint', __name__)
@@ -16,6 +16,9 @@ organismo_b = APIBlueprint('organismo_blueprint', __name__)
 #################Before requests ##################
 @organismo_b.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

@@ -20,7 +20,9 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 #################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    print("ENTRANDO A BEFORE REQUEST")
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

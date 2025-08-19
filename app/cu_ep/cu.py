@@ -6,9 +6,9 @@ import common.usher as usher
 import common.auth as auth_token
 import traceback
 from common.logger_config import logger
-from flask import g
+from flask import g, request
 from apiflask import APIBlueprint
-from flask import request, current_app
+from flask import current_app
 
 
 
@@ -18,6 +18,9 @@ cu_b = APIBlueprint('cu_blueprint', __name__)
 #################Before requests ##################
 @cu_b.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     print("ENTRANDO A BEFORE REQUEST")
        
     jsonHeader = auth_token.verify_header()

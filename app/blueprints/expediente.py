@@ -5,14 +5,18 @@ import schemas.schemas as schemas
 import models.expediente_model as expediente_model
 import common.error_handling as error_handling
 import common.exceptions as exceptions
-import common.auth as auth_token 
+import common.auth as auth_token
+from flask import request
+import traceback
 
 expediente_b = APIBlueprint('expediente_blueprint', __name__)
 
 #################Before requests ##################
 @expediente_b.before_request
 def before_request():
-
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')

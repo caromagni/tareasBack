@@ -17,6 +17,9 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 @groups_b.before_request
 def before_request():
+    if request.method == 'OPTIONS':
+        return  # Skip custom logic for OPTIONS requests
+    
     jsonHeader = auth_token.verify_header() or {}
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
