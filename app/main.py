@@ -17,6 +17,7 @@ from blueprints.alerta import alerta_b
 from blueprints.endpoint import ep_b
 from blueprints.dominio import dominio_b
 from blueprints.organismo import organismo_b
+from blueprints.full_sync import full_sync_b
 # from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.URL import ep_url
@@ -182,6 +183,7 @@ def create_app():
     app.register_blueprint(ep_url)
     app.register_blueprint(dominio_b)
     app.register_blueprint(organismo_b)
+    app.register_blueprint(full_sync_b)
 
     # Kubernetes liveness probe
     @app.route('/livez')
@@ -240,8 +242,8 @@ if __name__ == "__main__":
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
-        Config.RUN_DB_SETUP = True
-        if Config.RUN_DB_SETUP:
+       
+        if Config.RUN_DB_SETUP==1:
             print("******************************************")
             print("Running DatabaseSetup before app starts... __name__ == __main__")
             print("******************************************")
@@ -254,8 +256,8 @@ else:
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
-        Config.RUN_DB_SETUP = True
-        if Config.RUN_DB_SETUP:
+     
+        if Config.RUN_DB_SETUP==1:
             print("******************************************")
             print("Running DatabaseSetup before app starts... Else block")
             print("******************************************")

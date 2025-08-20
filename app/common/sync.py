@@ -22,9 +22,12 @@ def sync_request(url, entity_id):
     print("json roles:",resp)
     return resp
 
-def sync_tipo_tarea(entity_id, url,id_user):
-
-    resp= sync_request(url, entity_id)
+def sync_tipo_tarea(entity_id, url,id_user=None):
+    base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/?habilitado=H&rows=1000&usuario_consulta=')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    sync_url = f"{base_url}{usuario_consulta}"
+    print("logging before calling sync_request")
+    resp= sync_request(sync_url, entity_id)
     print("json roles:",resp)
     if resp and resp['data']['id'] is not None:
         #Buscar si existe el tipo de tarea en la base de datos
