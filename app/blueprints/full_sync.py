@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint
 from flask import g, request
 import decorators.role as rol
-import common.full_sync as full_sync
+import controller.full_sync as full_sync
 import common.utils as utils
 import common.error_handling as error_handling
 import common.exceptions as exceptions
@@ -33,12 +33,20 @@ def before_request():
 def sync_all_tipos_tareas():
     try:
         # Get user ID for audit trail
-        #id_user = utils.get_username_id(g.username)
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        print("id_user:",id_user)
         
         # Perform full sync
         print("calling full_sync_tipos_tareas")
         print("******************************")
-        success_count, error_count = full_sync.full_sync_tipos_tareas()
+        success_count, error_count = full_sync.full_sync_tipos_tareas(id_user)
         
         return {
             "success": True,
@@ -50,6 +58,7 @@ def sync_all_tipos_tareas():
         }
     
     except Exception as err:
+        traceback.print_exc()
         logger_config.logger.error(f"Error in full sync tipos tareas: {err}")
         raise exceptions.ValidationError(err)
 

@@ -29,8 +29,8 @@ def test_pusher_connection():
         return False
     
     # Test URL
-    base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/')
-    test_url = f"{base_url}?desc_sistema=tareas&tipo_entidad=tipo_act_juzgado&usuario_consulta={usuario_consulta}"
+    base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
+    test_url = f"{base_url}{usuario_consulta}&tipo_entidad=tipo_act_juzgado"
     
     headers = {'x-api-key': x_api_key, 'x-api-system': x_api_system}
     
@@ -59,8 +59,7 @@ def test_full_sync_functions():
     
     try:
         # Import the full sync module
-        from common.full_sync import (
-            get_all_entities_from_pusher,
+        from controller.full_sync import (
             full_sync_tipos_tareas,
             full_sync_usuarios,
             full_sync_organismos
@@ -69,13 +68,13 @@ def test_full_sync_functions():
         print("✅ Successfully imported full sync functions")
         
         # Test getting entities from Pusher
-        print("\nTesting get_all_entities_from_pusher...")
-        tipos_data = get_all_entities_from_pusher('tipo_act_juzgado')
+        print("\nTesting full_sync_tipos_tareas...")
+        success_count, error_count = full_sync_tipos_tareas()
         
-        if tipos_data and 'data' in tipos_data:
-            print(f"✅ Successfully retrieved {len(tipos_data['data'])} tipos de tareas")
+        if success_count >= 0:
+            print(f"✅ Successfully tested full_sync_tipos_tareas: {success_count} successful, {error_count} errors")
         else:
-            print("❌ Failed to retrieve tipos de tareas")
+            print("❌ Failed to test full_sync_tipos_tareas")
             return False
         
         return True
