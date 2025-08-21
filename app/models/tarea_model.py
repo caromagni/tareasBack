@@ -264,12 +264,18 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if fecha_inicio is None:
         fecha_inicio = datetime.now().date()
         
+        
     fecha_inicio = functions.controla_fecha(fecha_inicio)
+    if fecha_inicio < datetime.now().date():
+        raise Exception("La fecha de inicio no puede ser menor a la fecha actual")
 
     if fecha_fin is not None:
         fecha_fin = functions.controla_fecha(fecha_fin)
         if fecha_fin < fecha_inicio:
             raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
+        if fecha_fin < datetime.now():
+            raise Exception("La fecha de fin no puede ser menor la fecha actual")
+
 
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
@@ -517,6 +523,7 @@ def update_tarea(id_t='', username=None, **kwargs):
             tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
 
     if 'plazo' in kwargs:
+        plazo = kwargs['plazo']
         tarea.plazo = kwargs['plazo']
     if 'prioridad' in kwargs:
         tarea.prioridad = kwargs['prioridad']
@@ -524,9 +531,12 @@ def update_tarea(id_t='', username=None, **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper() 
+    ####CONTROLES DE FECHAS DE INICIO Y FIN SI SE INGRESA UNA DE LAS DOS , O LAS DOS ###########    
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        if fecha_inicio <= datetime.now():
+            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
     else:
         fecha_inicio = None
@@ -534,6 +544,8 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        if fecha_fin <= datetime.now():
+            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
         tarea.fecha_fin = fecha_fin     
     else:
         fecha_fin = None       
@@ -544,7 +556,22 @@ def update_tarea(id_t='', username=None, **kwargs):
         else:
             tarea.fecha_inicio = fecha_inicio
             tarea.fecha_fin = fecha_fin
-                
+    if fecha_inicio is not None and fecha_fin is None:        
+        #Si no se ingreso fecha fin, calculo la fecha fin
+        if 'plazo' in kwargs and kwargs['plazo'] > 0:
+            tarea.fecha_fin = calcular_fecha_vencimiento(fecha_inicio, kwargs['plazo'])
+        else:
+            if fecha_inicio > tarea.fecha_fin:
+                raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
+    if fecha_inicio is None and fecha_fin is not None:
+        #Si no se ingreso fecha inicio, calculo la fecha inicio
+        if 'plazo' in kwargs and kwargs['plazo'] > 0:
+            tarea.fecha_fin = calcular_fecha_vencimiento(fecha_fin, -kwargs['plazo'])
+        else:
+            if tarea.fecha_inicio > fecha_fin:
+                raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
+
+
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
 
@@ -908,6 +935,19 @@ def update_lote_tareas(username=None, **kwargs):
                         tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
                     if 'id_subtipo_tarea' in kwargs:
                         tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
+                    if 'fecha_inicio' in kwargs:
+                        fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
+                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+                        if fecha_inicio <= datetime.now():
+                            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+                        tarea.fecha_inicio = fecha_inicio    
+                    if 'fecha_fin' in kwargs:
+                        fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
+                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+                        if fecha_fin <= datetime.now():
+                            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+                        tarea.fecha_fin = fecha_fin
+
                  
                     tarea.id_user_actualizacion = id_user_actualizacion  
                     tarea.fecha_actualizacion = datetime.now()
