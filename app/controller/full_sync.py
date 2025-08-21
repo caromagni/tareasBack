@@ -20,6 +20,7 @@ def full_sync_tipos_tareas(id_user=None):
     base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', 'http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/?rows=1000&usuario_consulta=')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     sync_url = f"{base_url}{usuario_consulta}"
+    sync_url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
     print("Obtanined records from pusher")
     print("sync_url:",sync_url)
     print("usuario_consulta:",usuario_consulta)
@@ -41,7 +42,7 @@ def full_sync_tipos_tareas(id_user=None):
     for tipo_data in tipos_data['data']:
         print("tipo_data:",tipo_data)
         print("******************************")
-        sync.sync_tipo_tarea(tipo_data['id'], id_user)
+        sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
         time.sleep(0.5)
 
 
