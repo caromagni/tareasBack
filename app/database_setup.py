@@ -102,7 +102,8 @@ class DatabaseSetup:
             print("Organismo 'Organismo General' already exists")
             return existing_organismo
         organismo = Organismo(
-            id=uuid.uuid4(),
+            #id=uuid.uuid4(),
+            id="cb08f738-7590-4331-871e-26f0f09ff4ca", #must match harcoded id organismo from usher.py untill we have a proper organismo setup
             id_organismo_ext=uuid.uuid4(),
             circunscripcion_judicial="General",
             descripcion="Organismo General",
