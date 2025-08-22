@@ -86,13 +86,13 @@ class DatabaseSetup:
                 "suspendido": False
             },
             {
-                "nombre": "Raúls",
+                "nombre": "Raúl",
                 "apellido": "Guillot",
                 "username": "rguillot@jus.mendoza.gov.ar",
                 "email": "rguillot@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
-            },
+            }
             
         ]
         
