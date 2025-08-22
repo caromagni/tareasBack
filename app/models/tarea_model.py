@@ -1156,7 +1156,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None):
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
