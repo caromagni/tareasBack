@@ -41,6 +41,8 @@ def before_request():
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username
+        dominio = g.dominio
+        organismo = g.organismo
         cant=0
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
@@ -126,6 +128,8 @@ def post_tipo_tarea(json_data: dict):
 def update_tipotarea(id_tipo_tarea:str,json_data: dict):
     try:
         username=g.username
+        dominio = g.dominio
+        organismo = g.organismo
         res = tarea_model.update_tipo_tarea(username, id_tipo_tarea,**json_data)
         if res is None:
             result={

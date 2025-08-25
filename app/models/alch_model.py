@@ -313,6 +313,24 @@ class SubtipoTarea(Base):
     origen_externo = Column(Boolean, default=False)
     tipo_tarea = relationship('TipoTarea')
 
+""" class TipoTareaDominio(Base):
+    _tablename_ = 'tipo_tarea_x_dominio'
+    _table_args_ = {
+        'schema': 'tareas',
+        'comment': 'Relación entre tipo de tarea, dominio y organismo.'
+    }
+
+    id = Column(UUID, primary_key=True)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+
+    # Relaciones
+    dominio = relationship('Dominio')
+    tipo_tarea = relationship('TipoTarea')
+    organismo = relationship('Organismo')     """
+
 class Dominio(Base):
     __tablename__ = 'dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados.'}
@@ -327,7 +345,7 @@ class Dominio(Base):
     eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
 
-""" class TipoTareaDominio(Base):
+class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'relaciona los tipos de tarea con los dominios, para que cada tipo de tarea y subtipo se pueda clasificar y puede existir para mas de un dominio(fuero) y grupo.'}
 
@@ -341,7 +359,7 @@ class Dominio(Base):
 
     tipo_tarea = relationship('TipoTarea')
     dominio = relationship('Dominio')
-    organismo = relationship('Organismo') """
+    organismo = relationship('Organismo')
 
 
 

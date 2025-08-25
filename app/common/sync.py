@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, TipoTarea, SubtipoTarea, Inhabilidad, Organismo, Grupo,  Dominio
+from models.alch_model import Usuario, TipoTarea, SubtipoTarea, TipoTareaDominio, Inhabilidad, Organismo, Grupo,  Dominio
 from datetime import datetime
 import common.logger_config as logger_config
 import uuid
@@ -34,7 +34,8 @@ def sync_tipo_tarea(entity_id, url,id_user):
         query_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == resp['data']['id']).first()
         if query_tipo_tarea is None:
             #hago insert del tipo de tarea
-            nuevo_tipo_tarea = TipoTarea(id=uuid.uuid4(),
+            id_nuevo = uuid.uuid4()
+            nuevo_tipo_tarea = TipoTarea(id=id_nuevo,
                                id_ext=resp['data']['id'], 
                                nombre=resp['data']['descripcion'], 
                                codigo_humano=resp['data']['descripcion_corta'], 
@@ -48,7 +49,28 @@ def sync_tipo_tarea(entity_id, url,id_user):
                                id_organismo=x_organismo
                             )
             db.session.add(nuevo_tipo_tarea)
+            #Agrego el tipo de tarea al dominio y organismo por defecto
+            nuevo_tipo_tarea_dominio = TipoTareaDominio(id=uuid.uuid4(),
+                                                       id_tipo_tarea=id_nuevo,
+                                                       id_dominio=x_dominio,
+                                                       id_organismo=x_organismo,
+                                                       fecha_actualizacion=datetime.now(),
+                                                        id_user_actualizacion=id_user
+                                                       )
+            db.session.add(nuevo_tipo_tarea_dominio)
         else:
+            query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea == query_tipo_tarea.id, TipoTareaDominio.id_dominio == x_dominio, TipoTareaDominio.id_organismo == x_organismo).first()
+            if query_tipo_tarea_dominio is None:
+                #hago insert del tipo de tarea dominio
+                nuevo_tipo_tarea_dominio = TipoTareaDominio(id=uuid.uuid4(),
+                                                            id_tipo_tarea=query_tipo_tarea.id,
+                                                            id_dominio=x_dominio,
+                                                            id_organismo=x_organismo,
+                                                            fecha_actualizacion=datetime.now(),
+                                                            id_user_actualizacion=id_user
+                                                           )
+                db.session.add(nuevo_tipo_tarea_dominio)
+
             #hago update del tipo de tarea
             query_tipo_tarea.nombre = resp['data']['descripcion']
             query_tipo_tarea.codigo_humano = resp['data']['descripcion_corta'] 
