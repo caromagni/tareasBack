@@ -174,6 +174,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 logger_config.logger.info("before delete expired roles")
                 #needs to delete first the entry in usuario_rol as it has a foreign key to rol_ext
                 for role in current_user_expired_roles:
+                    print("Borra role.id:", role.id)
                     db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
                 logger_config.logger.info("after delete expired roles")
                 current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()

@@ -4,6 +4,7 @@ import common.error_handling as error_handling
 import common.exceptions as exceptions
 import common.auth as auth_token
 import decorators.role as rol
+import decorators.verify as verify
 import traceback
 from apiflask import APIBlueprint
 from flask import request, current_app
@@ -35,6 +36,7 @@ def before_request():
 @nota_b.get('/tipo_nota')
 @nota_b.output(schema.TipoNotaCountOut)
 @nota_b.input(schema.PageIn, location='query')
+@verify.check_fields()
 @rol.require_role()
 def get_tipoNotas(query_data: dict):
     try:
@@ -66,6 +68,7 @@ def get_tipoNotas(query_data: dict):
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.post('/tipo_nota')
 @nota_b.input(schema.TipoNotaIn)
+@verify.check_fields()
 @rol.require_role()
 def post_tipo_nota(json_data: dict):
     try:
@@ -91,6 +94,7 @@ def post_tipo_nota(json_data: dict):
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/tipo_nota/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 def del_tipo_nota(id: str):
     try:
@@ -117,6 +121,7 @@ def del_tipo_nota(id: str):
 @nota_b.get('/nota')
 @nota_b.input(schema.NotaGetIn, location='query')
 @nota_b.output(schema.NotaCountOut)
+@verify.check_fields()
 @rol.require_role()
 def get_notas(query_data: dict):
     try:
@@ -179,6 +184,7 @@ def get_notas(query_data: dict):
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota/<string:id>')
 @nota_b.output(schema.NotaIdOut)
+@verify.check_fields()
 @rol.require_role()
 def get_nota(id:str):
     print('nota.py')
@@ -203,6 +209,7 @@ def get_nota(id:str):
 @nota_b.post('/nota')
 @nota_b.input(schema.NotaIn)
 @nota_b.output(schema.NotaOut)
+@verify.check_fields()
 @rol.require_role()
 def post_nota(json_data: dict):
     try:
@@ -230,6 +237,7 @@ def post_nota(json_data: dict):
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
 # @nota_b.output(NotaIdOut)
+@verify.check_fields()
 @rol.require_role()
 def del_nota(id: str):
     try:

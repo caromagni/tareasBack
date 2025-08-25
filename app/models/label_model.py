@@ -6,6 +6,7 @@ from models.grupo_hierarchy import find_parent_id_recursive
 from db.alchemy_db import db
 from .alch_model import Label, LabelXTarea, Tarea
 import common.cache as cache_common
+import common.functions as functions
 ########################## LABELS #############################################
 # def buscar_grupo_padre_recursivo(id):
 #     
@@ -30,18 +31,21 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
-
-    if id_user_actualizacion is not None:
+    elif id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")  
     
     nuevoID_label=uuid.uuid4()
-    id_tarea = id_tarea
-    # tarea = get_tarea_by_id(id_tarea)
-    # id_grupo = tarea[0]['grupos'][0]['id']
+    if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
     # print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
     print('db.session:', db.session)
+    if id_grupo is not None:
+        if not(functions.es_uuid(id_grupo)):
+            raise Exception("El id del grupo debe ser un UUID: " + id_grupo)
+    
     id_grupo_base=find_parent_id_recursive(db.session, id_grupo)
 
     print('id_grupo_padre:', id_grupo_base)
@@ -127,12 +131,18 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_base=N
         query = query.filter(Label.nombre.ilike(f'%{nombre}%'))
 
     if id_grupo_base is not None:
+        if not(functions.es_uuid(id_grupo_base)):
+            raise Exception("El id del grupo base debe ser un UUID: " + id_grupo_base)
         query = query.filter(Label.id_grupo_base== id_grupo_base)
 
     if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
         query = query.filter(Label.id_tarea== id_tarea)
 
     if id_user_creacion is not None:
+        if not(functions.es_uuid(id_user_creacion)):
+            raise Exception("El id del usuario de creación debe ser un UUID: " + id_user_creacion)
         query = query.filter(Label.id_user_creacion == id_user_creacion)
 
     if eliminado is not None:
@@ -141,11 +151,18 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_base=N
     #muestra datos
     total= len(query.all()) 
     result = query.order_by(Label.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
+    for label in result:
+        print('label:', label.id_label)
 
-    
     return result, total
 
 def get_label_by_id(id):
+
+    if id is not None:
+        if not(functions.es_uuid(id)):
+            raise Exception("El id de la etiqueta debe ser un UUID: " + id)
+    if id is None:
+        raise Exception("El id de la etiqueta no puede ser nulo")    
     
     res = db.session.query(Label).filter(Label.id_label == id).first()
 
@@ -159,11 +176,18 @@ def delete_label(username=None, id_label=None):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
-
-    if id_user_actualizacion is not None:
+    elif id_user_actualizacion is not None:    
+            if not(functions.es_uuid(id_user_actualizacion)):
+                raise Exception("El id del usuario de actualización debe ser un UUID: " + id_user_actualizacion)    
             utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")
+    
+    if id_label is not None:
+        if not(functions.es_uuid(id_label)):
+            raise Exception("El id de la etiqueta debe ser un UUID: " + id_label)
+    else:
+        raise Exception("El id de la etiqueta a borrar no puede ser nulo")
     
     label = db.session.query(Label).filter(Label.id_label == id_label, Label.eliminado==False).first()
     print('label id a borrar:', label.id_label)
@@ -206,12 +230,22 @@ def get_active_labels(ids_grupos_base):
     # id_grupo_base = find_parent_id_recursive(db, id_grupo)
     # print('*********************************************id_grupo_base:', id_grupo_base)
     print("##"*50)
+    if ids_grupos_base is None:
+        raise Exception("Debe ingresar por lo menos un id de grupo base")
     ids_list = ids_grupos_base.split(',')
-    # ids_list = [ids_grupos_base]
+    for i in range(len(ids_list)):
+        ids_list[i] = ids_list[i].strip()
+        if not(functions.es_uuid(ids_list[i])):
+            raise Exception("El id del grupo base debe ser un UUID: " + ids_list[i])
+    #quitar espacios
     print('ids_list:', ids_list)
+   
     labels_group_array = []
     total = 0
     for id in ids_list:
+        if not(functions.es_uuid(id)):
+            raise Exception("El id del grupo base debe ser un UUID: " + id)
+        
         print('id_grupos_base:', id)
         print("#"*50)
         labels_group = db.session.query(Label).filter(Label.id_grupo_base == id, Label.eliminado == False).all()
@@ -229,17 +263,25 @@ def get_active_labels(ids_grupos_base):
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea(username=None, **kwargs):
+#def insert_label_tarea(username=None, **kwargs):
+def insert_label_tarea(ids_labels=[], id_tarea=None, username=None):    
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
-
-    if id_user_actualizacion is not None:
+    elif id_user_actualizacion is not None:
+        if not(functions.es_uuid(id_user_actualizacion)):
+            raise Exception("El id del usuario de actualización debe ser un UUID: " + id_user_actualizacion)
         utils.verifica_usr_id(id_user_actualizacion)
     else:
-        raise Exception("Usuario no ingresado") 
-    
-    id_tarea = kwargs['id_tarea']
-    ids_labels = kwargs['ids_labels']
+        raise Exception("Usuario no ingresado")
+
+    if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
+    if ids_labels is not  None:
+        for id_label in ids_labels:
+            if not(functions.es_uuid(id_label)):
+                raise Exception("El id de la etiqueta debe ser un UUID: " + id_label)
+
     
     labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
    
@@ -352,6 +394,12 @@ def update_label_tarea(id_label='', id_tarea="", **kwargs):
     return result
 
 def get_label_by_tarea(id_tarea):
+    if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
+    else:
+        raise Exception("El id de la tarea no puede ser nulo")
+    
     print('Fetching labels for task ID:', id_tarea)
     active_labels = []
 

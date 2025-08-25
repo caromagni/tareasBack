@@ -6,7 +6,6 @@ from sqlalchemy import desc
 from sqlalchemy import func, cast
 from sqlalchemy.types import Boolean, TIMESTAMP
 import uuid
-from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
@@ -17,6 +16,7 @@ import common.logger_config as logger_config
 import decorators.cache_error_wrapper as cache_error_wrapper
 import common.cache as cache_common
 import json
+from datetime import date, time, datetime, timedelta
 
 
 def nombre_estado(estado):
@@ -84,10 +84,13 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
         dias_aviso = 365  # Por defecto, 365 días de aviso
 
     # Consulta base con filtros comunes
+    fecha_actual =datetime.combine(date.today(), time.min)  
     query = (db.session.query(Tarea)
-            .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
+            .filter(Tarea.fecha_fin >= fecha_actual,  # Solo tareas activas
                     Tarea.eliminado == False,
-                    Tarea.estado != 3))
+                    Tarea.estado != 3)).order_by(Tarea.fecha_fin)
+    for tarea in query.all():
+        print("Tarea:", tarea.id, "Fecha de inicio:", tarea.fecha_inicio, "Fecha fin:", tarea.fecha_fin)
 
     if grupos_usr is not None and grupos_usr=='true' or grupos_usr==True:
         logger_config.logger.info("tareas_a_vencer asignadas a los grupos del usuario")
@@ -97,22 +100,37 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
                 .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
                 .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
                 .filter(UsuarioGrupo.id_usuario == id_user,
-                        UsuarioGrupo.eliminado == False)
+                        UsuarioGrupo.eliminado == False).order_by(Tarea.fecha_fin).order_by(Tarea.fecha_fin)
                 .all())
     else:
         # Tareas asignadas directamente al usuario
         logger_config.logger.info("tareas_a_vencer asignadas al usuario")
+        logger_config.logger.info("id_user:" + str(id_user))
         tareas = (query
                 .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
                 .filter(TareaAsignadaUsuario.id_usuario == id_user,
-                        TareaAsignadaUsuario.eliminado == False)
+                        TareaAsignadaUsuario.eliminado == False).order_by(Tarea.fecha_fin)
                 .all())    
 
     if tareas is not None:
+        for tarea in tareas:
+            print("Tarea:", tarea.id, "Fecha de inicio:", tarea.fecha_inicio, "Fecha fin:", tarea.fecha_fin)
         total = len(tareas)
         logger_config.logger.info("Cantidad de tareas_a_vencer:" + str(total))    
 
-    tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    #tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    #calculo tareas por vencer
+    tareas_vencer = []
+    for tarea in tareas:
+        dias_vencimiento = calcular_dias_vencimiento(tarea.fecha_fin)
+        print("Fecha fin:", tarea.fecha_fin , "Dias vencimiento:", dias_vencimiento, "Dias aviso:", dias_aviso)
+        if dias_vencimiento <= dias_aviso:
+            """ tarea.dias_vencimiento = dias_vencimiento
+            tarea.nombre_estado = nombre_estado(tarea.estado)
+            tarea.nombre_prioridad = nombre_prioridad(tarea.prioridad) """
+            tareas_vencer.append(tarea)
+    
+    
     total = len(tareas_vencer)
     return tareas_vencer, total
 
@@ -134,6 +152,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
           
 
     if id_expediente is not None:
+        if not(functions.es_uuid(id_expediente)):
+            raise Exception("El id del expediente debe ser un UUID: " + id_expediente)
+        
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
 
         if expediente is None:
@@ -161,6 +182,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 id_expediente = expediente.id
 
     if id_actuacion is not None:
+        if not(functions.es_uuid(id_actuacion)):
+            raise Exception("El id de la actuacion debe ser un UUID: " + id_actuacion)
+        
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion).first()
         
         if actuacion is None:
@@ -184,8 +208,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                     actuacion.id_user_actualizacion = id_user_actualizacion
                     actuacion.fecha_actualizacion = datetime.now()
                 id_actuacion = actuacion.id
-            
+
+    if id_subtipo_tarea is not None:
+        if not(functions.es_uuid(id_subtipo_tarea)):
+            raise Exception("El id del subtipo de tarea debe ser un UUID: " + id_subtipo_tarea)
+
     if id_tipo_tarea is not None:
+        if not(functions.es_uuid(id_tipo_tarea)):
+            raise Exception("El id del tipo de tarea debe ser un UUID: " + id_tipo_tarea)
+        
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
             #Busco por id_ext
@@ -233,12 +264,18 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if fecha_inicio is None:
         fecha_inicio = datetime.now().date()
         
+        
     fecha_inicio = functions.controla_fecha(fecha_inicio)
+    if fecha_inicio < datetime.now().date():
+        raise Exception("La fecha de inicio no puede ser menor a la fecha actual")
 
     if fecha_fin is not None:
         fecha_fin = functions.controla_fecha(fecha_fin)
         if fecha_fin < fecha_inicio:
             raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
+        if fecha_fin < datetime.now():
+            raise Exception("La fecha de fin no puede ser menor la fecha actual")
+
 
     if plazo>0:
         query_inhabilidad = db.session.query(Inhabilidad).all()
@@ -304,6 +341,9 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if grupo is not None:
         for group in grupo:
             id_grupo=group['id_grupo']
+            if not(functions.es_uuid(id_grupo)):
+                raise Exception("El id del grupo debe ser un UUID: " + id_grupo)
+            
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
             if existe_grupo is None:
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
@@ -336,6 +376,8 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if usuario is not None:
         for user in usuario:
             id_usuario = user['id_usuario']
+            if not(functions.es_uuid(id_usuario)):
+                raise Exception("El id del usuario debe ser un UUID: " + id_usuario)
             existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario, Usuario.eliminado==False).first()
             if existe_usuario is None:
                 logger_config.logger.error("Error en el ingreso de Usuario. Usuario no existente")
@@ -381,6 +423,12 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
 def update_tarea(id_t='', username=None, **kwargs):
     ################################
+
+    if id_t is None:
+        raise Exception("Debe ingresar el id de la tarea a modificar")
+    if not(functions.es_uuid(id_t)):
+        raise Exception("El id de la tarea debe ser un UUID: " + id_t)
+    
     tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==False).first()
 
     if username is not None:
@@ -475,6 +523,7 @@ def update_tarea(id_t='', username=None, **kwargs):
             tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
 
     if 'plazo' in kwargs:
+        plazo = kwargs['plazo']
         tarea.plazo = kwargs['plazo']
     if 'prioridad' in kwargs:
         tarea.prioridad = kwargs['prioridad']
@@ -482,9 +531,12 @@ def update_tarea(id_t='', username=None, **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper() 
+    ####CONTROLES DE FECHAS DE INICIO Y FIN SI SE INGRESA UNA DE LAS DOS , O LAS DOS ###########    
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        if fecha_inicio <= datetime.now():
+            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
     else:
         fecha_inicio = None
@@ -492,6 +544,8 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        if fecha_fin <= datetime.now():
+            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
         tarea.fecha_fin = fecha_fin     
     else:
         fecha_fin = None       
@@ -502,9 +556,37 @@ def update_tarea(id_t='', username=None, **kwargs):
         else:
             tarea.fecha_inicio = fecha_inicio
             tarea.fecha_fin = fecha_fin
-                
+    if fecha_inicio is not None and fecha_fin is None:        
+        #Si no se ingreso fecha fin, calculo la fecha fin
+        if 'plazo' in kwargs and kwargs['plazo'] > 0:
+            tarea.fecha_fin = calcular_fecha_vencimiento(fecha_inicio, kwargs['plazo'])
+        else:
+            if fecha_inicio > tarea.fecha_fin:
+                raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
+    if fecha_inicio is None and fecha_fin is not None:
+        #Si no se ingreso fecha inicio, calculo la fecha inicio
+        if 'plazo' in kwargs and kwargs['plazo'] > 0:
+            tarea.fecha_fin = calcular_fecha_vencimiento(fecha_fin, -kwargs['plazo'])
+        else:
+            if tarea.fecha_inicio > fecha_fin:
+                raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
+
+
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
+
+    
+    if 'url' in kwargs and kwargs['url'].strip() != "":
+        nuevo_url = URL(
+            id=uuid.uuid4(),
+            id_tarea=id_t,
+            url=kwargs['url'],
+            descripcion=kwargs['url_descripcion'] if 'url_descripcion' in kwargs else None,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+
+        db.session.add(nuevo_url)    
     
     usuarios=[]
     grupos=[]
@@ -853,6 +935,19 @@ def update_lote_tareas(username=None, **kwargs):
                         tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
                     if 'id_subtipo_tarea' in kwargs:
                         tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
+                    if 'fecha_inicio' in kwargs:
+                        fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
+                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+                        if fecha_inicio <= datetime.now():
+                            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+                        tarea.fecha_inicio = fecha_inicio    
+                    if 'fecha_fin' in kwargs:
+                        fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
+                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+                        if fecha_fin <= datetime.now():
+                            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+                        tarea.fecha_fin = fecha_fin
+
                  
                     tarea.id_user_actualizacion = id_user_actualizacion  
                     tarea.fecha_actualizacion = datetime.now()
@@ -1061,7 +1156,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None):
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1125,7 +1220,7 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     return nuevo_tipo_tarea
 
 
-def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
+def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1136,7 +1231,7 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         raise Exception("Usuario no ingresado")
 
     tipo_tarea = db.session.query(TipoTarea).filter(
-        TipoTarea.id == tipo_tarea_id,
+        TipoTarea.id == id_tipo_tarea,
         TipoTarea.eliminado == False
         ).first()
 
@@ -1271,12 +1366,16 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
         id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
+        if not(functions.es_uuid(id_user_actualizacion)):
+            raise Exception("El id_user_actualizacion debe ser un UUID: " + id_user_actualizacion)
         utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
     
     if id_tipo is not None:
+        if not(functions.es_uuid(id_tipo)):
+            raise Exception("El id_tipo debe ser un UUID: " + id_tipo)
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
             raise Exception("Tipo de tarea no encontrado")
@@ -1311,9 +1410,18 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
         id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
+        if not(functions.es_uuid(id_user_actualizacion)):
+            raise Exception("El id_user_actualizacion debe ser un UUID: " + id_user_actualizacion)
         utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
+    
+    if subtipo_id is not None:
+        if not(functions.es_uuid(subtipo_id)):
+            raise Exception("El id_subtipo_tarea debe ser un UUID: " + subtipo_id)
+
+    if subtipo_id is None:
+        raise Exception("Debe ingresar el id del subtipo de tarea a actualizar")    
 
     subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == subtipo_id).first()
     
@@ -1350,10 +1458,18 @@ def delete_subtipo_tarea(username=None, id=None):
         id_user_actualizacion = utils.get_username_id(username)
 
     if id_user_actualizacion is not None:
+        if not(functions.es_uuid(id_user_actualizacion)):
+            raise Exception("El id_user_actualizacion debe ser un UUID: " + id_user_actualizacion)
         utils.verifica_usr_id(id_user_actualizacion)
     else:
         raise Exception("Usuario no ingresado")
     
+    if id is not None:
+        if not(functions.es_uuid(id)):
+            raise Exception("El id_subtipo_tarea debe ser un UUID: " + id)
+    if id is None:
+        raise Exception("Debe ingresar el id del subtipo de tarea a eliminar")
+        
     subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id, SubtipoTarea.eliminado==False).first()
     if subtipo_tarea is not None:
         subtipo_tarea.eliminado=True
@@ -1366,8 +1482,15 @@ def delete_subtipo_tarea(username=None, id=None):
     
 ##########################TAREAS #############################################
 def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', notas=""):
+    
     msg=''
     
+    if id_tarea is None:
+        raise Exception("Debe ingresar el id de la tarea a asignar")
+    if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
+
     tareas = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
     if tareas is None:
         msg = "Tarea no encontrada"
@@ -1396,6 +1519,12 @@ def insert_usuario_tarea(id_tarea='', id_usuario='',id_user_actualizacion='', no
 
 def get_tarea_historia_usr_by_id(id):
     
+    if id is None:
+        raise Exception("Debe ingresar el id de la tarea a consultar")
+    if id is not None:
+        if not(functions.es_uuid(id)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id)
+        
     query = (
     db.session.query(
         Tarea.id.label("id_tarea"),
@@ -1443,6 +1572,13 @@ def get_tarea_historia_usr_by_id(id):
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_tarea_by_id(id):
+
+    if id is None:
+        raise Exception("Debe ingresar el id de la tarea a consultar")
+    
+    if id is not None:
+        if not(functions.es_uuid(id)):
+            raise Exception("El id de la tarea debe ser un UUID: " + id)
     
     res = db.session.query(Tarea).filter(Tarea.id == id).first()
     
@@ -1963,22 +2099,36 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
+        if not(functions.es_uuid(id_tarea)):
+            raise Exception("El id_tarea debe ser un UUID: " + id_tarea)
         query = query.filter(Tarea.id == id_tarea)
     if titulo is not None:
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
     if id_expediente is not None:
+        if not(functions.es_uuid(id_expediente)):
+            raise Exception("El id del expediente debe ser un UUID: " + id_expediente)
         query = query.filter(Tarea.id_expediente == id_expediente)
     if id_expte_ext is not None:
+        if not(functions.es_uuid(id_expte_ext)):
+            raise Exception("El id del expediente externo debe ser un UUID: " + id_expte_ext)
         query = query.join(ExpedienteExt, Tarea.id_expediente == ExpedienteExt.id
                 ).filter(ExpedienteExt.id_ext == id_expte_ext)
     if id_actuacion is not None:
+        if not(functions.es_uuid(id_actuacion)):
+            raise Exception("El id de la actuación debe ser un UUID: " + id_actuacion)
         query = query.filter(Tarea.id_actuacion == id_actuacion)
     if id_actuacion_ext is not None:
+        if not(functions.es_uuid(id_actuacion_ext)):
+            raise Exception("El id de la actuación externa debe ser un UUID: " + id_actuacion_ext)
         query = query.join(ActuacionExt, Tarea.id_actuacion == ActuacionExt.id
                 ).filter(ActuacionExt.id_ext == id_actuacion_ext)    
     if id_tipo_tarea is not None:
+        if not(functions.es_uuid(id_tipo_tarea)):
+            raise Exception("El id del tipo de tarea debe ser un UUID: " + id_tipo_tarea)
         query = query.filter(Tarea.id_tipo_tarea == id_tipo_tarea)
     if id_usuario_asignado is not None:
+        if not(functions.es_uuid(id_usuario_asignado)):
+            raise Exception("El id del usuario asignado debe ser un UUID: " + id_usuario_asignado)
         logger_config.logger.info(f"ID usuario asignado: {id_usuario_asignado}")
         query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea
                 ).filter(TareaAsignadaUsuario.id_usuario== id_usuario_asignado, TareaAsignadaUsuario.eliminado==False
@@ -1997,21 +2147,23 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
    
     if labels:
         # Primero eliminás comillas dobles, simples y luego dividís por coma
-        labels = [
-            l.strip().replace('"', '').replace("'", '') 
-            for l in labels.split(',') if l.strip()
-        ]
-        #labels = labels.split(",")
+        labels = labels.split(",")
+        for i in range(len(labels)):
+            labels[i] = labels[i].strip()
+            if not(functions.es_uuid(labels[i])):
+                raise Exception("El id de la etiqueta debe ser un UUID: " + labels[i])
+            
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
-        # Elimina comillas simples, dobles y espacios, luego separa por coma y limpia cada elemento
-        # Primero eliminás comillas dobles, simples y luego dividís por coma
-        grupos = [
-            g.strip().replace('"', '').replace("'", '') 
-            for g in grupos.split(',') if g.strip()
-        ]
+        grupos = grupos.split(",")
+        for i in range(len(grupos)):
+            grupos[i] = grupos[i].strip()
+            if not(functions.es_uuid(grupos[i])):
+                raise Exception("El id del grupo debe ser un UUID: " + grupos[i])
+        
+            
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
                 ).distinct()         
@@ -2168,18 +2320,28 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
    
     if id_expediente is not None:
+        if(not(functions.es_uuid(id_expediente))):
+            raise Exception("El id del expediente debe ser un UUID")
         query = query.filter(Tarea.id_expediente == id_expediente)
     
     if id_actuacion is not None:
+        if(not(functions.es_uuid(id_actuacion))):
+            raise Exception("El id de la actuación debe ser un UUID")
         query = query.filter(Tarea.id_actuacion == id_actuacion)
 
     if id_tipo_tarea is not None:
+        if(not(functions.es_uuid(id_tipo_tarea))):
+            raise Exception("El id del tipo de tarea debe ser un UUID")
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
 
     if id_tarea is not None:
+        if(not(functions.es_uuid(id_tarea))):
+            raise Exception("El id de la tarea debe ser un UUID")
         query = query.filter(Tarea.id == id_tarea)
 
     if id_usuario_asignado is not None:
+        if(not(functions.es_uuid(id_usuario_asignado))):
+            raise Exception("El id del usuario asignado debe ser un UUID")
         usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
         if usuario is None:
             raise Exception("Usuario no encontrado")
@@ -2289,7 +2451,12 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
 
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def usuarios_tarea(tarea_id=""):    
+def usuarios_tarea(tarea_id=None):    
+    if tarea_id is None:
+        raise Exception("Debe ingresar el id de la tarea a consultar")
+    if not(functions.es_uuid(tarea_id)):
+        raise Exception("El id de la tarea debe ser un UUID")
+    
     print("Usuarios por tarea:", tarea_id)    
     usuarios = db.session.query(Usuario.nombre.label('nombre'),
                         Usuario.apellido.label('apellido'),
@@ -2314,6 +2481,11 @@ def delete_tarea(username=None, id_tarea=None):
     else:
         raise Exception("Usuario no ingresado")
 
+    if id_tarea is None:
+        raise Exception("Debe ingresar el id de la tarea a eliminar")
+    if not(functions.es_uuid(id_tarea)):
+        raise Exception("El id de la tarea debe ser un UUID")
+    
     tarea = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
     if tarea is not None:
         if tarea.eliminable==False:

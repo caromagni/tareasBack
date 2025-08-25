@@ -453,6 +453,7 @@ class TipoTareaIn(Schema):
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
     id_organismo = String()
+    nivel = String()
     """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                     validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
                     default ='int') """
@@ -530,7 +531,6 @@ class SubtipoTareaPatchIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
 
@@ -554,7 +554,6 @@ class SubtipoTareaOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
-    origen_externo = Boolean()
 
 class SubtipoTareaShortOut(Schema):
     id = String()
@@ -700,6 +699,8 @@ class TareaPatchIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
+    url = String()
+    url_descripcion = String()
 
 class TareaPatchV2In(Schema):
     id_tarea = String(required=True)
@@ -1499,12 +1500,14 @@ class LabelAllOut(Schema):
     fecha_eliminacion = String()
     fecha_creacion = String()
     fecha_actualizacion = String()
+    id_label = String()
     id_user_creacion = String()
     id_grupo_base = String()
 
 
 class LabelIdOut(Schema):
     id = String()
+    id_label = String()
     nombre = String()
     color = String()
     eliminado = Boolean()
@@ -1541,8 +1544,9 @@ class LabelCountOut(Schema):
 class LabelXTareaIn(Schema):  
     ids_labels = List(String(),required=True, many=True)
     id_tarea = String(required=True)
-    # id_user_actualizacion = String(required=True)
-    # fecha_actualizacion = String(validate=validate_fecha)
+
+class LabelxGroupsIn(Schema):
+    ids_grupos_base = String(metadata={"description": "ids separados por comas. Ej: id1, id2, id3"})
 
 class LabelXTareaPatchIn(Schema):
     id_tarea = String(required=True)

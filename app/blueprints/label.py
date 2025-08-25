@@ -4,6 +4,7 @@ import common.error_handling as error_handling
 import common.exceptions as exceptions
 import common.auth as auth_token
 import decorators.role as rol
+import decorators.verify as verify
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
@@ -32,6 +33,7 @@ def before_request():
 @label_b.get('/label')
 @label_b.input(schema.LabelGetIn, location='query')
 @label_b.output(schema.LabelCountOut)
+@verify.check_fields()
 @rol.require_role()
 def get_labels(query_data: dict):
     try:
@@ -85,6 +87,7 @@ def get_labels(query_data: dict):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label/<string:id>')
 @label_b.output(schema.LabelIdOut)
+@verify.check_fields()
 @rol.require_role()
 def get_label(id:str):
     print('label.py')
@@ -105,6 +108,7 @@ def get_label(id:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(schema.LabelIn)
+@verify.check_fields()
 @rol.require_role()
 def post_label(json_data: dict):
     try:
@@ -137,6 +141,7 @@ def post_label(json_data: dict):
 #################DELETE########################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 def del_label(id: str):
     try:
@@ -169,6 +174,7 @@ def del_label(id: str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_tarea/<string:id_tarea>')
 @label_b.output(schema.LabelXTareaIdCountAllOut)
+@verify.check_fields()
 @rol.require_role()
 def get_label_tarea(id_tarea:str):
     try:
@@ -192,6 +198,7 @@ def get_label_tarea(id_tarea:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
 @label_b.input(schema.LabelXTareaIn)
+@verify.check_fields()
 @rol.require_role()
 def put_label_tarea(json_data: dict):
     try:
@@ -234,6 +241,7 @@ def put_label_tarea(json_data: dict):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label_tarea/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 def delete_label_tarea(id: str):
 
@@ -256,14 +264,15 @@ def delete_label_tarea(id: str):
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.get('/label_grupo/<string:ids_grupos_base>')
+@label_b.get('/label_grupo/<string:id_grupos_base>')
+@verify.check_fields()
 @rol.require_role()
 @cache.cached(CACHE_TIMEOUT_LONG)
-def get_active_labels_grupo(ids_grupos_base: str):
+def get_active_labels_grupo(id_grupos_base: str):
     try:
         # Fetch active labels
-        print('ids_grupos_base:', ids_grupos_base)
-        res, cant = label_model.get_active_labels(ids_grupos_base)
+        print('ids_grupos_base:', id_grupos_base)
+        res, cant = label_model.get_active_labels(id_grupos_base)
 
         if res is None:
             result = {
