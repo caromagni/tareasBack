@@ -314,7 +314,7 @@ class SubtipoTarea(Base):
 
 class Dominio(Base):
     __tablename__ = 'dominio'
-    __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados.'}
+    __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados. id_user_actualizacion es nullable porque el full sync no tiene un usuario'}
 
     id = Column(UUID, primary_key=True)
     id_dominio_ext = Column(UUID, nullable=False)
@@ -324,7 +324,7 @@ class Dominio(Base):
     fecha_actualizacion = Column(DateTime, nullable=False)
     habilitado = Column(Boolean, default=True)
     eliminado = Column(Boolean, default=False)
-    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=True) 
 
 """ class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'

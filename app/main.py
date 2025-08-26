@@ -155,8 +155,9 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
-        #db.create_all() 
-        Base.metadata.create_all(db.engine, checkfirst=True)
+        #db.create_all()
+        if Config.RUN_DB_CREATION=='1':
+            Base.metadata.create_all(db.engine, checkfirst=True)
    
 
     CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})

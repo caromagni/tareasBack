@@ -6,7 +6,7 @@ import uuid
 from db.alchemy_db import db
 import os
 import traceback
-
+from common.utils import normalize_spanish_text
 def sync_request(url, entity_id):
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
@@ -19,9 +19,23 @@ def sync_request(url, entity_id):
     print("###########################################")
     r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
     
-    resp=r.json()
-    print("json roles:",resp)
-    return resp
+    # Check if response is successful and has content
+    if r.status_code != 200:
+        print(f"HTTP Error: {r.status_code}")
+        return None
+    
+    if not r.text or r.text.strip() == '':
+        print("Empty response received")
+        return None
+    
+    try:
+        resp = r.json()
+        print("json roles:", resp)
+        return resp
+    except Exception as e:
+        print(f"JSON parsing error: {e}")
+        print(f"Response text: {r.text}")
+        return None
 
 def sync_tipo_tarea(entity_id, url,id_user=None):
     try:
@@ -39,8 +53,8 @@ def sync_tipo_tarea(entity_id, url,id_user=None):
                 #hago insert del tipo de tarea
                 nuevo_tipo_tarea = TipoTarea(id=uuid.uuid4(),
                                 id_ext=resp['data']['id'], 
-                                nombre=resp['data']['descripcion'], 
-                                codigo_humano=resp['data']['descripcion_corta'], 
+                                nombre=normalize_spanish_text(resp['data']['descripcion']), 
+                                codigo_humano=normalize_spanish_text(resp['data']['descripcion_corta']), 
                                 eliminado=not(resp['data']['habilitado']),
                                 fecha_actualizacion=datetime.now(),
                                 id_user_actualizacion=id_user if id_user else None,
@@ -53,8 +67,8 @@ def sync_tipo_tarea(entity_id, url,id_user=None):
                 db.session.add(nuevo_tipo_tarea)
             else:
                 #hago update del tipo de tarea
-                query_tipo_tarea.nombre = resp['data']['descripcion']
-                query_tipo_tarea.codigo_humano = resp['data']['descripcion_corta'] 
+                query_tipo_tarea.nombre = normalize_spanish_text(resp['data']['descripcion'])
+                query_tipo_tarea.codigo_humano = normalize_spanish_text(resp['data']['descripcion_corta']) 
                 query_tipo_tarea.eliminado = not(resp['data']['habilitado'])
                 query_tipo_tarea.id_ext = resp['data']['id']
                 query_tipo_tarea.fecha_actualizacion=datetime.now()
@@ -81,14 +95,20 @@ def sync_usuario(entity_id, url,id_user):
     print("json roles:",resp)    
     if resp and resp['data']['username'] is not None:
         #Buscar el usuario en la base de datos
+        print("LOOKING FOR EXISTING USER IN DB")
+        print("*"*50)
         query_usr = db.session.query(Usuario).filter(Usuario.username == resp['data']['username']).first()
+        print("query_usr:",query_usr)
+        print("*"*50)
         if query_usr is None:
+            print("NO EXISTE EL USUARIO EN LA BASE DE DATOS CREANDO NUEVO USUARIO")
+            print("*"*50)
             #hago insert del usuario
             nuevo_usuario = Usuario(id=uuid.uuid4(),
                                username=resp['data']['username'], 
                                email=resp['data']['email'], 
-                               nombre=resp['data']['nombre'], 
-                               apellido=resp['data']['apellido'], 
+                               nombre=normalize_spanish_text(resp['data']['nombre']), 
+                               apellido=normalize_spanish_text(resp['data']['apellido']), 
                                id_ext = resp['data']['id'],
                                fecha_actualizacion=datetime.now(),
                                id_user_actualizacion=id_user,
@@ -99,11 +119,23 @@ def sync_usuario(entity_id, url,id_user):
    
             db.session.add(nuevo_usuario)
         else:
+            print("EXISTE EL USUARIO EN LA BASE DE DATOS ACTUALIZANDO USUARIO")
+            print("username:",query_usr.username)
+            print("email:",query_usr.email)
+            print("nombre:",query_usr.nombre)
+            print("apellido:",query_usr.apellido)
+            print("id_ext:",query_usr.id_ext)
+            print("fecha_actualizacion:",query_usr.fecha_actualizacion)
+            print("id_user_actualizacion:",query_usr.id_user_actualizacion)
+            print("eliminado:",query_usr.eliminado)
+            print("dni:",query_usr.dni)
+            print("id:",query_usr.id)
+            print("*"*50)
             #hago update del usuario
             query_usr.username = resp['data']['username']
             query_usr.email = resp['data']['email']
-            query_usr.nombre = resp['data']['nombre']
-            query_usr.apellido = resp['data']['apellido']
+            query_usr.nombre = normalize_spanish_text(resp['data']['nombre'])
+            query_usr.apellido = normalize_spanish_text(resp['data']['apellido'])
             query_usr.fecha_actualizacion=datetime.now()
             query_usr.id_user_actualizacion=id_user
             query_usr.eliminado=not(resp['data']['habilitado'])
@@ -121,8 +153,8 @@ def sync_fuero(entity_id, url,id_user):
         if query_fuero is None:
             nuevo_fuero = Dominio(id=uuid.uuid4(),
                                id_dominio_ext=resp['data']['id'],   
-                               descripcion=resp['data']['descripcion'],
-                               descripcion_corta=resp['data']['descripcion_corta'],
+                               descripcion=normalize_spanish_text(resp['data']['descripcion']),
+                               descripcion_corta=normalize_spanish_text(resp['data']['descripcion_corta']),
                                fecha_actualizacion=datetime.now(),
                                eliminado=not(resp['data']['habilitado']),
                                prefijo=resp['data']['prefijo'],   
@@ -134,8 +166,8 @@ def sync_fuero(entity_id, url,id_user):
             print("existe el fuero en la base de datos:", resp['data']['id'])
             #hago el update de fuero
             query_fuero.id_dominio_ext = resp['data']['id']
-            query_fuero.descripcion = resp['data']['descripcion']
-            query_fuero.descripcion_corta = resp['data']['descripcion_corta']
+            query_fuero.descripcion = normalize_spanish_text(resp['data']['descripcion'])
+            query_fuero.descripcion_corta = normalize_spanish_text(resp['data']['descripcion_corta'])
             query_fuero.fecha_actualizacion=datetime.now()
             query_fuero.eliminado = not(resp['data']['habilitado'])
             query_fuero.prefijo = resp['data']['prefijo']
@@ -160,7 +192,7 @@ def sync_inhabilidad(entity_id, url,id_user):
                                id_organismo=resp['data']['id_organismo'],
                                id_juez=resp['data']['id_juez'],
                                tipo =resp['data']['tipo'],
-                               descripcion=resp['data']['descripcion'],
+                               descripcion=normalize_spanish_text(resp['data']['descripcion']),
                                eliminado=not(resp['data']['habilitado']),
                                fecha_actualizacion=datetime.now(),
                                id_user_actualizacion=id_user
@@ -184,59 +216,25 @@ def sync_inhabilidad(entity_id, url,id_user):
         db.session.commit()
     return resp
 
-""" def sync_grupo(entity_id, url,id_user):
-    resp = sync_request(url, entity_id)
-    print("json roles:",resp)    
-    if resp and resp['data']['id'] is not None:
-        #Buscar si existe el organismo en la base de datos
-        query_organismo = db.session.query(Grupo).filter(Grupo.id == resp['data']['id']).first()
-        if query_organismo is None:
-            #hago insert del organismo
-            nuevo_organismo = Grupo(id=uuid.uuid4(),
-                               id_organismo=resp['data']['id'],
-                               nombre=resp['data']['descripcion'], 
-                               circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
-                               descripcion=resp['data']['descripcion'],
-                               descripcion_corta=resp['data']['descripcion_corta'],
-                               id_dominio=resp['data']['id_fuero'],
-                               eliminado=not(resp['data']['habilitado']),
-                               fecha_actualizacion=datetime.now(),
-                               fecha_creacion=datetime.now(),
-                               id_user_actualizacion=id_user,
-                               base = True,
-                            )
-            db.session.add(nuevo_organismo)
 
-        else:
-            #hago update del organismo
-            query_organismo.descricion = resp['data']['descripcion']
-            query_organismo.descripcion_corta = resp['data']['descripcion_corta'] 
-            query_organismo.circunscripcion_judicial = resp['data']['circunscripcion_judicial']
-            query_organismo.eliminado = not(resp['data']['habilitado'])
-            query_organismo.nombre = resp['data']['descripcion']
-            query_organismo.id_dominio = resp['data']['id_fuero']
-            query_organismo.fecha_actualizacion=datetime.now()
-            query_organismo.fecha_creacion = datetime.now()
-            query_organismo.id_user_actualizacion=id_user
-            query_organismo.base = True
-
-        db.session.commit()
-    return resp """
 
 def sync_organismo(entity_id, url,id_user):
-    resp = sync_request(url, entity_id)
-    print("json roles:",resp)    
-    if resp and resp['data']['id'] is not None:
-        #Buscar si existe el organismo en la base de datos
-        query_organismo = db.session.query(Organismo).filter(Organismo.id == resp['data']['id']).first()
-        if query_organismo is None:
-            #hago insert del organismo
-            id_nuevo_organismo = uuid.uuid4()
-            nuevo_organismo = Organismo(id=id_nuevo_organismo,
+    try:
+        resp = sync_request(url, entity_id)
+        print("json roles:",resp)    
+        if resp and resp['data']['id'] is not None:
+            #Buscar si existe el organismo en la base de datos
+            query_organismo = db.session.query(Organismo).filter(Organismo.id == resp['data']['id']).first()
+            if query_organismo is None:
+                #hago insert del organismo
+                print("INSERTING NEW ORGANISMO")
+                print("*"*50)
+                id_nuevo_organismo = uuid.uuid4()
+                nuevo_organismo = Organismo(id=id_nuevo_organismo,
                                id_organismo_ext=resp['data']['id'],
-                               circunscripcion_judicial=resp['data']['circunscripcion_judicial'],    
-                               descripcion=resp['data']['descripcion'],
-                               descripcion_corta=resp['data']['descripcion_corta'],
+                               circunscripcion_judicial=normalize_spanish_text(resp['data']['circunscripcion_judicial']),    
+                               descripcion=normalize_spanish_text(resp['data']['descripcion']),
+                               descripcion_corta=normalize_spanish_text(resp['data']['descripcion_corta']),
                                id_fuero=resp['data']['id_fuero'],
                                habilitado=resp['data']['habilitado'],
                                eliminado=not(resp['data']['habilitado']),
@@ -244,63 +242,116 @@ def sync_organismo(entity_id, url,id_user):
                                id_user_actualizacion=id_user,
                                id_tarea_grupo_base=resp['data']['id_tarea_grupo_base']
                             )
-            db.session.add(nuevo_organismo)
+                db.session.add(nuevo_organismo)
 
 
-            nuevo_grupo = Grupo(id=uuid.uuid4(),
-                                id_organismo = id_nuevo_organismo,
-                                id_dominio = resp['data']['id_fuero'],
-                                nombre = resp['data']['nombre'],
-                                descripcion = resp['data']['descripcion'],
-                                id_user_actualizacion = id_user,
-                                fecha_actualizacion = datetime.now(),
-                                fecha_creacion = datetime.now(),
-                                eliminado = not(resp['data']['habilitado']),
-                                suspendido = False,
-                                base = True
-                                )
-            db.session.add(nuevo_grupo)
-
-        else:
-            #hago update del organismo
-            query_organismo.id_organismo_ext = resp['data']['id']
-            query_organismo.descricion = resp['data']['descripcion']
-            query_organismo.descripcion_corta = resp['data']['descripcion_corta'] 
-            query_organismo.circunscripcion_judicial = resp['data']['circunscripcion_judicial']
-            query_organismo.habilitado = resp['data']['habilitado']
-            query_organismo.eliminado = not(resp['data']['habilitado'])
-            query_organismo.id_fuero = resp['data']['id_fuero']
-            query_organismo.fecha_actualizacion=datetime.now()
-            query_organismo.id_user_actualizacion=id_user
-            query_organismo.id_tarea_grupo_base = resp['data']['id_tarea_grupo_base']
-
-            query_grupo = db.session.query(Grupo).filter(Grupo.id_organismo == query_organismo.id).first()
-            if query_grupo is not None:
-                query_grupo.id_dominio = resp['data']['id_fuero']
-                query_grupo.nombre = resp['data']['nombre']
-                query_grupo.descripcion = resp['data']['descripcion']
-                query_grupo.id_user_actualizacion = id_user
-                query_grupo.fecha_actualizacion = datetime.now()
-                query_grupo.eliminado = not(resp['data']['habilitado'])
-                query_grupo.base = True
-            else:
                 nuevo_grupo = Grupo(id=uuid.uuid4(),
-                                id_organismo = query_organismo.id,
-                                id_dominio = resp['data']['id_fuero'],
-                                nombre = resp['data']['nombre'],
-                                descripcion = resp['data']['descripcion'],
-                                id_user_actualizacion = id_user,
-                                fecha_actualizacion = datetime.now(),
-                                fecha_creacion = datetime.now(),
-                                eliminado = not(resp['data']['habilitado']),
-                                suspendido = False,
-                                base = True
-                                )
-                db.session.add(nuevo_grupo)    
+                                    id_organismo = id_nuevo_organismo,
+                                    id_dominio = resp['data']['id_fuero'],
+                                    nombre = normalize_spanish_text(resp['data']['descripcion']),
+                                    descripcion = normalize_spanish_text(resp['data']['descripcion']),
+                                    id_user_actualizacion = id_user,
+                                    fecha_actualizacion = datetime.now(),
+                                    fecha_creacion = datetime.now(),
+                                    eliminado = not(resp['data']['habilitado']),
+                                    suspendido = False,
+                                    base = True
+                                    )
+                db.session.add(nuevo_grupo)
 
-        db.session.commit()
-        print("Organismo y grupo sincronizado:", resp['data']['id'])
-    return resp
+            else:
+                #hago update del organismo
+                print("UPDATING ORGANISMO")
+                print("*"*50)
+                query_organismo.id_organismo_ext = resp['data']['id']
+                query_organismo.descricion = normalize_spanish_text(resp['data']['descripcion'])
+                query_organismo.descripcion_corta = normalize_spanish_text(resp['data']['descripcion_corta'])
+                query_organismo.circunscripcion_judicial = normalize_spanish_text(resp['data']['circunscripcion_judicial'])
+                query_organismo.habilitado = resp['data']['habilitado']
+                query_organismo.eliminado = not(resp['data']['habilitado'])
+                query_organismo.id_fuero = resp['data']['id_fuero']
+                query_organismo.fecha_actualizacion=datetime.now()
+                query_organismo.id_user_actualizacion=id_user
+                query_organismo.id_tarea_grupo_base = resp['data']['id_tarea_grupo_base']
+
+                query_grupo = db.session.query(Grupo).filter(Grupo.id_organismo == query_organismo.id).first()
+                if query_grupo is not None:
+                    query_grupo.id_dominio = resp['data']['id_fuero']
+                    query_grupo.nombre = normalize_spanish_text(resp['data']['nombre'])
+                    query_grupo.descripcion = normalize_spanish_text(resp['data']['descripcion'])
+                    query_grupo.id_user_actualizacion = id_user
+                    query_grupo.fecha_actualizacion = datetime.now()
+                    query_grupo.eliminado = not(resp['data']['habilitado'])
+                    query_grupo.base = True
+                else:
+                    nuevo_grupo = Grupo(id=uuid.uuid4(),
+                                    id_organismo = query_organismo.id,
+                                    id_dominio = resp['data']['id_fuero'],
+                                    nombre = normalize_spanish_text(resp['data']['descripcion']),
+                                    descripcion = normalize_spanish_text(resp['data']['descripcion']),
+                                    id_user_actualizacion = id_user,
+                                    fecha_actualizacion = datetime.now(),
+                                    fecha_creacion = datetime.now(),
+                                    eliminado = not(resp['data']['habilitado']),
+                                    suspendido = False,
+                                    base = True
+                                    )
+                    db.session.add(nuevo_grupo)    
+
+            db.session.commit()
+            print("Organismo y grupo sincronizado:", resp['data']['id'])
+        return resp
+    except Exception as e:
+        print("Error al sincronizar el organismo:", e)
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return None
+
+def sync_dominio(entity_id, url,id_user):
+    try:
+        resp = sync_request(url, entity_id)
+        print("json roles:",resp)    
+        if resp and 'data' in resp and resp['data'] and resp['data']['id'] is not None:
+            #Buscar si existe el dominio en la base de datos
+            query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == resp['data']['id']).first()
+            if query_dominio is None:
+                #hago insert del dominio
+                print("INSERTING NEW DOMINIO")
+                print("*"*50)
+                nuevo_dominio = Dominio(
+                    id=uuid.uuid4(),
+                    id_dominio_ext=resp['data']['id'],
+                    descripcion=normalize_spanish_text(resp['data']['descripcion']),
+                    descripcion_corta=normalize_spanish_text(resp['data']['descripcion_corta']),
+                    prefijo=resp['data']['prefijo'],
+                    fecha_actualizacion=datetime.now(),
+                    habilitado=resp['data']['habilitado'],
+                    eliminado=not(resp['data']['habilitado']),
+                    id_user_actualizacion=id_user
+                )
+                db.session.add(nuevo_dominio)
+            else:
+                #hago update del dominio
+                print("UPDATING DOMINIO")
+                print("*"*50)
+                query_dominio.descripcion = normalize_spanish_text(resp['data']['descripcion'])
+                query_dominio.descripcion_corta = normalize_spanish_text(resp['data']['descripcion_corta'])
+                query_dominio.prefijo = resp['data']['prefijo']
+                query_dominio.habilitado = resp['data']['habilitado']
+                query_dominio.eliminado = not(resp['data']['habilitado'])
+                query_dominio.fecha_actualizacion = datetime.now()
+                query_dominio.id_user_actualizacion = id_user
+
+            db.session.commit()
+            print("Dominio sincronizado:", resp['data']['id'])
+        return resp
+    except Exception as e:
+        print("Error al sincronizar el dominio:", e)
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return None
 
 def sync_subtipo_tarea(entity_id, url,id_user):
     resp = sync_request(url, entity_id)
@@ -315,8 +366,8 @@ def sync_subtipo_tarea(entity_id, url,id_user):
                 nuevo_subtipo = SubtipoTarea(id=uuid.uuid4(),
                                 id_ext=resp['data']['id'],
                                 id_tipo =query_tipo.id,
-                                nombre=resp['data']['descripcion'],
-                                nombre_corto=resp['data']['descripcion_corta'],
+                                nombre=normalize_spanish_text(resp['data']['descripcion']),
+                                nombre_corto=normalize_spanish_text(resp['data']['descripcion_corta']),
                                 eliminado=not(resp['data']['habilitado']),
                                 fecha_actualizacion=datetime.now(),
                                 id_user_actualizacion=id_user,

@@ -19,6 +19,7 @@ class Config:
 
     # Run database setup before app starts (set to 1 to enable)
     RUN_DB_SETUP = os.getenv('RUN_DB_SETUP', '0')
+    RUN_DB_CREATION = os.getenv('RUN_DB_CREATION', '0')
     SQLALCHEMY_POOL_SIZE = os.getenv('SQLALCHEMY_POOL_SIZE')
     #SQLALCHEMY_DATABASE_URI = os.getenv("SETTINGS_CONECTION")
     SQLALCHEMY_TRACK_MODIFICATIONS = True

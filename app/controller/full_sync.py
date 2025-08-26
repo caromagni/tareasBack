@@ -17,22 +17,22 @@ def full_sync_tipos_tareas(id_user=None):
     system_apikey = os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
-    base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', 'http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/?rows=1000&usuario_consulta=')
+    base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', '')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     sync_url = f"{base_url}{usuario_consulta}"
     sync_url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
-    print("Obtanined records from pusher")
-    print("sync_url:",sync_url)
-    print("usuario_consulta:",usuario_consulta)
-    print("headers:",headers)
-    print("id_user:",id_user)
+    logger_config.logger.info("Obtained records from pusher")
+    logger_config.logger.debug(f"sync_url: {sync_url}")
+    logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
+    logger_config.logger.debug(f"headers: {headers}")
+    logger_config.logger.debug(f"id_user: {id_user}")
    
-    print("******************************")
+    logger_config.logger.debug("******************************")
     response = requests.get(headers=headers,url=sync_url)
   
     tipos_data = response.json()
-    print("tipos_data:",tipos_data)
-    print("******************************")
+    logger_config.logger.debug(f"tipos_data: {tipos_data}")
+    logger_config.logger.debug("******************************")
    
     success_count = 0
     error_count = 0
@@ -44,9 +44,9 @@ def full_sync_tipos_tareas(id_user=None):
 
     for tipo_data in tipos_data['data']:
         try:
-            print("tipo_data:",tipo_data)
-            print("******************************")
-            print('sending URL MOFO',sync_url_post)
+            logger_config.logger.debug(f"tipo_data: {tipo_data}")
+            logger_config.logger.debug("******************************")
+            logger_config.logger.debug(f'sending URL: {sync_url_post}')
             sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
             success_count += 1
         except Exception as e:
@@ -60,62 +60,153 @@ def full_sync_tipos_tareas(id_user=None):
 def full_sync_usuarios(id_user=None):
     """Sync all usuarios from Pusher"""
     logger_config.logger.info("Starting full sync of usuarios...")
-    
-    usuarios_data = sync.usuario()
-    
+    usher_apikey = os.environ.get('PUSHER_API_KEY')
+    system_apikey = os.environ.get('PUSHER_API_SYSTEM')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
+    base_url = os.environ.get('PUSHER_URL_USUARIOS', '')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    sync_url = f"{base_url}{usuario_consulta}"
+    sync_url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/usuario/"
+    logger_config.logger.info("Obtained records from pusher")
+    logger_config.logger.debug(f"sync_url: {sync_url}")
+    logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
+    logger_config.logger.debug(f"headers: {headers}")
+    logger_config.logger.debug(f"id_user: {id_user}")
+   
+    logger_config.logger.debug("******************************")
+    response = requests.get(headers=headers,url=sync_url)
+  
+    usuarios_data = response.json()
+    logger_config.logger.debug(f"usuarios_data: {usuarios_data}")
+    logger_config.logger.debug("******************************")
+   
+    success_count = 0
+    error_count = 0
     if not usuarios_data or 'data' not in usuarios_data:
         logger_config.logger.error("No data received from Pusher for usuarios")
         return 0, 1
-    
-    success_count = 0
-    error_count = 0
-    
+
     for usuario_data in usuarios_data['data']:
         try:
-            # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
-            usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
-            sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=usuario"
+            logger_config.logger.debug(f"usuarios_data: {usuario_data}")
+            logger_config.logger.debug("******************************")
+            logger_config.logger.debug(f'sending URL: {sync_url_post}')
             
-            sync.sync_usuario(usuario_data['id'], sync_url, id_user)
+            sync.sync_usuario(usuario_data['id'],sync_url_post, id_user)
             success_count += 1
-            logger_config.logger.info(f"Successfully synced usuario: {usuario_data.get('id', 'unknown')}")
         except Exception as e:
             logger_config.logger.error(f"Error syncing usuario {usuario_data.get('id', 'unknown')}: {e}")
             error_count += 1
-    
+       
+        time.sleep(0.1)
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
-    return success_count, error_count
+ 
+ 
+            
+         
 
 def full_sync_organismos(id_user=None):
     """Sync all organismos from Pusher"""
     logger_config.logger.info("Starting full sync of organismos...")
-    
-    organismos_data = sync.organismo()
-    
+
+
+    usher_apikey = os.environ.get('PUSHER_API_KEY')
+    system_apikey = os.environ.get('PUSHER_API_SYSTEM')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
+    base_url = os.environ.get('PUSHER_URL_ORGANISMOS', '')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    sync_url = f"{base_url}{usuario_consulta}"
+    sync_url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/organismo/"
+    logger_config.logger.info("Obtained records from pusher")
+    logger_config.logger.debug(f"sync_url: {sync_url}")
+    logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
+    logger_config.logger.debug(f"headers: {headers}")
+    logger_config.logger.debug(f"id_user: {id_user}")
+   
+    logger_config.logger.debug("******************************")
+    response = requests.get(headers=headers,url=sync_url)
+  
+    organismos_data = response.json()
+    logger_config.logger.debug(f"organismos_data: {organismos_data}")
+    logger_config.logger.debug("******************************")
+   
+    success_count = 0
+    error_count = 0
     if not organismos_data or 'data' not in organismos_data:
-        logger_config.logger.error("No data received from Pusher for organismos")
+        logger_config.logger.error("No data received from Pusher for usuarios")
         return 0, 1
+
+    for fuero_data in organismos_data['data']:
+        try:
+            logger_config.logger.debug(f"organismos_data: {fuero_data}")
+            logger_config.logger.debug("******************************")
+            logger_config.logger.debug(f'sending URL: {sync_url_post}')
+            
+            sync.sync_organismo(fuero_data['id'],sync_url_post, id_user)
+            success_count += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing usuario {fuero_data.get('id', 'unknown')}: {e}")
+            error_count += 1
+       
+        time.sleep(0.1)
+    logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
+    
     
     success_count = 0
     error_count = 0
-    
-    for organismo_data in organismos_data['data']:
+def full_sync_dominios(id_user=None):
+    """Sync all dominios from Pusher"""
+    logger_config.logger.info("Starting full sync of dominios...")
+
+
+    usher_apikey = os.environ.get('PUSHER_API_KEY')
+    system_apikey = os.environ.get('PUSHER_API_SYSTEM')
+   
+    headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
+    base_url = os.environ.get('PUSHER_URL_DOMINIOS', '')
+    usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
+    sync_url = f"{base_url}{usuario_consulta}"
+    sync_url_post="https://dev-backend.usher.pjm.gob.ar/api/v1/fuero/"
+    logger_config.logger.info("Obtained records from pusher")
+    logger_config.logger.debug(f"sync_url: {sync_url}")
+    logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
+    logger_config.logger.debug(f"headers: {headers}")
+    logger_config.logger.debug(f"id_user: {id_user}")
+   
+    logger_config.logger.debug("******************************")
+    response = requests.get(headers=headers,url=sync_url)
+  
+    fueros_data = response.json()
+    logger_config.logger.debug(f"fueros_data: {fueros_data}")
+    logger_config.logger.debug("******************************")
+   
+    success_count = 0
+    error_count = 0
+    if not fueros_data or 'data' not in fueros_data:
+        logger_config.logger.error("No data received from Pusher for fueros")
+        return 0, 1
+
+    for organismo_data in fueros_data['data']:
         try:
-            # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
-            usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
-            sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=organismo"
+            logger_config.logger.debug(f"fueros_data: {organismo_data}")
+            logger_config.logger.debug("******************************")
+            logger_config.logger.debug(f'sending URL: {sync_url_post}')
             
-            sync.sync_organismo(organismo_data['id'], sync_url, id_user)
+            sync.sync_dominio(organismo_data['id'],sync_url_post, id_user)
             success_count += 1
-            logger_config.logger.info(f"Successfully synced organismo: {organismo_data.get('id', 'unknown')}")
         except Exception as e:
-            logger_config.logger.error(f"Error syncing organismo {organismo_data.get('id', 'unknown')}: {e}")
+            logger_config.logger.error(f"Error syncing usuario {organismo_data.get('id', 'unknown')}: {e}")
             error_count += 1
-    
+       
+        time.sleep(0.1)
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
-    return success_count, error_count
+    
+    
+    success_count = 0
+    error_count = 0
+
 
 def full_sync_fuero(id_user=None):
     """Sync all fuero from Pusher"""
@@ -133,7 +224,7 @@ def full_sync_fuero(id_user=None):
     for fuero_item in fuero_data['data']:
         try:
             # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
+            base_url = os.environ.get('PUSHER_URL', '')
             usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
             sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=fuero"
             
@@ -163,7 +254,7 @@ def full_sync_inhabilidad(id_user=None):
     for inhabilidad_item in inhabilidad_data['data']:
         try:
             # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
+            base_url = os.environ.get('PUSHER_URL', '')
             usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
             sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=inhabilidad"
             
@@ -193,7 +284,7 @@ def full_sync_subtipo_tarea(id_user=None):
     for subtipo_item in subtipo_data['data']:
         try:
             # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', 'http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta=')
+            base_url = os.environ.get('PUSHER_URL', '')
             usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
             sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=subtipo_act_juzgado"
             

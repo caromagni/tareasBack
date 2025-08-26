@@ -41,11 +41,11 @@ def sync_all_tipos_tareas():
         else:
             id_user = None
         
-        print("id_user:",id_user)
+        logger_config.logger.debug(f"id_user: {id_user}")
         
         # Perform full sync
-        print("calling full_sync_tipos_tareas")
-        print("******************************")
+        logger_config.logger.info("calling full_sync_tipos_tareas")
+        logger_config.logger.debug("******************************")
         full_sync.full_sync_tipos_tareas(id_user)
         
         return {
@@ -69,16 +69,21 @@ def sync_all_tipos_tareas():
 #@rol.require_role(['admin', 'superadmin'])
 def sync_all_usuarios():
     try:
-        id_user = utils.get_username_id(g.username)
-        success_count, error_count = full_sync.full_sync_usuarios(id_user)
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        logger_config.logger.debug(f"id_user: {id_user}")
+        full_sync.full_sync_usuarios(id_user)
         
         return {
             "success": True,
-            "message": f"Full sync completed: {success_count} successful, {error_count} errors",
-            "data": {
-                "success_count": success_count,
-                "error_count": error_count
-            }
+            "message": f"Batch job finished, see logs for more detail",
+           
         }
     
     except Exception as err:
@@ -95,20 +100,59 @@ def sync_all_usuarios():
 #@rol.require_role(['admin', 'superadmin'])
 def sync_all_organismos():
     try:
-        id_user = utils.get_username_id(g.username)
-        success_count, error_count = full_sync.full_sync_organismos(id_user)
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        print("id_user:",id_user)
+        full_sync.full_sync_organismos(id_user)
         
         return {
             "success": True,
-            "message": f"Full sync completed: {success_count} successful, {error_count} errors",
-            "data": {
-                "success_count": success_count,
-                "error_count": error_count
-            }
+            "message": f"Batch job finished, see logs for more detail",
+           
         }
     
     except Exception as err:
-        logger_config.logger.error(f"Error in full sync organismos: {err}")
+        logger_config.logger.error(f"Error in full sync usuarios: {err}")
+        raise exceptions.ValidationError(err)
+
+
+
+#sync dominios
+@full_sync_b.doc(   
+    security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth': []}],
+    description='Full sync of all dominios from Pusher',
+    summary='Full Sync Dominios',
+    responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'}
+)
+@full_sync_b.get('/full_sync/dominios')
+#@rol.require_role(['admin', 'superadmin'])
+def sync_all_dominios():
+    try:
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        logger_config.logger.debug(f"id_user: {id_user}")
+        full_sync.full_sync_dominios(id_user)
+        
+        return {
+            "success": True,
+            "message": f"Batch job finished, see logs for more detail",
+           
+        }
+    
+    except Exception as err:
+        logger_config.logger.error(f"Error in full sync dominios: {err}")
         raise exceptions.ValidationError(err)
 
 @full_sync_b.doc(
@@ -199,16 +243,83 @@ def sync_all_subtipo_tarea():
 #@rol.require_role(['admin', 'superadmin'])
 def sync_all_entities():
     try:
-        #id_user = utils.get_username_id(g.username)
-        results = full_sync.full_sync_all()
+        # Get user ID for audit trail
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        logger_config.logger.info("Starting full sync of all entities...")
+        logger_config.logger.debug(f"id_user: {id_user}")
+        
+        # Initialize results tracking
+        results = {}
+        total_success = 0
+        total_errors = 0
+
+        logger_config.logger.info("Syncing fuero/DOMINIOS...")
+        try:
+            success_count, error_count = full_sync.full_sync_fuero(id_user)
+            results['fuero'] = {"status": "completed", "success": True, "success_count": success_count, "error_count": error_count}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing fuero: {e}")
+            results['fuero'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1
+
+        logger_config.logger.info("3. Syncing organismos...")
+        try:
+            full_sync.full_sync_organismos(id_user)
+            results['organismos'] = {"status": "completed", "success": True}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing organismos: {e}")
+            results['organismos'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1
+        
+        
+        # Sync all entities sequentially
+        logger_config.logger.info("1. Syncing tipos_tareas...")
+        try:
+            full_sync.full_sync_tipos_tareas(id_user)
+            results['tipos_tareas'] = {"status": "completed", "success": True}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing tipos_tareas: {e}")
+            results['tipos_tareas'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1
+        
+        logger_config.logger.info("2. Syncing usuarios...")
+        try:
+            full_sync.full_sync_usuarios(id_user)
+            results['usuarios'] = {"status": "completed", "success": True}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing usuarios: {e}")
+            results['usuarios'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1
+        
+        
+       
+        logger_config.logger.info(f"Full sync completed. Total successful: {total_success}, Total failed: {total_errors}")
         
         return {
             "success": True,
-            "message": "Full sync of all entities completed",
-            "data": results
+            "message": f"Full sync of all entities completed. {total_success} successful, {total_errors} failed.",
+            "data": {
+                "summary": {
+                    "total_success": total_success,
+                    "total_errors": total_errors
+                },
+                "details": results
+            }
         }
     
     except Exception as err:
+        traceback.print_exc()
         logger_config.logger.error(f"Error in full sync all entities: {err}")
         raise exceptions.ValidationError(err)
 
