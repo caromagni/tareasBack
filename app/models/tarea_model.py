@@ -1095,7 +1095,6 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
         query = query.filter(TipoTareaDominio.id_organismo == id_organismo)
 
     #query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
-                            
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
@@ -1106,18 +1105,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
         query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))
-    #if dominio is not None:
-    #    query = query.filter(TipoTarea.id_dominio == dominio)
-    #if organismo is not None:
-    #    query = query.filter(TipoTarea.id_organismo == organismo)
-    """ if id_dominio is not None:
-        if(not(functions.es_uuid(id_dominio))):
-            raise Exception("El id_dominio debe ser un UUID")
-        query = query.filter(TipoTarea.id_dominio == id_dominio)
-    if id_organismo is not None:
-        if(not(functions.es_uuid(id_organismo))):
-            raise Exception("El id_organismo debe ser un UUID")
-        query = query.filter(TipoTarea.id_organismo == id_organismo)  """    
+  
 
     total= query.count()
     res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
