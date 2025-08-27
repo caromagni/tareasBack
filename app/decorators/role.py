@@ -40,7 +40,7 @@ def require_role(rol=''):
                 can_pass=usher_fnc.get_usr_cu(decoded['email'], rol, use_cases)
                 logger_config.logger.info(f"attempting to pass with user roles: {rol}")
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
-                if  (can_pass==False) and (rol != 'Superadmin' and rol != 'superadmin'):
+                if  (can_pass==False) and (rol != 'Superadmin' or rol != 'superadmin'):
                     logger_config.logger.info(f"bypass through first if")
                     logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
                     raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
