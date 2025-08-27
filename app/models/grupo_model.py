@@ -1075,17 +1075,17 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
         organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.habilitado==True).first()
         if organismo is None: 
             raise Exception("Organismo no encontrado")
-        dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext==organismo.id_fuero, Dominio.habilitado==True).first()
+        dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext==organismo.id_dominio, Dominio.habilitado==True).first()
         if dominio is not None:
-            id_fuero = dominio.id
+            id_dominio = dominio.id
     ##################### REVISAR ESTO ######################
     if id_dominio is not None:
         dominio = db.session.query(Dominio).filter(Dominio.id==id_dominio, Dominio.habilitado==True).first()
         if dominio is None:
             raise Exception("Dominio no encontrado")
     else:
-        if id_fuero is not None:
-            id_dominio = id_fuero """
+        if id_dominio is not None:
+            id_dominio = id_dominio """
     id_dominio = None
     id_organismo = None
     if id_padre is not None and id_padre is not '':

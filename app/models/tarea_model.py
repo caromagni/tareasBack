@@ -1182,7 +1182,7 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
         query_dominio = db.session.query(Dominio).filter(Dominio.id == dominio, Dominio.eliminado==False).first()
         if query_dominio is None:
             raise Exception("Dominio no encontrado")
-        if query_organismo.id_fuero != query_dominio.id_dominio_ext:
+        if query_organismo.id_dominio != query_dominio.id_dominio_ext:
             raise Exception("El organismo ingresado no corresponde al dominio actual")
         
 
@@ -1281,7 +1281,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
 
     # Validar relación solo si tenemos ambos
     if dominio and organismo:
-        if organismo.id_fuero != dominio.id_dominio_ext:
+        if organismo.id_dominio != dominio.id_dominio_ext:
             raise Exception("Dominio y Organismo no corresponden")
 
     # Asignar cambios
@@ -1315,7 +1315,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
             ).first()
             if query_organismo:
                 query_dominio = db.session.query(Dominio).filter(
-                    Dominio.id_dominio_ext == query_organismo.id_fuero,
+                    Dominio.id_dominio_ext == query_organismo.id_dominio,
                     Dominio.eliminado == False
                 ).first()
                 if query_dominio is not None:

@@ -13,7 +13,7 @@ def get_organismo():
             "id_organismo_ext": organismo.id_organismo_ext,
             "circunscripcion_judicial": organismo.circunscripcion_judicial,
             "descripcion": organismo.descripcion,
-            "id_fuero": organismo.id_fuero,
+            "id_dominio": organismo.id_dominio,
             "descripcion_corta": organismo.descripcion_corta,
             "eliminado": organismo.eliminado,
             "id_tarea_grupo_base": organismo.id_tarea_grupo_base,

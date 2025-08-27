@@ -86,7 +86,7 @@ class OrganismoOut(Schema):
     id = String()
     id_organismo_ext = String()
     circunscripcion_judicial = String()
-    id_fuero = String()
+    id_dominio = String()
     descripcion = String()
     eliminado = Boolean()
     descripcion_corta = String()
