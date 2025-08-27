@@ -89,7 +89,7 @@ class Organismo(Base):
     id = Column(UUID, primary_key=True)
     id_organismo_ext = Column(UUID)
     circunscripcion_judicial = Column(String, nullable=False)
-    id_fuero = Column(UUID)
+    id_dominio = Column(UUID)
     descripcion = Column(String)
     descripcion_corta = Column(String)
     habilitado = Column(Boolean, nullable=False)

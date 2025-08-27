@@ -132,7 +132,7 @@ class DatabaseSetup:
         domain = Dominio(
             id=dominio_id,
             #id_dominio_ext=uuid.uuid4(),
-            #id_dominio_ext tiene que ser el mismo que id_fuero de organismo
+            #id_dominio_ext tiene que ser el mismo que id_dominio de organismo
             id_dominio_ext=dominio_id, #must match harcoded id dominio from usher.py untill we have a proper domain setup
             descripcion="General",
             descripcion_corta="GEN",
@@ -153,16 +153,19 @@ class DatabaseSetup:
             print("Organismo 'Organismo General' already exists")
             return existing_organismo
         organismo = Organismo(
-            #id=uuid.uuid4(),
-            #Es el id de dominio hardcodeado en los blueprints para Lavalle
-            id="cb08f738-7590-4331-871e-26f0f09ff4ca", #must match harcoded id organismo from usher.py untill we have a proper organismo setup
+            id="cb08f738-7590-4331-871e-26f0f09ff4ca", #harcoded organismo must match id from sync.py x_organismo
             id_organismo_ext=uuid.uuid4(),
             circunscripcion_judicial="General",
             descripcion="Organismo General",
             descripcion_corta="ORG",
             habilitado=True,
             fecha_actualizacion=datetime.now(),
+<<<<<<< HEAD
             id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
+=======
+            #id_dominio tiene que coincidir con id_dominio_ext de dominio
+            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded dominio juz paz lavalle
+>>>>>>> 5db31751f2736364c270111fb7625d9d186be35b
         )
         session.add(organismo)
         session.commit()
