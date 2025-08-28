@@ -125,14 +125,10 @@ class DatabaseSetup:
     def create_initial_domain(self, session, admin_user):
         dominio_id="06737c52-5132-41bb-bf82-98af37a9ed80" #must match harcoded id dominio from usher.py untill we have a proper domain setup
         print("Creating initial domain...")
-        #existing_domain = session.query(Dominio).filter_by(descripcion="General").first()
-        existing_domain_by_id = session.query(Dominio).filter_by(id=dominio_id).first()
-        #if existing_domain or existing_domain_by_id:
-        #    print("Domain 'General' already exists")
-        if existing_domain_by_id:
-            print("Domain with the specified ID already exists")
-            return existing_domain_by_id
-
+        existing_domain = session.query(Dominio).filter_by(id=dominio_id).first()
+        if existing_domain:
+            print("Domain 'General' already exists")
+            return existing_domain 
         domain = Dominio(
             id=dominio_id,
             #id_dominio_ext=uuid.uuid4(),
@@ -169,8 +165,7 @@ class DatabaseSetup:
             descripcion_corta="ORG",
             habilitado=True,
             fecha_actualizacion=datetime.now(),
-            #id_dominio tiene que coincidir con id_dominio_ext de dominio
-            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded dominio juz paz lavalle
+            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
         )
         session.add(organismo)
         session.commit()

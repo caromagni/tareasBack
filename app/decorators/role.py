@@ -36,19 +36,21 @@ def require_role(rol=''):
                 #funcion que devuelve los casos de uso según la url del request
                 use_cases = usher_fnc.get_api_cu_bd(metodo,url_cu)
                 logger_config.logger.info(f"USE CASES: {use_cases}")
+                logger_config.logger.info(f"FOR USER: {decoded['email']}")
                 #funcion que devuelve los casos de uso según el operador
                 can_pass=usher_fnc.get_usr_cu(decoded['email'], rol, use_cases)
                 logger_config.logger.info(f"attempting to pass with user roles: {rol}")
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
-                if  (can_pass==False) and (rol != 'Superadmin' and rol.lower() != 'superadmin'):
-                    print("Can pass:", can_pass)
-                    print("User role:", rol)
-                    logger_config.logger.info(f"bypass through first if")
-                    logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
-                    raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
-                elif (can_pass==False and (rol == 'superadmin' or rol=='Superadmin')) or (not can_pass and config.RUN_DB_SETUP=='1'):
-                    logger_config.logger.info(f"bypass through second if")
-                    can_pass=True
+                
+                if(can_pass==False):
+                    if (rol.lower() == 'superadmin') or (config.ALL_USERS_SUPERADMIN=="1"):
+                        logger_config.logger.info(f"bypass through second if")
+                        can_pass=True
+                    else:
+                        logger_config.logger.info(f"bypass through first if")
+                        logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
+                        raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
+                    
             
             # Si tiene permisos, continuar con la función original
                 return f(*args, **kwargs)
@@ -58,3 +60,4 @@ def require_role(rol=''):
                                                
         return wrapped
     return decorator
+
