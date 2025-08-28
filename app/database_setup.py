@@ -125,10 +125,14 @@ class DatabaseSetup:
     def create_initial_domain(self, session, admin_user):
         dominio_id="06737c52-5132-41bb-bf82-98af37a9ed80" #must match harcoded id dominio from usher.py untill we have a proper domain setup
         print("Creating initial domain...")
-        existing_domain = session.query(Dominio).filter_by(descripcion="General").first()
-        if existing_domain:
-            print("Domain 'General' already exists")
-            return existing_domain 
+        #existing_domain = session.query(Dominio).filter_by(descripcion="General").first()
+        existing_domain_by_id = session.query(Dominio).filter_by(id=dominio_id).first()
+        #if existing_domain or existing_domain_by_id:
+        #    print("Domain 'General' already exists")
+        if existing_domain_by_id:
+            print("Domain with the specified ID already exists")
+            return existing_domain_by_id
+
         domain = Dominio(
             id=dominio_id,
             #id_dominio_ext=uuid.uuid4(),
@@ -148,10 +152,15 @@ class DatabaseSetup:
 
     def create_initial_organismo(self, session):
         print("Creating initial organismo...")
-        existing_organismo = session.query(Organismo).filter_by(descripcion="Organismo General").first()
-        if existing_organismo:
-            print("Organismo 'Organismo General' already exists")
-            return existing_organismo
+        id_organismo="cb08f738-7590-4331-871e-26f0f09ff4ca" #must match harcoded id organismo from sync.py x_organismo
+        #existing_organismo = session.query(Organismo).filter_by(descripcion="Organismo General").first()
+        existing_organismo_by_id = session.query(Organismo).filter_by(id=id_organismo).first()
+        #if existing_organismo or existing_organismo_by_id:
+        #    print("Organismo 'Organismo General' already exists")
+        if existing_organismo_by_id:
+            print("Organismo with the specified ID already exists")
+            return existing_organismo_by_id
+
         organismo = Organismo(
             id="cb08f738-7590-4331-871e-26f0f09ff4ca", #harcoded organismo must match id from sync.py x_organismo
             id_organismo_ext=uuid.uuid4(),
