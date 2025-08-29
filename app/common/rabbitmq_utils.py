@@ -8,6 +8,8 @@ import traceback
 import common.sync  as sync
 import common.logger_config as logger_config
 
+queue_name = os.environ.get('RABBITMQ_QUEUE_NAME')
+
 def check_updates_new( rabbit_message: dict):
         
         entity = rabbit_message.get('entity_type').lower()
@@ -90,6 +92,8 @@ class RabbitMQHandler:
             'port': int(os.environ.get('RABBITMQ_PORT', 5672)),
             'vhost': os.environ.get('RABBITMQ_VHOST', '/')
         }
+        
+
         retry_count = 0
         while retry_count < self.max_retries:
 
@@ -104,14 +108,14 @@ class RabbitMQHandler:
                 )
                 self.connection = pika.BlockingConnection(connection_params)
                 self.channel = self.connection.channel()
-                self.channel.queue_declare(queue='tareas_params', durable=True, passive=True)
+                self.channel.queue_declare(queue=queue_name, durable=True, passive=True)
                 logger_config.logger.info("RabbitMQ conectado.")
                 return
             except pika.exceptions.ChannelClosedByBroker as e:
                 if e.reply_code == 404:
                     #el canal se cierra cuando passive=True
                     self.channel = self.connection.channel()
-                    self.channel.queue_declare(queue='tareas_params', durable=True)
+                    self.channel.queue_declare(queue=queue_name, durable=True)
                 else:
                     raise
 
@@ -156,7 +160,7 @@ class RabbitMQHandler:
             logger_config.logger.error("No se puede consumir mensajes sin conexión.")
             raise Exception("No se puede consumir mensajes sin conexión.")
 
-        self.channel.basic_consume(queue='tareas_params', 
+        self.channel.basic_consume(queue=queue_name, 
                                    auto_ack=False, 
                                    on_message_callback=self.callback
                 )

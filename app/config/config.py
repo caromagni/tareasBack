@@ -74,6 +74,7 @@ class Config:
     RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
     RABBITMQ_PORT = os.getenv('RABBITMQ_PORT')
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
+    RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
     
 

@@ -92,6 +92,22 @@ class DatabaseSetup:
                 "email": "rguillot@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "portal",
+                "apellido": "portal",
+                "username": "portal",
+                "email": "portal@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "expediente",
+                "apellido": "expediente",
+                "username": "expediente",
+                "email": "expediente@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
             
         ]
