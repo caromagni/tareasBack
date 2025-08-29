@@ -5,7 +5,7 @@ import common.logger_config as logger_config
 from flask import request
 from flask import g
 import common.exceptions as exceptions
-import config.config as Config
+from config.config import Config
 import common.functions as functions
 def require_role(rol=''):
     def decorator(f):
