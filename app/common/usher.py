@@ -227,7 +227,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         descripcion_ext=caso_uso['descripcion_corta_cu']
                     )
                     nuevos_roles.append(nuevo_rol)
-                    print("nuevo_rol:", nuevo_rol)
+                    #print("nuevo_rol:", nuevo_rol)
 
                     # Create UsuarioRol object (don't add to session yet)
                     nuevo_usuarioRol = UsuarioRol(
@@ -240,8 +240,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         id_dominio=id_dominio
                     )
                     nuevos_usuarios_roles.append(nuevo_usuarioRol)
-                    print("nuevo_usuarioRol:", nuevo_usuarioRol)
-            
+                    #print("nuevo_usuarioRol:", nuevo_usuarioRol)
             # Bulk insert all RolExt objects at once
             if nuevos_roles:
                 db.session.bulk_save_objects(nuevos_roles)

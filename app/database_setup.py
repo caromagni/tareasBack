@@ -92,6 +92,22 @@ class DatabaseSetup:
                 "email": "rguillot@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "portal",
+                "apellido": "portal",
+                "username": "portal",
+                "email": "portal@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "expediente",
+                "apellido": "expediente",
+                "username": "expediente",
+                "email": "expediente@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
             
         ]
@@ -148,10 +164,15 @@ class DatabaseSetup:
 
     def create_initial_organismo(self, session):
         print("Creating initial organismo...")
-        existing_organismo = session.query(Organismo).filter_by(descripcion="Organismo General").first()
-        if existing_organismo:
-            print("Organismo 'Organismo General' already exists")
-            return existing_organismo
+        id_organismo="cb08f738-7590-4331-871e-26f0f09ff4ca" #must match harcoded id organismo from sync.py x_organismo
+        #existing_organismo = session.query(Organismo).filter_by(descripcion="Organismo General").first()
+        existing_organismo_by_id = session.query(Organismo).filter_by(id=id_organismo).first()
+        #if existing_organismo or existing_organismo_by_id:
+        #    print("Organismo 'Organismo General' already exists")
+        if existing_organismo_by_id:
+            print("Organismo with the specified ID already exists")
+            return existing_organismo_by_id
+
         organismo = Organismo(
             id="cb08f738-7590-4331-871e-26f0f09ff4ca", #harcoded organismo must match id from sync.py x_organismo
             id_organismo_ext=uuid.uuid4(),

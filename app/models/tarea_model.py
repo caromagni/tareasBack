@@ -1150,8 +1150,6 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                 "id_ext": tipo.id_ext,
                 "id_dominio": tipo.id_dominio,
                 "id_organismo": tipo.id_organismo
-                #"dominio": tipo.dominio,
-                #"organismo": tipo.organismo
             }
             tipo_list.append(tipo_tarea)
 
