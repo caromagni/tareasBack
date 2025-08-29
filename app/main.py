@@ -37,7 +37,7 @@ import threading
 import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
-
+import os
 
 def is_redis_available(): 
     """One-liner Redis availability check"""
@@ -62,9 +62,16 @@ def create_app():
         
         # For now, just instantiate as a placeholder
     print("Creating app..")
-    app = APIFlask(__name__)
-    # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
-    # cache_common.cache_enabled=Config.CACHE_ENABLED
+    app = APIFlask(__name__, docs_path='/docs')
+    swagger_version = os.getenv("SWAGGER_VERSION", "5.27.0")
+    base_url = f"https://unpkg.com/swagger-ui-dist@{swagger_version}"
+
+    app.config['SWAGGER_UI_PATH'] = '/docs'
+    app.config['SWAGGER_UI_BUNDLE_JS'] = f"{base_url}/swagger-ui-bundle.js"
+    app.config['SWAGGER_UI_STANDALONE_PRESET_JS'] = f"{base_url}/swagger-ui-standalone-preset.js"
+    app.config['SWAGGER_UI_CSS'] = f"{base_url}/swagger-ui.css"
+
+
 
     if cache_common.cache_enabled == False :
         print("Using NullCache, caching is disabled")
