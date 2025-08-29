@@ -604,14 +604,16 @@ def post_tarea(json_data: dict):
         print("**** G OBJECT *****")
         username = g.get('username')
         type_header = g.get('type')
+        dominio = g.get('dominio')
+        organismo = g.get('organismo')
         
         if type_header == 'api_key':
             logger.info("API KEY ORIGIN")
-            res = tarea_model.insert_tarea(**json_data)
+            res = tarea_model.insert_tarea(dominio, organismo,**json_data)
         else:    
             if type_header == 'JWT':
                 logger.info("JWT ORIGIN")
-                res = tarea_model.insert_tarea(username, **json_data)
+                res = tarea_model.insert_tarea(dominio, organismo, username, **json_data)
             else:
                 #Esto es para probar sin header - no debería pasar - sacarlo en produccion
                 logger.info("NO HEADER ORIGIN")

@@ -135,11 +135,14 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     return tareas_vencer, total
 
 
-def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None):
+def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None):
     
     print("##############Validaciones Insert de Tarea################")
     id_grupo=None
     id_usuario_asignado=None
+    
+    print("Usuario que crea la tarea: ", username)
+
     if usr_header is not None:
         id_user_actualizacion = utils.get_username_id(usr_header)
     else:
@@ -195,7 +198,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 insert_actuacion = ActuacionExt(id=nuevoID_actuacion,
                                                 id_ext=id_actuacion,
                                                 nombre=nombre_actuacion,
-                                                id_tipo_actuacion=id_tipo_tarea,
+                                                #id_tipo_actuacion=id_tipo_tarea,
                                                 id_user_actualizacion=id_user_actualizacion,
                                                 fecha_actualizacion=datetime.now())
                 db.session.add(insert_actuacion)
@@ -212,22 +215,49 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if id_subtipo_tarea is not None:
         if not(functions.es_uuid(id_subtipo_tarea)):
             raise Exception("El id del subtipo de tarea debe ser un UUID: " + id_subtipo_tarea)
-
+    logger_config.logger.info("CHEQUEA TIPO DE TAREA Y SUBTIPO DE TAREA")
     if id_tipo_tarea is not None:
         if not(functions.es_uuid(id_tipo_tarea)):
             raise Exception("El id del tipo de tarea debe ser un UUID: " + id_tipo_tarea)
         
-        tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
-        if tipo_tarea is None:
+        query_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
+        if query_tipo_tarea is None:
             #Busco por id_ext
-            tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea, TipoTarea.eliminado==False).first()
-            if tipo_tarea is None:
+            print("id de tarea no encontrado - busco por id_ext")
+            query_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea, TipoTarea.eliminado==False).first()
+            if query_tipo_tarea is None:
                 logger_config.logger.error("Tipo de tarea no encontrado:%s" + id_tipo_tarea)
-                raise Exception("Tipo de tarea no encontrado")
-            
-            
-        nombre_tipo=tipo_tarea.nombre
-        id_tipo_tarea = tipo_tarea.id
+                print("Tipo de tarea no encontrado por id_ext - lo inserto")
+                #raise Exception("Tipo de tarea no encontrado")
+                #agrego el tipo de tarea si no existe
+                nuevoID_tipo_tarea=uuid.uuid4()
+                nuevo_tipo_tarea = TipoTarea(id=nuevoID_tipo_tarea,
+                                               id_ext=id_tipo_tarea,
+                                               nombre=titulo,
+                                               codigo_humano=titulo.lower().replace(" ", "_"),
+                                               nivel='expte',
+                                               origen_externo=True,
+                                               fecha_actualizacion=datetime.now(),
+                                               id_user_actualizacion=id_user_actualizacion)
+                db.session.add(nuevo_tipo_tarea)
+                
+                #Agrego el dominio en TipoTareaDominio
+                nuevo_tipo_tarea_dominio = TipoTareaDominio(id=uuid.uuid4(),
+                                                             id_tipo_tarea=nuevoID_tipo_tarea,
+                                                             id_dominio=dominio,
+                                                             id_organismo=organismo,
+                                                             fecha_actualizacion=datetime.now(),
+                                                             id_user_actualizacion=id_user_actualizacion)
+                db.session.add(nuevo_tipo_tarea_dominio)
+
+                logger_config.logger.info("tipo de tarea insertada")
+                db.session.commit()
+            else:
+                print("Tipo de tarea encontrado por id_ext", query_tipo_tarea.id)
+
+
+        nombre_tipo=query_tipo_tarea.nombre
+        id_tipo_tarea = query_tipo_tarea.id
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
@@ -346,8 +376,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
             
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
             if existe_grupo is None:
-                raise Exception("Error en el ingreso de grupos. Grupo no existente")
-            
+                # Busco el id_organismo 
+                existe_grupo = db.session.query(Grupo).filter(Grupo.id_organismo == id_grupo, Grupo.eliminado==False).first()
+                if existe_grupo is None:
+                    logger_config.logger.error("Busco el grupo en organismo")
+                    raise Exception("Error en el ingreso de grupos. Grupo no existente")
+                else:
+                    id_grupo=existe_grupo.id
+                    logger_config.logger.info("Grupo encontrado por id_organismo") 
+
             if existe_grupo.eliminado==True:
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
             
