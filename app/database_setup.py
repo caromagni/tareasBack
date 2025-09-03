@@ -40,8 +40,8 @@ class DatabaseSetup:
             {
                 "nombre": "Carolina",
                 "apellido": "Magni",
-                "username": "cmagni@jus.mendoza.gov.ar",
-                "email": "cmagni@jus.mendoza.gov.ar",
+                "username": "carolinamagni@jus.mendoza.gov.ar",
+                "email": "carolinamagni@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
             },
