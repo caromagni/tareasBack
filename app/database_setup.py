@@ -44,6 +44,14 @@ class DatabaseSetup:
                 "email": "cmagni@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "portal",
+                "apellido": "portal",
+                "username": "portal",
+                "email": "portal@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
             
         ]

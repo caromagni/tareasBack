@@ -7,6 +7,7 @@ from flask import g
 import common.exceptions as exceptions
 from config.config import Config
 import common.functions as functions
+import os
 def require_role(rol=''):
     def decorator(f):
         @wraps(f)
@@ -14,6 +15,8 @@ def require_role(rol=''):
             #try:
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
+                ALL_USERS_SUPERADMIN=os.environ.get("ALL_USERS_SUPERADMIN")    
+                logger_config.logger.info(f"ALL_USERS_SUPERADMIN: {ALL_USERS_SUPERADMIN}")
                 x_api_key = request.headers.get('x-api-key')
                 if x_api_key:
                     logger_config.logger.info("API Key detected in header")
@@ -43,7 +46,7 @@ def require_role(rol=''):
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
                 
                 if(can_pass==False):
-                    if (rol.lower() == 'superadmin') or (Config.ALL_USERS_SUPERADMIN=="1"):
+                    if (rol.lower() == 'superadmin') or (ALL_USERS_SUPERADMIN=="1"):
                         logger_config.logger.info(f"bypass through second if")
                         can_pass=True
                     else:
