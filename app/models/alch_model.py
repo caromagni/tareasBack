@@ -581,10 +581,12 @@ class UsuarioRol(Base):
     id_user_actualizacion = Column(UUID)
     eliminado = Column(Boolean, default=False)
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
 
     usuario_grupo = relationship('UsuarioGrupo')
     rol_ext = relationship('RolExt')
     dominio = relationship('Dominio')
+    grupo = relationship('Grupo')
 
 class Parametros(Base):
     __tablename__ = 'parametros'

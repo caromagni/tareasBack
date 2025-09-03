@@ -59,6 +59,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
 def get_grupo(query_data: dict):
     try:
         username = g.username
+        print("username:", username)
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         eliminado = request.args.get('eliminado')

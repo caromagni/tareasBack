@@ -156,7 +156,7 @@ def create_app():
     
     # Initialize the SQLAlchemy engine and session
     print("#####################")
-    print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
+   #print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
     print("######################")
       # Create tables based on the models defined in Base
     db.init_app(app)

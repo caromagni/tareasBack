@@ -79,7 +79,7 @@ def sync_tipo_tarea(entity_id, url,id_user=None):
                                                             id_organismo=x_organismo,
                                                             eliminado=False,
                                                             fecha_actualizacion=datetime.now(),
-                                                            id_user_actualizacion=id_user if id_user else 'system'
+                                                            id_user_actualizacion=id_user if id_user else None
                                                            )
                     db.session.add(nuevo_tipo_tarea_dominio)
                 #hago update del tipo de tarea
