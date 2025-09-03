@@ -299,15 +299,19 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         # Ejecuto el query
         query_permisos = query.all()
         if len(query_permisos)==0:
+            logger_config.logger.info("query_permisos:", query_permisos)
             logger_config.logger.error("No tiene permisos")
             return False
         else:
+            logger_config.logger.info("query_permisos:", query_permisos)
             logger_config.logger.info("Usuario tiene permisos")
             return True
     except requests.exceptions.RequestException as e:
+        logger_config.logger.error(traceback.format_exc())
         logger_config.logger.error(f"Error en get_roles desde P-USHER: {e}")
         return False    
     except Exception as e:
+        logger_config.logger.error(traceback.format_exc())
         logger_config.logger.error(f"Error en get_usr_cu: {e}")
         return False     
 
