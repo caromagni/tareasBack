@@ -353,7 +353,7 @@ class AutoAccionAsignacion(Base):
 
     id = Column(UUID, primary_key=True)
     id_regla = Column(ForeignKey('tareas.auto_regla_asignacion.id'), nullable=False)
-    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=True)
     fecha_actualizacion = Column(DateTime, nullable=False)
 
     grupo = relationship('Grupo')
@@ -567,7 +567,7 @@ class TareaXGrupo(Base):
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
-
+ 
 
 class UsuarioRol(Base):
     __tablename__ = 'usuario_rol'
@@ -581,7 +581,7 @@ class UsuarioRol(Base):
     id_user_actualizacion = Column(UUID)
     eliminado = Column(Boolean, default=False)
     id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=True)
 
     usuario_grupo = relationship('UsuarioGrupo')
     rol_ext = relationship('RolExt')
