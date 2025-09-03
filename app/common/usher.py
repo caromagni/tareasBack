@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, RolExt, EP, UsuarioRol, UsuarioGrupo
+from models.alch_model import Usuario, RolExt, EP, UsuarioRol, UsuarioGrupo, Organismo, Dominio
 from datetime import date, timedelta, datetime
 import common.logger_config as logger_config
 import uuid
@@ -212,6 +212,17 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             for r in roles['lista_roles_cus']:
                 ######ROL USHER##########
                 print("rol:",r['descripcion_rol'])
+                id_organismo = r['id_organismo']
+                query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
+                if query_organismo is not None:
+                    id_grupo = query_organismo.id 
+                    query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio).first()
+                    if query_dominio is not None:
+                        id_dominio = query_dominio.id 
+
+                print("id_organismo:", id_organismo)
+                email = username
+                print("email:", email)
                 ######Casos de uso del rol##########
                 for caso_uso in r['casos_de_uso']:
                     print("caso de uso:", caso_uso['descripcion_corta_cu']) 
@@ -237,7 +248,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         fecha_actualizacion=current_time,
                         id_user_actualizacion=id_user_actualizacion,
                         eliminado=False,
-                        id_dominio=id_dominio
+                        id_dominio=id_dominio,
+                        id_grupo=id_grupo
                     )
                     nuevos_usuarios_roles.append(nuevo_usuarioRol)
                     #print("nuevo_usuarioRol:", nuevo_usuarioRol)

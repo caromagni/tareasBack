@@ -9,6 +9,7 @@ import common.sync  as sync
 import common.logger_config as logger_config
 
 queue_name = os.environ.get('RABBITMQ_QUEUE_NAME')
+print ("queue_name: ", queue_name)
 
 def check_updates_new( rabbit_message: dict):
         
@@ -40,7 +41,10 @@ def check_updates_new( rabbit_message: dict):
             system_apikey = os.environ.get('SYSTEM_NAME')
             headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
-            id_user = utils.get_username_id('pusher')
+            #id_user = utils.get_username_id('pusher')
+            #id_user = utils.get_username_id('simperiale@jus.mendoza.gov.ar')
+            id_user=None
+            print("id_user: ", id_user)
             g.id_user = id_user
             #print("id user: ", id_user)
             print("entity: ", entity)
@@ -156,6 +160,7 @@ class RabbitMQHandler:
 
 
     def start_consuming(self):
+        print ("queue_name: ", queue_name)
         if not self.channel:
             logger_config.logger.error("No se puede consumir mensajes sin conexión.")
             raise Exception("No se puede consumir mensajes sin conexión.")
