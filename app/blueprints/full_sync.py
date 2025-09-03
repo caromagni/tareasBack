@@ -152,6 +152,7 @@ def sync_all_dominios():
         }
     
     except Exception as err:
+        print(traceback.format_exc())
         logger_config.logger.error(f"Error in full sync dominios: {err}")
         raise exceptions.ValidationError(err)
 
@@ -161,25 +162,6 @@ def sync_all_dominios():
     summary='Full Sync Fuero',
     responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'}
 )
-@full_sync_b.get('/full_sync/fuero')
-#@rol.require_role(['admin', 'superadmin'])
-def sync_all_fuero():
-    try:
-        id_user = utils.get_username_id(g.username)
-        success_count, error_count = full_sync.full_sync_fuero(id_user)
-        
-        return {
-            "success": True,
-            "message": f"Full sync completed: {success_count} successful, {error_count} errors",
-            "data": {
-                "success_count": success_count,
-                "error_count": error_count
-            }
-        }
-    
-    except Exception as err:
-        logger_config.logger.error(f"Error in full sync fuero: {err}")
-        raise exceptions.ValidationError(err)
 
 @full_sync_b.doc(
     security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth': []}],
@@ -213,12 +195,20 @@ def sync_all_inhabilidad():
     summary='Full Sync Subtipo Tarea',
     responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'}
 )
-@full_sync_b.get('/full_sync/subtipo_tarea')
+@full_sync_b.get('/full_sync/tipo_tarea_parte')
 #@rol.require_role(['admin', 'superadmin'])
-def sync_all_subtipo_tarea():
+def sync_all_tipo_tarea_parte():
     try:
-        id_user = utils.get_username_id(g.username)
-        success_count, error_count = full_sync.full_sync_subtipo_tarea(id_user)
+         # Get user ID for audit trail
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
+        success_count, error_count = full_sync.full_sync_tipos_tareas(id_user,url_post,True)
         
         return {
             "success": True,
@@ -266,6 +256,7 @@ def sync_all_entities():
             results['fuero'] = {"status": "completed", "success": True, "success_count": success_count, "error_count": error_count}
             total_success += 1
         except Exception as e:
+            print(traceback.format_exc())
             logger_config.logger.error(f"Error syncing fuero: {e}")
             results['fuero'] = {"status": "failed", "error": str(e), "success": False}
             total_errors += 1
@@ -276,6 +267,7 @@ def sync_all_entities():
             results['organismos'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:
+            print(traceback.format_exc())
             logger_config.logger.error(f"Error syncing organismos: {e}")
             results['organismos'] = {"status": "failed", "error": str(e), "success": False}
             total_errors += 1
@@ -284,12 +276,25 @@ def sync_all_entities():
         # Sync all entities sequentially
         logger_config.logger.info("1. Syncing tipos_tareas...")
         try:
-            full_sync.full_sync_tipos_tareas(id_user)
+            url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
+            full_sync.full_sync_tipos_tareas(id_user,url_post,False)
             results['tipos_tareas'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:
             logger_config.logger.error(f"Error syncing tipos_tareas: {e}")
             results['tipos_tareas'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1
+
+         # Sync all entities sequentially
+        logger_config.logger.info("1. Syncing subtipos_tareas...")
+        try:
+            url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
+            full_sync.full_sync_tipos_tareas(id_user,url_post,True)
+            results['subtipos_tareas'] = {"status": "completed", "success": True}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing subtipos_tareas: {e}")
+            results['subtipos_tareas'] = {"status": "failed", "error": str(e), "success": False}
             total_errors += 1
         
         logger_config.logger.info("2. Syncing usuarios...")

@@ -1,7 +1,6 @@
 import pika
 import json
 import os
-import time
 from db.alchemy_db import db
 from flask import g
 import common.utils as utils
@@ -94,15 +93,10 @@ class RabbitMQHandler:
             'vhost': os.environ.get('RABBITMQ_VHOST', '/')
         }
         
-        # Close existing connection if any
-        if self.connection and not self.connection.is_closed:
-            try:
-                self.connection.close()
-            except Exception as e:
-                logger_config.logger.warning(f"Error closing existing connection: {e}")
 
         retry_count = 0
         while retry_count < self.max_retries:
+
             try:
                 connection_params = pika.ConnectionParameters(
                     host=rabbitmq_params['host'],
@@ -110,19 +104,12 @@ class RabbitMQHandler:
                     virtual_host=rabbitmq_params['vhost'],
                     credentials=pika.PlainCredentials(
                         rabbitmq_params['user'], rabbitmq_params['password']
-                    ),
-                    # Add heartbeat and connection timeout settings
-                    heartbeat=30,  # 30 seconds heartbeat
-                    blocked_connection_timeout=300,  # 5 minutes timeout for blocked connections
-                    connection_attempts=3,  # Try 3 times to connect
-                    retry_delay=2,  # Wait 2 seconds between connection attempts
-                    socket_timeout=10,  # 10 seconds socket timeout
-                    stack_timeout=10  # 10 seconds for AMQP handshake
+                    )
                 )
                 self.connection = pika.BlockingConnection(connection_params)
                 self.channel = self.connection.channel()
                 self.channel.queue_declare(queue=queue_name, durable=True, passive=True)
-                logger_config.logger.info("RabbitMQ conectado con parámetros mejorados.")
+                logger_config.logger.info("RabbitMQ conectado.")
                 return
             except pika.exceptions.ChannelClosedByBroker as e:
                 if e.reply_code == 404:
@@ -131,12 +118,6 @@ class RabbitMQHandler:
                     self.channel.queue_declare(queue=queue_name, durable=True)
                 else:
                     raise
-            except Exception as e:
-                retry_count += 1
-                logger_config.logger.warning(f"Connection attempt {retry_count} failed: {e}")
-                if retry_count >= self.max_retries:
-                    raise
-                time.sleep(2)  # Wait before retry
 
     def callback(self, ch, method, properties, body):
         try:

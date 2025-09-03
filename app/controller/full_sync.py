@@ -9,7 +9,7 @@ import traceback
 import json
 import time
 
-def full_sync_tipos_tareas(id_user=None):
+def full_sync_tipos_tareas(id_user=None,url_post=None,is_subtipo=False):
     """Sync all tipos de tareas from Pusher"""
     logger_config.logger.info("Starting full sync of tipos de tareas...")
     #getting all the records at once and then pass them one by one to the sync_tipo_tarea function
@@ -17,10 +17,14 @@ def full_sync_tipos_tareas(id_user=None):
     system_apikey = os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
-    base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', '')
+    if is_subtipo:
+        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE', '')
+    else:
+        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', '')
+    
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     sync_url = f"{base_url}{usuario_consulta}"
-    sync_url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
+    
     logger_config.logger.info("Obtained records from pusher")
     logger_config.logger.debug(f"sync_url: {sync_url}")
     logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
@@ -46,11 +50,11 @@ def full_sync_tipos_tareas(id_user=None):
         try:
             logger_config.logger.debug(f"tipo_data: {tipo_data}")
             logger_config.logger.debug("******************************")
-            logger_config.logger.debug(f'sending URL: {sync_url_post}')
+            logger_config.logger.debug(f'sending URL: {url_post}')
             logger_config.logger.debug(f'id_user: {id_user}')
             logger_config.logger.debug('USER FROM CONTROLLER BEFORE SYNC')
            
-            sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
+            sync.sync_tipo_tarea(tipo_data['id'],url_post, id_user)
             success_count += 1
         except Exception as e:
             logger_config.logger.error(f"Error syncing tipo tarea {tipo_data.get('id', 'unknown')}: {e}")
@@ -211,35 +215,6 @@ def full_sync_dominios(id_user=None):
     error_count = 0
 
 
-def full_sync_fuero(id_user=None):
-    """Sync all fuero from Pusher"""
-    logger_config.logger.info("Starting full sync of fuero...")
-    
-    fuero_data = sync.fuero()
-    
-    if not fuero_data or 'data' not in fuero_data:
-        logger_config.logger.error("No data received from Pusher for fuero")
-        return 0, 1
-    
-    success_count = 0
-    error_count = 0
-    
-    for fuero_item in fuero_data['data']:
-        try:
-            # Use existing sync function for each entity
-            base_url = os.environ.get('PUSHER_URL', '')
-            usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
-            sync_url = f"{base_url}{usuario_consulta}&tipo_entidad=fuero"
-            
-            sync.sync_fuero(fuero_item['id'], sync_url, id_user)
-            success_count += 1
-            logger_config.logger.info(f"Successfully synced fuero: {fuero_item.get('id', 'unknown')}")
-        except Exception as e:
-            logger_config.logger.error(f"Error syncing fuero {fuero_item.get('id', 'unknown')}: {e}")
-            error_count += 1
-    
-    logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
-    return success_count, error_count
 
 def full_sync_inhabilidad(id_user=None):
     """Sync all inhabilidad from Pusher"""
@@ -271,7 +246,7 @@ def full_sync_inhabilidad(id_user=None):
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
     return success_count, error_count
 
-def full_sync_subtipo_tarea(id_user=None):
+def full_sync_subtipo_tarea(id_user=None,url_post=None):
     """Sync all subtipo tarea from Pusher"""
     logger_config.logger.info("Starting full sync of subtipo tarea...")
     
@@ -301,37 +276,4 @@ def full_sync_subtipo_tarea(id_user=None):
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
     return success_count, error_count
 
-def full_sync_all(id_user=None):
-    """Sync all entity types from Pusher"""
-    logger_config.logger.info("Starting full sync of all entities...")
-    
-    results = {}
-    
-    # Sync all entity types
-    entity_types = ['tipo_act_juzgado', 'usuario', 'organismo', 'fuero', 'inhabilidad', 'subtipo_act_juzgado']
-    
-    for entity_type in entity_types:
-        try:
-            logger_config.logger.info(f"Starting sync of {entity_type}...")
-            
-            if entity_type == 'tipo_act_juzgado':
-                results[entity_type] = full_sync_tipos_tareas(id_user)
-            elif entity_type == 'usuario':
-                results[entity_type] = full_sync_usuarios(id_user)
-            elif entity_type == 'organismo':
-                results[entity_type] = full_sync_organismos(id_user)
-            elif entity_type == 'fuero':
-                results[entity_type] = full_sync_fuero(id_user)
-            elif entity_type == 'inhabilidad':
-                results[entity_type] = full_sync_inhabilidad(id_user)
-            elif entity_type == 'subtipo_act_juzgado':
-                results[entity_type] = full_sync_subtipo_tarea(id_user)
-                
-            logger_config.logger.info(f"Completed sync of {entity_type}: {results[entity_type]}")
-            
-        except Exception as e:
-            logger_config.logger.error(f"Error in full sync of {entity_type}: {e}")
-            results[entity_type] = (0, 1)
-    
-    logger_config.logger.info(f"Full sync of all entities completed: {results}")
-    return results
+
