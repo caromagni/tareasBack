@@ -119,7 +119,7 @@ class TipoActuacionExt(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_tipo_actuacion_ext = Column(UUID, nullable=False)
+    id_tipo_actuacion_ext = Column(UUID)
     nombre = Column(String, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
 
@@ -132,10 +132,10 @@ class ActuacionExt(Base):
     id_ext = Column(UUID)
     nombre = Column(String)
     #id_tipo_actuacion = Column(UUID)
-    id_tipo_actuacion = Column(ForeignKey('tareas.tipo_actuacion_ext.id'), nullable=False)
+    id_tipo_actuacion = Column(ForeignKey('tareas.tipo_actuacion_ext.id'))
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    tipo_actuacion = relationship('TipoActuacionExt')
+    #tipo_actuacion = relationship('TipoActuacionExt')
 
 
 class AutoReglaAsignacion(Base):
@@ -289,8 +289,8 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'))
+    id_organismo = Column(ForeignKey('tareas.organismo.id'))
 
     user_actualizacion = relationship('Usuario')
     #dominio = relationship('Dominio')

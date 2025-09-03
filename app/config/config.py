@@ -22,6 +22,7 @@ class Config:
     RUN_DB_CREATION = os.getenv('RUN_DB_CREATION', '0')
     SQLALCHEMY_POOL_SIZE = os.getenv('SQLALCHEMY_POOL_SIZE')
     RUN_DB_CREATION = os.getenv('RUN_DB_CREATION', '0')
+    ALL_USERS_SUPERADMIN = os.getenv('ALL_USERS_SUPERADMIN', '0')
     #SQLALCHEMY_DATABASE_URI = os.getenv("SETTINGS_CONECTION")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SHOW_SQLALCHEMY_LOG_MESSAGES = True
@@ -74,6 +75,7 @@ class Config:
     RABBITMQ_HOST = os.getenv('RABBITMQ_HOST')
     RABBITMQ_PORT = os.getenv('RABBITMQ_PORT')
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
+    RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
     
 
