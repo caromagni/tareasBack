@@ -210,11 +210,7 @@ def full_sync_dominios(id_user=None):
         time.sleep(0.1)
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
     
-    
-    success_count = 0
-    error_count = 0
-
-
+    return success_count, error_count
 
 def full_sync_inhabilidad(id_user=None):
     """Sync all inhabilidad from Pusher"""
