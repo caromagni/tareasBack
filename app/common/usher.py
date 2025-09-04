@@ -299,11 +299,11 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         # Ejecuto el query
         query_permisos = query.all()
         if len(query_permisos)==0:
-            logger_config.logger.info("query_permisos:", query_permisos)
+            logger_config.logger.error(f"query_permisos: {query_permisos}")
             logger_config.logger.error("No tiene permisos")
             return False
         else:
-            logger_config.logger.info("query_permisos:", query_permisos)
+            logger_config.logger.info(f"query_permisos: {query_permisos}")
             logger_config.logger.info("Usuario tiene permisos")
             return True
     except requests.exceptions.RequestException as e:

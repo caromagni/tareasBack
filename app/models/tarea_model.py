@@ -2154,9 +2154,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     print(page, per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)
     
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
     else:
-        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y")
 
     if fecha_hasta is not None:
         fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
@@ -2167,6 +2167,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())    
 
+    if fecha_desde > fecha_hasta:
+        raise ValueError("La fecha desde no puede ser mayor a la fecha hasta.")
+    
     """ query = db.session.query(Tarea.id, Tarea.titulo, Tarea.fecha_creacion, Tarea.fecha_fin,
                              Tarea.fecha_inicio, Tarea.plazo, Tarea.prioridad, Tarea.estado, 
                              Tarea.id_tipo_tarea, Tarea.id_subtipo_tarea, Tarea.id_actuacion,
@@ -2389,9 +2392,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
     else:
-        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y")
         
             
     if fecha_hasta is not None:
@@ -2402,7 +2405,10 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         #.date() 
         
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
-
+   
+    if fecha_desde > fecha_hasta:
+        raise ValueError("La fecha desde no puede ser mayor a la fecha hasta.")
+   
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
 
     if titulo is not None:
