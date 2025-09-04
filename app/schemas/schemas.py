@@ -481,6 +481,7 @@ class TipoTareaPatchIn(Schema):
 class TipoTareaOut(Schema):
     id = String()
     id_ext = String()
+    clasificacion_ext= String()
     base = Boolean()
     nombre = String()
     nivel = String()
@@ -567,6 +568,7 @@ class SubtipoTareaShortOut(Schema):
 class TipoTareaSubtipoOut(Schema):
     id = String()
     id_ext = String()
+    clasificacion_ext= String()
     nombre = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))

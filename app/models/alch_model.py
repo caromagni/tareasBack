@@ -280,6 +280,7 @@ class TipoTarea(Base):
 
     id = Column(UUID, primary_key=True)
     id_ext = Column(UUID)
+    clasificacion_ext = Column(String)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
     eliminado = Column(Boolean, nullable=False, default=False)

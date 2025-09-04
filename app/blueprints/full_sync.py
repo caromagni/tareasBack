@@ -202,14 +202,18 @@ def sync_all_tipo_tarea_parte():
          # Get user ID for audit trail
         if g is not None:
             if 'username' in g:
+
                 id_user = utils.get_username_id(g.username)
             else:
                 id_user = None
         else:
             id_user = None
-        url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
-        success_count, error_count = full_sync.full_sync_tipos_tareas(id_user,url_post,True)
-        
+        #url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
+        #clasificacion="tipo_act_parte"
+        url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
+        clasificacion="tipo_act_juzgado"
+        success_count, error_count = full_sync.full_sync_tipos_tareas(clasificacion, id_user,url_post,False)
+
         return {
             "success": True,
             "message": f"Full sync completed: {success_count} successful, {error_count} errors",
@@ -277,7 +281,8 @@ def sync_all_entities():
         logger_config.logger.info("1. Syncing tipos_tareas...")
         try:
             url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
-            full_sync.full_sync_tipos_tareas(id_user,url_post,False)
+            clasificacion="tipo_act_juzgado"
+            full_sync.full_sync_tipos_tareas(clasificacion, id_user,url_post,False)
             results['tipos_tareas'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:

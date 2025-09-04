@@ -8,6 +8,7 @@ import os
 import traceback
 import time
 from common.utils import normalize_spanish_text
+
 def sync_request(url, entity_id):
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
@@ -24,14 +25,15 @@ def sync_request(url, entity_id):
     print("json roles:",resp)
     return resp
 
-def sync_tipo_tarea(entity_id, url,id_user=None):
+def sync_tipo_tarea(entity, entity_id, url,id_user=None):
     try:
         print("receiving URL MOFO from sync_tipo_tarea",url)
         print("passing to sync_request")
         print("*"*50)   
+        print("Entity:",entity)
         print("id_user:",id_user)
         resp= sync_request(url, entity_id)
-        print("json roles:",resp)
+        print("json resp:",resp)
         print("aca esta la info de pusher")
      
         if resp and resp['data']['id'] is not None:
@@ -39,12 +41,14 @@ def sync_tipo_tarea(entity_id, url,id_user=None):
             x_dominio = '06737c52-5132-41bb-bf82-98af37a9ed80'
                 #id Juzgado de Paz de Lavalle de la tabla organismo
             x_organismo = 'cb08f738-7590-4331-871e-26f0f09ff4ca'
+                
             query_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == resp['data']['id']).first()
             if query_tipo_tarea is None:
                 #hago insert del tipo de tarea
                 
                 nuevo_tipo_tarea = TipoTarea(id=uuid.uuid4(),
                                 id_ext=resp['data']['id'], 
+                                clasificacion_ext=entity,
                                 nombre=normalize_spanish_text(resp['data']['descripcion']), 
                                 codigo_humano=normalize_spanish_text(resp['data']['descripcion_corta']), 
                                 eliminado=not(resp['data']['habilitado']),
@@ -87,6 +91,7 @@ def sync_tipo_tarea(entity_id, url,id_user=None):
                 query_tipo_tarea.codigo_humano = normalize_spanish_text(resp['data']['descripcion_corta']) 
                 query_tipo_tarea.eliminado = not(resp['data']['habilitado'])
                 query_tipo_tarea.id_ext = resp['data']['id']
+                query_tipo_tarea.clasificacion_ext = entity
                 query_tipo_tarea.fecha_actualizacion=datetime.now()
                 query_tipo_tarea.id_user_actualizacion=id_user if id_user else None
                 query_tipo_tarea.base = True

@@ -52,10 +52,10 @@ def check_updates_new( rabbit_message: dict):
                 match entity:
                     case 'tipo_act_juzgado':
                         #ejecutar insert o update para tipo_tarea
-                        res=sync.sync_tipo_tarea(entity_id, url, id_user)
+                        res=sync.sync_tipo_tarea(entity, entity_id, url, id_user)
                     case 'tipo_act_parte':
                         #ejecutar insert o update para tipo_tarea
-                        res=sync.sync_tipo_tarea(entity_id, url, id_user)
+                        res=sync.sync_tipo_tarea(entity, entity_id, url, id_user)
                     case 'usuario':
                         #ejecutar insert o update para usuario
                         res=sync.sync_usuario(entity_id, url, id_user)
