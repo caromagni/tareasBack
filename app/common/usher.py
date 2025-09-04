@@ -215,7 +215,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 id_organismo = r['id_organismo']
                 query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
                 if query_organismo is not None:
-                    id_grupo = query_organismo.id 
+                    id_grupo = query_organismo.id_organismo_ext
                     query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio).first()
                     if query_dominio is not None:
                         id_dominio = query_dominio.id 
