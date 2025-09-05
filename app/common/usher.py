@@ -156,12 +156,13 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         current_user_roles = db.session.query(RolExt).filter(RolExt.email == email).all()
         print("current_user_roles:", len(current_user_roles))
         print("**"*20)
-        if len(current_user_roles)>=0:
-            #Pregunto si hay algún registro vencido
-            logger_config.logger.info("Controla roles vencidos")
-            current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
-            print("current_user_expired_roles:", len(current_user_expired_roles))
-            print("**"*20)
+        
+        #Pregunto si hay algún registro vencido
+        logger_config.logger.info("Controla roles vencidos")
+        current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
+        print("current_user_expired_roles:", len(current_user_expired_roles))
+        print("**"*20)
+        
         #Traigo los roles del usuario desde P-USHER
         if len(current_user_roles)==0 or len(current_user_expired_roles)>0:
        
