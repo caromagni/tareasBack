@@ -28,9 +28,9 @@ def before_request():
     summary='Full Sync Tipos Tareas',
     responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'}
 )
-@full_sync_b.get('/full_sync/tipos_tareas')
+@full_sync_b.get('/full_sync/tipos_tareas_juzgado')
 #@rol.require_role(['admin', 'superadmin'])  # Restrict to admin users
-def sync_all_tipos_tareas():
+def sync_all_tipos_tareas_juzgado():
     try:
         # Get user ID for audit trail
         if g is not None:
@@ -46,7 +46,49 @@ def sync_all_tipos_tareas():
         # Perform full sync
         logger_config.logger.info("calling full_sync_tipos_tareas")
         logger_config.logger.debug("******************************")
-        full_sync.full_sync_tipos_tareas(id_user)
+        clasificacion="juzgado"
+        full_sync.full_sync_tipos_tareas_juzgado(clasificacion,id_user,False)
+        
+        return {
+            "success": True,
+            "message": f"Batch job finished, see logs for more detail",
+           
+        }
+    
+    except Exception as err:
+        traceback.print_exc()
+        logger_config.logger.error(f"Error in full sync tipos tareas: {err}")
+        raise exceptions.ValidationError(err)
+
+
+@full_sync_b.doc(
+    security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth': []}],
+    description='Full sync of all tipos de tareas from Pusher',
+    summary='Full Sync Tipos Tareas',
+    responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'}
+)
+
+@full_sync_b.get('/full_sync/tipos_tareas_parte')
+#@rol.require_role(['admin', 'superadmin'])  # Restrict to admin users
+def sync_all_tipos_tareas_parte():
+    try:
+        # Get user ID for audit trail
+        if g is not None:
+            if 'username' in g:
+                id_user = utils.get_username_id(g.username)
+            else:
+                id_user = None
+        else:
+            id_user = None
+        
+        logger_config.logger.debug(f"id_user: {id_user}")
+        
+        # Perform full sync
+
+        clasificacion="parte"
+        logger_config.logger.info("calling full_sync_tipos_tareas")
+        logger_config.logger.debug("******************************")
+        full_sync.full_sync_tipos_tareas_parte(clasificacion,id_user,True)
         
         return {
             "success": True,
@@ -212,7 +254,7 @@ def sync_all_tipo_tarea_parte():
         clasificacion="tipo_act_parte"
         #url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
         #clasificacion="tipo_act_juzgado"
-        success_count, error_count = full_sync.full_sync_tipos_tareas(clasificacion, id_user,url_post,False)
+        success_count, error_count = full_sync.full_sync_tipos_tareas_parte(clasificacion, id_user,url_post,False)
 
         return {
             "success": True,
@@ -281,8 +323,8 @@ def sync_all_entities():
         logger_config.logger.info("1. Syncing tipos_tareas...")
         try:
             url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
-            clasificacion="tipo_act_juzgado"
-            full_sync.full_sync_tipos_tareas(clasificacion, id_user,url_post,False)
+            clasificacion="juzgado"
+            full_sync.full_sync_tipos_tareas_juzgado(clasificacion, id_user,url_post,False)
             results['tipos_tareas'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:
@@ -294,7 +336,8 @@ def sync_all_entities():
         logger_config.logger.info("1. Syncing subtipos_tareas...")
         try:
             url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
-            full_sync.full_sync_tipos_tareas(id_user,url_post,True)
+            clasificacion="parte"
+            full_sync.full_sync_tipos_tareas_parte(clasificacion,id_user,url_post,True)
             results['subtipos_tareas'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:

@@ -19,10 +19,11 @@ def full_sync_tipos_tareas(clasificacion=None, id_user=None,url_post=None,is_sub
     system_apikey = os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
-    if is_subtipo:
+    if clasificacion=="parte":
         base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE', '')
-    else:
-        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', '')
+    if clasificacion=="juzgado":
+        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_JUZGADO', '')
+    url_post = os.environ.get('PUSHER_URL_TIPOS_TAREAS_JUZGADO_POST', '')
 
    
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
