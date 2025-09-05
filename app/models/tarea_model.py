@@ -248,8 +248,8 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                 #Agrego el dominio en TipoTareaDominio
                 nuevo_tipo_tarea_dominio = TipoTareaDominio(id=uuid.uuid4(),
                                                              id_tipo_tarea=nuevoID_tipo_tarea,
-                                                             id_dominio=dominio,
-                                                             id_organismo=organismo,
+                                                             id_dominio_ext=dominio,
+                                                             id_organismo_ext=organismo,
                                                              fecha_actualizacion=datetime.now(),
                                                              id_user_actualizacion=id_user_actualizacion)
                 db.session.add(nuevo_tipo_tarea_dominio)
@@ -1112,8 +1112,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                             TipoTarea.id_ext,
                             TipoTarea.id_user_actualizacion,
                             TipoTarea.fecha_actualizacion,
-                            TipoTareaDominio.id_dominio.label('id_dominio'),
-                            TipoTareaDominio.id_organismo.label('id_organismo')
+                            TipoTareaDominio.id_dominio_ext.label('id_dominio'),
+                            TipoTareaDominio.id_organismo_ext.label('id_organismo')
                             ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
                             ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
      
@@ -1124,7 +1124,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
         if(not(functions.es_uuid(id_dominio))):
                 raise Exception("El id_dominio debe ser un UUID")
     if id_dominio is not None:          
-        query = query.filter(TipoTareaDominio.id_dominio == id_dominio)
+        query = query.filter(TipoTareaDominio.id_dominio_ext == id_dominio)
 
     if id_organismo is None:
         id_organismo = organismo
@@ -1133,7 +1133,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
             raise Exception("El id_organismo debe ser un UUID")
         
     if id_organismo is not None:
-        query = query.filter(TipoTareaDominio.id_organismo == id_organismo)
+        query = query.filter(TipoTareaDominio.id_organismo_ext == id_organismo)
 
     #query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
     if nivel is not None:
@@ -1215,10 +1215,10 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
         if not(functions.es_uuid(id_organismo)):
             raise Exception("El id_organismo debe ser un UUID")
         
-        query_organismo = db.session.query(Organismo).filter(Organismo.id == id_organismo, Organismo.eliminado==False).first()
+        query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo, Organismo.eliminado==False).first()
         if query_organismo is None:
             raise Exception("Organismo no encontrado")
-        query_dominio = db.session.query(Dominio).filter(Dominio.id == dominio, Dominio.eliminado==False).first()
+        query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == dominio, Dominio.eliminado==False).first()
         if query_dominio is None:
             raise Exception("Dominio no encontrado")
         if query_organismo.id_dominio != query_dominio.id_dominio_ext:
@@ -1248,8 +1248,8 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     nuevo_tipo_tarea_dominio = TipoTareaDominio(
         id=uuid.uuid4(),
         id_tipo_tarea=nuevoID,
-        id_dominio=dominio,
-        id_organismo=id_organismo,
+        id_dominio_ext=dominio,
+        id_organismo_ext=id_organismo,
         eliminado=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
@@ -1260,8 +1260,8 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     db.session.commit()
 
     query_tipo_tarea = db.session.query(TipoTarea.id, TipoTarea.codigo_humano, TipoTarea.nombre, TipoTarea.nivel, TipoTarea.base, TipoTarea.origen_externo, TipoTarea.suspendido, TipoTarea.eliminado, TipoTarea.id_ext, TipoTarea.id_user_actualizacion, TipoTarea.fecha_actualizacion,
-                                        TipoTareaDominio.id_dominio, TipoTareaDominio.id_organismo).join(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea==TipoTarea.id, TipoTarea.id == nuevoID).first()
-    
+                                        TipoTareaDominio.id_dominio_ext.label("id_dominio"), TipoTareaDominio.id_organismo_ext.label("id_organismo")).join(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea==TipoTarea.id, TipoTarea.id == nuevoID).first()
+
     return query_tipo_tarea
 
 
@@ -1299,7 +1299,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
     dominio = None
     if 'id_dominio' in kwargs:
         dominio = db.session.query(Dominio).filter(
-            Dominio.id == kwargs['id_dominio'],
+            Dominio.id_dominio_ext == kwargs['id_dominio'],
             Dominio.eliminado == False
         ).first()
         if dominio is None:
@@ -1311,7 +1311,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
     id_organismo_final = None
     if 'id_organismo' in kwargs:
         organismo = db.session.query(Organismo).filter(
-            Organismo.id == kwargs['id_organismo'],
+            Organismo.id_organismo_ext == kwargs['id_organismo'],
             Organismo.eliminado == False
         ).first()
         if organismo is None:
@@ -1320,7 +1320,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
 
     # Validar relación solo si tenemos ambos
     if dominio and organismo:
-        if organismo.id_dominio != dominio.id_dominio_ext:
+        if organismo.id_dominio_ext != dominio.id_dominio_ext:
             raise Exception("Dominio y Organismo no corresponden")
 
     # Asignar cambios
@@ -1328,7 +1328,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
         id_dominio_final = kwargs['id_dominio']
         query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter( 
             TipoTareaDominio.id_tipo_tarea == id_tipo_tarea,
-            TipoTareaDominio.id_dominio == kwargs['id_dominio'],
+            TipoTareaDominio.id_dominio_ext == kwargs['id_dominio'],
             TipoTareaDominio.eliminado == False
         ).first()
         if query_tipo_tarea_dominio is None:
@@ -1336,8 +1336,8 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
             nuevo_tipo_tareaxdominio = TipoTareaDominio(
                 id=uuid.uuid4(),
                 id_tipo_tarea=id_tipo_tarea,
-                id_dominio=kwargs['id_dominio'],
-                id_organismo=id_organismo_final,
+                id_dominio_ext=kwargs['id_dominio'],
+                id_organismo_ext=id_organismo_final,
                 eliminado=False,
                 id_user_actualizacion=id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
@@ -1349,7 +1349,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
         #tipo_tarea.id_organismo = kwargs['id_organismo']
         if id_dominio_final is None:
             query_organismo = db.session.query(Organismo).filter(
-                Organismo.id == kwargs['id_organismo'],
+                Organismo.id_organismo_ext == kwargs['id_organismo'],
                 Organismo.eliminado == False
             ).first()
             if query_organismo:
@@ -1362,7 +1362,7 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
                     #tipo_tarea.id_dominio = query_dominio.id
                 query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter( 
                         TipoTareaDominio.id_tipo_tarea == id_tipo_tarea,
-                        TipoTareaDominio.id_dominio == kwargs['id_dominio'],
+                        TipoTareaDominio.id_dominio_ext == kwargs['id_dominio'],
                         TipoTareaDominio.eliminado == False
                     ).first()
                 if query_tipo_tarea_dominio is None:
@@ -1370,8 +1370,8 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
                     nuevo_tipo_tareaxdominio = TipoTareaDominio(
                         id=uuid.uuid4(),
                         id_tipo_tarea=id_tipo_tarea,
-                        id_dominio=kwargs['id_dominio'],
-                        id_organismo=id_organismo_final,
+                        id_dominio_ext=kwargs['id_dominio'],
+                        id_organismo_ext=id_organismo_final,
                         eliminado=False,
                         id_user_actualizacion=id_user_actualizacion,
                         fecha_actualizacion=datetime.now()
@@ -1404,8 +1404,8 @@ def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
     db.session.commit()
 
     query_tipo_tarea = db.session.query(TipoTarea.id, TipoTarea.codigo_humano, TipoTarea.nombre, TipoTarea.nivel, TipoTarea.base, TipoTarea.origen_externo, TipoTarea.suspendido, TipoTarea.eliminado, TipoTarea.id_ext, TipoTarea.id_user_actualizacion, TipoTarea.fecha_actualizacion,
-                                        TipoTareaDominio.id_dominio, TipoTareaDominio.id_organismo).join(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea==TipoTarea.id, TipoTarea.id == id_tipo_tarea).first()
-    
+                                        TipoTareaDominio.id_dominio_ext, TipoTareaDominio.id_organismo_ext).join(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea==TipoTarea.id, TipoTarea.id == id_tipo_tarea).first()
+
     return query_tipo_tarea
     #return tipo_tarea
 

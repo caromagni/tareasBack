@@ -1365,7 +1365,7 @@ class NotaIn(Schema):
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
-    id_tipo_nota = String(required=True)
+    id_tipo_nota = String()
     eliminado = Boolean(default=False)
     id_tarea = String()
 
