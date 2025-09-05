@@ -125,7 +125,7 @@ class DatabaseSetup:
             descripcion_corta="ORG",
             habilitado=True,
             fecha_actualizacion=datetime.now(),
-            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
+            id_dominio_ext="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
         )
         session.add(organismo)
         session.commit()
@@ -140,8 +140,8 @@ class DatabaseSetup:
             return existing_group
         group = Grupo(
             id=uuid.uuid4(),
-            id_dominio=domain.id,
-            id_organismo=organismo.id,
+            id_dominio_ext=domain.id_dominio_ext,
+            id_organismo_ext=organismo.id_organismo_ext,
             nombre="Grupo General",
             descripcion="Grupo general del sistema",
             id_user_actualizacion=admin_user.id,
@@ -435,7 +435,7 @@ class DatabaseSetup:
             existing_usuario_rol = session.query(UsuarioRol).filter_by(
                 id_usuario_grupo=usuario_grupo.id,
                 id_rol_ext=rol_ext.id,
-                id_dominio=domain.id
+                id_dominio_ext=domain.id_dominio_ext
             ).first()
             
             if existing_usuario_rol:
@@ -448,7 +448,7 @@ class DatabaseSetup:
                 id=uuid.uuid4(),
                 id_usuario_grupo=usuario_grupo.id,
                 id_rol_ext=rol_ext.id,
-                id_dominio=domain.id,
+                id_dominio_ext=domain.id_dominio_ext,
                 base_desnz=True,
                 fecha_actualizacion=datetime.now(),
                 id_user_actualizacion=user.id,

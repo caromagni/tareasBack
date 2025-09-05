@@ -221,10 +221,10 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 id_organismo = r['id_organismo']
                 query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
                 if query_organismo is not None:
-                    query_grupo=db.session.query(Grupo).filter(Grupo.id_organismo == id_organismo).first()
+                    query_grupo=db.session.query(Grupo).filter(Grupo.id_organismo_ext == id_organismo).first()
                     id_grupo = query_grupo.id
                     #id_grupo = query_organismo.id_organismo_ext
-                    query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio).first()
+                    query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio_ext).first()
                     if query_dominio is not None:
                         id_dominio = query_dominio.id 
                         print("#"*20)
@@ -259,7 +259,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         fecha_actualizacion=current_time,
                         id_user_actualizacion=id_user_actualizacion,
                         eliminado=False,
-                        id_dominio=id_dominio,
+                        id_dominio_ext=id_dominio,
                         id_grupo=id_grupo
                     )
                     nuevos_usuarios_roles.append(nuevo_usuarioRol)
