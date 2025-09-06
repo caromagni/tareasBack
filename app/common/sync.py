@@ -24,8 +24,8 @@ def sync_request(url, entity_id):
     resp=r.json()
     print("json roles:",resp)
     return resp
-
-def sync_tipo_tarea(entity, entity_id, url,id_user=None):
+    sync.sync_tipo_tarea(clasificacion, tipo_data['id'],url_post, id_user)
+def sync_tipo_tarea(clasificacion,entity, entity_id, url,id_user=None):
     try:
         print("receiving URL MOFO from sync_tipo_tarea",url)
         print("passing to sync_request")
@@ -39,8 +39,10 @@ def sync_tipo_tarea(entity, entity_id, url,id_user=None):
         if resp and resp['data']['id'] is not None:
             #Buscar si existe el tipo de tarea en la base de datos
             x_dominio_ext = 'd36d2054-073c-4b9c-bd3d-baf93009091a'
+            
                 #id Juzgado de Paz de Lavalle de la tabla organismo
-            x_organismo_ext = 'c7452ea9d-0698-4a36-afda-f5ae2fa55d63'
+               
+            x_organismo_ext = '7452ea9d-0698-4a36-afda-f5ae2fa55d63'
 
             query_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == resp['data']['id']).first()
             if query_tipo_tarea is None:

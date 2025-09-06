@@ -10,7 +10,6 @@ def find_parent_id(db, id_hijo: str):
     print('db.session:', db)
     print('id_hijo:', id_hijo)
     try:
-            # query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
 
         # Query the HerarquiaGrupoGrupo table to find the parent
         hierarchy = db.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo == id_hijo).one()

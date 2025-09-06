@@ -1099,16 +1099,14 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
                     id_base = grupo['id']
                     print("#"* 30)
                     print("Grupo base encontrado:", id_base)
-                    #print("DOminio:", grupo['id_dominio'])
-                    #print("Organismo:", grupo['id_organismo'])
                     print("#"* 30)
                     break
             query_base = db.session.query(Grupo).filter(Grupo.id==id_base).first()
 
             if query_base is not None:
-                id_dominio = query_base.id_dominio
-                id_organismo = query_base.id_organismo
-    
+                id_dominio = query_base.id_dominio_ext
+                id_organismo = query_base.id_organismo_ext
+
     """ if id_dominio is None:
         id_dominio = dominio
     if id_organismo is None:
@@ -1121,8 +1119,8 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
         nombre=nombre.upper(),
         descripcion=descripcion,
         base=False,
-        id_organismo=id_organismo,
-        id_dominio=id_dominio,
+        id_organismo_ext=id_organismo,
+        id_dominio_ext=id_dominio,
         eliminado=False,
         suspendido=False,
         id_user_actualizacion=id_user_actualizacion,

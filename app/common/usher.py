@@ -227,7 +227,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                     #id_grupo = query_organismo.id_organismo_ext
                     query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio_ext).first()
                     if query_dominio is not None:
-                        id_dominio = query_dominio.id 
+                        id_dominio = query_dominio.id_dominio_ext 
                         print("#"*20)
                         print("id_dominio:", id_dominio)
                         print("#"*20)
