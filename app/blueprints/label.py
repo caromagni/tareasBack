@@ -206,7 +206,10 @@ def put_label_tarea(json_data: dict):
         print(json_data)
         print("#"*50)
         username = g.username
-        res = label_model.insert_label_tarea(username, **json_data)
+        ids_labels = json_data.get('ids_labels', [])
+        id_tarea = json_data.get('id_tarea', None)
+        res = label_model.insert_label_tarea(ids_labels, id_tarea, username)
+
         print("res:",res)   
         if res is None:
             result = {
