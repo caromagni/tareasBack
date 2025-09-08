@@ -32,7 +32,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
     elif id_user_actualizacion is not None:
-            utils.verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
     else:
             raise Exception("Usuario no ingresado")  
     
@@ -265,6 +265,9 @@ def get_active_labels(ids_grupos_base):
 ############################## LABELS x TAREA ########################################
 #def insert_label_tarea(username=None, **kwargs):
 def insert_label_tarea(ids_labels=[], id_tarea=None, username=None):    
+    print( 'insert_label_tarea ids_labels:', ids_labels)
+    print('id_tarea:', id_tarea)
+    print('username:', username)
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
     elif id_user_actualizacion is not None:
@@ -282,6 +285,10 @@ def insert_label_tarea(ids_labels=[], id_tarea=None, username=None):
             if not(functions.es_uuid(id_label)):
                 raise Exception("El id de la etiqueta debe ser un UUID: " + id_label)
 
+    print("#############################################    PUT LABELS X TAREA #############################################")
+    print('ids_labels:', ids_labels)
+    print('id_tarea:', id_tarea)
+    print('id_user_actualizacion:', id_user_actualizacion)
     
     labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
    
