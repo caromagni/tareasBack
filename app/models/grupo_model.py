@@ -616,8 +616,8 @@ def get_all_base(id, usuarios=False):
             gt.group_id,
             gt.eliminado,
             gt.suspendido,
-            gt.id_dominio_ext,
-            gt.id_organismo_ext,
+            gt.id_dominio,
+            gt.id_organismo,
             gt.is_base
         FROM 
             GroupTree gt
@@ -644,8 +644,8 @@ def get_all_base(id, usuarios=False):
             "path_name": reg.path_name,
             "eliminado": reg.eliminado,
             "suspendido": reg.suspendido,
-            "id_dominio": reg.id_dominio_ext,
-            "id_organismo": reg.id_organismo_ext,
+            "id_dominio": reg.id_dominio,
+            "id_organismo": reg.id_organismo,
             "organismo": reg.organismo if hasattr(reg, 'organismo') else None,
             "dominio": reg.dominio if hasattr(reg, 'dominio') else None,
             "is_base": reg.is_base,

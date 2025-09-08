@@ -174,7 +174,7 @@ class HerarquiaOut(Schema):
     path = String()
     path_name = String()
     level = Integer()        
-
+ 
 
 class HerarquiaAllOut(Schema):
     id_padre = String()
