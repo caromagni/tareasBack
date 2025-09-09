@@ -214,8 +214,8 @@ class Label(Base):
 
     eliminado = Column(Boolean)
     fecha_creacion = Column(DateTime, nullable=False)
-    fecha_eliminacion = Column(DateTime, nullable=False)
-    fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=True)
+    fecha_actualizacion = Column(DateTime, nullable=True)
     #id = Column(UUID, primary_key=True)
     id_label = Column('id', UUID, primary_key=True)
     id_grupo_base = Column(UUID)
