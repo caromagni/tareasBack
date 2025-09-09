@@ -1354,72 +1354,6 @@ def get_grupos_recursivo():
 def get_grupos_all(eliminado=None):
     #print("eliminado:", eliminado)
     #session: scoped_session = current_app.session
-    query1 = text("""
-  WITH RECURSIVE GroupTree AS (
-    -- Anchor member: Start with all parentless nodes
-    SELECT 
-        g.id AS id_padre,
-        g.id AS id_hijo,
-        g.nombre AS parent_name,
-        g.descripcion AS parent_description,            
-        g.nombre AS child_name,
-        g.descripcion AS child_description,
-        g.eliminado AS child_eliminado,         
-        g.id::text AS path,
-        0 AS level,  -- Set level to 0 for parentless groups
-        true AS is_parentless,
-        g.id AS group_id  -- Add the group ID column
-    FROM 
-        tareas.grupo g
-    LEFT JOIN 
-        tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
-    WHERE 
-        hgg1.id_hijo IS NULL
-
-    UNION ALL
-
-    -- Recursive member: Join with the hierarchical table to find child groups
-    SELECT 
-        hgg.id_padre,
-        hgg.id_hijo,
-        gp_padre.nombre AS parent_name,
-        gp_padre.descripcion AS parent_description,
-        gp_hijo.nombre AS child_name,
-        gp_hijo.descripcion AS child_description,
-        gp_hijo.eliminado AS child_eliminado,         
-        gt.path || ' -> ' || hgg.id_hijo::text AS path,
-        gt.level + 1 AS level,
-        false AS is_parentless,
-        gp_hijo.id AS group_id  -- Add the group ID column for children
-    FROM 
-        tareas.herarquia_grupo_grupo hgg
-    INNER JOIN 
-        GroupTree gt ON gt.id_hijo = hgg.id_padre
-    INNER JOIN 
-        tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
-    INNER JOIN 
-        tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
-)
-
--- Select from the CTE to get the full hierarchy
-SELECT 
-    gt.id_padre,
-    gt.parent_name,
-    gt.parent_description,              
-    gt.id_hijo,
-    gt.child_name,
-    gt.child_description,
-    gt.child_eliminado,             
-    gt.path,
-    gt.level,
-    gt.is_parentless,
-    gt.group_id  -- Include the new group ID column in the final select
-FROM 
-    GroupTree gt
-WHERE 
-    gt.child_eliminado = :eliminado   
-ORDER BY gt.path;                                 
-  """)
     query_str = (
         'WITH RECURSIVE GroupTree AS ('
         'SELECT '
@@ -1433,9 +1367,12 @@ ORDER BY gt.path;
         'g.id::text AS path, '
         '0 AS level, '  # Nivel 0 para grupos sin padre
         'true AS is_parentless, '
-        'g.id AS group_id '
+        'g.id AS group_id, '
+        'd.id AS dominio_id, '
+        'd.descripcion AS dominio_descripcion '
         'FROM tareas.grupo g '
         'LEFT JOIN tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo '
+        'LEFT JOIN tareas.dominio d ON g.id_dominio_ext = d.id_dominio_ext '
         'WHERE hgg1.id_hijo IS NULL '
         'UNION ALL '
         'SELECT '
@@ -1449,11 +1386,14 @@ ORDER BY gt.path;
         'gt.path || \' -> \' || hgg.id_hijo::text AS path, '
         'gt.level + 1 AS level, '
         'false AS is_parentless, '
-        'gp_hijo.id AS group_id '
+        'gp_hijo.id AS group_id, '
+        'd.id AS dominio_id, '
+        'd.descripcion AS dominio_descripcion '
         'FROM tareas.herarquia_grupo_grupo hgg '
         'INNER JOIN GroupTree gt ON gt.id_hijo = hgg.id_padre '
         'INNER JOIN tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id '
         'INNER JOIN tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id '
+        'LEFT JOIN tareas.dominio d ON gp_hijo.id_dominio_ext = d.id_dominio_ext '
         ') '
         'SELECT '
         'gt.id_padre, '
@@ -1466,7 +1406,9 @@ ORDER BY gt.path;
         'gt.path, '
         'gt.level, '
         'gt.is_parentless, '
-        'gt.group_id '
+        'gt.group_id, '
+        'gt.dominio_id, '
+        'gt.dominio_descripcion '
         'FROM GroupTree gt '
     )
 
@@ -1482,7 +1424,7 @@ ORDER BY gt.path;
         res = db.session.execute(query, {"eliminado": eliminado}).fetchall()
     else:
         res = db.session.execute(query).fetchall()
-    
+   
     return res
 
 

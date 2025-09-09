@@ -188,6 +188,8 @@ class HerarquiaAllOut(Schema):
     level = Integer()
     is_parentless = Boolean()
     group_id = String()
+    dominio_id = String()
+    dominio_descripcion = String()
 
 class GroupIn(Schema):
     nombre= String(required=True, validate=[
