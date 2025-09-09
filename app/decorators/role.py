@@ -46,7 +46,7 @@ def require_role(rol=''):
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
                 
                 if(can_pass==False):
-                    if (rol.lower() == 'superadmin') or (ALL_USERS_SUPERADMIN=="1"):
+                    if (rol is not None and rol.lower() == 'superadmin') or (ALL_USERS_SUPERADMIN=="1"):
                         logger_config.logger.info(f"bypass through second if")
                         can_pass=True
                     else:
