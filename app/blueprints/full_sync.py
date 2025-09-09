@@ -69,7 +69,7 @@ def sync_all_tipos_tareas_juzgado():
 )
 
 @full_sync_b.get('/full_sync/tipos_tareas_parte')
-#@rol.require_role(['admin', 'superadmin'])  # Restrict to admin users
+#@rol.require_role(['admin', 'superadmin'])  # Restrict to admin users.
 def sync_all_tipos_tareas_parte():
     try:
         # Get user ID for audit trail

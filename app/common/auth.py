@@ -49,7 +49,15 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
         logger_config.logger.error("No se proporciono api-system")
         #return False
         raise Exception( 'No se proporciono api-system')
-
+    #remove not used header from api key.
+    #if header is not provided must use api key as provided
+    try:
+        clean_api_key_provided = api_key_provided.split('-')[1]
+        logger_config.logger.info("will attempt to remove prefix from api key")
+    except Exception as err:
+        clean_api_key_provided = api_key_provided
+        logger_config.logger.info("No se proporciono prefix en la api key, usando la api key como esta")
+    
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
     file_path = './json/api_keys.json'
@@ -72,9 +80,17 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     #convert stored_api_key to bytes
     try:
         logger_config.logger.info("will decode key from b64 to string")
+        #remove not used header from api key.
+        try:
+            logger_config.logger.info("will attempt to remove prefix from api key")
+            stored_hashed_api_key = stored_hashed_api_key.split('-')[1]
+            
+        except Exception as err:
+            stored_hashed_api_key = stored_hashed_api_key
+            logger_config.logger.info("No se proporciono prefix en la api key, usando la api key como esta")
         stored_api_key = base64.b64decode(stored_hashed_api_key)
         logger_config.logger.info("will use bcrypc to check")
-        return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
+        return bcrypt.checkpw(clean_api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
         logger_config.logger.error(err)
         raise Exception(err)
