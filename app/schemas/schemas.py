@@ -509,6 +509,7 @@ class TipoTareaGetIn(Schema):
     nombre = String(default="")
     id_dominio = String()
     id_organismo = String()
+    clasificacion_ext = String(metadata={"description": "TIPO_ACT_JUZGADO, TIPO_ACT_PARTE"})
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)

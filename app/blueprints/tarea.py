@@ -53,6 +53,7 @@ def get_tipoTareas(query_data: dict):
         nombre=None
         id_dominio = None
         id_organismo = None
+        clasificacion_ext = None
         dominio = g.dominio
         organismo = g.organismo
 
@@ -74,8 +75,10 @@ def get_tipoTareas(query_data: dict):
             id_dominio = request.args.get('id_dominio')
         if (request.args.get('id_organismo') is not None):
             id_organismo = request.args.get('id_organismo') 
+        if (request.args.get('clasificacion_ext') is not None):
+            clasificacion_ext = request.args.get('clasificacion_ext')    
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, suspendido, eliminado, nombre, id_dominio, id_organismo, dominio, organismo, clasificacion_ext)
     
         
         data = {

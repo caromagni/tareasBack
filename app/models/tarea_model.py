@@ -581,7 +581,7 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_inicio <= datetime.now():
+        if fecha_inicio < datetime.now():
             raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
     else:
@@ -590,7 +590,7 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_fin <= datetime.now():
+        if fecha_fin < datetime.now():
             raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
         tarea.fecha_fin = fecha_fin     
     else:
@@ -1101,14 +1101,12 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None):
-    print("eliminado:", eliminado)
-    print("nivel:", nivel)
-    print("nombre:", nombre)
-    
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None, clasificacion_ext=None):
+
     query = db.session.query(TipoTarea.base,
                             TipoTarea.id,
                             TipoTarea.codigo_humano,
+                            TipoTarea.clasificacion_ext,
                             TipoTarea.nombre,
                             TipoTarea.nivel,
                             TipoTarea.origen_externo,
@@ -1122,22 +1120,16 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                             ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
                             ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
      
-
-    if id_dominio is None:
-        id_dominio = dominio
-    else:        
+    if id_dominio is not None:
         if(not(functions.es_uuid(id_dominio))):
                 raise Exception("El id_dominio debe ser un UUID")
-    if id_dominio is not None:          
+        
         query = query.filter(TipoTareaDominio.id_dominio_ext == id_dominio)
 
-    if id_organismo is None:
-        id_organismo = organismo
-    else:
+    if id_organismo is not None:
         if(not(functions.es_uuid(id_organismo))):
             raise Exception("El id_organismo debe ser un UUID")
-        
-    if id_organismo is not None:
+
         query = query.filter(TipoTareaDominio.id_organismo_ext == id_organismo)
 
     #query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
@@ -1151,7 +1143,10 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
         query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))
-  
+
+    if clasificacion_ext is not None:
+        query = query.filter(TipoTarea.clasificacion_ext.ilike(f"%{clasificacion_ext}%"))
+
 
     total= query.count()
     res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
@@ -1183,6 +1178,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
             tipo_tarea = {
                 "id": tipo.id,
                 "codigo_humano": tipo.codigo_humano,
+                "clasificacion_ext": tipo.clasificacion_ext,
                 "nombre": tipo.nombre,
                 "base": tipo.base,
                 "origen_externo": tipo.origen_externo,
