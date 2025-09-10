@@ -435,8 +435,6 @@ def get_dominio_usuario(username=None):
         logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")        
 
-    print("id_user_actualizacion: ", id_user_actualizacion)    
-    #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
     res_dominio = db.session.query(UsuarioGrupo.id_usuario,Dominio.id, Dominio.descripcion
                     ).join(Grupo, Grupo.id == UsuarioGrupo.id_grupo
                     ).join(Dominio, Dominio.id_dominio_ext == Grupo.id_dominio_ext
@@ -456,7 +454,6 @@ def get_dominio_usuario(username=None):
         }
         dominios.append(dominio)
 
-    print("dominios: ", dominios)
     return dominios
 
 def delete_usuario(username=None, id=None):
