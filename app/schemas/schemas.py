@@ -1035,8 +1035,8 @@ class UsuarioRolOut(Schema):
 class UsuarioDominioOut(Schema):
     id_dominio = String()
     dominio = String()
-    id_grupo = String()
-    grupo = String()
+    #id_grupo = String()
+    #grupo = String()
 
 class UsuarioCountRolOut(Schema):
     count = Integer()

@@ -434,12 +434,16 @@ def get_dominio_usuario(username=None):
     else:
         logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")        
-        
+
+    print("id_user_actualizacion: ", id_user_actualizacion)    
     #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
-    res_dominio = db.session.query(UsuarioGrupo, Grupo, Dominio).filter(UsuarioGrupo.id_usuario == id_user_actualizacion
-                 ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
-                 ).join(Dominio, Grupo.id_dominio_ext == Dominio.id
-                 ).order_by(Dominio.descripcion).all()
+    res_dominio = db.session.query(UsuarioGrupo.id_usuario,Dominio.id, Dominio.descripcion
+                    ).join(Grupo, Grupo.id == UsuarioGrupo.id_grupo
+                    ).join(Dominio, Dominio.id_dominio_ext == Grupo.id_dominio_ext
+                    ).filter(UsuarioGrupo.id_usuario == id_user_actualizacion, UsuarioGrupo.eliminado == False, Grupo.eliminado == False, Dominio.eliminado == False
+                    ).group_by(UsuarioGrupo.id_usuario, Dominio.id, Dominio.descripcion
+                    ).order_by(Dominio.descripcion
+                    ).all()
     
     if res_dominio is None:
         raise Exception("El usuario no pertenece a ningún grupo ni dominio")
@@ -447,10 +451,8 @@ def get_dominio_usuario(username=None):
     dominios = []
     for row in res_dominio:
         dominio ={
-            "id_dominio": row.Dominio.id,
-            "dominio": row.Dominio.descripcion,
-            "id_grupo": row.Grupo.id,
-            "grupo": row.Grupo.nombre
+            "id_dominio": row.id,
+            "dominio": row.descripcion
         }
         dominios.append(dominio)
 
