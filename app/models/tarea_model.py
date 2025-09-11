@@ -581,7 +581,7 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
         #fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=0, second=0, microsecond=0)
-        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
+        #fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
         if fecha_inicio < datetime.now().date():
             raise Exception("La fecha de inicio no puede ser menor a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
@@ -590,8 +590,8 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
 
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
-        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
+        #fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        #fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
         if fecha_fin < datetime.now().date():
             raise Exception("La fecha de fin no puede ser menor a la fecha actual")
         tarea.fecha_fin = fecha_fin     
@@ -665,7 +665,23 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
 
             nuevoID=uuid.uuid4()
             tareaxgrupo = db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id_t, TareaXGrupo.id_grupo==group['id_grupo']).first()
-            if tareaxgrupo is None:
+            if tareaxgrupo is not None:
+                tareaxgrupo.eliminado=True
+                tareaxgrupo.fecha_actualizacion=datetime.now()
+                tareaxgrupo.fecha_actualizacion=datetime.now()
+                tareaxgrupo.id_user_actualizacion=id_user_actualizacion
+            
+            nuevo_tarea_grupo = TareaXGrupo(
+                id=nuevoID,
+                id_grupo=group['id_grupo'],
+                id_tarea=id_t,
+                id_user_actualizacion= id_user_actualizacion,
+                fecha_asignacion=datetime.now(),
+                fecha_actualizacion=datetime.now()
+            )
+            
+            db.session.add(nuevo_tarea_grupo)
+            """ if tareaxgrupo is None:
                 nuevo_tarea_grupo = TareaXGrupo(
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
@@ -682,7 +698,7 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                     tareaxgrupo.eliminado=False
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.fecha_actualizacion=datetime.now()
-                    tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
+                    tareaxgrupo.id_user_actualizacion=id_user_actualizacion  """  
 
     res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                   ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== id_t).order_by(TareaXGrupo.eliminado).all()
