@@ -135,7 +135,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     return tareas_vencer, total
 
 
-def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None):
+def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None, urls=None):
     
     print("##############Validaciones Insert de Tarea################")
     id_grupo=None
@@ -357,7 +357,23 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
 
     db.session.add(nueva_tarea) 
 
-    if url is not None and url.strip() != "":
+    #Inserto las urls
+    if urls is not None and len(urls)>0:
+        for url_item in urls:
+            url=url_item.get('url', None)
+            url_descripcion=url_item.get('descripcion', None)
+            if url is not None and url.strip() != "":
+                nuevo_url = URL(
+                    id=uuid.uuid4(),
+                    id_tarea=nuevoID_tarea,
+                    url=url,
+                    descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+                    fecha_actualizacion=datetime.now(),
+                    id_user_actualizacion=id_user_actualizacion
+                )
+
+                db.session.add(nuevo_url)
+    """ if url is not None and url.strip() != "":
       
         nuevo_url = URL(
             id=uuid.uuid4(),
@@ -368,7 +384,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
             id_user_actualizacion=id_user_actualizacion
         )
 
-        db.session.add(nuevo_url)
+        db.session.add(nuevo_url) """
 
     usuariosxdefault = []
 
@@ -467,7 +483,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
     db.session.commit()
     return nueva_tarea
 
-def update_tarea(id_t='', username=None, **kwargs):
+def update_tarea(id_t='', usr_header=None, **kwargs):
     ################################
 
     if id_t is None:
@@ -477,8 +493,8 @@ def update_tarea(id_t='', username=None, **kwargs):
     
     tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==False).first()
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
@@ -580,18 +596,20 @@ def update_tarea(id_t='', username=None, **kwargs):
     ####CONTROLES DE FECHAS DE INICIO Y FIN SI SE INGRESA UNA DE LAS DOS , O LAS DOS ###########    
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
-        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_inicio < datetime.now():
-            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+        #fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=0, second=0, microsecond=0)
+        #fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
+        if fecha_inicio < datetime.now().date():
+            raise Exception("La fecha de inicio no puede ser menor a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
     else:
         fecha_inicio = None
 
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
-        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_fin < datetime.now():
-            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+        #fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
+        #fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
+        if fecha_fin < datetime.now().date():
+            raise Exception("La fecha de fin no puede ser menor a la fecha actual")
         tarea.fecha_fin = fecha_fin     
     else:
         fecha_fin = None       
@@ -621,18 +639,23 @@ def update_tarea(id_t='', username=None, **kwargs):
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
 
-    
-    if 'url' in kwargs and kwargs['url'].strip() != "":
-        nuevo_url = URL(
-            id=uuid.uuid4(),
-            id_tarea=id_t,
-            url=kwargs['url'],
-            descripcion=kwargs['url_descripcion'] if 'url_descripcion' in kwargs else None,
-            fecha_actualizacion=datetime.now(),
-            id_user_actualizacion=id_user_actualizacion
-        )
+    #Inserto las urls
+    if 'urls' in kwargs and kwargs['urls'] is not None and len(kwargs['urls'])>0:
+        for url_item in kwargs['urls']:
+            url=url_item.get('url', None)
+            url_descripcion=url_item.get('descripcion', None)
+            if url is not None and url.strip() != "":
+                nuevo_url = URL(
+                    id=uuid.uuid4(),
+                    id_tarea=id_t,
+                    url=url,
+                    descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+                    fecha_actualizacion=datetime.now(),
+                    id_user_actualizacion=id_user_actualizacion
+                )
 
-        db.session.add(nuevo_url)    
+                db.session.add(nuevo_url)
+
     
     usuarios=[]
     grupos=[]
@@ -663,7 +686,23 @@ def update_tarea(id_t='', username=None, **kwargs):
 
             nuevoID=uuid.uuid4()
             tareaxgrupo = db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id_t, TareaXGrupo.id_grupo==group['id_grupo']).first()
-            if tareaxgrupo is None:
+            if tareaxgrupo is not None:
+                tareaxgrupo.eliminado=True
+                tareaxgrupo.fecha_actualizacion=datetime.now()
+                tareaxgrupo.fecha_actualizacion=datetime.now()
+                tareaxgrupo.id_user_actualizacion=id_user_actualizacion
+            
+            nuevo_tarea_grupo = TareaXGrupo(
+                id=nuevoID,
+                id_grupo=group['id_grupo'],
+                id_tarea=id_t,
+                id_user_actualizacion= id_user_actualizacion,
+                fecha_asignacion=datetime.now(),
+                fecha_actualizacion=datetime.now()
+            )
+            
+            db.session.add(nuevo_tarea_grupo)
+            """ if tareaxgrupo is None:
                 nuevo_tarea_grupo = TareaXGrupo(
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
@@ -680,7 +719,7 @@ def update_tarea(id_t='', username=None, **kwargs):
                     tareaxgrupo.eliminado=False
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.fecha_actualizacion=datetime.now()
-                    tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
+                    tareaxgrupo.id_user_actualizacion=id_user_actualizacion  """  
 
     res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                   ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== id_t).order_by(TareaXGrupo.eliminado).all()
@@ -800,10 +839,10 @@ def update_tarea(id_t='', username=None, **kwargs):
     db.session.commit()
     return result
 
-def update_lote_tareas_v2(username=None, **kwargs):
-    
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+def update_lote_tareas_v2(usr_header=None, **kwargs):
+
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
         else:
@@ -868,10 +907,10 @@ def update_lote_tareas_v2(username=None, **kwargs):
 
 #     return result
 
-def update_lote_tareas(username=None, **kwargs):
-    
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+def update_lote_tareas(usr_header=None, **kwargs):
+
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
         else:
@@ -983,15 +1022,15 @@ def update_lote_tareas(username=None, **kwargs):
                         tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
                     if 'fecha_inicio' in kwargs:
                         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
-                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-                        if fecha_inicio <= datetime.now():
-                            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
+                        if fecha_inicio < datetime.now().date():
+                            raise Exception("La fecha de inicio no puede ser menor a la fecha actual")  
                         tarea.fecha_inicio = fecha_inicio    
                     if 'fecha_fin' in kwargs:
                         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
-                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-                        if fecha_fin <= datetime.now():
-                            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
+                        if fecha_fin < datetime.now().date():
+                            raise Exception("La fecha de fin no puede ser menor  a la fecha actual")
                         tarea.fecha_fin = fecha_fin
 
                  
@@ -1199,10 +1238,10 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
+def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         utils.verifica_usr_id(id_user_actualizacion)
@@ -1266,10 +1305,10 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     return query_tipo_tarea
 
 
-def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
+def update_tipo_tarea(usr_header=None, id_tipo_tarea='', **kwargs):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         utils.verifica_usr_id(id_user_actualizacion)
@@ -1450,10 +1489,10 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', eliminado=False, suspendido=False):
+def insert_subtipo_tarea(usr_header=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', eliminado=False, suspendido=False):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         if not(functions.es_uuid(id_user_actualizacion)):
@@ -1494,10 +1533,10 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
     db.session.commit()
     return nuevo_subtipo_tarea
 
-def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
+def update_subtipo_tarea(usr_header=None, subtipo_id='', **kwargs):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         if not(functions.es_uuid(id_user_actualizacion)):

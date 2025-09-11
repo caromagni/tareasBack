@@ -299,6 +299,20 @@ class DatabaseSetup:
                 'metodo': 'DELETE'
             },
             {
+                'id': '',
+                'url': '/tarea',
+                'descripcion': 'Crear tarea',
+                'caso_uso': [{"codigo": "crear-tarea"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/tarea',
+                'descripcion': 'Modificar tarea',
+                'caso_uso': [{"codigo": "modificar-tarea"}],
+                'metodo': 'PATCH'
+            },
+            {
                 'id': '683048cf-d29c-4719-8a51-430d56a5f364',
                 'url': '/nota',
                 'descripcion': 'DELETE nota',

@@ -355,6 +355,5 @@ def get_dominio_usr():
                 "data": schema.UsuarioDominioOut().dump(res, many=True)
             }
         
-        
     return data
     

@@ -671,8 +671,7 @@ class TareaIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ), default=1)
-    url = String()
-    url_descripcion = String()
+    urls = List(Nested(URLOut, only=("url", "descripcion")))
 
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
@@ -704,8 +703,7 @@ class TareaPatchIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
-    url = String()
-    url_descripcion = String()
+    urls = List(Nested(URLOut, only=("url", "descripcion")))
 
 class TareaPatchV2In(Schema):
     id_tarea = String(required=True)
