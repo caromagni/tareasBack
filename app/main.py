@@ -207,7 +207,9 @@ def create_app():
         except Exception as e:
             return {'status': 'unavailable', 'error': str(e)}, 503
 
-  
+    # Database
+    print("Database connected:", Config.POSGRESS_BASE)
+
     ###Api Key
     print("#####################")
     print("Iniciando servidor...")

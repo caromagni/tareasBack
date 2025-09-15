@@ -1473,7 +1473,6 @@ def delete_tipo_tarea(username=None, id=None):
         return None
     
 #########################SUBTIPO TAREA############################################
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None, suspendido=None):
 
     query = db.session.query(SubtipoTarea)
@@ -1701,7 +1700,6 @@ def get_tarea_historia_usr_by_id(id):
     result = query.all()
     return result
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_tarea_by_id(id):
 
     if id is None:
@@ -1854,7 +1852,6 @@ def get_tarea_by_id(id):
     
     return results 
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_tarea_grupo(username=None, page=1, per_page=10):
         
     if username is not None:
@@ -2043,7 +2040,6 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
     return results, total
 
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_tarea_grupo_by_id(username=None, page=1, per_page=10): 
     
     results = []
@@ -2086,6 +2082,29 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     grupo_alias = aliased(Grupo)
 
     for res in res_tareas:
+        # Solo dejar la tarea en results si se reasignó a otro grupo, si no, omitirla
+        if reasignada == 'true':
+            if len(res_grupos) > 1:
+                print("Ordenando grupos por fecha de asignación", grupos_consulta)
+                grupos = []
+                for row in res_grupos:
+                    grupo = {
+                        "id_grupo": row.id,
+                        "nombre": row.nombre,
+                        "asignada": not row.reasignada,
+                        "fecha_asignacion": row.fecha_asignacion
+                    }
+                    if row.reasignada:
+                        reasignada_grupo = True
+                    grupos.append(grupo)
+
+                id_grupo_str = str(grupos[1]["id_grupo"])
+                if id_grupo_str in grupos_consulta:
+                    print('se reasigno a otro grupo:', id_grupo_str, res)
+                    # dejar res en res_tareas (no hacer nada especial)
+                else:
+                    print("No es igual", id_grupo_str, grupos_consulta)
+                    continue  # quitar res de res_tareas, pasa a la siguiente iteración
         grupos=[]
         usuarios=[]
         notas=[]
@@ -2178,12 +2197,11 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None):
     
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
-        return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
+        return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}:{reasignada_grupo}"
 
     # Use the generated cache key
     cache_key = make_cache_key()
@@ -2291,23 +2309,37 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
-        grupos = grupos.split(",")
-        for i in range(len(grupos)):
-            grupos[i] = grupos[i].strip()
-            if not(functions.es_uuid(grupos[i])):
-                raise Exception("El id del grupo debe ser un UUID: " + grupos[i])
-        
-            
-        query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
-                ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
-                ).distinct()         
+        grupos_consulta = grupos.split(",")
+        for i in range(len(grupos_consulta)):
+            grupos_consulta[i] = grupos_consulta[i].strip()
+            if not(functions.es_uuid(grupos_consulta[i])):
+                raise Exception("El id del grupo debe ser un UUID: " + grupos_consulta[i])
+
+        if(reasignada_grupo is not None):
+            reasignada = reasignada_grupo
+            if reasignada=='true':
+                query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
+                ).filter(TareaXGrupo.id_grupo.in_(grupos_consulta), TareaXGrupo.eliminado == True
+                ).distinct()
+            # else:
+            #     query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
+            #     ).filter(TareaXGrupo.id_grupo.in_(grupos_consulta), TareaXGrupo.eliminado == False
+            #     ).distinct()
+            else:
+                query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
+                ).filter(TareaXGrupo.id_grupo.in_(grupos_consulta), TareaXGrupo.eliminado == False
+                ).distinct()   
+        else:
+            query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
+                ).filter(TareaXGrupo.id_grupo.in_(grupos_consulta), TareaXGrupo.eliminado == False
+                ).distinct()       
 
     # Get total count of tasks matching the filter
     total = query.count()
     
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
-    print("Total de tareas:", total)
+    # print("Total de tareas:", total, reasignada)
 
     # Process each task in paginated results
     results = []
@@ -2317,9 +2349,13 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     usuario_alias = aliased(Usuario)
     grupo_alias = aliased(Grupo)
     if res_tareas is None:
+        # total = 0
         return results, total
-    
+
+    print('Cantidad de tareas en el page:', total)
+
     for res in res_tareas:
+
         usuarios = []
         grupos = []
         reasignada_usuario = False
@@ -2352,19 +2388,45 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
 
         # Fetch assigned groups for the task
         res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
-                                   ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.eliminado).all()
+                                   ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.fecha_asignacion.desc()).all()
 
-        for row in res_grupos:
-            grupo = {
-                "id_grupo": row.id,
-                "nombre": row.nombre,
-                "asignada": not row.reasignada,
-                "fecha_asignacion": row.fecha_asignacion
-            }
-            if row.reasignada:
-                reasignada_grupo = True
-            grupos.append(grupo)            
-        
+
+        if reasignada=='true':
+            if len(res_grupos) > 1:
+                for row in res_grupos:
+                    grupo = {
+                        "id_grupo": row.id,
+                        "nombre": row.nombre,
+                        "asignada": not row.reasignada,
+                        "fecha_asignacion": row.fecha_asignacion
+                    }
+                    if row.reasignada:
+                        reasignada_grupo = True
+                    grupos.append(grupo)
+                
+                 # Id del grupo anterior asignado
+                id_grupo_str = str(grupos[1]["id_grupo"])
+               
+                if id_grupo_str in grupos_consulta:                    
+                    print('se reasigno a otro grupo:', id_grupo_str)                    
+                else:
+                    print("No es igual", id_grupo_str, grupos_consulta)
+                    total -= 1
+                    continue  # quitar res de res_tareas, pasa a la siguiente iteración
+
+        else:        
+            for row in res_grupos:  
+                grupo = {
+                    "id_grupo": row.id,
+                    "nombre": row.nombre,
+                    "asignada": not row.reasignada,
+                    "fecha_asignacion": row.fecha_asignacion
+                }
+                if row.reasignada:
+                    reasignada_grupo = True
+
+                grupos.append(grupo)
+
         url = []
         res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
         if res_url is not None:
@@ -2430,7 +2492,6 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
 
 #def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     
     if fecha_desde is not None:
@@ -2587,7 +2648,6 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     return results, total
 
 
-@cache.memoize(CACHE_TIMEOUT_LONG)
 def usuarios_tarea(tarea_id=None):    
     if tarea_id is None:
         raise Exception("Debe ingresar el id de la tarea a consultar")
