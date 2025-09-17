@@ -1025,6 +1025,9 @@ class UsuarioCountOut(Schema):
 class CasoUsoOut(Schema):
     id = String()
     descripcion_ext = String()
+    id_dominio_ext = String()
+    id_grupo = String()
+    nombre_grupo = String()
 
 class UsuarioRolOut(Schema):
     #id = String()
