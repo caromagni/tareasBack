@@ -2197,7 +2197,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
-def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None, sin_usuario_asignado=None):
     
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
@@ -2295,8 +2295,13 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     
             
     if tiene_notas is not None:
-        query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
-   
+        query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)
+
+    if sin_usuario_asignado is not None and (sin_usuario_asignado=='true' or sin_usuario_asignado==True):
+        # Tareas que no tienen usuarios asignados o todas las asignaciones están eliminadas
+        subquery = db.session.query(TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.eliminado == False).subquery()
+        query = query.filter(~Tarea.id.in_(subquery))
+        
     if labels:
         # Primero eliminás comillas dobles, simples y luego dividís por coma
         labels = labels.split(",")
@@ -2308,6 +2313,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
+    reasignada = 'false'
     if grupos:
         grupos_consulta = grupos.split(",")
         for i in range(len(grupos_consulta)):
