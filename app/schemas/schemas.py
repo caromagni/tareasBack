@@ -857,6 +857,7 @@ class TareaGetIn(Schema):
     tiene_notas = Boolean()
     sin_usuario_asignado = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
+    reasignada_grupo = Boolean()
   
 class TareaNotasGetIn(Schema):
     page = Integer(default=1)
