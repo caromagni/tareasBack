@@ -375,6 +375,7 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('estado') is not None):
             estado = int(request.args.get('estado'))    
         eliminado=request.args.get('eliminado')
+        sin_usuario_asignado=request.args.get('sin_usuario_asignado')
         id_tipo_tarea=request.args.get('id_tipo_tarea')
         id_usuario_asignado=request.args.get('id_usuario_asignado')
         grupos=request.args.get('grupos')
@@ -385,7 +386,7 @@ def get_tareas_detalle(query_data: dict):
         fecha_fin_desde=request.args.get('fecha_fin_desde')
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
         tiene_notas=request.args.get('tiene_notas')
-        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_expte_ext, id_actuacion, id_actuacion_ext, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_expte_ext, id_actuacion, id_actuacion_ext, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas, sin_usuario_asignado)    
         # res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {

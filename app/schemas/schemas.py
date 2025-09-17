@@ -855,6 +855,7 @@ class TareaGetIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"})
     eliminado = Boolean()
     tiene_notas = Boolean()
+    sin_usuario_asignado = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
   
 class TareaNotasGetIn(Schema):
