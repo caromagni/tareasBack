@@ -16,4 +16,4 @@ RUN pip install --progress-bar off -r requirements.txt
 COPY app/ .
 #RUN make html
 CMD ["uwsgi","--wsgi-file","main.py","--ini","uwsgi.ini"]
-      
+    
