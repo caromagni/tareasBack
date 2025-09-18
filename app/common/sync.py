@@ -24,8 +24,8 @@ def sync_request(url, entity_id):
     resp=r.json()
     print("json roles:",resp)
     return resp
-    sync.sync_tipo_tarea(clasificacion, tipo_data['id'],url_post, id_user)
-def sync_tipo_tarea(clasificacion,entity, entity_id, url,id_user=None):
+
+def sync_tipo_tarea(clasificacion,entity, entity_id, url, id_user=None):
     try:
         print("receiving URL MOFO from sync_tipo_tarea",url)
         print("passing to sync_request")

@@ -1260,10 +1260,16 @@ def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codi
         query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo, Organismo.eliminado==False).first()
         if query_organismo is None:
             raise Exception("Organismo no encontrado")
+        if dominio is None:
+            dominio = query_organismo.id_dominio_ext
+
+        id_organismo = query_organismo.id_organismo_ext
+        
         query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == dominio, Dominio.eliminado==False).first()
+        
         if query_dominio is None:
             raise Exception("Dominio no encontrado")
-        if query_organismo.id_dominio != query_dominio.id_dominio_ext:
+        if query_organismo.id_dominio_ext != query_dominio.id_dominio_ext:
             raise Exception("El organismo ingresado no corresponde al dominio actual")
         
 
