@@ -1358,7 +1358,7 @@ class LoadExpedienteSchema(Schema):
 class TipoNotaIn(Schema):
    
     nombre = String(required=True, validate=[
-        validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     eliminado = Boolean()

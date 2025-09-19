@@ -202,8 +202,8 @@ class Label(Base):
 
     eliminado = Column(Boolean)
     fecha_creacion = Column(DateTime, nullable=False)
-    fecha_eliminacion = Column(DateTime, nullable=False)
-    fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=True)
+    fecha_actualizacion = Column(DateTime, nullable=True)
     id_label = Column('id', UUID, primary_key=True)
     id_grupo_base = Column(UUID)
     id_user_creacion = Column(UUID, nullable=False)
@@ -448,12 +448,12 @@ class Nota(Base):
     __table_args__ = {'schema': 'tareas', 'comment': 'campo libre de notas que puede tener en principio 3 niveles de visibilidad, personal, juzgado y externo(abogados)'}
 
     eliminado = Column(Boolean)
-    fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=True)
     fecha_creacion = Column(DateTime, nullable=False)
-    fecha_eliminacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=True)
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
+    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=True)
     id_user_creacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     id_user_actualizacion = Column(UUID)
     nota = Column(String)
