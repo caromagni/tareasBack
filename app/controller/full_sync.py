@@ -20,14 +20,16 @@ def full_sync_tipos_tareas(clasificacion=None, id_user=None,url_post=None,is_sub
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
     url_post=""
+    base_url=""
+    entity=""
     if clasificacion=="parte":
-        print("clasificacion from controller: ",clasificacion)
         #https://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/
         base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE', '')
         url_post = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE_POST', '')
         print("BASE URL: ",base_url)
         print("URL POST: ",url_post)
         entity="TIPO_ACT_PARTE"
+
     if clasificacion=="juzgado":
         print("clasificacion from controller: ",clasificacion)
         #https://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/

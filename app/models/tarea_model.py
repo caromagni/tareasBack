@@ -1260,10 +1260,16 @@ def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codi
         query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo, Organismo.eliminado==False).first()
         if query_organismo is None:
             raise Exception("Organismo no encontrado")
+        if dominio is None:
+            dominio = query_organismo.id_dominio_ext
+
+        id_organismo = query_organismo.id_organismo_ext
+        
         query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == dominio, Dominio.eliminado==False).first()
+        
         if query_dominio is None:
             raise Exception("Dominio no encontrado")
-        if query_organismo.id_dominio != query_dominio.id_dominio_ext:
+        if query_organismo.id_dominio_ext != query_dominio.id_dominio_ext:
             raise Exception("El organismo ingresado no corresponde al dominio actual")
         
 
@@ -1334,8 +1340,8 @@ def update_tipo_tarea(usr_header=None, id_tipo_tarea='', **kwargs):
         if not(functions.es_uuid(kwargs['id_organismo'])):
             raise Exception("El id_organismo debe ser un UUID")
 
-    id_dominio_final = kwargs.get('id_dominio', tipo_tarea.id_dominio)
-    id_organismo_final = kwargs.get('id_organismo', tipo_tarea.id_organismo)
+    id_dominio_final = kwargs.get('id_dominio', tipo_tarea.id_dominio_ext)
+    id_organismo_final = kwargs.get('id_organismo', tipo_tarea.id_organismo_ext)
 
     # Validar dominio si existe
     dominio = None
@@ -1396,11 +1402,11 @@ def update_tipo_tarea(usr_header=None, id_tipo_tarea='', **kwargs):
             ).first()
             if query_organismo:
                 query_dominio = db.session.query(Dominio).filter(
-                    Dominio.id_dominio_ext == query_organismo.id_dominio,
+                    Dominio.id_dominio_ext == query_organismo.id_dominio_ext,
                     Dominio.eliminado == False
                 ).first()
                 if query_dominio is not None:
-                    id_dominio_final = query_dominio.id
+                    id_dominio_final = query_dominio.id_dominio_ext
                     #tipo_tarea.id_dominio = query_dominio.id
                 query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter( 
                         TipoTareaDominio.id_tipo_tarea == id_tipo_tarea,

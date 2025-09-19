@@ -3,7 +3,7 @@ from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
-from models.alch_model import Usuario, UsuarioGrupo, Grupo, Dominio, TareaAsignadaUsuario, Tarea, RolExt
+from models.alch_model import Usuario, UsuarioGrupo, UsuarioRol, Grupo, Dominio, TareaAsignadaUsuario, Tarea, RolExt
 from collections import defaultdict
 from common.cache import *
 
@@ -409,7 +409,33 @@ def get_rol_usuario(username=None):
         raise Exception("Usuario no ingresado")        
         
     #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
-    res = db.session.query(RolExt).filter(RolExt.email == username).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all()
+    res = db.session.query(RolExt.email, RolExt.rol, RolExt.descripcion_ext,
+                            UsuarioRol.id_dominio_ext, UsuarioRol.id_grupo, Grupo.nombre.label("nombre_grupo")
+                            ).join(UsuarioRol, UsuarioRol.id_rol_ext == RolExt.id
+                            ).join(Grupo, Grupo.id == UsuarioRol.id_grupo
+                            ).filter(RolExt.email == username
+                            ).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all()
+    print("encontrados: ", len(res))
+
+    agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
+
+    for r in res:
+        key = (r.email, r.rol)
+        agrupado[key]["email"] = r.email
+        agrupado[key]["rol"] = r.rol
+        agrupado[key]["usuario_cu"].append({
+            "id_dominio_ext": r.id_dominio_ext,
+            "id_grupo": r.id_grupo,
+            "nombre_grupo": r.nombre_grupo,
+            "descripcion_ext": r.descripcion_ext
+        })
+
+    # Convertir el resultado en lista para salida tipo JSON
+    res = list(agrupado.values())
+    print("res: ", res)
+    
+    
+    """ res = db.session.query(RolExt).filter(RolExt.email == username).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all()
     print("encontrados: ", len(res))
     agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
 
@@ -421,7 +447,7 @@ def get_rol_usuario(username=None):
 
 # Convertir el resultado en lista para salida tipo JSON
     res = list(agrupado.values())
-    print("res: ", res)
+    print("res: ", res) """
     
     return res
 

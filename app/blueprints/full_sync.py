@@ -88,7 +88,7 @@ def sync_all_tipos_tareas_parte():
         clasificacion="parte"
         logger_config.logger.info("calling full_sync_tipos_tareas")
         logger_config.logger.debug("******************************")
-        print("1sr clasificacion: ",clasificacion)
+        print("clasificacion: ",clasificacion)
         full_sync.full_sync_tipos_tareas(clasificacion,id_user,True)
         
         return {
