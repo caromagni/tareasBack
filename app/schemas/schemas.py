@@ -1041,9 +1041,8 @@ class UsuarioRolOut(Schema):
     id_grupo= String()
     nombre_grupo= String()
     rol_usuario= List(Nested(UsuarioRolDetalleOut))
-
-    rol= String()
-    usuario_cu = List(Nested(CasoUsoOut))
+    #rol= String()
+    #usuario_cu = List(Nested(CasoUsoOut))
 
 
 class UsuarioDominioOut(Schema):
