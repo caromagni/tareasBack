@@ -1029,11 +1029,21 @@ class CasoUsoOut(Schema):
     id_grupo = String()
     nombre_grupo = String()
 
+class UsuarioRolDetalleOut(Schema):
+    id_rol = String()
+    rol= String()
+
 class UsuarioRolOut(Schema):
     #id = String()
     email = String()
-    rol= String()
-    usuario_cu = List(Nested(CasoUsoOut))
+    id_dominio_ext= String()
+    dominio= String()
+    id_grupo= String()
+    nombre_grupo= String()
+    rol_usuario= List(Nested(UsuarioRolDetalleOut))
+    #rol= String()
+    #usuario_cu = List(Nested(CasoUsoOut))
+
 
 class UsuarioDominioOut(Schema):
     id_dominio = String()

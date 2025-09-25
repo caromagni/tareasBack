@@ -522,7 +522,7 @@ class Nota(Base):
     eliminado = Column(Boolean)
     fecha_actualizacion = Column(DateTime, nullable=False)
     fecha_creacion = Column(DateTime, nullable=False)
-    fecha_eliminacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=True)
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
     id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'))
