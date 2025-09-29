@@ -2203,7 +2203,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
-def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None, sin_usuario_asignado=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None, sin_usuario_asignado=None, id_dominio=None):
     
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
@@ -2236,18 +2236,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     if fecha_desde > fecha_hasta:
         raise ValueError("La fecha desde no puede ser mayor a la fecha hasta.")
     
-    """ query = db.session.query(Tarea.id, Tarea.titulo, Tarea.fecha_creacion, Tarea.fecha_fin,
-                             Tarea.fecha_inicio, Tarea.plazo, Tarea.prioridad, Tarea.estado, 
-                             Tarea.id_tipo_tarea, Tarea.id_subtipo_tarea, Tarea.id_actuacion,
-                             Tarea.id_expediente, Tarea.cuerpo, Tarea.eliminable, 
-                             Tarea.tipo_tarea, Tarea.subtipo_tarea, Tarea.actuacion,
-                             Tarea.expediente, 
-                             Tarea.eliminado, Tarea.fecha_eliminacion, Tarea.fecha_actualizacion,
-                             Tarea.id_user_actualizacion, Tarea.tiene_notas_desnz,
-                             Tarea.fecha_creacion, Tarea.caratula_expediente,
-                             URL.url, URL.descripcion
-                             ).outerjoin(URL, Tarea.id == URL.id_tarea
-                             ).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta)) """
+          
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
         fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%d/%m/%Y').date()
@@ -2321,12 +2310,41 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 ).distinct()
     reasignada = 'false'
     if grupos:
-        grupos_consulta = grupos.split(",")
-        for i in range(len(grupos_consulta)):
-            grupos_consulta[i] = grupos_consulta[i].strip()
-            if not(functions.es_uuid(grupos_consulta[i])):
-                raise Exception("El id del grupo debe ser un UUID: " + grupos_consulta[i])
+        #grupos_consulta = grupos.split(",")
+        grupos_consulta = [g.strip() for g in grupos.split(",")]
+        arr_dominios = []
+        dominio_ref = None  # guardamos el dominio del primer grupo
 
+        for g in grupos_consulta:
+            g = g.strip()
+            print("Grupo a consultar:", g)
+
+            if not functions.es_uuid(g):
+                raise Exception("El id del grupo debe ser un UUID: " + g)
+
+            dominio = db.session.query(Grupo.id_dominio_ext).filter(Grupo.id == g).first()
+            if dominio is not None:
+                print("Dominio del grupo:", dominio.id_dominio_ext)
+
+                if dominio_ref is None:
+                    # Primer grupo → lo usamos como referencia
+                    dominio_ref = dominio.id_dominio_ext
+                    arr_dominios.append(dominio_ref)
+                else:
+                    # Para los siguientes, comparamos con el dominio de referencia
+                    if dominio.id_dominio_ext != dominio_ref:
+                        raise Exception(
+                            f"Los grupos deben pertenecer al mismo dominio. "
+                            f"Grupo: {g} Dominio: {str(dominio.id_dominio_ext)} (ref: {str(dominio_ref)})"
+                        )
+
+                if id_dominio is not None and dominio.id_dominio_ext != id_dominio:
+                    raise Exception(
+                        f"El dominio del grupo no coincide con el dominio de la tarea. "
+                        f"Dominio del grupo: {str(dominio.id_dominio_ext)} - Dominio actual: {str(id_dominio)   }"
+                    )
+
+        # Filtrar tareas asignadas a los grupos del usuario
         if(reasignada_grupo is not None):
             reasignada = reasignada_grupo
             if reasignada=='true':
@@ -2344,7 +2362,20 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         else:
             query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos_consulta), TareaXGrupo.eliminado == False
-                ).distinct()       
+                ).distinct()     
+    else:
+        if id_dominio is not None:
+            if not(functions.es_uuid(id_dominio)):
+                raise Exception("El id del dominio debe ser un UUID: " + id_dominio)
+            # Obtener los grupos asociados al dominio
+            grupos_dominio = db.session.query(Grupo.id).filter(Grupo.id_dominio == id_dominio).all()
+            grupos_dominio_ids = [grupo.id for grupo in grupos_dominio]
+            if grupos_dominio_ids:
+                query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
+                    ).filter(TareaXGrupo.id_grupo.in_(grupos_dominio_ids), TareaXGrupo.eliminado == False
+                    ).distinct()  
+               
+
 
     # Get total count of tasks matching the filter
     total = query.count()

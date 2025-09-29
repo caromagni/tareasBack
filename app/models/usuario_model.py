@@ -408,71 +408,64 @@ def get_rol_usuario(username=None):
         logger_config.logger.error("Usuario no ingresado")
         raise Exception("Usuario no ingresado")        
         
-    #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
-    """ res = db.session.query(RolExt.email, RolExt.rol, RolExt.id, RolExt.descripcion_ext,
-                            UsuarioRol.id_dominio_ext, UsuarioRol.id_grupo, Grupo.nombre.label("nombre_grupo")
-                            ).join(UsuarioRol, UsuarioRol.id_rol_ext == RolExt.id
-                            ).join(Grupo, Grupo.id == UsuarioRol.id_grupo
-                            ).filter(RolExt.email == username
-                            ).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all() """
     res = db.session.query(RolExt.email, RolExt.rol,  
                             UsuarioRol.id_dominio_ext, UsuarioRol.id_grupo, 
                             Grupo.nombre.label("nombre_grupo"),
                             Dominio.descripcion.label("dominio")
                             ).join(UsuarioRol, UsuarioRol.id_rol_ext == RolExt.id
                             ).join(Grupo, Grupo.id == UsuarioRol.id_grupo
-                            ).join(Dominio, Dominio.id_dominio_ext == Grupo.id_dominio_ext       
+                            ).join(Dominio, Dominio.id_dominio_ext == Grupo.id_dominio_ext 
+                            ).group_by(RolExt.email, RolExt.rol,
+                                      UsuarioRol.id_dominio_ext, UsuarioRol.id_grupo, Grupo.nombre, Dominio.descripcion             
                             ).filter(RolExt.email == username
-                            ).group_by(RolExt.email, RolExt.rol, UsuarioRol.id_dominio_ext,
-                                       UsuarioRol.id_grupo, Grupo.nombre, Dominio.descripcion
                             ).order_by(RolExt.email, Grupo.nombre, RolExt.rol).all()
-    print("encontrados: ", len(res))
-
-    #agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
-    agrupado = defaultdict(lambda: {"email": "", "id_dominio_ext": "", "dominio": "", "id_grupo": "", "nombre_grupo": "", "rol_usuario": []})
-    #agrupado = []
-    """ for r in res:
-        key = (r.email, r.rol)
-        agrupado[key]["email"] = r.email
-        agrupado[key]["rol"] = r.rol
-        agrupado[key]["usuario_cu"].append({
-            "id_dominio_ext": r.id_dominio_ext,
-            "id_grupo": r.id_grupo,
-            "nombre_grupo": r.nombre_grupo,
-            "descripcion_ext": r.descripcion_ext
-        }) """
+   
+    usuarios = {}
 
     for r in res:
-        key = (r.email, r.id_dominio_ext, r.dominio, r.id_grupo, r.nombre_grupo)
-        agrupado[key]["email"] = r.email
-        agrupado[key]["id_dominio_ext"] = r.id_dominio_ext
-        agrupado[key]["dominio"] = r.dominio
-        agrupado[key]["id_grupo"] = r.id_grupo
-        agrupado[key]["nombre_grupo"] = r.nombre_grupo
-        agrupado[key]["rol_usuario"].append({
-            "rol": r.rol
-        })    
+        if r.email not in usuarios:
+            usuarios[r.email] = {
+                "email": r.email,
+                "dominios": {}
+            }
 
-    # Convertir el resultado en lista para salida tipo JSON
-    res = list(agrupado.values())
-    print("res: ", res)
-    
-    
-    """ res = db.session.query(RolExt).filter(RolExt.email == username).order_by(RolExt.email, RolExt.rol, RolExt.descripcion_ext).all()
-    print("encontrados: ", len(res))
-    agrupado = defaultdict(lambda: {"email": "", "rol": "", "usuario_cu": []})
+        dominios = usuarios[r.email]["dominios"]
+        if r.id_dominio_ext not in dominios:
+            dominios[r.id_dominio_ext] = {
+                "id_dominio_ext": r.id_dominio_ext,
+                "dominio": r.dominio,
+                "grupos": {}
+            }
 
-    for r in res:
-        key = (r.email, r.rol)
-        agrupado[key]["email"] = r.email
-        agrupado[key]["rol"] = r.rol
-        agrupado[key]["usuario_cu"].append({"descripcion_ext": r.descripcion_ext, "id": r.id})
+        grupos = dominios[r.id_dominio_ext]["grupos"]
+        if r.id_grupo not in grupos:
+            grupos[r.id_grupo] = {
+                "id_grupo": r.id_grupo,
+                "nombre_grupo": r.nombre_grupo,
+                "roles": []
+            }
 
-# Convertir el resultado en lista para salida tipo JSON
-    res = list(agrupado.values())
-    print("res: ", res) """
-    
-    return res
+        rol_obj = {"rol": r.rol}
+
+        # Evitar duplicados
+        if rol_obj not in grupos[r.id_grupo]["roles"]:
+           grupos[r.id_grupo]["roles"].append(rol_obj)
+
+    # Convertir a lista JSON
+    resultado = []
+    for usuario in usuarios.values():
+        dominios_list = []
+        for dom in usuario["dominios"].values():
+            grupos_list = list(dom["grupos"].values())
+            dom["grupos"] = grupos_list
+            dominios_list.append(dom)
+        usuario["dominios"] = dominios_list
+        resultado.append(usuario)
+
+    return resultado
+
+
+
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_dominio_usuario(username=None):

@@ -1030,8 +1030,27 @@ class CasoUsoOut(Schema):
     nombre_grupo = String()
 
 class UsuarioRolDetalleOut(Schema):
-    id_rol = String()
+    #id_rol = String()
     rol= String()
+
+class GroupRolOut(Schema):
+    id_grupo= String()
+    nombre_grupo= String()
+    roles= List(Nested(UsuarioRolDetalleOut))
+    #caso_uso= List(Nested(CasoUsoOut))    
+
+class DominioGrupoOut(Schema):
+    id_dominio_ext= String()
+    dominio= String()
+    grupos= List(Nested(GroupRolOut))
+
+class UsuarioDominiosOut(Schema):
+    email = String()
+    dominios = List(Nested(DominioGrupoOut))
+
+class UsuarioDominiosCountOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioDominiosOut, many=True)    
 
 class UsuarioRolOut(Schema):
     #id = String()
