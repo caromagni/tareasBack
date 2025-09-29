@@ -852,6 +852,7 @@ class TareaGetIn(Schema):
     id_expte_ext = String()
     id_actuacion = String()
     id_actuacion_ext = String()
+    id_dominio = String()
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"})
     eliminado = Boolean()
     tiene_notas = Boolean()

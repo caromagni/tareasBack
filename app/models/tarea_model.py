@@ -2338,10 +2338,10 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                             f"Grupo: {g} Dominio: {str(dominio.id_dominio_ext)} (ref: {str(dominio_ref)})"
                         )
 
-                if id_dominio is not None and dominio.id_dominio_ext != id_dominio:
+                if id_dominio is not None and dominio.id_dominio_ext != uuid.UUID(id_dominio):
                     raise Exception(
                         f"El dominio del grupo no coincide con el dominio de la tarea. "
-                        f"Dominio del grupo: {str(dominio.id_dominio_ext)} - Dominio actual: {str(id_dominio)   }"
+                        f"Dominio del grupo: {str(dominio.id_dominio_ext)} - Dominio actual: {str(id_dominio)}"
                     )
 
         # Filtrar tareas asignadas a los grupos del usuario
@@ -2368,7 +2368,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             if not(functions.es_uuid(id_dominio)):
                 raise Exception("El id del dominio debe ser un UUID: " + id_dominio)
             # Obtener los grupos asociados al dominio
-            grupos_dominio = db.session.query(Grupo.id).filter(Grupo.id_dominio == id_dominio).all()
+            grupos_dominio = db.session.query(Grupo.id).filter(Grupo.id_dominio_ext == id_dominio).all()
             grupos_dominio_ids = [grupo.id for grupo in grupos_dominio]
             if grupos_dominio_ids:
                 query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
