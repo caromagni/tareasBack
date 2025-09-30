@@ -540,6 +540,31 @@ def patch_tarea(id_tarea: str, json_data: dict):
         print(traceback.format_exc())
         raise exceptions.ValidationError(err)
 
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Restaura Tarea eliminada', summary='Restaura Tarea eliminada', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.patch('/tarea_undelete/<string:id_tarea>')
+@tarea_b.input(schema.TareaPatchUndeleteIn)
+@verify.check_fields()
+@rol.require_role()
+def patch_tarea_undelete(id_tarea: str, json_data: dict):
+    try:
+        username = g.get('username')
+
+        res = tarea_model.undelete_tarea(id_tarea, username, **json_data)
+        if res is None:
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Tarea no encontrada",
+                    "ErrorMsg":"No se encontró la tarea a modificar"
+                } 
+            return result
+        return schema.TareaPatchAllOut().dump(res)    
+        
+    
+    except Exception as err:
+        print(traceback.format_exc())
+        raise exceptions.ValidationError(err)
+    
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/lote_tareas')
 @tarea_b.input(schema.TareaPatchLoteIn)

@@ -483,6 +483,35 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
     db.session.commit()
     return nueva_tarea
 
+def undelete_tarea(id_t='', usr_header=None, **kwargs):
+    ################################
+
+    if id_t is None:
+        raise Exception("Debe ingresar el id de la tarea a modificar")
+    if not(functions.es_uuid(id_t)):
+        raise Exception("El id de la tarea debe ser un UUID: " + id_t)
+    
+    tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==True).first()
+
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
+
+        if id_user_actualizacion is not None:
+            utils.verifica_usr_id(id_user_actualizacion)
+        else:
+            raise Exception("Debe ingresar username o id_user_actualizacion")
+
+    if tarea is None:
+        raise Exception("Tarea no encontrada o no eliminada")
+    
+    tarea.eliminado = False
+    #tarea.fecha_eliminacion = None
+    tarea.id_user_actualizacion = id_user_actualizacion
+    tarea.fecha_actualizacion = datetime.now()
+    
+    db.session.commit()
+    return tarea
+
 def update_tarea(id_t='', usr_header=None, **kwargs):
     ################################
 
@@ -502,7 +531,7 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
             if 'id_user_actualizacion' in kwargs:
                 utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
-              
+            
             else:
                 raise Exception("Debe ingresar username o id_user_actualizacion")
 
