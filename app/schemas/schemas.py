@@ -673,6 +673,9 @@ class TareaIn(Schema):
     ), default=1)
     urls = List(Nested(URLOut, only=("url", "descripcion")))
 
+class TareaPatchUndeleteIn(Schema):
+    eliminado = Boolean(required=True)
+
 class TareaPatchIn(Schema):
     prioridad = Integer(metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
