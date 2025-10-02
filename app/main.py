@@ -33,7 +33,6 @@ from db.alchemy_db import db
 from flask_caching import Cache
 sys.setrecursionlimit(100)
 import common.cache as cache_common
-import threading
 import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup

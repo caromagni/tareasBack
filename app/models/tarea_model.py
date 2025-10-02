@@ -893,7 +893,7 @@ def update_lote_tareas_v2(usr_header=None, **kwargs):
         for tareas_update in upd_tarea:
            if not(functions.es_uuid(tareas_update['id_tarea'])):
                raise Exception("El id de la tarea debe ser un UUID: " + tareas_update['id_tarea'])
-           resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
+           resp = update_tarea(tareas_update['id_tarea'], usr_header, **tareas_update)
            if resp is None:
                 datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
                
