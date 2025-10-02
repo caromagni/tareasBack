@@ -463,7 +463,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
 
     # Query for non-hierarchical groups
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    print("todos:", todos)
+   
     # Apply filters
     if nombre:
         query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
