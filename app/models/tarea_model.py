@@ -1269,7 +1269,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
+def insert_tipo_tarea(usr_header=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, id_dominio=None, nivel=None):
 
     if usr_header is not None:
         id_user_actualizacion = utils.get_username_id(usr_header)
@@ -1279,29 +1279,43 @@ def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codi
     else:
         raise Exception("Usuario no ingresado")
            
-    if id_organismo is None:
-       
-       id_organismo = organismo
-    else:
+    if id_organismo is not None:
         if not(functions.es_uuid(id_organismo)):
             raise Exception("El id_organismo debe ser un UUID")
         
         query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo, Organismo.eliminado==False).first()
         if query_organismo is None:
             raise Exception("Organismo no encontrado")
-        if dominio is None:
-            dominio = query_organismo.id_dominio_ext
+
+        dominio = query_organismo.id_dominio_ext
+
 
         id_organismo = query_organismo.id_organismo_ext
         
         query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == dominio, Dominio.eliminado==False).first()
         
         if query_dominio is None:
-            raise Exception("Dominio no encontrado")
+            raise Exception("Dominio del organismo no encontrado")
+        
         if query_organismo.id_dominio_ext != query_dominio.id_dominio_ext:
             raise Exception("El organismo ingresado no corresponde al dominio actual")
         
+    if id_dominio is not None:
+        if not(functions.es_uuid(id_dominio)):
+            raise Exception("El id_dominio debe ser un UUID")
+        
+        query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == id_dominio, Dominio.eliminado==False).first()
+        if query_dominio is None:
+            raise Exception("Dominio no encontrado")
+        
+        dominio = query_dominio.id_dominio_ext
 
+        if id_organismo is not None:
+            query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo, Organismo.eliminado==False).first()
+            if query_organismo is None:
+                raise Exception("Organismo no encontrado")
+            if query_organismo.id_dominio_ext != query_dominio.id_dominio_ext:
+                raise Exception("El organismo ingresado no corresponde al dominio actual")
 
     nuevoID=uuid.uuid4()
 

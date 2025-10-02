@@ -102,9 +102,7 @@ def get_tipoTareas(query_data: dict):
 def post_tipo_tarea(json_data: dict):
     try:
         username = g.username
-        dominio = g.dominio
-        organismo = g.organismo
-        res = tarea_model.insert_tipo_tarea(username, dominio, organismo, **json_data)
+        res = tarea_model.insert_tipo_tarea(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",

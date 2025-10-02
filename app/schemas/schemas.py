@@ -455,6 +455,7 @@ class TipoTareaIn(Schema):
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
     id_organismo = String()
+    id_dominio = String()
     nivel = String()
     """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                     validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
