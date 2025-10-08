@@ -7,4 +7,5 @@ Esta sección describe las interfaces y vistas principales del sistema.
    :maxdepth: 2
    :caption: Interfaz:
 
-   ./modulos/bandeja_principal 
+   ./modulos/bandeja_principal
+   ./modulos/tareas_personales

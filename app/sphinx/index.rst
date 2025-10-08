@@ -8,11 +8,10 @@ Documentación de Tareas
    fundamentos
    organizacion
    tareas
-   tipos
-   soporte
    interfaz
-   roadmap
+   soporte
    referencia
+   roadmap
 
 Índices y tablas
 ================
