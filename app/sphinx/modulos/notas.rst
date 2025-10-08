@@ -5,6 +5,7 @@ Lógica de las Notas
 ================
 
 Este documento describe la lógica de visibilidad, creación y eliminación de las notas en el contexto de los grupos y las tareas.
+Las notas pueden ser una guía para que los distintos usuarios de la tarea puedan comunicarse entre sí.
 
 -----------------------------
 1. Visibilidad en los Grupos
@@ -28,3 +29,5 @@ Este documento describe la lógica de visibilidad, creación y eliminación de l
 Índice de Contenidos
 -----------------------------
 - :ref:`notas`
+
+.. [#] Editado por M.B.

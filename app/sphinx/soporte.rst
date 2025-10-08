@@ -1,4 +1,4 @@
-Elementos de Soporte
+Herramientas para tareas 
 ===================
 
 Esta sección contiene las herramientas de apoyo y elementos complementarios del sistema.
@@ -9,4 +9,3 @@ Esta sección contiene las herramientas de apoyo y elementos complementarios del
 
    ./modulos/etiquetas
    ./modulos/notas
-   ./modulos/contenido_multimedia 

@@ -3,7 +3,7 @@ Lista de Tareas
 =========================
 
 La funcionalidad de **Lista de Tareas** permite ver y gestionar las tareas de forma organizada y fácil de usar. Cada tarea se muestra en una tarjeta, con información detallada y opciones de acción. Esta herramienta es ideal para el seguimiento, administración y actualización de tareas dentro de un sistema de gestión.
-
+Podrás ver tu lista de tareas o todas de los grupos dónde haya sido asignada la tarea según la bandeja que selecciones.
 
 
 .. image:: ../_static/sphinx_images/tarea_card.png
@@ -26,7 +26,7 @@ Características y Funcionalidades
    - El progreso se calcula automáticamente en función de las fechas de inicio y fin de la tarea, de modo que se pueda hacer un seguimiento visual fácil.
 
 **3. Opciones de Acción en Cada Tarea**
-   - **Ver Tarea**: Permite revisar todos los detalles de la tarea, ideal para tareas complejas o que requieren confirmación.
+   - **Ver Tarea**: Permite revisar todos los detalles de la tarea, ideal para tareas complejas o que requieren confirmación. Aqui podrás agregar las etiquetas(labels) para agruparlas y después poder filtrarlas por ellas.
    - **Editar Tarea**: Si necesita hacer ajustes, como actualizar la prioridad o cambiar el estado de la tarea, esta opción está disponible para realizar esos cambios.
    - **Eliminar Tarea**: Cuando una tarea ya no es necesaria, puede eliminarse del sistema.
    - **Reasignar Tarea**: Si la tarea necesita ser transferida a otra persona o grupo, esta opción permite realizar el cambio.
@@ -58,3 +58,5 @@ Notas
 - La interfaz ajusta automáticamente la información para que sea fácil de leer en diferentes tamaños de pantalla, asegurando una buena experiencia de usuario en computadoras y dispositivos móviles.
 
 Con **Lista de Tareas**, puede administrar sus tareas de manera eficiente, realizar un seguimiento de su progreso y asegurarse de que todas las tareas estén actualizadas y bien documentadas.
+
+.. [#] Editado por M.B.
