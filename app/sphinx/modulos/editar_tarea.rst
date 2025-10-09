@@ -26,7 +26,7 @@ Pantalla para modificar una tarea puntual de forma simple y segura: podés cambi
 
 **Pasos simples:**
 
-1. Cambiá lo necesario: Tipo/Subtipo, Título/Descripción, Prioridad, Grupo/Usuario, Fecha de fin, Expediente
+1. Cambiá lo necesario: Tipo/Subtipo de tarea , Título/Descripción, Prioridad, Grupo/Usuario, Fecha de fin, Expediente
 2. Revisá que no haya errores marcados en rojo
 3. Presioná Actualizar
 
