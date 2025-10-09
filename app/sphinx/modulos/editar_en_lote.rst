@@ -162,8 +162,7 @@ Antes de guardar
 ^^^^^^^^^^^^^^^^
 
 - **Revisá el filtro**: Asegurate de que las tareas filtradas son las que querés actualizar
-- **Verificá el contador**: Mirá cuántas tareas se van a actualizar
-- **Previzualizá si podés**: Es mejor revisar la lista antes de confirmar
+
 
 Al usar la herramienta
 ^^^^^^^^^^^^^^^^^^^^^^^
