@@ -545,7 +545,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     return grupos_acumulados
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_base(id, usuarios=False):
+def get_all_base(id, usuarios=False, solo_grupo_base=None):
     cursor=None
    
     #session: scoped_session = current_app.session
@@ -658,6 +658,20 @@ def get_all_base(id, usuarios=False):
     grupo_base = None
     print("Antes de encontrar grupo base", id)
     grupo_base=encontrar_grupo_base(res_grupos, id)
+    print("############GRUPO BASE###############")
+    print("Grupo base encontrado:", grupo_base)
+    print("#####################################")
+    if solo_grupo_base is not None and (solo_grupo_base==True or solo_grupo_base=='true'):
+        data = {
+                "id": grupo_base['id'],
+                "parent_name": grupo_base['parent_name'],
+                "path": grupo_base['path'],
+                "eliminado": grupo_base['eliminado'],
+                "suspendido": grupo_base['suspendido'],
+                "is_base": grupo_base['is_base']
+                }
+
+        return data
 
     grupos_mismo_base = []
     if grupo_base:

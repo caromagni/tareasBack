@@ -604,6 +604,7 @@ class GroupsBaseIn(Schema):
     id_grupo = String()
     usuarios = Boolean()
 
+
 class GroupsBaseOut(Schema):
     id = String()
     id_padre = String()
@@ -625,7 +626,15 @@ class GroupsBaseOut(Schema):
     id_dominio = String()
     dominio = Nested(DominioOut, only=("id", "descripcion"))
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
-    
+
+class GroupBaseOutbyId(Schema):
+    id = String()
+    parent_name = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    is_base = Boolean()
+   
+
 class GroupIdOut(Schema):
     id = String()
     nombre = String()

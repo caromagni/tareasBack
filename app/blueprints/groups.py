@@ -157,7 +157,7 @@ def get_all_grupobase(query_data: dict):
             usuarios=request.args.get('usuarios')
        
                     
-        res = grupo_model.get_all_base(id, usuarios)
+        res = grupo_model.get_all_base(id, usuarios, solo_grupo_base=False)
      
         return res
     except Exception as err:
@@ -259,7 +259,7 @@ def restaura_grupo(id: str):
   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(schema.GroupsBaseIn, location='query')
-@groups_b.output(schema.GroupsBaseOut)
+@groups_b.output(schema.GroupBaseOutbyId)
 @groups_b.get('/grupo_base/<string:id>')
 #@rol.require_role()
 @verify.check_fields()
@@ -270,9 +270,12 @@ def getGrupoBase(id: str):
             id=request.args.get('id_grupo')
         if(request.args.get('usuarios') is not None):
             usuarios=request.args.get('usuarios')    
-        res = grupo_model.get_all_base(id, usuarios)
+
+        res = grupo_model.get_all_base(id, usuarios, solo_grupo_base=True)
         
         return res
+        #return schema.GroupsBaseOut().dump(res)
+    
     except Exception as err:
         print(traceback.format_exc())
         raise exceptions.ValidationError(err)
