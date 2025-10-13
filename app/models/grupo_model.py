@@ -472,7 +472,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
     if suspendido is not None:
         query = query.filter(Grupo.suspendido == suspendido)
     if todos is None or todos== False or todos== 'false':
-        query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user)    
+        query = query.join(UsuarioGrupo, UsuarioGrupo.id_grupo == Grupo.id).filter(UsuarioGrupo.id_usuario == id_user, UsuarioGrupo.eliminado==False)    
     if id_dominio:
         query = query.filter(Grupo.id_dominio_ext == id_dominio)
     if id_organismo:
