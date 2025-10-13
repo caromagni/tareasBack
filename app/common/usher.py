@@ -224,7 +224,11 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
                 if query_organismo is not None:
                     query_grupo=db.session.query(Grupo).filter(Grupo.id_organismo_ext == id_organismo).first()
-                    id_grupo = query_grupo.id
+                    if query_grupo is not None:
+                        id_grupo = query_grupo.id
+                    else:
+                        logger_config.logger.error(f"No grupo found for organismo {id_organismo}, skipping role")
+                        continue
                     #id_grupo = query_organismo.id_organismo_ext
                     query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio_ext).first()
                     if query_dominio is not None:
@@ -232,6 +236,12 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         print("#"*20)
                         print("id_dominio:", id_dominio)
                         print("#"*20)
+                    else:
+                        logger_config.logger.error(f"No dominio found for organismo {id_organismo}, skipping role")
+                        continue
+                else:
+                    logger_config.logger.error(f"No organismo found with id {id_organismo}, skipping role")
+                    continue
 
                 print("id_organismo:", id_organismo)
                 email = username
@@ -253,6 +263,11 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                     nuevos_roles.append(nuevo_rol)
                     #print("nuevo_rol:", nuevo_rol)
 
+                    # Validate that we have valid UUIDs before creating UsuarioRol
+                    if not id_dominio or id_dominio == '':
+                        logger_config.logger.error(f"Invalid id_dominio for role {r['descripcion_rol']}, skipping")
+                        continue
+                    
                     # Create UsuarioRol object (don't add to session yet)
                     nuevo_usuarioRol = UsuarioRol(
                         id=uuid.uuid4(),
@@ -262,7 +277,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         id_user_actualizacion=id_user_actualizacion,
                         eliminado=False,
                         id_dominio_ext=id_dominio,
-                        id_grupo=id_grupo
+                        id_grupo=id_grupo if id_grupo and id_grupo != '' else None
                     )
                     nuevos_usuarios_roles.append(nuevo_usuarioRol)
                     #print("nuevo_usuarioRol:", nuevo_usuarioRol)
