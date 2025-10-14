@@ -50,7 +50,6 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 - Acciones rápidas con botones intuitivos:
   - Ver detalles - Información completa del grupo
   - Editar - Modificar datos del grupo
-  - Suspender - Desactivar temporalmente
   - Eliminar - Marcar como eliminado
   - Restaurar - Recuperar grupos eliminados
   - Crear nuevo - Agregar nuevo grupo
@@ -78,8 +77,8 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 **¿Qué puedes hacer aquí?**
 
-- Crear grupo principal (sin padre) o dependiente (con padre)
-- Seleccionar grupo padre para crear jerarquías
+- Crear grupo principal (sin superior) o dependiente (con superior)
+- Seleccionar grupo superior para crear jerarquías
 - Asignar usuario por defecto al grupo
 - El sistema valida automáticamente la estructura
 
@@ -92,7 +91,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 2. **Completar información básica:**
    - Nombre del grupo (obligatorio) - Ej: "Departamento Civil"
    - Descripción (opcional) - Ej: "Maneja casos civiles"
-   - Grupo padre (si es dependiente) - Elige de qué grupo depende
+   - Grupo superior (si es dependiente) - Elige de qué grupo depende
 
 3. **Configurar usuario por defecto:**
    - Selecciona quién será el responsable por defecto de ese grupo
@@ -102,7 +101,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 - **Nombre** - Campo obligatorio (mínimo 6 caracteres)
 - **Descripción** - Campo opcional para detalles adicionales
-- **Grupo padre** - Para crear jerarquías (opcional)
+- **Grupo superior** - Para crear jerarquías (opcional)
 - **Usuario por defecto** - Se asigna automáticamente a nuevas tareas
 
 **Validaciones que se protegen:**
@@ -175,6 +174,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 3. Confirmar acción en diálogo
 4. Grupo se marca como eliminado
 5. Desaparece de la lista principal (pero se puede restaurar)
+6. Requiere roles superiores   
 
 1.5. Suspender Grupo - ¿Cuándo usar?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -200,6 +200,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 3. Grupo se marca como suspendido
 4. Cambia de color en la tabla (amarillo)
 5. Se puede reactivar desde la misma tabla
+6. Requiere roles superiores
 
 1.6. Reactivar Grupo Suspendido
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -233,6 +234,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 3. Click en botón "Restaurar"
 4. Confirmar acción
 5. Grupo vuelve a estar activo
+6. Requiere roles superiores
 
 1.8. Ver Detalles del Grupo - Información completa
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -248,7 +250,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 
 - Nombre y descripción del grupo
 - Nivel jerárquico - Posición en la estructura organizacional
-- Organismo padre - A qué organismo pertenece
+- Organismo superior - A qué organismo pertenece
 - Ruta completa - Path completo en la jerarquía
 - Fecha de creación y última actualización
 - Usuario que realizó la última actualización
@@ -277,7 +279,7 @@ El módulo de **Grupos** es la herramienta que te permite organizar tu instituci
 **Opciones de filtrado avanzadas:**
 
 - **Nivel jerárquico** - Filtrar por nivel específico
-- **Organismo** - Filtrar por organismo padre
+- **Organismo** - Filtrar por organismo superior
 - **Usuario por defecto** - Buscar por usuario asignado
 - **Fecha de creación** - Filtrar por rango de fechas
 
@@ -325,21 +327,18 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 2. Flujos de Trabajo Típicos
 ------------------------------
 
-2.1. Crear Nueva Estructura Organizacional
+2.1. Crear Nueva Estructura Organizacional en sistema P-Usher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Crear grupo base (organismo principal)
-2. Agregar áreas principales como grupos hijos
-3. Crear sub grupos dentro de cada área
-4. Asignar usuarios a cada grupo según responsabilidades
-5. Configurar usuarios por defecto para asignación automática
+
 
 2.2. Reorganizar Estructura Existente
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Analizar jerarquía actual usando el mapa de grupos
-2. Crear nuevos grupos donde sea necesario
-3. Mover grupos entre padres (si está permitido)
+2. Crear nuevos grupos donde sea necesario dentro de Grupos base y/o otros grupos
+3. Mover grupos entre superiores (si está permitido)
 4. Reasignar usuarios según nueva estructura
 5. Validar integridad de la jerarquía
 
@@ -372,8 +371,7 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 
 **Validaciones adicionales:**
 
-- Nivel máximo - No se pueden crear grupos más allá de cierto nivel
-- Organismo único - Cada grupo pertenece a un solo organismo
+- Organismo único - Cada grupo pertenece a un solo organismo/grupo base
 - Usuario por defecto válido - Debe ser un usuario activo del sistema
 
 **Validaciones específicas para Grupos Base:**
@@ -388,13 +386,12 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 
 - **Eliminación lógica** - Los grupos no se borran físicamente
 - **Cascada de estados** - Al suspender un grupo, se pueden afectar subgrupos
-- **Herencia de permisos** - Los subgrupos pueden heredar permisos del padre
+- **Herencia de permisos** - Los subgrupos pueden heredar permisos del grupo superior
 - **Protección de datos** - No se pueden eliminar grupos con tareas activas
 
 **Comportamiento adicional:**
 
-- Cálculo automático de level - Se actualiza al cambiar la jerarquía
-- Herencia de organismo - Los subgrupos heredan el organismo del padre
+- Herencia de organismo - Los subgrupos heredan el organismo del grupo superior
 - Validación de usuario por defecto - Debe pertenecer al grupo o ser administrador
 
 3.3. Rendimiento optimizado para tu comodidad
@@ -492,4 +489,5 @@ Es una vista de árbol que te muestra toda la estructura organizacional de tu in
 - Los colores te indican el estado de cada grupo
 
 Esta documentación proporciona una guía completa para entender y utilizar el módulo de Grupos de manera efectiva, combinando información técnica con orientación práctica para el usuario.
-MB.
+
+.. [#] Editado por M.B.

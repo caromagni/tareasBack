@@ -64,9 +64,9 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 
 **Funcionalidades:**
 
-- Crear desde cero - Nuevo tipo con nombre personalizado
+- Crear desde cero - Nuevo tipo con nombre personalizado (interno)
 - Copiar existente - Duplicar tipo existente con sus subtipos
-- Gestión de subtipos - Agregar/quitar subtipos asociados a tarea existente
+- Gestión de subtipos - Agregar/quitar subtipos asociados a tarea existente (interna)
 - Validaciones - Nombre obligatorio, sin caracteres especiales
 
 **Proceso de creación:**
@@ -85,7 +85,7 @@ El módulo de **Tipos de Tarea** permite administrar las categorías de tipos de
 - Sin caracteres especiales
 - Mínimo 4 caracteres
 
-1.3. Editar Tipo Existente
+1.3. Editar Tipo Existente (interna)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Funcionalidades:**
@@ -322,5 +322,6 @@ Esta regla protege la integridad de los datos que provienen de sistemas externos
 - Historial de integraciones
 
 Esta documentación proporciona una guía completa para entender y utilizar el módulo de Tipos y Subtipos de Tarea de manera efectiva, combinando información técnica con orientación práctica para el usuario.
-MB 
+
+.. [#] Editado por M.B.
 

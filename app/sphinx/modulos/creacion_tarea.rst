@@ -1,64 +1,208 @@
+==================
 Creación de Tarea
-=================
+==================
 
-El módulo de Creación de Tarea es un componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la generación eficiente y detallada de nuevas tareas dentro del ámbito judicial o administrativo. Este módulo proporciona una interfaz intuitiva y flexible para definir todos los aspectos necesarios de una tarea, asegurando que cada nueva actividad se integre perfectamente en el flujo de trabajo del sistema.
+¿Qué es y para qué sirve?
+-------------------------
 
-Características principales
----------------------------
+El módulo de **Creación de Tarea** es la herramienta que te permite registrar nuevas actividades de forma rápida, clara y segura. Desde aquí definís el tipo de tarea, su prioridad, a quién se asigna, las fechas y la descripción, vinculándola opcionalmente a un expediente. Todo con validaciones en tiempo real para evitar errores y asegurar coherencia con los flujos de trabajo judiciales o administrativos.
 
-1. **Interfaz intuitiva**:
-   - Formulario claro y fácil de usar para la creación de tareas.
-   - Diseño responsive para acceso desde diferentes dispositivos.
+Índice de Contenidos
+--------------------
 
-2. **Campos personalizables**:
-   - Conjunto estándar de campos para información básica de la tarea (título, descripción, fecha de vencimiento, etc.).
-   - Capacidad para añadir campos personalizados según las necesidades específicas del juzgado o departamento.
+.. contents::
+   :local:
+   :depth: 2
 
-3. **Asignación flexible**:
-   - Opciones para asignar la tarea a individuos, grupos o roles específicos.
-   - Funcionalidad de auto-asignación para tareas personales.
+**Navegación Rápida:**
 
-4. **Integración con otros módulos**:
-   - Vinculación directa con el módulo de Calendario para selección de fechas.
-   - Opción para crear tareas anidadas o recurrentes desde la interfaz de creación.
+1. `Componentes de la Interfaz`_ - Diálogo, controles y estados
+2. `Flujos de Trabajo Típicos`_ - Casos de uso comunes
+3. `Consideraciones Importantes`_ - Validaciones y reglas
+4. `Interfaz de Usuario`_ - Elementos visuales y accesibilidad
+5. `Casos de Uso Comunes`_ - Por tipo de usuario
+6. `Consejos útiles`_ - Recomendaciones prácticas
+7. `¿Necesitas ayuda?`_ - Soporte y mensajes del sistema
 
-5. **Priorización y categorización**:
-   - Herramientas para establecer la prioridad de la tarea.
-   - Sistema de etiquetas o categorías para una fácil clasificación y búsqueda posterior.
+1. Componentes de la Interfaz
+------------------------------
 
-6. **Adjuntos y enlaces**:
-   - Capacidad para adjuntar archivos relevantes a la tarea.
-   - Opción para incluir enlaces a documentos o recursos externos.
+1.1. Diálogo "Nueva Tarea" - ¿Qué ves aquí?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-7. **Plantillas predefinidas**:
-   - Biblioteca de plantillas para tipos comunes de tareas judiciales o administrativas.
-   - Funcionalidad para guardar nuevas plantillas personalizadas.
+**Funcionalidades disponibles:**
 
-8. **Configuración de alertas**:
-   - Opciones para establecer recordatorios y alertas desde el momento de la creación.
-   - Personalización de notificaciones para diferentes etapas de la tarea.
+- Crear una nueva tarea con campos guiados
+- Validaciones en tiempo real
+- Notificaciones de éxito/error
 
-9. **Validación de datos**:
-   - Verificación automática de la integridad y coherencia de los datos ingresados.
-   - Alertas en tiempo real sobre campos obligatorios o información faltante.
+**Botones de acción:**
 
-10. **Flujos de trabajo automatizados**:
-    - Opción para iniciar flujos de trabajo predefinidos al crear ciertos tipos de tareas.
-    - Integración con reglas de negocio para automatizar acciones posteriores a la creación.
+- **Guardar** - Crea la tarea (se desactiva si hay errores o durante el envío)
+- **Cancelar** - Cierra sin guardar
 
-11. **Registro de auditoría**:
-    - Captura automática de metadatos como fecha de creación, usuario creador, etc.
-    - Trazabilidad completa desde el momento de la creación de la tarea.
+**Estados del sistema:**
 
-Funcionalidad
--------------
+- **Carga inicial** - Se muestran skeletons mientras se obtienen datos (grupos, tipos, expedientes, etc.)
+- **Envío** - El botón Guardar muestra un spinner (CircularProgress)
+- **Resultado** - Snackbar de confirmación (Tarea creada exitosamente) o error
 
-El módulo de Creación de Tarea sirve como punto de entrada crucial para todas las actividades gestionadas en el sistema. Proporciona una plataforma versátil y eficiente para capturar toda la información necesaria al inicio de una nueva tarea o proceso.
+1.2. Campos del Formulario
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-La interfaz intuitiva y los campos personalizables aseguran que los usuarios puedan crear rápidamente tareas que se ajusten a las necesidades específicas de su rol o departamento. La integración con otros módulos del sistema, como el Calendario y las Tareas Anidadas, permite una creación de tareas contextualizada y coherente con el flujo de trabajo general.
+**Obligatorios:**
 
-Las opciones de asignación flexible y la configuración de alertas desde el momento de la creación ayudan a establecer claramente las responsabilidades y plazos desde el inicio. Esto contribuye a una gestión más eficiente y a un seguimiento más efectivo de las tareas a lo largo de su ciclo de vida.
+- **Tipo de Tarea** - Define la naturaleza del trabajo (agrupado por nivel: Expediente / Actuación / Interna)
+- **Subtipo de Tarea** - Si el tipo seleccionado lo requiere
+- **Título** - Nombre claro y descriptivo
+- **Grupo** - Área responsable donde "vive" la tarea
+- **Prioridad** - Alta (1), Media (2), Baja (3) — por defecto, Baja
+- **Fecha de inicio** - Día a partir del cual empieza a correr
+- **Fecha de fin** - Fecha límite para completar la tarea
 
-La funcionalidad de plantillas predefinidas es particularmente útil en el ámbito judicial, donde muchos procesos siguen patrones establecidos. Esto no solo ahorra tiempo en la creación de tareas recurrentes, sino que también asegura la consistencia en la forma en que se manejan los diferentes tipos de casos o procedimientos.
+**Opcionales:**
 
-En resumen, el módulo de Creación de Tarea es esencial para iniciar de manera efectiva cualquier actividad dentro del sistema, sentando las bases para una gestión eficiente y un seguimiento preciso de todas las tareas y procesos en el entorno judicial o administrativo.
+- **Usuario asignado** - Integrante del grupo (se puede definir luego)
+- **Expediente** - Vínculo administrativo/judicial
+- **Descripción** - Hasta 250 caracteres (mínimo 6 si escribís algo)
+
+**Comportamientos útiles:**
+
+- Al seleccionar Grupo, se cargan los Usuarios de ese grupo
+- Contador de caracteres en Descripción
+
+1.3. Fuentes de datos
+^^^^^^^^^^^^^^^^^^^^^
+
+- **GrupoService** - Lista de grupos disponibles
+- **TaskTypeService** - Tipos de tarea habilitados (y sus subtipos si existen)
+- **ActuacionService y ExpedienteService** - Catálogos para vínculos
+- **DominioService** - Muestra el dominio actual (informativo)
+
+2. Flujos de Trabajo Típicos
+------------------------------
+
+2.1. Crear una tarea simple (rápida)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Elegí Tipo de Tarea (y Subtipo si corresponde)
+2. Completá Título
+3. Seleccioná Prioridad
+4. Elegí Grupo (y, si querés, Usuario asignado)
+5. Definí Fecha de inicio y Fecha de fin
+6. (Opcional) Agregá Descripción
+7. Presioná Guardar
+
+2.2. Asignar una tarea a una persona del grupo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Seleccioná Grupo
+2. Elegí Usuario asignado (lista filtrada por el grupo)
+3. Completá Tipo, Título, Prioridad y Fechas
+4. Guardar
+
+2.3. Vincular una tarea a un expediente
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Completá los datos base (Tipo, Título, Grupo, etc.)
+2. En Expediente, seleccioná la carátula correspondiente
+3. Guardar
+
+3. Consideraciones Importantes
+------------------------------
+
+3.1. Validaciones de Seguridad que te protegen
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- **Fecha de inicio** - No puede ser anterior a hoy
+- **Fecha de fin** - Debe ser posterior o igual a Fecha de inicio
+
+**Título obligatorio:**
+
+- No puede comenzar con número ni con caracter especial
+- Debe tener al menos 4 caracteres
+- No admite ciertos caracteres especiales
+
+**Otras validaciones:**
+
+- **Descripción** (si se completa) - Mínimo 6 y máximo 250 caracteres
+- **Grupo obligatorio** - Usuario opcional
+
+3.2. Comportamiento del Sistema que facilita tu trabajo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- El botón Guardar se desactiva si el formulario es inválido o hay errores de fecha
+- Se envían solo los campos completos y válidos (payload limpio)
+- Si el Tipo de Tarea posee subtipos, el Subtipo pasa a ser obligatorio
+- Los Usuarios disponibles dependen del Grupo seleccionado
+
+3.3. Rendimiento optimizado para tu comodidad
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Búsquedas y ordenamientos en listas de selección (tipos, grupos)
+- Carga diferida: se consulta lo necesario al abrir el formulario
+- Mensajes claros de error y éxito para tomar decisiones rápido
+
+4. Interfaz de Usuario
+-----------------------
+
+4.1. Elementos Visuales que facilitan la navegación
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Autocomplete con agrupación por nivel (Expediente / Actuación / Interna)
+- Chips/labels y helper texts para indicar estados y errores
+- Colores semánticos en mensajes (éxito/error)
+- Skeletons de carga para una experiencia fluida
+
+4.2. Accesibilidad para todos los usuarios
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Navegación por teclado en inputs y selectores
+- Contraste adecuado y labels claros
+- Tooltips y mensajes de ayuda contextual
+- Diseño responsive para distintos tamaños de pantalla
+
+5. Casos de Uso Comunes
+------------------------
+
+5.1. Administrador del Sistema
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Asegurar que existan Tipos/Subtipos y Grupos correctos
+- Monitorear que las tareas se creen con fechas válidas
+- Auditar mensajes de error recurrentes para mejorar datos base
+
+5.2. Líder de Equipo
+^^^^^^^^^^^^^^^^^^^^
+
+- Crear tareas para su área, asignarlas a miembros del grupo
+- Priorizar tareas (Alta/Media/Baja) según urgencia
+
+5.3. Usuario Final
+^^^^^^^^^^^^^^^^^^
+
+- Registrar tareas propias o del área
+- Elegir Grupo correcto y, si corresponde, Usuario asignado
+- Usar Descripción breve y clara (6–250 caracteres)
+
+6. Consejos útiles para el usuario
+----------------------------------
+
+**Antes de crear una tarea:**
+
+- **Título** - Usá nombres descriptivos ("Revisar antecedentes", "Cargar informe")
+- **Grupo/Usuario** - Si no estás seguro del usuario, seleccioná el Grupo y asigná después
+- **Descripción** - Evitá pegar textos extensos; sintetizá en hasta 250 caracteres
+- **Errores** - Leé el mensaje que aparece debajo del campo para corregir rápido
+
+7. ¿Necesitas ayuda?
+---------------------
+
+- Los mensajes de error te indican qué corregir
+- Las validaciones evitan incoherencias (fechas, título, descripción)
+- Los tooltips suman contexto en inputs complejos
+- El snackbar confirma si la tarea se creó o si hubo un problema
+
+Esta documentación proporciona una guía completa para entender y utilizar el módulo de Creación de Tarea de manera efectiva, combinando información técnica con orientación práctica para el usuario.
+
+.. [#] Editado por M.B.
