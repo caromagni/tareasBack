@@ -52,6 +52,7 @@ def full_sync_tipos_tareas(clasificacion=None, id_user=None,url_post=None,is_sub
     response = requests.get(headers=headers,url=sync_url)
   
     tipos_data = response.json()
+    logger_config.logger.debug("******************************")
     logger_config.logger.debug(f"tipos_data: {tipos_data}")
     logger_config.logger.debug("******************************")
    
@@ -65,12 +66,14 @@ def full_sync_tipos_tareas(clasificacion=None, id_user=None,url_post=None,is_sub
 
     for tipo_data in tipos_data['data']:
         try:
+            id = tipo_data['id']
             logger_config.logger.debug(f"tipo_data: {tipo_data}")
             logger_config.logger.debug("******************************")
             logger_config.logger.info(f'sending URL: {url_post}')
             logger_config.logger.debug(f'id_user: {id_user}')
             logger_config.logger.debug('USER FROM CONTROLLER BEFORE SYNC')
-           
+            logger_config.logger.debug(f'entity: {entity}')
+            logger_config.logger.debug(f'id: {id}')
             sync.sync_tipo_tarea(clasificacion,entity, tipo_data['id'],url_post, id_user)
             success_count += 1
         except Exception as e:
