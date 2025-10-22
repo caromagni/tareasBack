@@ -180,9 +180,15 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                
                 logger_config.logger.info(f"proceeding to erase {len(current_user_expired_roles)} roles")
                 for role in current_user_expired_roles:
-                    db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
+                    deleteUsuarioRol = db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
+                    if deleteUsuarioRol:
+                        logger_config.logger.info(f"Deleted UsuarioRol entries for RolExt id {role.id}")
+
                 logger_config.logger.info("after delete expired roles")
                 current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
+                if current_user_expired_roles:
+                    logger_config.logger.info(f"Deleted  expired RolExt entries for user {email}")
+                
                 pull_roles = True
             else:
                 logger_config.logger.error("Error al obtener roles desde P-USHER")
@@ -198,13 +204,13 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             logger_config.logger.info("Get roles desde p-usher")
             print ("id de usuario:", id_usuario)
             ####HACER LA BUSQUEDA DE GRUPO PARA EL ORGANISMO ACTUAL######
-            #grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.id_grupo==id_grupo, UsuarioGrupo.eliminado==False)
-            grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.eliminado==False)
-            if grupo_usuario is None or grupo_usuario.count() == 0:
-                logger_config.logger.error("Usuario no pertenece a ningún grupo")
-                raise Exception("Usuario no pertenece a ningún grupo")
-            else:
-                grupo_usuario = grupo_usuario.first()
+            ####MODIFICADO - ASIGNO GRUPO EN usuario_rol y en usuario_grupo SEGUN ORGANISMO DE CADA ROL######
+            #grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.eliminado==False)
+            #if grupo_usuario is None or grupo_usuario.count() == 0:
+            #    logger_config.logger.error("Usuario no pertenece a ningún grupo")
+                #raise Exception("Usuario no pertenece a ningún grupo")
+           # else:
+            #    grupo_usuario = grupo_usuario.first()
             
             # Prepare bulk insert lists
             nuevos_roles = []
@@ -223,6 +229,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 id_organismo = r['id_organismo']
                 query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
                 if query_organismo is not None:
+                    #Busca el grupo base correspondiente al organismo
                     query_grupo=db.session.query(Grupo).filter(Grupo.id_organismo_ext == id_organismo).first()
                     if query_grupo is not None:
                         id_grupo = query_grupo.id
@@ -230,6 +237,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         logger_config.logger.error(f"No grupo found for organismo {id_organismo}, skipping role")
                         continue
                     #id_grupo = query_organismo.id_organismo_ext
+                    # Busca el dominio del organismo
                     query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio_ext).first()
                     if query_dominio is not None:
                         id_dominio = query_dominio.id_dominio_ext 
@@ -237,13 +245,31 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         print("id_dominio:", id_dominio)
                         print("#"*20)
                     else:
+                        #No encuentra el dominio del organismo de pusher en la base de datos tareas
                         logger_config.logger.error(f"No dominio found for organismo {id_organismo}, skipping role")
                         continue
                 else:
+                    #No encuentra el organismo de pusher en la base de datos tareas
                     logger_config.logger.error(f"No organismo found with id {id_organismo}, skipping role")
                     continue
 
-                print("id_organismo:", id_organismo)
+                query_usr_grupo = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id_usuario, UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado == False).first()
+
+                if query_usr_grupo is not None:
+                    id_usuario_grupo = query_usr_grupo.id
+                else:
+                    id_usuario_grupo = uuid.uuid4()
+                    nuevo_usuario_grupo = UsuarioGrupo(
+                        id=id_usuario_grupo,
+                        id_usuario=id_usuario,
+                        id_grupo=id_grupo,
+                        fecha_actualizacion=current_time,
+                        id_user_actualizacion=id_user_actualizacion,
+                        eliminado=False
+                    )
+                    db.session.add(nuevo_usuario_grupo)
+
+                print("id_organismo de pusher:", id_organismo)
                 email = username
                 print("email:", email)
                 ######Casos de uso del rol##########
@@ -271,7 +297,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                     # Create UsuarioRol object (don't add to session yet)
                     nuevo_usuarioRol = UsuarioRol(
                         id=uuid.uuid4(),
-                        id_usuario_grupo=grupo_usuario.id,
+                        #id_usuario_grupo=grupo_usuario.id,
+                        id_usuario_grupo=id_usuario_grupo,
                         id_rol_ext=nuevoIDRol,
                         fecha_actualizacion=current_time,
                         id_user_actualizacion=id_user_actualizacion,

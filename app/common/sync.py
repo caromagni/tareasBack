@@ -13,6 +13,9 @@ def sync_request(url, entity_id):
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta=os.environ.get('PUSHER_USUARIO_CONSULTA')
+    print("###########################################")
+    print("sync_request function")
+    print("url:",url," entity_id:",entity_id, " usuario_consulta:",usuario_consulta)
     url=url+'?id='+entity_id+'&usuario_consulta='+usuario_consulta
     print("###########################################")
     print("url:",url)
