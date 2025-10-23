@@ -367,17 +367,31 @@ def sync_all_entities():
             total_errors += 1
 
          # Sync all entities sequentially
-        logger_config.logger.info("1. Syncing subtipos_tareas...")
+        logger_config.logger.info("1. Syncing tipo_tarea_parte...")
         try:
             url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
             clasificacion="parte"
-            full_sync.full_sync_tipos_tareas_parte(clasificacion,id_user,url_post,True)
-            results['subtipos_tareas'] = {"status": "completed", "success": True}
+            #full_sync.full_sync_tipos_tareas_parte(clasificacion,id_user,url_post,True)
+            full_sync.full_sync_tipos_tareas(clasificacion,id_user,url_post,True)
+            results['tipo_tarea_parte'] = {"status": "completed", "success": True}
             total_success += 1
         except Exception as e:
-            logger_config.logger.error(f"Error syncing subtipos_tareas: {e}")
-            results['subtipos_tareas'] = {"status": "failed", "error": str(e), "success": False}
+            logger_config.logger.error(f"Error syncing tipo_tarea_parte: {e}")
+            results['tipo_tarea_parte'] = {"status": "failed", "error": str(e), "success": False}
             total_errors += 1
+
+        logger_config.logger.info("1. Syncing tipo_tarea_parte...")
+        try:
+            url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
+            clasificacion="juzgado"
+            #full_sync.full_sync_tipos_tareas_parte(clasificacion,id_user,url_post,True)
+            full_sync.full_sync_tipos_tareas(clasificacion,id_user,url_post,True)
+            results['tipo_tarea_juzgado'] = {"status": "completed", "success": True}
+            total_success += 1
+        except Exception as e:
+            logger_config.logger.error(f"Error syncing tipo_tarea_juzgado: {e}")
+            results['tipo_tarea_juzgado'] = {"status": "failed", "error": str(e), "success": False}
+            total_errors += 1    
         
         logger_config.logger.info("2. Syncing usuarios...")
         try:

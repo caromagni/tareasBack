@@ -13,6 +13,9 @@ def sync_request(url, entity_id):
     x_api_key=os.environ.get('PUSHER_API_KEY')
     x_api_system=os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta=os.environ.get('PUSHER_USUARIO_CONSULTA')
+    print("###########################################")
+    print("sync_request function")
+    print("url:",url," entity_id:",entity_id, " usuario_consulta:",usuario_consulta)
     url=url+'?id='+entity_id+'&usuario_consulta='+usuario_consulta
     print("###########################################")
     print("url:",url)
@@ -34,7 +37,7 @@ def sync_tipo_tarea(clasificacion,entity, entity_id, url, id_user=None):
         print("id_user:",id_user)
         resp= sync_request(url, entity_id)
         print("json resp:",resp)
-        print("aca esta la info de pusher")
+        print("aca esta la info de pusher. Registro a insertar/actualizar")
      
         if resp and resp['data']['id'] is not None:
             #Buscar si existe el tipo de tarea en la base de datos
@@ -76,7 +79,7 @@ def sync_tipo_tarea(clasificacion,entity, entity_id, url, id_user=None):
                                                        )
                 db.session.add(nuevo_tipo_tarea_dominio)
             else:
-                query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea == query_tipo_tarea.id, TipoTareaDominio.id_dominio == x_dominio, TipoTareaDominio.id_organismo == x_organismo).first()
+                query_tipo_tarea_dominio = db.session.query(TipoTareaDominio).filter(TipoTareaDominio.id_tipo_tarea == query_tipo_tarea.id, TipoTareaDominio.id_dominio_ext == x_dominio_ext, TipoTareaDominio.id_organismo_ext == x_organismo_ext).first()
                 if query_tipo_tarea_dominio is None:
                     #hago insert del tipo de tarea dominio
                     nuevo_tipo_tarea_dominio = TipoTareaDominio(id=uuid.uuid4(),
