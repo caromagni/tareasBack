@@ -193,7 +193,7 @@ class HerarquiaAllOut(Schema):
 
 class GroupIn(Schema):
     nombre= String(required=True, validate=[
-        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
     descripcion= String(required=True, validate=[
@@ -444,11 +444,11 @@ class UsuariosGroupOut(Schema):
 ###############Tareas y Tipo de Tareas Base####################  
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True, validate=[
-        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres"),
+        validate.Length(min=3, max=20, error="El campo debe ser mayor a 3 caracteres y menor a 20 caracteres"),
         validate_char
     ])
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
+        validate.Length(min=3, max=100, error="El campo debe ser mayor a 3 y menor a 100 caracteres"),
         validate_char
     ])
     eliminado = Boolean(default=False)
@@ -464,11 +464,11 @@ class TipoTareaIn(Schema):
 
 class TipoTareaPatchIn(Schema):
     codigo_humano = String(validate=[
-        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres"),
+        validate.Length(min=3, max=20, error="El campo debe ser mayor a 3 caracteres y menor a 20 caracteres"),
         validate_char
     ])
     nombre = String(validate=[
-        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
+        validate.Length(min=3, max=100, error="El campo debe ser mayor a 3 y menor a 100 caracteres"),
         validate_char
     ])
     eliminado = Boolean(default=False)
@@ -515,11 +515,11 @@ class TipoTareaGetIn(Schema):
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 50 caracteres"),
         validate_char
     ])
     nombre_corto = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 50 caracteres"),
         validate_char
     ])
     eliminado = Boolean(default=False)
@@ -528,11 +528,11 @@ class SubtipoTareaIn(Schema):
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
     nombre = String(validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 50 caracteres"),
         validate_char
     ])
     nombre_corto = String(validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 50 caracteres"),
         validate_char
     ])
     base = Boolean(default=False)

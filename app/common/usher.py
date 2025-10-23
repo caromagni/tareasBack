@@ -181,8 +181,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 logger_config.logger.info(f"proceeding to erase {len(current_user_expired_roles)} roles")
                 for role in current_user_expired_roles:
                     deleteUsuarioRol = db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
-                    if deleteUsuarioRol:
-                        logger_config.logger.info(f"Deleted UsuarioRol entries for RolExt id {role.id}")
+                    
+                    #if deleteUsuarioRol:
+                    #    logger_config.logger.info(f"Deleted UsuarioRol entries for RolExt id {role.id}")
 
                 logger_config.logger.info("after delete expired roles")
                 current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
@@ -268,7 +269,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         eliminado=False
                     )
                     db.session.add(nuevo_usuario_grupo)
-
+                    db.session.commit()
+                    logger_config.logger.info(f"Created new UsuarioGrupo for user {username} and grupo {id_grupo}")
+                    
                 print("id_organismo de pusher:", id_organismo)
                 email = username
                 print("email:", email)
