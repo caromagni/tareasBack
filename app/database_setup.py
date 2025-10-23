@@ -157,146 +157,96 @@ class DatabaseSetup:
     def populate_endpoints(self, session, admin_user):
         print("Populating endpoints...")
         endpoints_data = [
-            {
-                'id': '015bd2ca-b148-4efc-8399-02576b5e9340',
-                'url': '/tarea_detalle',
-                'descripcion': 'GET tarea_detalle',
-                'caso_uso': [{"codigo": "consultar-tarea"}],
+             {
+                'id': '',
+                'url': '/alertas',
+                'descripcion': 'Consultar Alerta',
+                'caso_uso': [{"codigo": "consultar-alerta"}],
                 'metodo': 'GET'
             },
             {
-                'id': '137d7d23-41fe-4598-813a-41eafcd10e4c',
-                'url': '/tarea_notas',
-                'descripcion': 'GET tarea_notas',
-                'caso_uso': [{"codigo": "consultar-tarea"}],
+                'id': '',
+                'url': '/expedientes',
+                'descripcion': 'Consultar Expediente',
+                'caso_uso': [{"codigo": "consultar-expediente"}],
                 'metodo': 'GET'
             },
-            {
-                'id': '1517d8e0-ab5a-4f22-9dc1-122adca5581b',
-                'url': '/ep',
-                'descripcion': 'GET EP',
-                'caso_uso': [{"codigo": "consultar-tarea"}, {"codigo": "consultar-grupo"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '25e7c829-b4b9-416f-8286-05939e392451',
-                'url': '/label',
-                'descripcion': 'Delete label',
-                'caso_uso': [{"codigo": "eliminar-label"}],
-                'metodo': 'DELETE'
-            },
-            {
-                'id': '25f027f3-af2b-4909-8701-27783713f746',
+             {
+                'id': '',
                 'url': '/grupo',
-                'descripcion': 'POST grupo',
-                'caso_uso': [{"codigo": "crear-grupo"}],
-                'metodo': 'POST'
+                'descripcion': 'GET grupo',
+                'caso_uso': [{"codigo": "consultar-grupo"}],
+                'metodo': 'GET'
             },
-            {
-                'id': '2e8dc99d-9605-4ae5-aacd-2e22ae5c704e',
+             {
+                'id': '',
                 'url': '/label_grupo',
                 'descripcion': 'GET label_grupo',
                 'caso_uso': [{"codigo": "consultar-label"}],
                 'metodo': 'GET'
             },
-            {
-                'id': '32957337-799f-4d01-b4e3-0d40fcfe952b',
-                'url': '/tipo_tarea',
-                'descripcion': 'Get tipo_tarea',
+        {
+                'id': '',
+                'url': '/nota',
+                'descripcion': 'Consultar Nota',
+                'caso_uso': [{"codigo": "consultar-nota"}],
+                'metodo': 'GET'
+            },
+{
+                'id': '',
+                'url': '/tarea_detalle',
+                'descripcion': 'GET tarea_detalle',
                 'caso_uso': [{"codigo": "consultar-tarea"}],
                 'metodo': 'GET'
             },
-            
-            {
-                'id': 'd1b1b706-506b-44c6-bc07-8c458accc6fc',
+             {
+                'id': '',
                 'url': '/tarea',
                 'descripcion': 'Get tarea',
                 'caso_uso': [{"codigo": "consultar-tarea"}],
                 'metodo': 'GET'
             },
             {
-                'id': '34773fe7-063e-4edf-98ba-1c5168471277',
-                'url': '/groups_with_base',
-                'descripcion': 'GET groups_with_base',
-                'caso_uso': [{"codigo": "consultar-usuario"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '3a2c8947-3209-4100-a94a-10e1c433d005',
+                'id': '',
                 'url': '/tipo_tarea',
-                'descripcion': 'Patch tipo_tarea',
-                'caso_uso': [{"codigo": "modificar-tipo-tarea"}],
-                'metodo': 'PATCH'
-            },
-            {
-                'id': '44797749-84f7-47f4-8fb7-ef8335bff613',
-                'url': '/subtipo_tarea',
-                'descripcion': 'Eliminar subtipo de tarea',
-                'caso_uso': [{"codigo": "eliminar-subtipo-tarea"}],
-                'metodo': 'DELETE'
-            },
-            {
-                'id': '4cefc783-63e4-415b-8683-22f1bb447148',
-                'url': '/grupo',
-                'descripcion': 'GET grupo',
-                'caso_uso': [{"codigo": "consultar-grupo"}],
+                'descripcion': 'Get tipo_tarea',
+                'caso_uso': [{"codigo": "consultar-tipo-tarea"}],
                 'metodo': 'GET'
             },
             {
-                'id': '4ded8f1e-0ad5-4014-bdd7-0c115b913657',
-                'url': '/tarea_grupo',
-                'descripcion': 'GET tarea_grupo',
-                'caso_uso': [{"codigo": "consultar-tarea"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '4fbe819d-ddbc-4503-970c-2c9e96ac07b9',
-                'url': '/grupo',
-                'descripcion': 'DELETE grupo',
-                'caso_uso': [{"codigo": "eliminar-grupo"}],
-                'metodo': 'DELETE'
-            },
-            {
-                'id': '540d9d45-549c-4ada-ab4f-855b3c73150b',
-                'url': '/actuacion',
-                'descripcion': 'Get actuacion',
-                'caso_uso': [{"codigo": "consultar-actuacion"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '545869a8-deed-45ae-95db-bb6be5ed9e3a',
-                'url': '/usuario_rol',
-                'descripcion': 'GET usuario_rol',
-                'caso_uso': [{"codigo": "consultar-usuario"}],
-                'metodo': 'GET'
-            },
-            
-            {
-                'id': 'c60fd41c-3962-418d-b898-ef8595bd44f5',
-                'url': '/usuario',
-                'descripcion': 'DELETE usuario',
-                'caso_uso': [{"codigo": "eliminar-usuario"}],
-                'metodo': 'DELETE'
-            }, {
-                'id': '5c984baf-75b8-425c-8271-c9de803582f8',
+                'id': '',
                 'url': '/usuario',
                 'descripcion': 'GET usuario',
                 'caso_uso': [{"codigo": "consultar-usuario"}],
                 'metodo': 'GET'
             },
             {
-                'id': '5cb16bd7-c475-4897-8161-c5d9c4c931b0',
-                'url': '/lote_tareas',
-                'descripcion': 'Modificar tarea',
-                'caso_uso': [{"codigo": "modificar-tarea"}],
-                'metodo': 'PATCH'
+                'id': '',
+                'url': '/usuarios_grupo',
+                'descripcion': 'GET usuarios_grupo',
+                'caso_uso': [{"codigo": "consultar-usuarios_grupo"}],
+                'metodo': 'GET'
+            },
+             {
+                'id': '',
+                'url': '/grupo',
+                'descripcion': 'POST grupo',
+                'caso_uso': [{"codigo": "crear-grupo"}],
+                'metodo': 'POST'
             },
             {
-                'id': '6083167a-eda2-42fd-b87a-288153102b62',
-                'url': '/tarea',
-                'descripcion': 'Delete tarea',
-                'caso_uso': [{"codigo": "eliminar-tarea"}],
-                'metodo': 'DELETE'
+                'id': '',
+                'url': '/label',
+                'descripcion': 'POST label',
+                'caso_uso': [{"codigo": "crear-label"}],
+                'metodo': 'POST'
+            },
+             {
+                'id': '',
+                'url': '/nota',
+                'descripcion': 'POST nota',
+                'caso_uso': [{"codigo": "crear-nota"}],
+                'metodo': 'POST'
             },
             {
                 'id': '',
@@ -305,63 +255,7 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "crear-tarea"}],
                 'metodo': 'POST'
             },
-            {
-                'id': '',
-                'url': '/tarea',
-                'descripcion': 'Modificar tarea',
-                'caso_uso': [{"codigo": "modificar-tarea"}],
-                'metodo': 'PATCH'
-            },
-            {
-                'id': '683048cf-d29c-4719-8a51-430d56a5f364',
-                'url': '/nota',
-                'descripcion': 'DELETE nota',
-                'caso_uso': [{"codigo": "eliminar-nota"}],
-                'metodo': 'DELETE'
-            },
-            {
-                'id': '6b78d70f-2870-4466-aece-c94b1aa5f3a5',
-                'url': '/usuarios_grupo',
-                'descripcion': 'GET usuarios_grupo',
-                'caso_uso': [{"codigo": "consultar-grupo"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '1d158a1a-dcc1-425c-803b-c53733a31cc6',
-                'url': '/alertas',
-                'descripcion': 'GET alertas',
-                'caso_uso': [{"codigo": "consultar-usuario"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '',
-                'url': '/endpoint',
-                'descripcion': 'POST ep',
-                'caso_uso': [{"codigo": "crear-tarea"}],
-                'metodo': 'POST'
-            },
-            {
-                'id': '',
-                'url': '/dominio',
-                'descripcion': 'GET dominio',
-                'caso_uso': [{"codigo": "crear-tarea"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '',
-                'url': '/ep',
-                'descripcion': 'GET ep',
-                'caso_uso': [{"codigo": "consultar-tarea"}],
-                'metodo': 'GET'
-            },
-            {
-                'id': '',
-                'url': '/lote_tarea_v2',
-                'descripcion': 'PATCH lote_tareas_v2',
-                'caso_uso': [{"codigo": "modificar-tarea"}],
-                'metodo': 'PATCH'
-            },
-            {
+             {
                 'id': '',
                 'url': '/tipo_tarea',
                 'descripcion': 'POST tipo_tarea',
@@ -370,10 +264,165 @@ class DatabaseSetup:
             },
             {
                 'id': '',
+                'url': '/usuario',
+                'descripcion': 'POST usuario',
+                'caso_uso': [{"codigo": "crear-usuario"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/grupo',
+                'descripcion': 'DELETE grupo',
+                'caso_uso': [{"codigo": "eliminar-grupo"}],
+                'metodo': 'DELETE'
+            },
+             {
+                'id': '',
+                'url': '/label',
+                'descripcion': 'Delete label',
+                'caso_uso': [{"codigo": "eliminar-label"}],
+                'metodo': 'DELETE'
+            },
+              {
+                'id': '',
+                'url': '/nota',
+                'descripcion': 'DELETE nota',
+                'caso_uso': [{"codigo": "eliminar-nota"}],
+                'metodo': 'DELETE'
+            },
+            {
+                'id': '',
+                'url': '/tarea',
+                'descripcion': 'Delete tarea',
+                'caso_uso': [{"codigo": "eliminar-tarea"}],
+                'metodo': 'DELETE'
+            },
+ {
+                'id': '',
+                'url': '/tipo_tarea',
+                'descripcion': 'Delete tipo_tarea',
+                'caso_uso': [{"codigo": "eliminar-tipo-tarea"}],
+                'metodo': 'DELETE'
+            },
+            {
+                'id': '',
+                'url': '/usuario',
+                'descripcion': 'DELETE usuario',
+                'caso_uso': [{"codigo": "eliminar-usuario"}],
+                'metodo': 'DELETE'
+            },
+            {
+                'id': '',
+                'url': '/grupo',
+                'descripcion': 'Modificar grupo',
+                'caso_uso': [{"codigo": "modificar-grupo"}],
+                'metodo': 'PATCH'
+            },
+{
+                'id': '',
+                'url': '/tarea',
+                'descripcion': 'Modificar tarea',
+                'caso_uso': [{"codigo": "modificar-tarea"}],
+                'metodo': 'PATCH'
+            },
+            {
+                'id': '',
+                'url': '/tipo_tarea',
+                'descripcion': 'Patch tipo_tarea',
+                'caso_uso': [{"codigo": "modificar-tipo-tarea"}],
+                'metodo': 'PATCH'
+            },
+{
+                'id': '',
+                'url': '/usuario',
+                'descripcion': 'Patch usuario',
+                'caso_uso': [{"codigo": "modificar-usuario"}],
+                'metodo': 'PATCH'
+            },
+            {
+                'id': '',
+                'url': '/tarea_notas',
+                'descripcion': 'GET tarea_notas',
+                'caso_uso': [{"codigo": "consultar-tarea-notas"}],
+                'metodo': 'GET'
+            },
+              
+            {
+                'id': '',
+                'url': '/groups_with_base',
+                'descripcion': 'GET groups_with_base',
+                'caso_uso': [{"codigo": "consultar-grupos-grupo-base"}],
+                'metodo': 'GET'
+            },
+               {
+                'id': '',
+                'url': '/subtipo_tarea',
+                'descripcion': 'Eliminar subtipo de tarea',
+                'caso_uso': [{"codigo": "eliminar-subtipo-tarea"}],
+                'metodo': 'DELETE'
+            },
+             {
+                'id': '',
+                'url': '/tarea_grupo',
+                'descripcion': 'GET tarea_grupo',
+                'caso_uso': [{"codigo": "consultar-tarea-grupo"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/actuacion',
+                'descripcion': 'Get actuacion',
+                'caso_uso': [{"codigo": "consultar-actuacion"}],
+                'metodo': 'GET'
+            },
+              {
+                'id': '545869a8-deed-45ae-95db-bb6be5ed9e3a',
+                'url': '/usuario_rol',
+                'descripcion': 'GET usuario_rol',
+                'caso_uso': [{"codigo": "consultar-usuario-rol"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/endpoint',
+                'descripcion': 'POST ep',
+                'caso_uso': [{"codigo": "crear-endpoint"}],
+                'metodo': 'POST'
+            },
+             {
+                'id': '',
+                'url': '/dominio',
+                'descripcion': 'GET dominio',
+                'caso_uso': [{"codigo": "consultar-dominio"}],
+                'metodo': 'GET'
+            },
+             {
+                'id': '',
+                'url': '/ep',
+                'descripcion': 'GET ep',
+                'caso_uso': [{"codigo": "consultar-endpoint"}],
+                'metodo': 'GET'
+            },
+             {
+                'id': '',
+                'url': '/lote_tarea_v2',
+                'descripcion': 'PATCH lote_tareas_v2',
+                'caso_uso': [{"codigo": "modificar-tarea-lote-v2"}],
+                'metodo': 'PATCH'
+            },
+             {
+                'id': '',
                 'url': '/subtipo_tarea',
                 'descripcion': 'POST subtipo_tarea',
-                'caso_uso': [{"codigo": "crear-tipo-tarea"}],
+                'caso_uso': [{"codigo": "crear-subtipo-tarea"}],
                 'metodo': 'POST'
+            },
+              {
+                'id': '',
+                'url': '/grupo_usuario',
+                'descripcion': 'GET grupo_usuario',
+                'caso_uso': [{"codigo": "consultar-grupo-usuario"}],
+                'metodo': 'GET'
             },
         ]
         for ep in endpoints_data:
