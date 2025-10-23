@@ -57,10 +57,7 @@ def require_role(rol=''):
             
             # Si tiene permisos, continuar con la función original
                 return f(*args, **kwargs)
-            #except Exception as e:
-            #    logger_config.logger.error(f"Error en require_role decorator: {e}")
-            #    raise e    
-                                               
+                                 
         return wrapped
     return decorator
 
