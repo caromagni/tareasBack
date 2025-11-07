@@ -890,6 +890,8 @@ class TareaGetIn(Schema):
     sin_usuario_asignado = Boolean()
     estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
     reasignada_grupo = Boolean()
+    order_fecha_inicio = String(metadata={"description": "asc o desc"}, validate=[
+        validate.OneOf(['asc', 'desc'], error="El campo debe ser asc o desc")], default='asc')
     order_fecha_fin = String(metadata={"description": "asc o desc"}, validate=[
         validate.OneOf(['asc', 'desc'], error="El campo debe ser asc o desc")], default='asc')
     order_fecha_creacion = String(metadata={"description": "asc o desc"}, validate=[

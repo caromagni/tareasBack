@@ -388,8 +388,9 @@ def get_tareas_detalle(query_data: dict):
         id_dominio = request.args.get('id_dominio')
         order_fecha_fin=request.args.get('order_fecha_fin')
         order_fecha_creacion=request.args.get('order_fecha_creacion')
-        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_expte_ext, id_actuacion, id_actuacion_ext, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas, reasignada_grupo, sin_usuario_asignado, id_dominio, order_fecha_fin, order_fecha_creacion)    
-        
+        order_fecha_inicio = request.args.get('order_fecha_inicio')
+        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_expte_ext, id_actuacion, id_actuacion_ext, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas, reasignada_grupo, sin_usuario_asignado, id_dominio, order_fecha_fin, order_fecha_creacion, order_fecha_inicio)
+
         data = {
                 "count": cant,
                 "data": schema.TareaAllOut().dump(res, many=True)
