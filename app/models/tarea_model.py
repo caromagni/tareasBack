@@ -2263,7 +2263,7 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
-def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None, sin_usuario_asignado=None, id_dominio=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None, reasignada_grupo=None, sin_usuario_asignado=None, id_dominio=None, order_fecha_fin=None, order_fecha_creacion=None, order_fecha_inicio=None):
     
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
@@ -2439,9 +2439,32 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
 
     # Get total count of tasks matching the filter
     total = query.count()
-    
-    # Pagination with eager loading for associated users and groups
-    res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
+
+    # Order of results
+    if order_fecha_inicio is not None:
+        print("Ordenando por fecha inicio:", order_fecha_inicio)
+        if order_fecha_inicio=='asc':
+            query = query.order_by(Tarea.fecha_inicio.asc())
+        else:
+            query = query.order_by(Tarea.fecha_inicio.desc())
+    else:
+        if order_fecha_fin is not None:
+            print("Ordenando por fecha fin:", order_fecha_fin)
+            if order_fecha_fin=='asc':
+                query = query.order_by(Tarea.fecha_fin.asc())
+            else:
+                query = query.order_by(Tarea.fecha_fin.desc())
+        elif order_fecha_creacion is not None:
+            print("Ordenando por fecha creación:", order_fecha_creacion)
+            if order_fecha_creacion=='asc':
+                query = query.order_by(Tarea.fecha_creacion.asc())
+            else:
+                query = query.order_by(Tarea.fecha_creacion.desc())
+        else:
+            query = query.order_by(Tarea.fecha_creacion.asc())
+
+    # Apply pagination
+    res_tareas = query.offset((page - 1) * per_page).limit(per_page).all()
     # print("Total de tareas:", total, reasignada)
 
     # Process each task in paginated results
