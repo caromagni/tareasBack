@@ -575,7 +575,7 @@ class TareaXGrupo(Base):
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
-    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    #user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignacion = relationship('Usuario', foreign_keys=[id_user_asignacion])
  
 

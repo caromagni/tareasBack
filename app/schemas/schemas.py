@@ -364,18 +364,8 @@ class GroupTareaOut(Schema):
     asignada = Boolean()
     fecha_asignacion = String()
     id_user_asignacion = String()
-    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
-
-    @post_dump
-    def build_user_asignacion(self, data, **kwargs):
-        # Si existen los campos base, los empaqueta en user_asignacion
-        if data.get("id_user_asignacion"):
-            data["user_asignacion"] = {
-                "id_user_asignacion": data.get("id"),
-                "nombre_asigna": data.get("nombre_asigna"),
-                "apellido_asigna": data.get("apellido_asigna"),
-            }
-        return data
+    user_asignacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
+    #user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
 
 class UsuarioGroupIdOut(Schema):
     id = String()
@@ -987,31 +977,20 @@ class UsuarioGetIn(Schema):
     suspendido = Boolean()
 
 
-
 class UsuarioTareaOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
+    nombre_completo = String(dump_only=True)
     asignada = Boolean()
     fecha_asignacion = String()
     id_user_asignacion = String()
-    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
-
-    """ def build_user_asignacion(self, data, **kwargs):
-        if data.get("id_user_asignacion"):
-            data["user_asignacion"] = {
-                "id_user_asignacion": data.get("id_user_asignacion"),
-                "nombre_asigna": data.get("nombre"),
-                "apellido_asigna": data.get("apellido"),
-            }
-        return data """
-    
-
 
 class DetalleUsuarioAllOut(Schema):
     id = String()
@@ -1269,9 +1248,12 @@ class UsuarioGroupTareaOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
+    nombre_completo = String(dump_only=True)
     asignada = Boolean()
     fecha_asignacion = String()
     grupos_usr = List(Nested(GroupOut, only=("id_grupo", "nombre")))
+    is_user_asignacion = String()
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
