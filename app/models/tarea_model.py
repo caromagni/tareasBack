@@ -672,20 +672,32 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
 
-    #Inserto las urls
+    #Inserto o modifico las urls
     if 'urls' in kwargs and kwargs['urls'] is not None and len(kwargs['urls'])>0:
         for url_item in kwargs['urls']:
             url=url_item.get('url', None)
             url_descripcion=url_item.get('descripcion', None)
-            if url is not None and url.strip() != "":
-                nuevo_url = URL(
-                    id=uuid.uuid4(),
-                    id_tarea=id_t,
-                    url=url,
-                    descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
-                    fecha_actualizacion=datetime.now(),
-                    id_user_actualizacion=id_user_actualizacion
-                )
+            url_id=url_item.get('id', None)
+            if url_id is not None and functions.es_uuid(url_id):
+                #actualizo la url existente
+                url_existente = db.session.query(URL).filter(URL.id == url_id, URL.id_tarea == id_t).first()
+                if url_existente is not None:
+                    if url is not None and url.strip() != "":
+                        url_existente.url = url
+                    if url_descripcion is not None and url_descripcion.strip() != "":
+                        url_existente.descripcion = url_descripcion
+                    url_existente.fecha_actualizacion = datetime.now()
+                    url_existente.id_user_actualizacion = id_user_actualizacion
+            else:
+                if url is not None and url.strip() != "":
+                    nuevo_url = URL(
+                        id=uuid.uuid4(),
+                        id_tarea=id_t,
+                        url=url,
+                        descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+                        fecha_actualizacion=datetime.now(),
+                        id_user_actualizacion=id_user_actualizacion
+                    )
 
                 db.session.add(nuevo_url)
 
@@ -2850,6 +2862,29 @@ def delete_tarea(username=None, id_tarea=None):
     
     else:
         return None
+
+def delete_url(username=None, id_url=None):
+    
+    if username is not None:
+        id_user_actualizacion = utils.get_username_id(username)
+
+    if id_user_actualizacion is not None:
+        utils.verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
+    if id_url is None:
+        raise Exception("Debe ingresar el id de la url a eliminar")
+    if not(functions.es_uuid(id_url)):
+        raise Exception("El id de la url debe ser un UUID")
+
+    url = db.session.query(URL).filter(URL.id == id_url).delete()
+    if url is not None:
+        db.session.commit()
+        return True
+    
+    else:
+        return False        
     
 
 

@@ -728,7 +728,7 @@ class TareaPatchIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
-    urls = List(Nested(URLOut, only=("url", "descripcion")))
+    urls = List(Nested(URLOut, only=("id", "url", "descripcion")))
 
 class TareaPatchV2In(Schema):
     id_tarea = String(required=True)
@@ -1134,7 +1134,7 @@ class TareaPatchAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
-    url = List(Nested(URLOut, only=("url", "descripcion")))
+    url = List(Nested(URLOut, only=("id", "url", "descripcion")))
     editable_externo = Boolean()
 
 class TareaAllOut(Schema):
@@ -1725,4 +1725,6 @@ class EPCountOut(Schema):
 class URLTareaOut(Schema):
     url = String()
    
-   
+class MsgOut(Schema):
+    id = String()
+    msg = String()
