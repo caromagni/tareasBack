@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory
+from flask import send_from_directory, request, g
 import threading
 from flask_cors import CORS
 
@@ -165,54 +165,51 @@ def create_app():
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
    
-    # Configuración CORS para localhost y Cloud Run
-    ALLOWED_ORIGINS = [
-        'http://localhost:3000',
-        'https://localhost:3000',
-        'http://127.0.0.1:3000',
-        'https://127.0.0.1:3000',
-        # Agrega aquí tus URLs exactas de Cloud Run y producción
-        'https://tareas.pjm.gob.ar',
-        'https://dev-tareas.pjm.gob.ar',
-        'https://tareas-back-809525105092.us-west1.run.app'
-        # Si usas Cloud Run, agrega las URLs específicas:
-        # 'https://tu-servicio-abc123.run.app',
-    ]
-    
-    # Usar flask-cors con configuración flexible
+    # Configuración CORS optimizada para Cloud Run
     CORS(app, 
          resources={r"/*": {
-             "origins": ALLOWED_ORIGINS,
+             "origins": "*",
              "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
-             "allow_headers": [
-                 "Content-Type", 
-                 "Authorization", 
-                 "X-Requested-With", 
-                 "Accept",
-                 "x-api-key", 
-                 "x-api-system", 
-                 "x-user-role"
-             ],
+             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", 
+                              "Accept", "x-api-key", "x-api-system", "x-user-role"],
              "expose_headers": ["Content-Type", "Authorization"],
              "supports_credentials": False,
-             "max_age": 86400
+             "max_age": 86400,
+             "send_wildcard": True,
+             "always_send": True
          }})
 
+    @app.before_request
+    def log_request_info():
+        """Log para debug de CORS en Cloud Run"""
+        if request.method == 'OPTIONS':
+            print(f"[CORS] Preflight request from: {request.headers.get('Origin')}")
+            print(f"[CORS] Path: {request.path}")
+            print(f"[CORS] Headers requested: {request.headers.get('Access-Control-Request-Headers')}")
+
     @app.after_request
-    def after_request(response):
-        # Asegurar headers CORS en todas las respuestas
+    def add_cors_headers(response):
+        """Asegurar headers CORS en todas las respuestas para Cloud Run"""
         origin = request.headers.get('Origin')
         
-        # Verificar si el origen está permitido
-        if origin:
-            # Permitir wildcards para subdominios
-            if any(origin.endswith(allowed.replace('https://*.', '').replace('http://*.', '')) 
-                   for allowed in ALLOWED_ORIGINS if '*' in allowed):
-                response.headers['Access-Control-Allow-Origin'] = origin
-            elif origin in ALLOWED_ORIGINS:
-                response.headers['Access-Control-Allow-Origin'] = origin
+        # Forzar headers CORS en todas las respuestas
+        if not response.headers.get('Access-Control-Allow-Origin'):
+            response.headers['Access-Control-Allow-Origin'] = '*'
+        
+        if request.method == 'OPTIONS':
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = request.headers.get(
+                'Access-Control-Request-Headers', 
+                'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
+            )
+            response.headers['Access-Control-Max-Age'] = '86400'
+            
+        print(f"[CORS] Response for {request.method} {request.path}: {response.status_code}")
+        print(f"[CORS] CORS headers: {response.headers.get('Access-Control-Allow-Origin')}")
         
         return response
+
+
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
