@@ -165,8 +165,54 @@ def create_app():
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
    
+    # Configuración CORS para localhost y Cloud Run
+    ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'https://localhost:3000',
+        'http://127.0.0.1:3000',
+        'https://127.0.0.1:3000',
+        # Agrega aquí tus URLs exactas de Cloud Run y producción
+        'https://tareas.pjm.gob.ar',
+        'https://dev-tareas.pjm.gob.ar',
+        'https://tareas-back-809525105092.us-west1.run.app'
+        # Si usas Cloud Run, agrega las URLs específicas:
+        # 'https://tu-servicio-abc123.run.app',
+    ]
+    
+    # Usar flask-cors con configuración flexible
+    CORS(app, 
+         resources={r"/*": {
+             "origins": ALLOWED_ORIGINS,
+             "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
+             "allow_headers": [
+                 "Content-Type", 
+                 "Authorization", 
+                 "X-Requested-With", 
+                 "Accept",
+                 "x-api-key", 
+                 "x-api-system", 
+                 "x-user-role"
+             ],
+             "expose_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": False,
+             "max_age": 86400
+         }})
 
-    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
+    @app.after_request
+    def after_request(response):
+        # Asegurar headers CORS en todas las respuestas
+        origin = request.headers.get('Origin')
+        
+        # Verificar si el origen está permitido
+        if origin:
+            # Permitir wildcards para subdominios
+            if any(origin.endswith(allowed.replace('https://*.', '').replace('http://*.', '')) 
+                   for allowed in ALLOWED_ORIGINS if '*' in allowed):
+                response.headers['Access-Control-Allow-Origin'] = origin
+            elif origin in ALLOWED_ORIGINS:
+                response.headers['Access-Control-Allow-Origin'] = origin
+        
+        return response
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
