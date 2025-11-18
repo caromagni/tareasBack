@@ -37,6 +37,9 @@ import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 import os
+from flask import Flask, request
+from flask_restful import Api
+from flask_cors import CORS
 
 def is_redis_available(): 
     """One-liner Redis availability check"""
@@ -165,35 +168,25 @@ def create_app():
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
 
-    # Configuración CORS para permitir peticiones desde localhost:3000 a Cloud Run
-    CORS(app, resources={r"/*": {
-        "origins": "*",
-        "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], 
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", 
-                         "Accept", "x-api-key", "x-api-system", "x-user-role"],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": False,
-        "max_age": 86400
-    }})
+    CORS(app, resources={r"/*": {"origins": "https://TUFRONTEND.com"}}, supports_credentials=True)
+
+    api = Api(app)
 
     @app.before_request
     def handle_preflight():
-        """Manejar peticiones OPTIONS explícitamente para Cloud Run"""
         if request.method == "OPTIONS":
-            response = app.make_response('')
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
-            response.headers['Access-Control-Max-Age'] = '86400'
+            response = app.make_response("")
+            response.status_code = 204
+            response.headers["Access-Control-Allow-Origin"] = "https://TUFRONTEND.com"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = (
+                "Content-Type, Authorization, X-Requested-With, Accept, "
+                "x-api-key, x-api-system, x-user-role"
+            )
+            response.headers["Access-Control-Allow-Methods"] = (
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            )
             return response
-
-    @app.after_request
-    def after_request(response):
-        """Asegurar headers CORS en todas las respuestas"""
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
-        return response
 
     
     @app.route('/docs_sphinx/<path:filename>')
