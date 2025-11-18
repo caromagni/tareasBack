@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory
+from flask import send_from_directory, request, g
 import threading
 from flask_cors import CORS
 
@@ -167,7 +167,7 @@ def create_app():
 
     # Configuración CORS para permitir peticiones desde localhost:3000 a Cloud Run
     CORS(app, resources={r"/*": {
-        "origins": "*",  # Permite todos los orígenes (localhost:3000 y otros)
+        "origins": "*",
         "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], 
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", 
                          "Accept", "x-api-key", "x-api-system", "x-user-role"],
@@ -175,6 +175,26 @@ def create_app():
         "supports_credentials": False,
         "max_age": 86400
     }})
+
+    @app.before_request
+    def handle_preflight():
+        """Manejar peticiones OPTIONS explícitamente para Cloud Run"""
+        if request.method == "OPTIONS":
+            response = app.make_response('')
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
+            response.headers['Access-Control-Max-Age'] = '86400'
+            return response
+
+    @app.after_request
+    def after_request(response):
+        """Asegurar headers CORS en todas las respuestas"""
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
+        return response
+
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
