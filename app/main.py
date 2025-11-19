@@ -166,7 +166,9 @@ def create_app():
             Base.metadata.create_all(db.engine, checkfirst=True)
    
 
-    CORS(app, supports_credentials=True, origins=["https://localhost:3000"], resources={r"/*": {"methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
+    CORS(app, resources={r"/": {"origins": "", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
+    # api = Api(app)
+    # # CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
@@ -252,7 +254,7 @@ if __name__ == "__main__":
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
        
-        if Config.RUN_DB_SETUP=='1':
+        if Config.RUN_DB_SETUP=='0':
             print("******************************************")
             print("Running DatabaseSetup before app starts... __name__ == __main__")
             print("******************************************")
@@ -266,7 +268,7 @@ else:
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
      
-        if Config.RUN_DB_SETUP=='1':
+        if Config.RUN_DB_SETUP=='0':
             print("******************************************")
             print("Running DatabaseSetup before app starts... Else block")
             print("******************************************")
