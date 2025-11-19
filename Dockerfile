@@ -38,10 +38,9 @@ COPY app/ .
 # Expose port
 EXPOSE 5000
 
-# Health check - simplificado para evitar dependencias extras
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/livez', timeout=5)" || exit 1
+# Cloud Run provides PORT env var, default to 5000
+ENV PORT=5000
 
-# Use ENTRYPOINT + CMD for better signal handling
-ENTRYPOINT ["uwsgi"]
-CMD ["--ini", "uwsgi.ini"]
+# Use uwsgi directly (simpler than startup.py for now)
+CMD uwsgi --ini uwsgi.ini --http 0.0.0.0:$PORT
+

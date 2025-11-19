@@ -43,9 +43,20 @@ steps:
       - '--min-instances=0'
       - '--max-instances=10'
       - '--allow-unauthenticated'
-      # Add your environment variables here:
-      # - '--set-env-vars=CORS_ORIGINS=https://your-frontend.com'
-      # - '--set-env-vars=postgres_user=your-user'
+      # ⚠️ REQUIRED: Configure these environment variables
+      # Either here or separately with: gcloud run services update
+      # Uncomment and set values:
+      # - '--set-env-vars=postgres_user=YOUR_USER'
+      # - '--set-env-vars=postgres_password=YOUR_PASSWORD'
+      # - '--set-env-vars=postgres_base=YOUR_HOST:5432/YOUR_DB'
+      # - '--set-env-vars=AUTH_URL=YOUR_KEYCLOAK_URL'
+      # - '--set-env-vars=REALM=YOUR_REALM'
+      # - '--set-env-vars=AUDIENCE=YOUR_AUDIENCE'
+      - '--set-env-vars=CORS_ORIGINS=https://your-frontend.com,http://localhost:5173'
+      - '--set-env-vars=CORS_ALLOW_CREDENTIALS=true'
+      - '--set-env-vars=LOG_LEVEL=INFO'
+      - '--set-env-vars=RUN_DB_SETUP=0'
+      - '--set-env-vars=RUN_DB_CREATION=0'
     id: 'deploy'
     waitFor: ['push-sha', 'push-latest']
 
