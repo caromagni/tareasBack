@@ -38,6 +38,14 @@ import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 import os
 
+# Try to import uwsgi, but don't fail if not available
+try:
+    import uwsgi
+    UWSGI_AVAILABLE = True
+except ImportError:
+    UWSGI_AVAILABLE = False
+    print("WARNING: uwsgi module not available, running without uwsgi-specific features")
+
 def is_redis_available(): 
     """One-liner Redis availability check"""
     try:
@@ -270,7 +278,21 @@ def create_app():
     exceptions.register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    if uwsgi.worker_id() == 1: #if id is 1 then this thread should run. disabled for now with any long number
+    # Only run background threads in uwsgi worker 1, or if not using uwsgi
+    should_run_threads = False
+    if UWSGI_AVAILABLE:
+        try:
+            if uwsgi.worker_id() == 1:
+                should_run_threads = True
+                print("Running in uwsgi worker 1, starting background threads")
+        except Exception as e:
+            print(f"Error checking uwsgi worker_id: {e}")
+    else:
+        # Not running under uwsgi, safe to run threads (e.g., development mode)
+        should_run_threads = True
+        print("Not running under uwsgi, starting background threads")
+    
+    if should_run_threads:
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()

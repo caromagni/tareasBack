@@ -32,15 +32,19 @@ RUN apt-get update && \
 # Copy uwsgi configuration
 COPY uwsgi-production.ini ./uwsgi.ini
 
+# Copy startup script
+COPY start-uwsgi.sh .
+RUN chmod +x start-uwsgi.sh
+
 # Copy application
 COPY app/ .
 
 # Expose port
 EXPOSE 5000
 
-# Cloud Run provides PORT env var, default to 5000
+# Cloud Run provides PORT env var, default to 5000 if not set
 ENV PORT=5000
 
-# Use uwsgi directly (simpler than startup.py for now)
-CMD uwsgi --ini uwsgi.ini --http 0.0.0.0:$PORT
+# Use startup script that handles PORT variable
+CMD ["./start-uwsgi.sh"]
 
