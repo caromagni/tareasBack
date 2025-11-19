@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory
+from flask import send_from_directory, request
 import threading
 from flask_cors import CORS
 
@@ -166,24 +166,43 @@ def create_app():
             Base.metadata.create_all(db.engine, checkfirst=True)
    
 
-    # CORS configuration - more secure and Cloud Run compatible
-    CORS(app, 
-         resources={r"/*": {
-             "origins": Config.CORS_ORIGINS,
-             "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
-             "allow_headers": [
-                 "Content-Type", 
-                 "Authorization", 
-                 "X-Requested-With", 
-                 "Accept", 
-                 "x-api-key", 
-                 "x-api-system", 
-                 "x-user-role"
-             ],
-             "expose_headers": ["Content-Type", "Authorization"],
-             "supports_credentials": Config.CORS_ALLOW_CREDENTIALS,
-             "max_age": 3600
-         }})
+    # CORS configuration - Cloud Run compatible with explicit preflight handling
+    cors_config = {
+        "origins": Config.CORS_ORIGINS,
+        "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        "allow_headers": [
+            "Content-Type", 
+            "Authorization", 
+            "X-Requested-With", 
+            "Accept", 
+            "x-api-key", 
+            "x-api-system", 
+            "x-user-role"
+        ],
+        "expose_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": Config.CORS_ALLOW_CREDENTIALS,
+        "max_age": 3600,
+        "send_wildcard": False,
+        "always_send": True,
+        "automatic_options": True
+    }
+    
+    CORS(app, resources={r"/*": cors_config})
+    
+    # Explicit OPTIONS handler for all routes (backup for preflight)
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = app.make_default_options_response()
+            origin = request.headers.get('Origin')
+            if origin in Config.CORS_ORIGINS:
+                response.headers['Access-Control-Allow-Origin'] = origin
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
+                response.headers['Access-Control-Max-Age'] = '3600'
+                if Config.CORS_ALLOW_CREDENTIALS:
+                    response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):

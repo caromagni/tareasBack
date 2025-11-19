@@ -124,6 +124,55 @@ Access-Control-Allow-Headers: Content-Type, Authorization, ...
 
 ## Troubleshooting
 
+### Error: "preflightMissingAllowOriginHeader"
+Este es el error más común y significa que la respuesta OPTIONS no incluye `Access-Control-Allow-Origin`.
+
+**Diagnóstico:**
+```bash
+# Test preflight request
+curl -X OPTIONS https://tu-servicio.run.app/api/endpoint \
+  -H "Origin: https://tu-frontend.com" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -v
+```
+
+**Causas comunes:**
+1. La variable `CORS_ORIGINS` no está configurada o no incluye tu frontend
+2. Flask-CORS no está instalado correctamente
+3. La configuración de CORS tiene un error de sintaxis
+
+**Soluciones:**
+
+1. **Verificar y configurar CORS_ORIGINS en Cloud Run:**
+```bash
+# Ver configuración actual
+gcloud run services describe TU-SERVICIO --region REGION --format="value(spec.template.spec.containers[0].env)"
+
+# Configurar correctamente (IMPORTANTE: sin espacios después de las comas)
+gcloud run services update TU-SERVICIO \
+  --region REGION \
+  --set-env-vars="CORS_ORIGINS=https://tu-frontend.com,http://localhost:5173"
+```
+
+2. **Verificar que Flask-CORS esté en requirements.txt:**
+```bash
+grep Flask-Cors requirements.txt
+# Debe aparecer: Flask-Cors==4.0.1
+```
+
+3. **Test local antes de desplegar:**
+```bash
+# Abrir test-cors.html en el navegador
+python3 -m http.server 8080
+# Luego abre: http://localhost:8080/test-cors.html
+```
+
+4. **Usar el script de test:**
+```bash
+./test-cors.sh https://tu-servicio.run.app https://tu-frontend.com
+```
+
 ### Error: "No 'Access-Control-Allow-Origin' header"
 - Verifica que la URL del frontend esté en `CORS_ORIGINS`
 - Asegúrate de incluir el protocolo (https://)

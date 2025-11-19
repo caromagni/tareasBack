@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CORS - Tareas Backend</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #545b62;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .headers {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 3px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test CORS - Tareas Backend</h1>
+        
+        <div class="form-group">
+            <label for="backendUrl">Backend URL:</label>
+            <input type="text" id="backendUrl" value="http://localhost:5000" 
+                   placeholder="https://tu-servicio.run.app">
+        </div>
+
+        <div class="form-group">
+            <label for="endpoint">Endpoint:</label>
+            <input type="text" id="endpoint" value="/livez" 
+                   placeholder="/api/usuario">
+        </div>
+
+        <div class="form-group">
+            <label for="method">Método HTTP:</label>
+            <select id="method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="OPTIONS">OPTIONS</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="apiKey">API Key (opcional):</label>
+            <input type="text" id="apiKey" placeholder="XXX-tu-api-key">
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="withCredentials"> 
+                Enviar credenciales (withCredentials)
+            </label>
+        </div>
+
+        <button onclick="testCORS()">🚀 Test CORS</button>
+        <button class="secondary" onclick="testPreflight()">🔍 Test Preflight (OPTIONS)</button>
+        <button class="secondary" onclick="clearResults()">🗑️ Limpiar</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testCORS() {
+            const resultDiv = document.getElementById('result');
+            const backendUrl = document.getElementById('backendUrl').value;
+            const endpoint = document.getElementById('endpoint').value;
+            const method = document.getElementById('method').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const withCredentials = document.getElementById('withCredentials').checked;
+            
+            const url = backendUrl + endpoint;
+            
+            resultDiv.innerHTML = '<div class="info">⏳ Realizando petición...</div>';
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                if (apiKey) {
+                    headers['x-api-key'] = apiKey;
+                }
+
+                const options = {
+                    method: method,
+                    headers: headers,
+                    credentials: withCredentials ? 'include' : 'omit'
+                };
+
+                if (method === 'POST' || method === 'PUT') {
+                    options.body = JSON.stringify({ test: true });
+                }
+
+                console.log('Request:', { url, options });
+
+                const response = await fetch(url, options);
+                const data = await response.text();
+                
+                let result = `<div class="success">✅ Petición exitosa!\n\n`;
+                result += `URL: ${url}\n`;
+                result += `Método: ${method}\n`;
+                result += `Status: ${response.status} ${response.statusText}\n`;
+                result += `Origin: ${window.location.origin}\n\n`;
+                
+                result += `<div class="headers"><strong>Response Headers (CORS):</strong>\n`;
+                result += `Access-Control-Allow-Origin: ${response.headers.get('access-control-allow-origin') || 'NOT SET ❌'}\n`;
+                result += `Access-Control-Allow-Methods: ${response.headers.get('access-control-allow-methods') || 'NOT SET'}\n`;
+                result += `Access-Control-Allow-Headers: ${response.headers.get('access-control-allow-headers') || 'NOT SET'}\n`;
+                result += `Access-Control-Allow-Credentials: ${response.headers.get('access-control-allow-credentials') || 'NOT SET'}\n`;
+                result += `Access-Control-Max-Age: ${response.headers.get('access-control-max-age') || 'NOT SET'}</div>\n\n`;
+                
+                result += `<strong>Response Body:</strong>\n${data}</div>`;
+                
+                resultDiv.innerHTML = result;
+                
+            } catch (error) {
+                let errorMsg = `<div class="error">❌ Error CORS!\n\n`;
+                errorMsg += `Error: ${error.message}\n\n`;
+                errorMsg += `<strong>Posibles causas:</strong>\n`;
+                errorMsg += `1. El backend no tiene configurado CORS_ORIGINS con: ${window.location.origin}\n`;
+                errorMsg += `2. El servidor no está respondiendo\n`;
+                errorMsg += `3. El preflight request está fallando\n\n`;
+                errorMsg += `<strong>Solución:</strong>\n`;
+                errorMsg += `Configura en Cloud Run:\n`;
+                errorMsg += `CORS_ORIGINS=${window.location.origin},http://localhost:5173\n`;
+                errorMsg += `CORS_ALLOW_CREDENTIALS=true</div>`;
+                
+                resultDiv.innerHTML = errorMsg;
+                console.error('CORS Error:', error);
+            }
+        }
+
+        async function testPreflight() {
+            const resultDiv = document.getElementById('result');
+            const backendUrl = document.getElementById('backendUrl').value;
+            const endpoint = document.getElementById('endpoint').value;
+            
+            const url = backendUrl + endpoint;
+            
+            resultDiv.innerHTML = '<div class="info">⏳ Realizando preflight request (OPTIONS)...</div>';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization, x-api-key',
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                let result = `<div class="success">✅ Preflight exitoso!\n\n`;
+                result += `URL: ${url}\n`;
+                result += `Status: ${response.status} ${response.statusText}\n`;
+                result += `Origin: ${window.location.origin}\n\n`;
+                
+                result += `<div class="headers"><strong>Preflight Response Headers:</strong>\n`;
+                result += `Access-Control-Allow-Origin: ${response.headers.get('access-control-allow-origin') || 'NOT SET ❌'}\n`;
+                result += `Access-Control-Allow-Methods: ${response.headers.get('access-control-allow-methods') || 'NOT SET ❌'}\n`;
+                result += `Access-Control-Allow-Headers: ${response.headers.get('access-control-allow-headers') || 'NOT SET ❌'}\n`;
+                result += `Access-Control-Allow-Credentials: ${response.headers.get('access-control-allow-credentials') || 'NOT SET'}\n`;
+                result += `Access-Control-Max-Age: ${response.headers.get('access-control-max-age') || 'NOT SET'}</div>\n\n`;
+                
+                if (!response.headers.get('access-control-allow-origin')) {
+                    result += `\n<strong>⚠️ PROBLEMA DETECTADO:</strong>\n`;
+                    result += `El header Access-Control-Allow-Origin NO está presente.\n`;
+                    result += `Esto causará el error: "preflightMissingAllowOriginHeader"\n\n`;
+                    result += `<strong>Solución:</strong>\n`;
+                    result += `1. Verifica que CORS_ORIGINS incluya: ${window.location.origin}\n`;
+                    result += `2. Redespliega el servicio en Cloud Run\n`;
+                    result += `3. Verifica que Flask-CORS esté instalado</div>`;
+                    
+                    resultDiv.innerHTML = result.replace('success', 'error').replace('✅', '❌');
+                } else {
+                    result += `</div>`;
+                    resultDiv.innerHTML = result;
+                }
+                
+            } catch (error) {
+                let errorMsg = `<div class="error">❌ Preflight Failed!\n\n`;
+                errorMsg += `Error: ${error.message}\n\n`;
+                errorMsg += `Este es el error "preflightMissingAllowOriginHeader"\n\n`;
+                errorMsg += `<strong>Causa:</strong>\n`;
+                errorMsg += `El servidor no responde correctamente a OPTIONS requests\n\n`;
+                errorMsg += `<strong>Solución:</strong>\n`;
+                errorMsg += `1. Configura CORS_ORIGINS en Cloud Run:\n`;
+                errorMsg += `   gcloud run services update SERVICE_NAME \\\n`;
+                errorMsg += `     --set-env-vars="CORS_ORIGINS=${window.location.origin}"\n\n`;
+                errorMsg += `2. Verifica que Flask-CORS esté instalado y configurado\n`;
+                errorMsg += `3. Revisa los logs del servicio</div>`;
+                
+                resultDiv.innerHTML = errorMsg;
+                console.error('Preflight Error:', error);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        // Auto-detect current origin
+        window.onload = function() {
+            console.log('Current Origin:', window.location.origin);
+            console.log('Use this in CORS_ORIGINS:', window.location.origin);
+        };
+    </script>
+</body>
+</html>

@@ -78,7 +78,8 @@ class Config:
     RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
     # CORS configuration
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:3000').split(',')
+    _cors_origins_str = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:3000')
+    CORS_ORIGINS = [origin.strip() for origin in _cors_origins_str.split(',') if origin.strip()]
     CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'true').lower() == 'true'
 
 
