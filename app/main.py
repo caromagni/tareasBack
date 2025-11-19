@@ -140,7 +140,23 @@ def create_app():
     app.config['LOG_LEVEL'] = Config.LOG_LEVEL
 
     app.config['DEBUG'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
+    
+    # Validate database configuration
+    print("#####################")
+    print("Database Configuration:")
+    print(f"  postgres_user: {Config.POSGRESS_USER}")
+    print(f"  postgres_base: {Config.POSGRESS_BASE}")
+    print("#####################")
+    
+    if not Config.POSGRESS_BASE or Config.POSGRESS_BASE == 'NOT_SET':
+        print("⚠️  WARNING: Database not configured!")
+        print("⚠️  Set environment variables: postgres_user, postgres_password, postgres_base")
+        # Use a dummy connection string to allow app to start
+        app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://dummy:dummy@localhost/dummy"
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
+        print(f"✓ Database URI configured")
+    
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
@@ -163,15 +179,25 @@ def create_app():
     
     # Initialize the SQLAlchemy engine and session
     print("#####################")
-   #print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
+    print("Initializing database connection...")
     print("######################")
-      # Create tables based on the models defined in Base
-    db.init_app(app)
     
-    with app.app_context():
-        #db.create_all()
-        if Config.RUN_DB_CREATION=='1':
-            Base.metadata.create_all(db.engine, checkfirst=True)
+    try:
+        db.init_app(app)
+        print("✓ Database initialized")
+    except Exception as e:
+        print(f"WARNING: Error initializing database: {e}")
+        print("Application will start but database operations may fail")
+    
+    # Create tables if needed
+    if Config.RUN_DB_CREATION=='1':
+        print("RUN_DB_CREATION is enabled, creating tables...")
+        try:
+            with app.app_context():
+                Base.metadata.create_all(db.engine, checkfirst=True)
+                print("✓ Database tables created/verified")
+        except Exception as e:
+            print(f"WARNING: Error creating tables: {e}")
    
 
     # CORS configuration - Cloud Run compatible with explicit preflight handling
@@ -236,12 +262,17 @@ def create_app():
     app.register_blueprint(organismo_b)
     app.register_blueprint(full_sync_b)
 
-    # Kubernetes liveness probe
+    # Root endpoint for quick verification
+    @app.route('/')
+    def root():
+        return {'status': 'ok', 'service': 'tareas-back', 'version': '1.0'}, 200
+
+    # Kubernetes liveness probe - must respond quickly
     @app.route('/livez')
     def livez():
         return {'status': 'live'}, 200
 
-    # Kubernetes readiness probe
+    # Kubernetes readiness probe - checks database
     @app.route('/readyz')
     def readyz():
         try:

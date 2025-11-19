@@ -37,50 +37,37 @@ steps:
       - '--region=us-west1'
       - '--platform=managed'
       - '--port=5000'
-      - '--cpu=1'
-      - '--memory=512Mi'
+      - '--cpu=2'
+      - '--memory=1Gi'
       - '--timeout=300'
       - '--min-instances=0'
       - '--max-instances=10'
       - '--allow-unauthenticated'
+      # Performance optimizations
+      - '--no-cpu-throttling'
+      - '--cpu-boost'
       # Environment variables
-      # CORS Configuration
-      - '--set-env-vars=ALLOWED_ORIGINS=http://localhost:3000'
-      # Auth/JWT Configuration - REEMPLAZAR CON TUS VALORES REALES
-      - '--update-env-vars=AUTH_URL=https://tu-keycloak.com/auth'
-      - '--update-env-vars=REALM=tu-realm'
-      - '--update-env-vars=AUDIENCE=tu-audience'
-      # Database Configuration - USAR SECRET MANAGER O CONFIGURAR DESPUÉS
-      - '--update-env-vars=postgres_user=$$POSTGRES_USER'
-      - '--update-env-vars=postgres_password=$$POSTGRES_PASSWORD'
-      - '--update-env-vars=postgres_base=$$POSTGRES_BASE'
-      # Redis Configuration (disabled by default)
-      - '--update-env-vars=redis_host=localhost'
-      - '--update-env-vars=redis_port=6379'
-      - '--update-env-vars=redis_password='
-      - '--update-env-vars=redis_user=default'
-      - '--update-env-vars=redis_db=0'
-      - '--update-env-vars=redis_uses_password=False'
-      - '--update-env-vars=cache_enabled=False'
-      # RabbitMQ Configuration
-      - '--update-env-vars=RABBITMQ_USER=guest'
-      - '--update-env-vars=RABBITMQ_PASSWORD=guest'
-      - '--update-env-vars=RABBITMQ_HOST=localhost'
-      - '--update-env-vars=RABBITMQ_PORT=5672'
-      - '--update-env-vars=RABBITMQ_VHOST=/'
-      - '--update-env-vars=RABBITMQ_QUEUE_NAME=tareas_queue'
-      # Application Configuration
-      - '--update-env-vars=RUN_DB_SETUP=0'
-      - '--update-env-vars=RUN_DB_CREATION=0'
-      - '--update-env-vars=SQLALCHEMY_POOL_SIZE=5'
-      - '--update-env-vars=MAX_ITEMS_PER_RESPONSE=100'
-      - '--update-env-vars=LOG_LEVEL=INFO'
-      - '--update-env-vars=ALL_USERS_SUPERADMIN=0'
-      - '--update-env-vars=SWAGGER_VERSION=5.27.0'
+      # IMPORTANT: Configure these properly before deploying!
+      # Option 1: Set inline (NOT recommended for production)
+      - '--set-env-vars=ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173'
+      - '--set-env-vars=LOG_LEVEL=INFO'
+      - '--set-env-vars=RUN_DB_SETUP=0'
+      - '--set-env-vars=RUN_DB_CREATION=0'
+      - '--set-env-vars=cache_enabled=False'
+      # Option 2: Use placeholders - configure after deployment
+      # Run: gcloud run services update tareas-back --region=us-west1 --set-env-vars=...
+      # Required variables that MUST be set:
+      # - postgres_user
+      # - postgres_password  
+      # - postgres_base
+      # - AUTH_URL
+      # - REALM
+      # - AUDIENCE
     id: 'deploy'
     waitFor: ['push-sha', 'push-latest']
-    # Uncomment below if using Secret Manager
-    # secretEnv: ['POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_BASE']
+    # Option 3: Use Secret Manager (recommended for production)
+    # Uncomment secretEnv below and availableSecrets section at the bottom
+    # secretEnv: ['POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_BASE', 'AUTH_URL', 'REALM', 'AUDIENCE']
 
 images:
   - 'gcr.io/$PROJECT_ID/tareas-back:$COMMIT_SHA'

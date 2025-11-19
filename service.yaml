@@ -10,6 +10,8 @@ spec:
       annotations:
         autoscaling.knative.dev/minScale: '0'
         autoscaling.knative.dev/maxScale: '10'
+        # Increase startup timeout for slower initializations
+        run.googleapis.com/startup-cpu-boost: 'true'
     spec:
       containerConcurrency: 80
       timeoutSeconds: 300
@@ -18,10 +20,28 @@ spec:
         ports:
         - name: http1
           containerPort: 5000
+        # Startup probe - gives container time to initialize
+        startupProbe:
+          httpGet:
+            path: /livez
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30  # 30 * 10s = 5 minutes max startup time
+        # Liveness probe - checks if container is still healthy
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 5000
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         resources:
           limits:
-            cpu: '1'
-            memory: 512Mi
+            cpu: '2'
+            memory: 1Gi
         env:
         # CORS Configuration
         - name: ALLOWED_ORIGINS

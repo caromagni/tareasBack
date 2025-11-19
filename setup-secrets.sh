@@ -1,4 +1,4 @@
-#!/bin/bash
+    #!/bin/bash
 # Script para crear secrets en Google Secret Manager
 # Uso: ./setup-secrets.sh
 
