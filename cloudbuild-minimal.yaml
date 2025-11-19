@@ -27,7 +27,8 @@ steps:
     id: 'push-latest'
     waitFor: ['build']
   
-  # Deploy to Cloud Run
+  # Deploy to Cloud Run - MINIMAL (no env vars)
+  # Configure env vars separately with: ./configure-env.sh
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
@@ -36,17 +37,7 @@ steps:
       - '--image=gcr.io/$PROJECT_ID/tareas-back:$COMMIT_SHA'
       - '--region=us-west1'
       - '--platform=managed'
-      - '--port=5000'
-      - '--cpu=1'
-      - '--memory=512Mi'
-      - '--timeout=300'
-      - '--min-instances=0'
-      - '--max-instances=10'
       - '--allow-unauthenticated'
-      # Environment variables (all in one --set-env-vars)
-      # ⚠️ IMPORTANT: Configure database and auth variables separately with:
-      # gcloud run services update tareas-back --region us-west1 --update-env-vars="postgres_user=USER,postgres_password=PASS,..."
-      - '--set-env-vars=CORS_ORIGINS=https://your-frontend.com,CORS_ALLOW_CREDENTIALS=true,LOG_LEVEL=INFO,RUN_DB_SETUP=0,RUN_DB_CREATION=0'
     id: 'deploy'
     waitFor: ['push-sha', 'push-latest']
 
@@ -54,9 +45,8 @@ images:
   - 'gcr.io/$PROJECT_ID/tareas-back:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/tareas-back:latest'
 
-# Build configuration
-timeout: '1800s'  # 30 minutes
+timeout: '1800s'
 
 options:
-  machineType: 'E2_HIGHCPU_8'  # Use more powerful machine for faster builds
+  machineType: 'E2_HIGHCPU_8'
   logging: CLOUD_LOGGING_ONLY
