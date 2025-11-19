@@ -364,8 +364,18 @@ class GroupTareaOut(Schema):
     asignada = Boolean()
     fecha_asignacion = String()
     id_user_asignacion = String()
-    user_asignacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
-    #user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
+
+    @post_dump
+    def build_user_asignacion(self, data, **kwargs):
+        # Si existen los campos base, los empaqueta en user_asignacion
+        if data.get("id_user_asignacion"):
+            data["user_asignacion"] = {
+                "id_user_asignacion": data.get("id"),
+                "nombre_asigna": data.get("nombre_asigna"),
+                "apellido_asigna": data.get("apellido_asigna"),
+            }
+        return data
 
 class UsuarioGroupIdOut(Schema):
     id = String()
@@ -728,7 +738,7 @@ class TareaPatchIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
-    urls = List(Nested(URLOut, only=("id", "url", "descripcion")))
+    urls = List(Nested(URLOut, only=("url", "descripcion")))
 
 class TareaPatchV2In(Schema):
     id_tarea = String(required=True)
@@ -977,20 +987,31 @@ class UsuarioGetIn(Schema):
     suspendido = Boolean()
 
 
+
 class UsuarioTareaOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
-    nombre_completo = String(dump_only=True)
     asignada = Boolean()
     fecha_asignacion = String()
     id_user_asignacion = String()
-    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
+
+    """ def build_user_asignacion(self, data, **kwargs):
+        if data.get("id_user_asignacion"):
+            data["user_asignacion"] = {
+                "id_user_asignacion": data.get("id_user_asignacion"),
+                "nombre_asigna": data.get("nombre"),
+                "apellido_asigna": data.get("apellido"),
+            }
+        return data """
+    
+
 
 class DetalleUsuarioAllOut(Schema):
     id = String()
@@ -1134,7 +1155,7 @@ class TareaPatchAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
-    url = List(Nested(URLOut, only=("id", "url", "descripcion")))
+    url = List(Nested(URLOut, only=("url", "descripcion")))
     editable_externo = Boolean()
 
 class TareaAllOut(Schema):
@@ -1171,7 +1192,7 @@ class TareaAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
-    url = List(Nested(URLOut, only=("id", "url", "descripcion")))
+    url = List(Nested(URLOut, only=("url", "descripcion")))
     editable_externo = Boolean()
 
 
@@ -1248,12 +1269,9 @@ class UsuarioGroupTareaOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
-    nombre_completo = String(dump_only=True)
     asignada = Boolean()
     fecha_asignacion = String()
     grupos_usr = List(Nested(GroupOut, only=("id_grupo", "nombre")))
-    is_user_asignacion = String()
-    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre", "apellido", "nombre_completo_asigna"))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
@@ -1297,7 +1315,7 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
-    url= List(Nested(URLOut, only=("id", "url", "descripcion")))
+    url= List(Nested(URLOut, only=("url", "descripcion")))
     editable_externo = Boolean()
 
 class TareaHIstoriaUserIdOut(Schema):
@@ -1725,6 +1743,4 @@ class EPCountOut(Schema):
 class URLTareaOut(Schema):
     url = String()
    
-class MsgOut(Schema):
-    id = String()
-    msg = String()
+   

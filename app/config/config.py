@@ -47,10 +47,6 @@ class Config:
             'url': 'http://localhost:3000'
         },
         {
-            'name': 'cloudrun',
-            'url': 'https://tareas-back-809525105092.us-west1.run.app'
-        },
-        {
             'name': 'localhost',
             'url': 'http://localhost:5005'
         }      
@@ -81,8 +77,7 @@ class Config:
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
     RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
-    # CORS configuration
-    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')
+    
 
 
 
