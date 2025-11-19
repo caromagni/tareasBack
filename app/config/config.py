@@ -77,7 +77,9 @@ class Config:
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
     RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
-    
+    # CORS configuration
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:3000').split(',')
+    CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'true').lower() == 'true'
 
 
 

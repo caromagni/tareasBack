@@ -166,7 +166,24 @@ def create_app():
             Base.metadata.create_all(db.engine, checkfirst=True)
    
 
-    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
+    # CORS configuration - more secure and Cloud Run compatible
+    CORS(app, 
+         resources={r"/*": {
+             "origins": Config.CORS_ORIGINS,
+             "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
+             "allow_headers": [
+                 "Content-Type", 
+                 "Authorization", 
+                 "X-Requested-With", 
+                 "Accept", 
+                 "x-api-key", 
+                 "x-api-system", 
+                 "x-user-role"
+             ],
+             "expose_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": Config.CORS_ALLOW_CREDENTIALS,
+             "max_age": 3600
+         }})
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
