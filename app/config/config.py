@@ -82,7 +82,7 @@ class Config:
     RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
     # CORS configuration
-    # FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')
 
 
 

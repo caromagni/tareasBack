@@ -168,7 +168,21 @@ def create_app():
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
 
-    CORS(app, resources={r"/": {"origins": "", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
+    # Configure CORS with allowed origins from environment variable
+    allowed_origins = Config.ALLOWED_ORIGINS
+    print(f"CORS configured with allowed origins: {allowed_origins}")
+    
+    CORS(app, 
+         resources={r"/*": {
+             "origins": allowed_origins,
+             "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
+             "allow_headers": ["Content-Type", "authorization", "Authorization", "X-Requested-With", 
+                             "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", 
+                             "x-api-key", "x-api-system", "x-user-role"],
+             "expose_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True,
+             "max_age": 3600
+         }})
     # api = Api(app)
     # # CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     
