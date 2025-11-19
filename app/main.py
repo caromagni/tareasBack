@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory
+from flask import send_from_directory, request, g
 import threading
 from flask_cors import CORS
 
@@ -37,6 +37,9 @@ import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 import os
+from flask import Flask, request
+from flask_restful import Api
+from flask_cors import CORS
 
 def is_redis_available(): 
     """One-liner Redis availability check"""
@@ -164,7 +167,6 @@ def create_app():
         #db.create_all()
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
-   
 
     CORS(app, resources={r"/": {"origins": "", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     # api = Api(app)
