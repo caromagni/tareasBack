@@ -2,10 +2,8 @@
 import os 
 import common.keycloak as keycloak
 
-# Set defaults for database configuration
 os.environ.setdefault('postgres_user', 'NOT_SET')
 os.environ.setdefault('postgres_password', 'NOT_SET')
-os.environ.setdefault('postgres_base', 'NOT_SET')
 
 class Config:
     # General configuration
@@ -79,10 +77,7 @@ class Config:
     RABBITMQ_VHOST = os.getenv('RABBITMQ_VHOST')
     RABBITMQ_QUEUE_NAME = os.getenv('RABBITMQ_QUEUE_NAME', 'tareas_queue')
 
-    # CORS configuration
-    _cors_origins_str = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:3000')
-    CORS_ORIGINS = [origin.strip() for origin in _cors_origins_str.split(',') if origin.strip()]
-    CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'true').lower() == 'true'
+    
 
 
 

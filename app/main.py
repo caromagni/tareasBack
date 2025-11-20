@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory, request
+from flask import send_from_directory
 import threading
 from flask_cors import CORS
 
@@ -37,14 +37,6 @@ import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 import os
-
-# Try to import uwsgi, but don't fail if not available
-try:
-    import uwsgi
-    UWSGI_AVAILABLE = True
-except ImportError:
-    UWSGI_AVAILABLE = False
-    print("WARNING: uwsgi module not available, running without uwsgi-specific features")
 
 def is_redis_available(): 
     """One-liner Redis availability check"""
@@ -140,23 +132,7 @@ def create_app():
     app.config['LOG_LEVEL'] = Config.LOG_LEVEL
 
     app.config['DEBUG'] = True
-    
-    # Validate database configuration
-    print("#####################")
-    print("Database Configuration:")
-    print(f"  postgres_user: {Config.POSGRESS_USER}")
-    print(f"  postgres_base: {Config.POSGRESS_BASE}")
-    print("#####################")
-    
-    if not Config.POSGRESS_BASE or Config.POSGRESS_BASE == 'NOT_SET':
-        print("⚠️  WARNING: Database not configured!")
-        print("⚠️  Set environment variables: postgres_user, postgres_password, postgres_base")
-        # Use a dummy connection string to allow app to start
-        app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://dummy:dummy@localhost/dummy"
-    else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
-        print(f"✓ Database URI configured")
-    
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
@@ -179,64 +155,18 @@ def create_app():
     
     # Initialize the SQLAlchemy engine and session
     print("#####################")
-    print("Initializing database connection...")
+   #print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
     print("######################")
+      # Create tables based on the models defined in Base
+    db.init_app(app)
     
-    try:
-        db.init_app(app)
-        print("✓ Database initialized")
-    except Exception as e:
-        print(f"WARNING: Error initializing database: {e}")
-        print("Application will start but database operations may fail")
-    
-    # Create tables if needed
-    if Config.RUN_DB_CREATION=='1':
-        print("RUN_DB_CREATION is enabled, creating tables...")
-        try:
-            with app.app_context():
-                Base.metadata.create_all(db.engine, checkfirst=True)
-                print("✓ Database tables created/verified")
-        except Exception as e:
-            print(f"WARNING: Error creating tables: {e}")
+    with app.app_context():
+        #db.create_all()
+        if Config.RUN_DB_CREATION=='1':
+            Base.metadata.create_all(db.engine, checkfirst=True)
    
 
-    # CORS configuration - Cloud Run compatible with explicit preflight handling
-    cors_config = {
-        "origins": Config.CORS_ORIGINS,
-        "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        "allow_headers": [
-            "Content-Type", 
-            "Authorization", 
-            "X-Requested-With", 
-            "Accept", 
-            "x-api-key", 
-            "x-api-system", 
-            "x-user-role"
-        ],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": Config.CORS_ALLOW_CREDENTIALS,
-        "max_age": 3600,
-        "send_wildcard": False,
-        "always_send": True,
-        "automatic_options": True
-    }
-    
-    CORS(app, resources={r"/*": cors_config})
-    
-    # Explicit OPTIONS handler for all routes (backup for preflight)
-    @app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            response = app.make_default_options_response()
-            origin = request.headers.get('Origin')
-            if origin in Config.CORS_ORIGINS:
-                response.headers['Access-Control-Allow-Origin'] = origin
-                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, x-api-key, x-api-system, x-user-role'
-                response.headers['Access-Control-Max-Age'] = '3600'
-                if Config.CORS_ALLOW_CREDENTIALS:
-                    response.headers['Access-Control-Allow-Credentials'] = 'true'
-            return response
+    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
@@ -262,17 +192,12 @@ def create_app():
     app.register_blueprint(organismo_b)
     app.register_blueprint(full_sync_b)
 
-    # Root endpoint for quick verification
-    @app.route('/')
-    def root():
-        return {'status': 'ok', 'service': 'tareas-back', 'version': '1.0'}, 200
-
-    # Kubernetes liveness probe - must respond quickly
+    # Kubernetes liveness probe
     @app.route('/livez')
     def livez():
         return {'status': 'live'}, 200
 
-    # Kubernetes readiness probe - checks database
+    # Kubernetes readiness probe
     @app.route('/readyz')
     def readyz():
         try:
@@ -309,21 +234,7 @@ def create_app():
     exceptions.register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    # Only run background threads in uwsgi worker 1, or if not using uwsgi
-    should_run_threads = False
-    if UWSGI_AVAILABLE:
-        try:
-            if uwsgi.worker_id() == 1:
-                should_run_threads = True
-                print("Running in uwsgi worker 1, starting background threads")
-        except Exception as e:
-            print(f"Error checking uwsgi worker_id: {e}")
-    else:
-        # Not running under uwsgi, safe to run threads (e.g., development mode)
-        should_run_threads = True
-        print("Not running under uwsgi, starting background threads")
-    
-    if should_run_threads:
+    if uwsgi.worker_id() == 1: #if id is 1 then this thread should run. disabled for now with any long number
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()

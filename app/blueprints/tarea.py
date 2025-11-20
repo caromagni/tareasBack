@@ -690,3 +690,26 @@ def del_tarea(id: str):
         print(traceback.format_exc())
         raise exceptions.ValidationError(err)    
     
+#################DELETE URL########################
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
+@tarea_b.delete('/url/<string:id>')
+@tarea_b.output(schema.MsgOut)
+@verify.check_fields()
+@rol.require_role()
+def del_url(id: str):
+    try:
+        username=g.get('username')
+        res = tarea_model.delete_url(username, id)
+        if not res:
+           raise exceptions.DataNotFound("URL no encontrada")
+        else:
+            result={
+                    "id": id,
+                    "msg":"Registro eliminado"
+                } 
+        
+        return result
+    
+    except Exception as err:
+        print(traceback.format_exc())
+        raise exceptions.ValidationError(err)  
