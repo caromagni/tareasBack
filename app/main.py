@@ -37,7 +37,9 @@ import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonfify
+import requests
+
 from flask_restful import Api
 from flask_cors import CORS
 
@@ -293,4 +295,12 @@ else:
             print("******************************************")
             setup = DatabaseSetup()
             setup.run()
+
+@app.route("/ip")
+def get_ip():
+    try:
+        ip = requests.get("https://ifconfig.me", timeout=5).text.strip()
+        return jsonify({"ip_publica": ip})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
    
