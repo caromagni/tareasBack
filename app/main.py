@@ -1,5 +1,5 @@
 from apiflask import APIFlask, HTTPTokenAuth
-from flask import send_from_directory, request, g
+from flask import send_from_directory
 import threading
 from flask_cors import CORS
 
@@ -169,27 +169,9 @@ def create_app():
         #db.create_all()
         if Config.RUN_DB_CREATION=='1':
             Base.metadata.create_all(db.engine, checkfirst=True)
+   
 
-    CORS(app, resources={r"/*": {"origins": "https://TUFRONTEND.com"}}, supports_credentials=True)
-
-    api = Api(app)
-
-    @app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            response = app.make_response("")
-            response.status_code = 204
-            response.headers["Access-Control-Allow-Origin"] = "https://TUFRONTEND.com"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization, X-Requested-With, Accept, "
-                "x-api-key, x-api-system, x-user-role"
-            )
-            response.headers["Access-Control-Allow-Methods"] = (
-                "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            )
-            return response
-
+    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"], "allow_headers": ["Content-Type", "authorization", "Authorization" , "X-Requested-With", "Accept", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "x-api-key", "x-api-system", "x-user-role"]}})
     
     @app.route('/docs_sphinx/<path:filename>')
     def serve_sphinx_docs(filename):
@@ -275,7 +257,7 @@ if __name__ == "__main__":
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
        
-        if Config.RUN_DB_SETUP=='1':
+        if Config.RUN_DB_SETUP=='0':
             print("******************************************")
             print("Running DatabaseSetup before app starts... __name__ == __main__")
             print("******************************************")
@@ -289,7 +271,7 @@ else:
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
      
-        if Config.RUN_DB_SETUP=='1':
+        if Config.RUN_DB_SETUP=='0':
             print("******************************************")
             print("Running DatabaseSetup before app starts... Else block")
             print("******************************************")

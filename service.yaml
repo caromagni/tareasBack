@@ -1,0 +1,114 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: tareas-back
+  labels:
+    cloud.googleapis.com/location: us-west1
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '10'
+        # Increase startup timeout for slower initializations
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - image: gcr.io/eng-scene-478112-k0/tareas-back:latest
+        ports:
+        - name: http1
+          containerPort: 5000
+        # Startup probe - gives container time to initialize
+        startupProbe:
+          httpGet:
+            path: /livez
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30  # 30 * 10s = 5 minutes max startup time
+        # Liveness probe - checks if container is still healthy
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 5000
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: '2'
+            memory: 1Gi
+        env:
+        # CORS Configuration
+        - name: ALLOWED_ORIGINS
+          value: "https://tu-frontend.run.app,http://localhost:3000,http://localhost:5173"
+        
+        # Auth/JWT Configuration
+        - name: AUTH_URL
+          value: "https://tu-keycloak.com/auth"
+        - name: REALM
+          value: "tu-realm"
+        - name: AUDIENCE
+          value: "tu-audience"
+        
+        # Database Configuration
+        - name: postgres_user
+          value: "tu_usuario"
+        - name: postgres_password
+          value: "tu_password"
+        - name: postgres_base
+          value: "tu_conexion_postgresql"
+        
+        # Redis Configuration (disabled by default)
+        - name: redis_host
+          value: "localhost"
+        - name: redis_port
+          value: "6379"
+        - name: redis_password
+          value: ""
+        - name: redis_user
+          value: "default"
+        - name: redis_db
+          value: "0"
+        - name: redis_uses_password
+          value: "False"
+        - name: cache_enabled
+          value: "False"
+        
+        # RabbitMQ Configuration
+        - name: RABBITMQ_USER
+          value: "guest"
+        - name: RABBITMQ_PASSWORD
+          value: "guest"
+        - name: RABBITMQ_HOST
+          value: "localhost"
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_VHOST
+          value: "/"
+        - name: RABBITMQ_QUEUE_NAME
+          value: "tareas_queue"
+        
+        # Application Configuration
+        - name: RUN_DB_SETUP
+          value: "0"
+        - name: RUN_DB_CREATION
+          value: "0"
+        - name: SQLALCHEMY_POOL_SIZE
+          value: "5"
+        - name: MAX_ITEMS_PER_RESPONSE
+          value: "100"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ALL_USERS_SUPERADMIN
+          value: "0"
+        - name: SWAGGER_VERSION
+          value: "5.27.0"
+        
+        # Port (Cloud Run will set this automatically, but we set default)
+        - name: PORT
+          value: "5000"

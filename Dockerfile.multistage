@@ -1,0 +1,70 @@
+FROM python:3.11-slim-bullseye AS builder
+
+# Set build environment
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        g++ \
+        make \
+        libpq-dev \
+        libpcre3-dev \
+        zlib1g-dev \
+        python3-dev
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies in a virtual environment
+RUN python3 -m pip install --upgrade pip setuptools wheel && \
+    pip install --prefix=/install --no-warn-script-location -r requirements.txt
+
+# ========================================
+# Final stage
+# ========================================
+FROM python:3.11-slim-bullseye
+
+# Set timezone and environment
+ENV TZ=America/Argentina/Mendoza \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/install/bin:$PATH" \
+    PYTHONPATH="/install/lib/python3.11/site-packages"
+
+WORKDIR /app
+
+# Install runtime dependencies only (not build tools)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libpq5 \
+        libpcre3 \
+        zlib1g && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /app/tmp /app/logs
+
+# Copy installed packages from builder
+COPY --from=builder /install /install
+
+# Copy uwsgi configuration
+COPY uwsgi-production.ini ./uwsgi.ini
+
+# Copy application
+COPY app/ .
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/livez', timeout=5)" || exit 1
+
+# Use ENTRYPOINT + CMD for better signal handling
+ENTRYPOINT ["/install/bin/uwsgi"]
+CMD ["--ini", "uwsgi.ini"]

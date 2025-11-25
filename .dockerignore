@@ -1,0 +1,89 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.Zone.Identifier
+
+# Logs
+logs/*.log
+*.log
+app/logs/*.log
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Documentation
+*.md
+README.md
+CORS_CLOUDRUN_SETUP.md
+roles.rst.txt
+
+# Docker files (not needed in image)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Test files
+test_*.py
+tests/
+
+# AI temp data
+app/ai_temp_data/
+
+# Sphinx build
+app/_build/
+
+# Config files
+customization/*.enc
+*.env.enc
+.env
+.env.*
+
+# Manifests
+manifests/
+
+# Build scripts
+app/build_and_replace.sh
+app/export_creds.sh
+app/make.bat
+app/Makefile
+
+# uwsgi files not for production
+uwsgi.dev-localhost.ini
+uwsgi-stage.ini
+uwsgi.ini
